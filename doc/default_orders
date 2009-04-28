@@ -1,0 +1,40 @@
+
+Note: this is out-of-date!
+
+
+The computer will automatically generate default orders for you if I do
+not receive your orders on time.  Thus, if you quit the game, your species
+will continue on "auto-pilot" until you return, until I find a replacement
+player, or until I give up.  In effect, your species will temporarily become
+a "non-player" species.  Default orders will be generated as follows:
+
+	1. If a non-self-sufficient colony has CUs and IUs or AUs in its
+		inventory, appropriate INSTALL orders will be issued.
+
+	2. If a transport is carrying CUs, if it is orbiting or landed on
+		a non-self-sufficient colony, and if it is NOT in the home
+		system, then it will be given an UNLOAD order if doing so
+		will not exceed the 250.0 base limit.
+
+	3. If a non-self-sufficient colony has available population units,
+		they will be converted to colonist units, and an appropriate
+		number of colonial mining and manufacturing units will be
+		built.  (The computer will not exceed the 250.0 limit.)
+
+	4. For each ship that is still under construction, as much additional
+		construction as possible will be done based on available funds.
+
+	5. For each starbase you own, the size will be increased as much as
+		possible, limited only by your manufacturing technology and
+		available funds.
+
+	6. All remaining funds will be evenly allocated to research.  If
+		a tech level is zero, then it will NOT be researched.
+
+	7. The gamemaster may intervene if he feels that a player is taking
+		advantage of a non-player species in a highly unrealistic
+		manner.  This intervention will be extremely subtle, and the
+		cheater will not even know it's happening.  Heh, heh, heh.
+
+
+All of the above is subject to change.  Let me know what you think.

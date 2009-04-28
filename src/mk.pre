@@ -1,0 +1,112 @@
+
+PRE1 = utils.o parse.o do_scan.o scan.o do_tran.o do_deep.o do_ally.o do_base.o do_disband.o
+PRE2 = get_gal.o get_star.o get_plan.o do_inst.o get_transact.o do_neutral.o do_des.o
+PRE3 = do_land.o do_unl.o do_mes.o do_orbit.o sav_transact.o do_send.o do_enemy.o
+PRE4 = sav_star.o sav_plan.o get_loc.o get_ship.o gam_abo.o do_name.o get_spnam.o dis_ship.o do_rep.o get_transfer.o
+
+PRE_OBJS = PreDeparture.o $(PRE1) $(PRE2) $(PRE3) $(PRE4)
+
+PreDeparture: $(PRE_OBJS)
+	cc $(PRE_OBJS) -o ../bin/PreDeparture
+
+PreDeparture.o: PreDeparture.c fh.h
+	cc -c PreDeparture.c
+
+utils.o: utils.c fh.h
+	cc -c utils.c
+
+parse.o: parse.c fh.h
+	cc -c parse.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+get_transact.o: get_transact.c fh.h
+	cc -c get_transact.c
+
+sav_transact.o: sav_transact.c fh.h
+	cc -c sav_transact.c
+
+get_loc.o: get_loc.c fh.h
+	cc -c get_loc.c
+
+get_spnam.o: get_spnam.c fh.h
+	cc -c get_spnam.c
+
+get_ship.o: get_ship.c fh.h
+	cc -c get_ship.c
+
+do_tran.o: do_tran.c fh.h
+	cc -c do_tran.c
+
+do_send.o: do_send.c fh.h
+	cc -c do_send.c
+
+do_scan.o: do_scan.c fh.h
+	cc -c do_scan.c
+
+scan.o: scan.c fh.h
+	cc -c scan.c
+
+do_inst.o: do_inst.c fh.h
+	cc -c do_inst.c
+
+do_ally.o: do_ally.c fh.h
+	cc -c do_ally.c
+
+do_enemy.o: do_enemy.c fh.h
+	cc -c do_enemy.c
+
+do_neutral.o: do_neutral.c fh.h
+	cc -c do_neutral.c
+
+do_name.o: do_name.c fh.h
+	cc -c do_name.c
+
+do_deep.o: do_deep.c fh.h
+	cc -c do_deep.c
+
+do_land.o: do_land.c fh.h
+	cc -c do_land.c
+
+do_orbit.o: do_orbit.c fh.h
+	cc -c do_orbit.c
+
+do_mes.o: do_mes.c fh.h
+	cc -c do_mes.c
+
+do_rep.o: do_rep.c fh.h
+	cc -c do_rep.c
+
+do_unl.o: do_unl.c fh.h
+	cc -c do_unl.c
+
+do_des.o: do_des.c fh.h
+	cc -c do_des.c
+
+do_base.o: do_base.c fh.h
+	cc -c do_base.c
+
+do_disband.o: do_disband.c fh.h
+	cc -c do_disband.c
+
+dis_ship.o: dis_ship.c fh.h
+	cc -c dis_ship.c
+
+gam_abo.o: gam_abo.c
+	cc -c gam_abo.c
+
+get_transfer.o: get_transfer.c fh.h
+	cc -c get_transfer.c
+
+sav_star.o: sav_star.c fh.h
+	cc -c sav_star.c
+
+sav_plan.o: sav_plan.c fh.h
+	cc -c sav_plan.c

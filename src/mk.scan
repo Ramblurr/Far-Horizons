@@ -1,0 +1,30 @@
+
+SCAN1 = scan.o utils.o
+SCAN2 = get_gal.o get_star.o get_plan.o
+
+SCAN_OBJS = ScanSpXYZ.o $(SCAN1) $(SCAN2)
+
+
+ScanSpXYZ: $(SCAN_OBJS)
+	cc $(SCAN_OBJS) -o ../bin/ScanSpXYZ
+
+ScanSpXYZ.o: ScanSpXYZ.c fh.h
+	cc -c ScanSpXYZ.c
+
+get_spec.o: get_spec.c fh.h
+	cc -c get_spec.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+scan.o: scan.c fh.h
+	cc -c scan.c
+
+utils.o: utils.c fh.h
+	cc -c utils.c

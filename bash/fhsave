@@ -1,0 +1,34 @@
+
+if [ $# -ne 0 ]
+then
+    cat - <<EOF
+
+    Usage: source fhsave
+
+	This script will save the results of script "fhtest".  It will
+	copy files *.dat, *.ord, and *.rpt.* to the directory where
+	"fhtest" started.  It will then cd to that directory.
+
+	Note that both "fhtest" and "fhsave" are not executable and must
+	be sourced.
+
+EOF
+    return 2
+fi
+
+if [ $PWD != /tmp/fhtest.dir ]
+then
+    echo 'fhsave: this script must start in directory /tmp/fhtest.dir!'
+    return 1
+fi
+
+odn=`cat original_directory_name`
+
+echo "Copying *.dat files to $odn..."
+cp -p *.dat $odn
+echo "Copying order files to $odn..."
+cp -p *.ord $odn
+echo "Copying report files to $odn..."
+cp -p *.rpt.* $odn
+
+cd $odn

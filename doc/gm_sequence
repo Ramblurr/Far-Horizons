@@ -1,0 +1,23 @@
+
+The following steps apply only to normal turns.  For the setup turn,
+first create the galaxy using the NewGalaxy and MakeHomes programs.
+Then generate the star list (ListGalaxy -p) and map files (MapGalaxy).
+Next, for each player run the HomeSystem and AddSpecies programs.  After
+this has been done for all species, run Finish and Report.  Finally,
+continue with step 3 below.
+
+
+1. As orders come in, copy them to the appropriate spNN.ord files in the
+fh/game directory.  (You may want to use script "fhorders" to do this
+automatically.)
+
+2. After all orders have been received, run NoOrders, Combat,
+PreDeparture, Jump, Production, PostArrival, Locations, Strike, Finish,
+and Report (in that order).  Script "fhtest" and "fhsave" were written
+to automate this process.
+
+3. Run the "fhreports" script.  It will mail the reports to the players.
+
+4. Run the "fhclean" script.  It will delete all temporary files that
+were used during the turn, and copy all data and report files to backup
+directories.

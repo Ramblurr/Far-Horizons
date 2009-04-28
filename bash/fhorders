@@ -1,0 +1,98 @@
+#!/bin/bash
+
+if [ $# -ne 0  -o  "$1" = "-h"  -o  "$1" = "--help" ]
+then
+    cat - <<EOF
+
+    Usage: fhorders
+
+	This script will extract all files in your system mailbox
+	(/var/spool/mail/$USER) that contain "fh.*order" in the subject
+	line (case insensitive) and write it to the appropriate order
+	file in the current directory. The system mailbox is not
+	changed. The file will have a name of the form "sp_NN.ord",
+	where NN is the species number taken from the file fh_names.
+	Note that this script will overwrite an existing order file.
+	Thus, if a player sends in more than one set of orders, only the
+	most recent will be used.  However, the script will report if
+	more than one report is received from the same player.  It will
+	also report on those players who did not send any orders.
+
+EOF
+    exit 2
+fi
+
+n=1
+while read sp_num[$n]     # Species number
+do
+    read sp_name[$n]      # Species name
+    read address[$n]      # Email address
+    address[$n]=`echo ${address[$n]} | tr 'A-Z' 'a-z'`
+    sp_count[$n]=0        # Initialize number of order emails received
+    n=$[ $n + 1 ]
+done < fh_names
+
+num_species=$[ $n - 1 ]
+
+if [ ! -f /var/spool/mail/$USER ]
+then
+    echo 'fhorders:' /var/spool/mail/$USER 'is empty!'
+    exit 1
+fi
+
+message_number=1
+while readmsg -h $message_number &> /tmp/fhorders.temp.$$
+do
+
+    if egrep -iq '^Subject: .*fh.*order' /tmp/fhorders.temp.$$
+    then
+
+        head -1 /tmp/fhorders.temp.$$ > /tmp/fhorders.first_line.$$
+	read a from_address b < /tmp/fhorders.first_line.$$
+	from_address=`echo $from_address | tr 'A-Z' 'a-z'`
+
+	n=1
+	found=0
+	while [ $n -le $num_species ]
+	do
+	    if [ $from_address = ${address[$n]} ]
+	    then
+		echo -n "  Created file sp${sp_num[$n]}.ord for SP ${sp_name[$n]}"
+		echo " from $from_address."
+		cp /tmp/fhorders.temp.$$ sp${sp_num[$n]}.ord
+		found=1
+		sp_count[$n]=$[ ${sp_count[$n]} + 1 ]
+		break
+	    fi
+	    n=$[ $n + 1 ]
+	done
+
+	if [ $found -eq 0 ]
+	then
+	    echo "WARNING: Unknown email address '$from_address' in message number $message_number"\!
+	fi
+    fi
+
+    message_number=$[ $message_number + 1 ]
+done
+
+rm -f /tmp/fhorders.*.$$
+
+#
+# Check sp_counts and report missing orders and multiple orders from the
+# same player.
+#
+n=1
+while [ $n -le $num_species ]
+do
+    if [ ${sp_count[$n]} -eq 0 ]
+    then
+	echo -n "WARNING: No orders were received for species number ${sp_num[$n]},"
+	echo " SP ${sp_name[$n]}"\!
+    elif [ ${sp_count[$n]} -gt 1 ]
+    then
+	echo -n "WARNING: ${sp_count[$n]} sets of orders were received for"
+	echo " species number ${sp_num[$n]}, SP ${sp_name[$n]}"\!
+    fi
+    n=$[ $n + 1 ]
+done

@@ -1,0 +1,112 @@
+
+POST1 = utils.o parse.o do_scan.o scan.o sav_plan.o sav_transact.o do_neutral.o do_rep.o
+POST2 = get_gal.o get_star.o get_plan.o do_land.o dis_ship.o do_deep.o do_ally.o do_tran.o
+POST3 = get_transact.o get_spnam.o do_name.o do_orbit.o do_tech.o do_send.o do_des.o
+POST4 = sav_star.o get_loc.o get_ship.o gam_abo.o do_mes.o do_terr.o do_enemy.o do_tel.o do_teach.o get_transfer.o
+
+POST_OBJS = PostArrival.o $(POST1) $(POST2) $(POST3) $(POST4)
+
+PostArrival: $(POST_OBJS)
+	cc $(POST_OBJS) -o ../bin/PostArrival
+
+PostArrival.o: PostArrival.c fh.h
+	cc -c PostArrival.c
+
+utils.o: utils.c fh.h
+	cc -c utils.c
+
+parse.o: parse.c fh.h
+	cc -c parse.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+sav_plan.o: sav_plan.c fh.h
+	cc -c sav_plan.c
+
+sav_star.o: sav_star.c fh.h
+	cc -c sav_star.c
+
+get_transact.o: get_transact.c fh.h
+	cc -c get_transact.c
+
+sav_transact.o: sav_transact.c fh.h
+	cc -c sav_transact.c
+
+get_loc.o: get_loc.c fh.h
+	cc -c get_loc.c
+
+get_spnam.o: get_spnam.c fh.h
+	cc -c get_spnam.c
+
+get_ship.o: get_ship.c fh.h
+	cc -c get_ship.c
+
+do_send.o: do_send.c fh.h
+	cc -c do_send.c
+
+do_scan.o: do_scan.c fh.h
+	cc -c do_scan.c
+
+scan.o: scan.c fh.h
+	cc -c scan.c
+
+do_name.o: do_name.c fh.h
+	cc -c do_name.c
+
+do_tran.o: do_tran.c fh.h
+	cc -c do_tran.c
+
+do_ally.o: do_ally.c fh.h
+	cc -c do_ally.c
+
+do_enemy.o: do_enemy.c fh.h
+	cc -c do_enemy.c
+
+do_neutral.o: do_neutral.c fh.h
+	cc -c do_neutral.c
+
+do_land.o: do_land.c fh.h
+	cc -c do_land.c
+
+do_deep.o: do_deep.c fh.h
+	cc -c do_deep.c
+
+do_orbit.o: do_orbit.c fh.h
+	cc -c do_orbit.c
+
+do_mes.o: do_mes.c fh.h
+	cc -c do_mes.c
+
+do_rep.o: do_rep.c fh.h
+	cc -c do_rep.c
+
+do_tech.o: do_tech.c fh.h
+	cc -c do_tech.c
+
+do_teach.o: do_teach.c fh.h
+	cc -c do_teach.c
+
+do_terr.o: do_terr.c fh.h
+	cc -c do_terr.c
+
+do_des.o: do_des.c fh.h
+	cc -c do_des.c
+
+do_tel.o: do_tel.c fh.h
+	cc -c do_tel.c
+
+dis_ship.o: dis_ship.c fh.h
+	cc -c dis_ship.c
+
+gam_abo.o: gam_abo.c
+	cc -c gam_abo.c
+
+get_transfer.o: get_transfer.c fh.h
+	cc -c get_transfer.c

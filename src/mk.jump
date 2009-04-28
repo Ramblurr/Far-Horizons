@@ -1,0 +1,69 @@
+
+JUMP1 = utils.o parse.o do_jump.o get_transact.o do_move.o do_vis.o
+JUMP2 = get_gal.o get_star.o get_plan.o sav_transact.o sav_star.o sav_plan.o
+JUMP3 = get_loc.o get_ship.o gam_abo.o dis_ship.o do_worm.o
+
+JUMP_OBJS = Jump.o $(JUMP1) $(JUMP2) $(JUMP3)
+
+Jump: $(JUMP_OBJS)
+	cc $(JUMP_OBJS) -o ../bin/Jump
+
+Jump.o: Jump.c fh.h
+	cc -c Jump.c
+
+utils.o: utils.c fh.h
+	cc -c utils.c
+
+parse.o: parse.c fh.h
+	cc -c parse.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+get_transact.o: get_transact.c fh.h
+	cc -c get_transact.c
+
+sav_transact.o: sav_transact.c fh.h
+	cc -c sav_transact.c
+
+get_loc.o: get_loc.c fh.h
+	cc -c get_loc.c
+
+get_ship.o: get_ship.c fh.h
+	cc -c get_ship.c
+
+do_scan.o: do_scan.c fh.h
+	cc -c do_scan.c
+
+scan.o: scan.c fh.h
+	cc -c scan.c
+
+do_jump.o: do_jump.c fh.h
+	cc -c do_jump.c
+
+do_move.o: do_move.c fh.h
+	cc -c do_move.c
+
+do_vis.o: do_vis.c fh.h
+	cc -c do_vis.c
+
+do_worm.o: do_worm.c fh.h
+	cc -c do_worm.c
+
+dis_ship.o: dis_ship.c fh.h
+	cc -c dis_ship.c
+
+gam_abo.o: gam_abo.c
+	cc -c gam_abo.c
+
+sav_star.o: sav_star.c fh.h
+	cc -c sav_star.c
+
+sav_plan.o: sav_plan.c fh.h
+	cc -c sav_plan.c

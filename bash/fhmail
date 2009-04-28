@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [ $# -ne 2  -o  "$1" = "-h"  -o  "$1" = "--help" ]
+then
+
+    cat - <<EOF
+
+    Usage: fhmail file subject
+
+	This script will mail an individual copy of 'file' to each player
+	with the subject line 'subject'.
+
+EOF
+    exit 2
+fi
+
+file="$1"
+
+if [ ! -f "$file" ]
+then
+    echo "fhmail: unknown file '$file'"\!
+    fhmail --help
+    exit 1
+fi
+
+subj="$2"
+
+while read sp_num
+do
+    read sp_name
+    read address
+    echo "Mailing file '$file' to SP $sp_name at ${address}."
+    mail -s "$subj" $address < $file
+
+done < fh_names

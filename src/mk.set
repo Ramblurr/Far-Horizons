@@ -1,0 +1,24 @@
+
+SET_OBJS = Set.o get_gal.o get_star.o get_plan.o sav_star.o sav_plan.o
+
+
+Set: $(SET_OBJS)
+	cc -o ../bin/Set $(SET_OBJS)
+
+Set.o: Set.c fh.h
+	cc -c Set.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+sav_star.o: sav_star.c fh.h
+	cc -c sav_star.c
+
+sav_plan.o: sav_plan.c fh.h
+	cc -c sav_plan.c

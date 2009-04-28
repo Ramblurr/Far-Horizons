@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if [ $# -ne 0  -o  "$1" = "-h"  -o  "$1" = "--help" ]
+then
+
+    cat - <<EOF
+
+    Usage: fhreports
+
+	This script will read file fh_names and mail report files to the
+	appropriate players.  File deadline.msg will be inserted at the
+	head of each report file before mailing.
+
+EOF
+    exit 2
+fi
+
+turn=$(TurnNumber)
+
+while read sp_num
+do
+    read sp_name
+    read address
+    sp_num=`printf "%02d" $sp_num`
+    file=sp${sp_num}.rpt.t$turn
+    echo "Mailing $file (SP $sp_name) to $address:"
+    cat deadline.msg $file | mail -s 'Far Horizons Status Report' $address
+
+done < fh_names

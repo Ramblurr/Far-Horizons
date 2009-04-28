@@ -1,0 +1,24 @@
+
+THIS SOFTWARE AND THE ACCOMPANYING DOCUMENTATION ARE DISTRIBUTED IN THE HOPE
+THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED
+WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE --
+NOTWITHSTANDING ANY STATEMENTS MADE BELOW IN THIS FILE.
+
+Far Horizons:
+
+This directory (fh) and its subdirectories contain the components of Far
+Horizons, a role-playing game of galactic exploration and conquest, designed
+for play-by-email.
+
+All the code and documentation in this directory and its subdirectories are
+copyrighted by Richard A. Morneau.
+
+The code in these directories is free software; you can redistribute it and/or
+modify it under terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any later
+version.  Far Horizons is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.  You should have received a copy of the GNU General Public License
+with this distribution (see file COPYING).  If not, write to the Free Software
+Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.

@@ -1,0 +1,85 @@
+
+if [ $# -ne 0 ]
+then
+    cat - << 'EOF'
+
+    Usage: source fhtest
+
+	This script will create a temporary directory in /tmp and copy
+	all Far Horizons files to it that are needed for processing
+	orders.  Next, the main FH programs will be run.  If you are
+	happy with the results, you can then run script "fhsave" to save
+	them.
+
+	Note that both "fhtest" and "fhsave" are not executable and must
+	be sourced.
+
+EOF
+    return 2
+fi
+
+if [ -d /tmp/fhtest.dir ]
+then
+    echo "Removing old /tmp/fhtest.dir directory..."
+    rm -r /tmp/fhtest.dir
+fi
+
+mkdir /tmp/fhtest.dir
+
+echo "Copying all needed files to /tmp/fhtest.dir/ ..."
+cp -p *.ord /tmp/fhtest.dir
+cp -p *.dat /tmp/fhtest.dir
+cp -p *.txt /tmp/fhtest.dir
+cp -p *.msg /tmp/fhtest.dir
+cp -p *.log /tmp/fhtest.dir
+
+# Save original directory name so that script "fhsave" can return
+# to it.
+echo $PWD > /tmp/fhtest.dir/original_directory_name
+
+cd /tmp/fhtest.dir
+
+echo
+echo Running NoOrders...
+NoOrders
+if [ $? -ne 0 ] ; then echo 'Error detected in program Combat!' ; return 1 ; fi
+
+echo
+echo Running Combat...
+Combat -s
+if [ $? -ne 0 ] ; then echo 'Error detected in program Combat!' ; return 1 ; fi
+
+echo Running PreDeparture...
+PreDeparture
+if [ $? -ne 0 ] ; then echo 'Error detected in program PreDeparture!' ; return 1 ; fi
+
+echo Running Jump...
+Jump
+if [ $? -ne 0 ] ; then echo 'Error detected in program Jump!' ; return 1 ; fi
+
+echo Running Production...
+Production
+if [ $? -ne 0 ] ; then echo 'Error detected in program Production!' ; return 1 ; fi
+
+echo Running PostArrival...
+PostArrival
+if [ $? -ne 0 ] ; then echo 'Error detected in program PostArrival!' ; return 1 ; fi
+
+echo Running Locations...
+Locations
+if [ $? -ne 0 ] ; then echo 'Error detected in program Locations!' ; return 1 ; fi
+
+echo Running Strike...
+Strike -s
+if [ $? -ne 0 ] ; then echo 'Error detected in program Strike!' ; return 1 ; fi
+
+echo Running Finish...
+Finish
+if [ $? -ne 0 ] ; then echo 'Error detected in program Finish!' ; return 1 ; fi
+
+echo Running Report...
+Report
+if [ $? -ne 0 ] ; then echo 'Error detected in program Report!' ; return 1 ; fi
+
+echo
+echo Done\!

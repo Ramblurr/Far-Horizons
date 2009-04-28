@@ -1,0 +1,53 @@
+
+
+			INSTALLING FAR HORIZONS
+
+
+Here are the steps needed to install Far Horizons on a Unix or Linux
+computer (you will have to make appropriate modifications for other
+computers):
+
+	gunzip fh.tar.gz
+	tar xf fh.tar
+
+The above command(s) will create a subdirectory in your current
+directory called "fh", which in turn will contain five of its own
+subdirectories "bash", "bin", "doc", "game", and "src".
+
+Next, do this:
+
+	cd fh/src
+	make.all
+
+The above will create all of the executable binaries and place them in
+fh/bin.  You may want to add fh/bin to your search path.
+
+There are a few utility programs that I have not had time to document,
+such as Edit, Set, TurnNumber, etc.  You can either ignore these or
+scrutinize the source code to see what they do.  They are not necessary
+for running a game, but you may find some of them useful.
+
+The directory fh/bash contains several scripts that I use to make my job
+easier.  You will probably have to modify them for your own use.  If you
+decide to use them, you may want to move them to fh/bin or add fh/bash
+to your execution path.  Use the following commands to get help for each
+one:
+
+fhclean --help
+fhmail --help
+fhorders --help
+fhreports --help
+source fhsave --help
+source fhtest --help
+
+Some of the above scripts use a file named "fh_names" in the fh/game
+directory.  This file contains the species number, species name, and
+email address for each player.  A sample is provided with this
+distribution that you can use as an example.
+
+There are a few other files in the fh/game directory that you should
+look at as well.
+
+Finally, the Gamemaster should read file fh/doc/gm_sequence.  It
+provides a brief description of the steps needed to start and run a
+game.

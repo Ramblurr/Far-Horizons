@@ -1,0 +1,24 @@
+
+NEAR_OBJS = Near.o utils.o get_gal.o get_star.o get_plan.o scan.o
+
+
+Near: $(NEAR_OBJS)
+	cc $(NEAR_OBJS) -o ../bin/Near
+
+Near.o: Near.c fh.h
+	cc -c Near.c
+
+utils.o: utils.c fh.h
+	cc -c utils.c
+
+get_gal.o: get_gal.c fh.h
+	cc -c get_gal.c
+
+get_star.o: get_star.c fh.h
+	cc -c get_star.c
+
+get_plan.o: get_plan.c fh.h
+	cc -c get_plan.c
+
+scan.o: scan.c fh.h
+	cc -c scan.c

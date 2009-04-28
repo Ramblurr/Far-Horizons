@@ -1,0 +1,61 @@
+#!/bin/sh
+
+if [ $# -ne 0  -o  "$1" = "-h"  -o  "$1" = "--help" ]
+then
+
+    cat - <<EOF
+
+    Usage: fhclean
+
+	This shell script is intended to clean up after processing
+	orders.
+
+	It will copy all *.dat files to directory "backup" and move all
+	*.ord files to it.
+
+	It will move all report files to the directory "reports".
+
+	Next, it will create a current statistics report and write
+	it to the report directory.
+
+	Finally, it will delete all unneeded temporary files.
+
+EOF
+    exit 2
+fi
+
+turn=$(TurnNumber)
+
+echo ""
+echo "Will now do cleanup for turn #${turn}..."
+echo ""
+
+if [ ! -d backup ]
+then
+    echo "fhclean: directory 'backup' does not exist"\!
+    exit 1
+fi
+
+if [ ! -d reports ]
+then
+    echo "fhclean: directory 'reports' does not exist"\!
+    exit 1
+fi
+
+echo 'Moving *.ord and *.dat files to backup/ ...'
+mv *.ord backup/
+mv *.dat backup/
+
+echo 'Moving all report files to reports/ ...'
+mv *.rpt reports/
+
+echo "Writing statistics for turn #$turn to reports/stats/stats.t${turn}..."
+mkdir -p reports/stats
+Stats > reports/stats/stats.t$turn
+
+echo "Deleting temporary files..."
+rm -f interspecies.dat
+rm -f *.msg
+rm -f *.log
+
+echo "Done"\!
