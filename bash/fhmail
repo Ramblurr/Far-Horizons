@@ -30,6 +30,6 @@ do
     read sp_name
     read address
     echo "Mailing file '$file' to SP $sp_name at ${address}."
-    mail -s "$subj" $address < $file
+    mutt -a $file -s "$subj" $address < $file
 
 done < fh_names

@@ -42,12 +42,13 @@ then
     exit 1
 fi
 
-echo 'Moving *.ord and *.dat files to backup/ ...'
-mv *.ord backup/
-mv *.dat backup/
+echo 'Moving sp*.ord files to backup/ ...'
+mkdir -p backup/turn$turn
+mv sp*.ord backup/turn$turn
+cp *.dat backup/turn$turn
 
 echo 'Moving all report files to reports/ ...'
-mv *.rpt reports/
+mv *.rpt.* reports/
 
 echo "Writing statistics for turn #$turn to reports/stats/stats.t${turn}..."
 mkdir -p reports/stats
@@ -55,7 +56,7 @@ Stats > reports/stats/stats.t$turn
 
 echo "Deleting temporary files..."
 rm -f interspecies.dat
-rm -f *.msg
+#rm -f *.msg
 rm -f *.log
 
 echo "Done"\!
