@@ -25,7 +25,7 @@ int get_ship ()
 
     char	upper_ship_name[32], *temp1_ptr, *temp2_ptr;
 
-    struct ship_data	*best_ship;
+    struct ship_data	*best_ship = NULL;
 
 
     /* Save in case of an error. */
@@ -130,6 +130,9 @@ yet_again:
 	    next_best_score = n;
     }
 
+    if (best_ship == NULL) {
+      return FALSE;
+    }
     name_length = strlen (best_ship->name);
     minimum_score = name_length - ((name_length / 7)  + 1);
 
