@@ -76,6 +76,10 @@ get_name_again:
     printf ("\nEnter name of species #%d: ", species_number);
     get_name (spec.name);
     j = strlen (spec.name);
+    if (j < 5) {
+      printf("\n\n\tERROR!  Species '%s' name too short (min 5 chars required)\n", spec.name);
+      goto get_name_again;
+    }
     for (i = 0; i < j; i++)
     {
 	c = spec.name[i];
