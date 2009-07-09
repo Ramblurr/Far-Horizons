@@ -59,7 +59,7 @@ do
 	    then
 		echo -n "  Created file sp${sp_num[$n]}.ord for SP ${sp_name[$n]}"
 		echo " from $from_address."
-		cp /tmp/fhorders.temp.$$ sp${sp_num[$n]}.ord
+		sed 's/=A0/ /g' < /tmp/fhorders.temp.$$ > sp${sp_num[$n]}.ord
 		found=1
 		sp_count[$n]=$[ ${sp_count[$n]} + 1 ]
 		break

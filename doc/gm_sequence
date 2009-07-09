@@ -5,7 +5,9 @@ Then generate the star list (ListGalaxy -p) and map files (MapGalaxy).
 Next, for each player run the HomeSystem and AddSpecies programs.  After
 this has been done for all species, run Finish and Report.  Finally,
 continue with step 3 below.
-
+Before you do, verify if the galaxy does not contain duplicate star
+systems (planets) - ListGalaxy |sort|uniq -cd|less
+If it does - regenerate.
 
 1. As orders come in, copy them to the appropriate spNN.ord files in the
 fh/game directory.  (You may want to use script "fhorders" to do this

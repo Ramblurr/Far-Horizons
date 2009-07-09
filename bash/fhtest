@@ -42,11 +42,11 @@ cd /tmp/fhtest.dir
 echo
 echo Running NoOrders...
 NoOrders
-if [ $? -ne 0 ] ; then echo 'Error detected in program Combat!' ; return 1 ; fi
+if [ $? -ne 0 ] ; then echo 'Error detected in program NoOrders!' ; return 1 ; fi
 
 echo
 echo Running Combat...
-Combat -s
+Combat
 if [ $? -ne 0 ] ; then echo 'Error detected in program Combat!' ; return 1 ; fi
 
 echo Running PreDeparture...
@@ -70,7 +70,7 @@ Locations
 if [ $? -ne 0 ] ; then echo 'Error detected in program Locations!' ; return 1 ; fi
 
 echo Running Strike...
-Strike -s
+Strike
 if [ $? -ne 0 ] ; then echo 'Error detected in program Strike!' ; return 1 ; fi
 
 echo Running Finish...
