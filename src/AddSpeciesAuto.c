@@ -61,14 +61,14 @@ char *argv[];
     /* Check for valid command line. */
     if (argc != 14)
     {
-	fprintf (stderr, "\n  Usage: AddSpecies <params>\n");
+      fprintf (stderr, "\n  Usage: AddSpeciesAuto <params> \n");
 	fprintf (stderr, "    See Auto.pl for parameter details.\n\n");
 	exit (-1);
     }
 
     species_number = atoi (argv[1]);
 
-    spec.name = argv[2];
+    strncpy(&spec.name, argv[2], 31);
 
     j = strlen (spec.name);
     if (j < 5)
@@ -92,30 +92,31 @@ char *argv[];
     }
 
     delete_nampla (&home_nampla);		/* Set everything to zero. */
-    home_nampla.name = argv[3];
+    strncpy(&home_nampla.name, argv[3], 31);
     if (strlen(home_nampla.name) > 31)
     {
         printf("\n\n\tERROR!  Home planet '%s' name too long (max 31 chars required)\n", home_nampla.name);
         exit(-1);
     }
     
-    spec.govt_name = argv[4];
+    strncpy(&spec.govt_name, argv[4], 31);
     if (strlen(spec.govt_name) > 31)
     {
         printf("\n\n\tERROR!  Government '%s' name too long (max 31 chars required)\n", spec.govt_name);
         exit(-1);
     }
     
-    spec.govt_type = argv[5];
+    strncpy(&spec.govt_type, argv[5], 31);
     if (strlen(home_nampla.name) > 31)
     {
         printf("\n\n\tERROR!  Government '%s' type too long (max 31 chars required)\n", spec.govt_type);
         exit(-1);
     }
 
-    home_nampla.x = atoi(argv[6]);
-    home_nampla.y = atoi(argv[7]);
-    home_nampla.z = atoi(argv[8]);
+    home_nampla.x = spec.x = x = atoi(argv[6]);
+    home_nampla.y = spec.y = y = atoi(argv[7]);
+    home_nampla.z = spec.z = z = atoi(argv[8]);
+    home_nampla.pn = spec.pn = pn = atoi(argv[9]);
 
     /* Get pointers to appropriate star and planet. */
     found = 0;
@@ -132,7 +133,7 @@ char *argv[];
 
     if (found == 0)
     {
-	printf ("\n\tERROR: There is no star at these coordinates! Try again.\n");
+      printf ("\n\tERROR: There is no star at %d %d %d!\n", x, y, z);
 	exit(-1);
     }
 
@@ -141,11 +142,9 @@ char *argv[];
     log_file = stdout;
     scan (x, y, z);
 
-    home_nampla.pn = atoi(argv[9]);
-
     if (pn > star->num_planets)
     {
-	printf ("\n\tERROR: Planet number is too large for star! Try again!\n");
+      printf ("\n\tERROR: Planet number (%d) does not exist!\n", pn );
 	exit(-1);
     }
 
@@ -183,7 +182,7 @@ char *argv[];
     }
 
     /* Get required gas. */
-    spec.required_gas = 7; // Assume O2 is required
+    spec.required_gas = req_gas = 7; // Assume O2 is required
 
     /* While checking if selection is valid, start determining neutral
 	gases. */
@@ -206,8 +205,8 @@ char *argv[];
     }
     if (found == 0)
     {
-	printf ("\n\tERROR! Planet does not have %s!\n", gas_string[req_gas]);
-	exit(-1)
+        printf ("\n\tERROR! Planet does not have %s(%d)!\n", gas_string[req_gas], req_gas);
+	exit(-1);
     }
 
     temp = percent/2;
@@ -337,11 +336,6 @@ char *argv[];
 		/home_planet->mining_difficulty);
     printf ("\tand the total production capacity will be %d.\n\n",
 	(spec.tech_level[MA] * home_nampla.ma_base)/10);
-
-
-    /* Give gamemaster one last chance to change his mind. */
-    gamemaster_abort_option ();
-
 
     /* Update galaxy file. */
     galaxy_fd = creat ("galaxy.dat", 0600);

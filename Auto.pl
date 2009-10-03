@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #
 # The following script will auto-generate galaxy using data piped via stdio
 # Player data is expected in the following format(one line per player):
@@ -7,8 +7,8 @@
 #
 # See example.csv for example
 #
-
-# Read input data
+# Execute from game directory: ../Auto.pl < ../example.csv > log.txt
+#
 
 my @data;
 while (<>)
@@ -20,7 +20,7 @@ while (<>)
 
 # TODO: check for duplicate names
 
-print "\n=================== Data provided for $$num_species species. ==================\n";
+print "\n=================== $num_species species defined. ==================\n";
 
 foreach (@data)
 {
@@ -33,53 +33,33 @@ print "\n============================= Executing NewGalaxy =====================
 # Adjust it here to create less crowded galaxy, players are asking for that
 $adjusted_num_species = int(( $num_species * 3) / 2); 
 
-@args = ("NewGalaxy", $adjusted_num_species);
-print "@args";
-#system(@args) == 0 || die "$args[0] failed: $?"
+@args = ("../bin/NewGalaxy", $adjusted_num_species);
+system(@args) == 0 || die "$args[0] failed: $?";
      
 print "\n============================= Executing MakeHomes =============================\n";
 
-@args = ("MakeHomes");
-print "@args";
-#system(@args) == 0 || die "$args[0] failed: $?"
+@args = ("../bin/MakeHomes");
+system(@args) == 0 || die "$args[0] failed: $?";
 
 print "\n============================= Executing ListGalaxy ============================\n";
 
-@args = ("ListGalaxy", "-p");
-print "@args";
-#system(@args) == 0 || die "$args[0] failed: $?"
-
-# TODO: verify that galaxy contains no duplicate star systems     
-     
-print "\n============================= Executing MapGalaxy ============================\n";
-
-@args = ("MapGalaxy");
-print "@args";
-#system(@args) == 0 || die "$args[0] failed: $?"
+`../bin/ListGalaxy |sort|uniq -d | wc -l` == 1 || die "Galaxy contains duplicate stars!!!";
 
 $curr_sp_number = 1;
 
-print "\n============================= Handling species ============================\n";
+`rm fh_names`;
+
 foreach (@data)
 {
     ( $email, $sp_name, $home_planet, $gov_name, $gov_type, $ML, $GV, $LS, $BI ) = @$_;
     
-    print "\n============================= Executing HomeSystem ============================\n";
-
-    $ret = `HomeSystemAuto 12`;
-    print "Homesystem returned '$ret'";
-    ($x, $y, $z) = split($ret);
-    #system(@args) == 0 || die "$args[0] failed: $?"
-
-    # TODO: Parse HomeSystem output & forward to stdout
+    $ret = `../bin/HomeSystemAuto 12`;
+    ($x, $y, $z, $n) = split(/ /, $ret);
     
     print "\n=========================== Executing AddSpecies ($curr_sp_number) ============================\n";
 
-    @args = ("AddSpecies", $curr_sp_number, $sp_name, $home_planet, $gov_name, $gov_type, $X, $Y, $Z, $N, $ML, $GV, $LS, $BI );
-    print "@args";
-    #system(@args) == 0 || die "$args[0] failed: $?"
-
-    print "\n=========================== Adding entry to fh_names ============================\n";
+    @args = ("../bin/AddSpeciesAuto", $curr_sp_number, $sp_name, $home_planet, $gov_name, $gov_type, $x, $y, $z, $n, $ML, $GV, $LS, $BI );
+    system(@args) == 0 || die "$args[0] failed: $?";
 
     open FH_NAMES, ">>fh_names" || die ("cannot open fh_names");
     printf FH_NAMES "%02d\n%s\n%s\n", $curr_sp_number, $sp_name, $email;

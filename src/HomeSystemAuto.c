@@ -155,11 +155,7 @@ char *argv[];
     free (star_base);
     free (planet_base);
 
-    fprintf (stdout, "\n\tNew home planet is at %d %d %d #%d.\n",
-	x, y, z, home_planet_number);
-
-    fprintf (stdout, "\n\tTotal number of home systems is now %d.\n\n",
-	num_home_systems);
+    fprintf (stdout, "%d %d %d %d", x, y, z, home_planet_number);
 
     exit (0);
 }
@@ -185,7 +181,7 @@ get_random_xyz ()
 	{
 	    fprintf (stderr, "\n\tIt appears that all suitable systems are within %ld parsecs of an\n", min_distance);
 	    fprintf (stderr, "\texisting home system. You'll have to select a system manually.\n\n");
-	    exit (EXIT_FAILURE);
+	    exit (-1);
 	}
 
 	i = rnd(num_stars);
