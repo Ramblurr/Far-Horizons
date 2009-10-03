@@ -8,10 +8,12 @@ fi
 make -f mk.newgal
 make -f mk.mho
 make -f mk.home
+make -f mk.home.auto
 make -f mk.listgal
 make -f mk.mapgal
 make -f mk.showgal
 make -f mk.addsp
+make -f mk.addsp.auto
 make -f mk.combat
 make -f mk.pre
 make -f mk.jump
