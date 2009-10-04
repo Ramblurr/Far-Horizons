@@ -40,7 +40,6 @@ char *argv[];
     struct species_data	spec;
     struct nampla_data	home_nampla;
 
-
     species = &spec;
 
     /* Seed random number generator. */
@@ -66,21 +65,23 @@ char *argv[];
 	exit (-1);
     }
 
+    galaxy.num_species++;
+    
     species_number = atoi (argv[1]);
 
-    strncpy(&spec.name, argv[2], 31);
-
-    j = strlen (spec.name);
+    j = strlen (argv[2]);
     if (j < 5)
     {
-        printf("\n\n\tERROR!  Species '%s' name too short (min 5 chars required)\n", spec.name);
+        printf("\n\n\tERROR!  Species '%s' name too short (min 5 chars required)\n", argv[2]);
         exit(-1);
     }
     if (j > 31)
     {
-        printf("\n\n\tERROR!  Species '%s' name too long (max 31 chars required)\n", spec.name);
+        printf("\n\n\tERROR!  Species '%s' name too long (max 31 chars required)\n", argv[2]);
         exit(-1);
     }
+    strncpy(&spec.name, argv[2], 31);
+
     for (i = 0; i < j; i++)
     {
 	c = spec.name[i];
@@ -92,26 +93,26 @@ char *argv[];
     }
 
     delete_nampla (&home_nampla);		/* Set everything to zero. */
+    if (strlen(argv[3]) > 31)
+    {
+        printf("\n\n\tERROR!  Home planet '%s' name too long (max 31 chars required)\n", argv[3]);
+        exit(-1);
+    }
     strncpy(&home_nampla.name, argv[3], 31);
-    if (strlen(home_nampla.name) > 31)
+    
+    if (strlen(argv[4]) > 31)
     {
-        printf("\n\n\tERROR!  Home planet '%s' name too long (max 31 chars required)\n", home_nampla.name);
+        printf("\n\n\tERROR!  Government '%s' name too long (max 31 chars required)\n", argv[4]);
         exit(-1);
     }
-    
     strncpy(&spec.govt_name, argv[4], 31);
-    if (strlen(spec.govt_name) > 31)
-    {
-        printf("\n\n\tERROR!  Government '%s' name too long (max 31 chars required)\n", spec.govt_name);
-        exit(-1);
-    }
     
-    strncpy(&spec.govt_type, argv[5], 31);
-    if (strlen(home_nampla.name) > 31)
+    if (strlen(argv[5]) > 31)
     {
-        printf("\n\n\tERROR!  Government '%s' type too long (max 31 chars required)\n", spec.govt_type);
+        printf("\n\n\tERROR!  Government '%s' type too long (max 31 chars required)\n", argv[5]);
         exit(-1);
     }
+    strncpy(&spec.govt_type, argv[5], 31);
 
     home_nampla.x = spec.x = x = atoi(argv[6]);
     home_nampla.y = spec.y = y = atoi(argv[7]);
