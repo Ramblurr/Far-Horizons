@@ -14,7 +14,7 @@ my @data;
 while (<>)
 {
     chomp;
-    push @data, [split /,/];
+    push @data, [split /\t/];
     $num_species++;
 }
 
