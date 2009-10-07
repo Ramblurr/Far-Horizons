@@ -1,0 +1,52 @@
+#!/bin/bash
+# ======== Script parameters ========
+FH_DIR=/home/slawcok/test/trunk/
+# ===================================
+
+cd $FH_DIR/game
+pwd=`pwd`
+
+echo "--- Starting message processing ---" >> fh.log
+
+n=1
+while read sp_num[$n]     # Species number
+do
+    read sp_name[$n]      # Species name
+    read address[$n]      # Email address
+    address[$n]=`echo ${address[$n]} | tr 'A-Z' 'a-z'`
+    echo "SP $n: ${address[$n]}" >> fh.log
+    n=$[ $n + 1 ]
+done < fh_names
+
+num_species=$[ $n - 1 ]
+echo "$num_species species read from fh_names" >> fh.log
+
+cat > /tmp/fhorders.raw.$$
+
+    if egrep -iq '^Subject: .*fh.*order' /tmp/fhorders.raw.$$
+    then
+        head -1 /tmp/fhorders.raw.$$ > /tmp/fhorders.first_line.$$
+	read a from_address b < /tmp/fhorders.first_line.$$
+	from_address=`echo $from_address | tr 'A-Z' 'a-z'`
+
+	n=1
+	while [ $n -le $num_species ]
+	do
+	    if [ $from_address = ${address[$n]} ]
+	    then
+		../bash/strip.pl < /tmp/fhorders.raw.$$ > /tmp/fhorders.body.$$
+		file=sp${sp_num[$n]}.ord
+		echo "Sender $from_address recognized, saving to $file" >> fh.log
+		sed 's/=A0/ /g' < /tmp/fhorders.body.$$ > $file
+		$FH_DIR/bash/orders.pl < $file > /tmp/fhorders.verify.$$
+		mutt -a $file -s "Orders received" $from_address < /tmp/fhorders.verify.$$
+		break
+	    fi
+	    n=$[ $n + 1 ]
+	done
+    fi
+done
+
+#rm -f /tmp/fhorders.*.$$
+
+cd -

@@ -1,0 +1,21 @@
+#### Begin Variables Section ####
+  
+# Next line is needed if programs are invoked from your procmailrc
+SHELL=/bin/bash
+			
+PMDIR=$HOME/Procmail      # Make sure this directory exists!
+LOGFILE=$PMDIR/pmlog
+## LOG="
+## "
+## VERBOSE=yes
+MAILDIR=$HOME/mail        # Make sure this directory exists!
+  
+####  End Variables Section; Begin Processing Section  #### 
+  
+INCLUDERC=$PMDIR/rc.verify
+ 
+# Messages that fall through all your procmail recipes are delivered
+# to your default INBOX. To find out yours, run 'procmail -v'
+ 
+#### End Processing Section #### 
+# EOF

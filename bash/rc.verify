@@ -1,0 +1,8 @@
+:0 c
+* ^Subject:.*FH.*orders.*
+| /home/slawcok/test/trunk/bash/fhprocmail
+ 
+:0
+Orders
+
+# EOF
