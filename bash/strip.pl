@@ -1,31 +1,25 @@
 #!/usr/bin/perl
 
-my $found = 0;
-my $show = 0;
+use MIME::Parser;
 
-while (<>)
+# Create a new MIME parser:
+my $parser = MIME::Parser->new;
+$parser->output_dir("/tmp");
+
+# Read the MIME message:
+$entity = $parser->read(\*STDIN) or die "couldn't parse MIME stream";
+
+$entity->make_multipart; # to allow uniform processing
+
+my @parts = $entity->parts;
+my $i;
+foreach $i (0 .. $#parts)
 {
-    if ( /Content-Type:.*text\/plain/ )
+    # dump each plain text part...
+    if ( $parts[$i]->effective_type =~ /text\/plain/ )
     {
-	while(<>)
-	{
-	    chomp;
-	    if (length > 0)
-	    {
-		while(<>)
-		{
-		    if ( /Content-Type:/ ) 
-		    {
-			exit 0;
-		    }
-
-		    if ( $prev_line )
-		    {
-			print $prev_line;
-		    }
-		    $prev_line = $_;
-		}
-	    }
-	}
+	$parts[$i]->print_body;
     }
 }
+
+

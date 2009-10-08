@@ -5,7 +5,7 @@ $no = 0; $mes = 0; $planet = 0;
 $char = "[-!-\+\.-9\<-~]";
 $object = $char."(".$char."| )*";
 $shipprefix = "(TR\\d+|PB|CT|ES|FF|DD|CL|CS|CA|CC|BC|BS|DN|SD|BM|BW|BR)";
-$gizmo = "(AU|DR|FD|FJ|FM|FS|GT|GU\\d|GW|IU|JP|PD|RM|SG\\d|SU|TP)";
+$gizmo = "(CU|AU|DR|FD|FJ|FM|FS|GT|GU\\d|GW|IU|JP|PD|RM|SG\\d|SU|TP)";
 $tech = "(MI|MA|ML|GV|LS|BI)";
 
 $species = "SP\\s+".$object;
