@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======== Script parameters ========
-FH_DIR=/home/slawcok/test/trunk/
+FH_DIR=/home/fh/fh
 # ===================================
 
 cd $FH_DIR/game
@@ -45,8 +45,7 @@ cat > /tmp/fhorders.raw.$$
 	    n=$[ $n + 1 ]
 	done
     fi
-done
 
-#rm -f /tmp/fhorders.*.$$
+rm -f /tmp/fhorders.*.$$
 
 cd -
