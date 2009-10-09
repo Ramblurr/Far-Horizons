@@ -10,7 +10,7 @@ $tech = "(MI|MA|ML|GV|LS|BI)";
 
 $species = "SP\\s+".$object;
 $coords = "\\d{1,2}\\s+\\d{1,2}\\s+\\d{1,2}";
-$pcoords = $coords."\s+\\d";
+$pcoords = $coords."\\s+\\d";
 $sship = $shipprefix."S{0,1}\\s+".$object; # any ship, incl. sublight
 $fship = $shipprefix."\\s+".$object; # only FTL ship
 $base = "BAS\\s+".$object;
@@ -53,7 +53,7 @@ while ($line = <STDIN>)
 	
 	if ($section eq "")
 	{
-		print "Line ".$no." : Non-empty line outside section\n";
+		print "Line ".$no." : warning: Non-empty line outside section, will be ignored\n";
 		$problems = 1;
 		next;
 	}
@@ -93,7 +93,7 @@ while ($line = <STDIN>)
 		if ($command =~ /^ENE\w*\s+($species)$/) { next;}
 		if ($command =~ /^INS\w*\s+\d+\s+[AI]U\s+($planet)$/) { next;}	
 		if ($command =~ /^LAN\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
-		if ($command =~ /^NAM\w*\s+($coords)\s+($planet)$/) { next;}
+		if ($command =~ /^NAM\w*\s+($pcoords)\s+($planet)$/) { next;}
 		if ($command =~ /^NEU\w*\s+($species)$/) { next;}
 		if ($command =~ /^ORB\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
 		
