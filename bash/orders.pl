@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$no = 0; $mes = 0; $planet = 0;
+$no = 0; $mes = 0; $pl_num = 0;
 
 $char = "[-!-\+\.-9\<-~]";
 $object = $char."(".$char."| )*";
@@ -125,9 +125,9 @@ while ($line = <STDIN>)
 	
 	if ($section eq "PRODUCTION")
 	{
-		if ($command =~ /^PRO\w*\s+PL\s+\w[-\w\s]*$/) { $planet = 1; next;}
+		if ($command =~ /^PRO\w*\s+PL\s+\w[-\w\s]*$/) { $pl_num = 1; next;}
 		
-		if ($planet == 0) 
+		if ($pl_num == 0) 
 		{
 			print "Line ".$no." : Production order before planet set\n";
 			$problems = 1;
@@ -142,7 +142,7 @@ while ($line = <STDIN>)
 		
 		if ($command =~ /^CON\w*\s+(($sship)|($base))(,\s*\d+\s*){0,1}$/) { next;}
 
-		if ($command =~ /^DEV\s+(\d+\s+){0,1}(($planet)(,\s+($sship)){0,1}){0,1}$/) { next;}
+		if ($command =~ /^DEV\w*(\s+\d+){0,1}(\s+($planet)(,\s+($sship)){0,1}){0,1}$/) { next;}
 				
 		if ($command =~ /^ENE\w*\s+($species)$/) { next;}
 		if ($command =~ /^EST\w*\s+($species)$/) { next;}
