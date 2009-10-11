@@ -2,6 +2,7 @@ START COMBAT
 END
 
 START PRE-DEPARTURE
+Name 1 2 3 4 5 PL Dupa Krzys
 END
 
 START JUMPS
@@ -15,9 +16,27 @@ START PRODUCTION
 	DEVELOP 99 PL Krzysiu
 	DEVELOP 99 PL Krzysiu, TR8 Foobar
 	DEVELOP PL Krzysiu, TR8 Foobar
+
+Build 10 AU
+Build 1 IU
+Build 1888 CU
+BUILD TR1 Transport Name
+
+shipyard
+
 END
 
 START POST-ARRIVAL
+   Orbit TR1 Transport Name, PL Dupa Jasiu
+   Transfer 10 AU PL Dupa Jasiu, TR1 Transport Name
+   Transfer 0 IU PL Dupa Jasiu, TR1 Transport Name
+Transfer 123 CU PL Dupa Jasiu, TR1 Transport Name
+   
+Transfer 0 AU TR1 Transport Name, PL Dupa Jasiu
+Unload TR1 Transport Name
+INSTALL 8 IU PL Dupa Jasiu
+INSTALL 0 AU PL Dupa Jasiu
+INSTALL PL Dupa Jasiu
 END
 
 START STRIKES
