@@ -3,6 +3,9 @@ END
 
 START PRE-DEPARTURE
 Name 1 2 3 4 5 PL Dupa Krzys
+ENEMY 0
+ENEMY SP Foo Bar
+ENEMY SP 1234 ; field-distorted pirates
 END
 
 START JUMPS
