@@ -6,6 +6,12 @@ Name 1 2 3 4 PL Dupa Krzys
 ENEMY 0
 ENEMY SP Foo Bar
 ENEMY SP 1234 ; field-distorted pirates
+
+Unload TR1 Transport Name
+INSTALL 8 IU PL Dupa Jasiu
+INSTALL 0 AU PL Dupa Jasiu
+INSTALL PL Dupa Jasiu
+
 END
 
 START JUMPS
@@ -36,10 +42,6 @@ START POST-ARRIVAL
 Transfer 123 CU PL Dupa Jasiu, TR1 Transport Name
    
 Transfer 0 AU TR1 Transport Name, PL Dupa Jasiu
-Unload TR1 Transport Name
-INSTALL 8 IU PL Dupa Jasiu
-INSTALL 0 AU PL Dupa Jasiu
-INSTALL PL Dupa Jasiu
 END
 
 START STRIKES
