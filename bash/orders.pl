@@ -115,9 +115,9 @@ while ($line = <STDIN>)
 	{
 		if ($command =~ /^JUM\w*\s+($fship),\s*(($coords)|($pcoords)|($planet))\s*$/) { next;}				
 		if ($command =~ /^MOV\w*\s+(($fship)|($base)),\s*(($coords)|($pcoords)|($planet))\s*$/) { next;}
-		if ($command =~ /^PJU\w*\s+($sship),\s*(($coords)|($pcoords)|($planet),)\s*($base)$/) { next;}				
+		if ($command =~ /^PJU\w*\s+($sship),\s*(($coords)|($pcoords)|($planet)),\s*($base)$/) { next;}				
 		if ($command =~ /^VIS\w*\s+($coords)\s*$/) { next;}		
-		if ($command =~ /^WOR\w*(($sship)|($base))(,\s*($planet))$/) { next;}
+		if ($command =~ /^WOR\w*\s+(($sship)|($base))(,\s*($planet))?$/) { next;}
 		
 		print "Line ".$no." : Illegal, incorrect or unrecognized $section command (".$command.")\n";
 		$problems = 1;
