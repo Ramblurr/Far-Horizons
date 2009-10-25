@@ -22,8 +22,8 @@ $problems = 0;
 while ($line = <STDIN>) 
 {
     $no++;
-    chomp $line;
     ($command, @comment) = split /;/, $line;
+    chomp $command;
 	
 	if ($command =~ /^\s*$/) {
 		next;
@@ -31,7 +31,7 @@ while ($line = <STDIN>)
 	
 	$command =~ tr/a-z/A-Z/;
 	
-	if ($command =~ /$\s*START ([-\w]+)/) {
+	if ($command =~ /^\s*START ([-\w]+)/) {
 		if ($section ne "")	
 		{
 		    print "Line ".$no." : START inside section\n";
@@ -41,7 +41,7 @@ while ($line = <STDIN>)
 		next;
 	}
 	
-	if ($command =~ /$\s*END/) {
+	if ($command =~ /^\s*END/) {
 		if ($section eq "")
 		{
 			print "Line ".$no." : END without START\n";
