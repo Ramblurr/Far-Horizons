@@ -40,6 +40,9 @@ Build 1 IU
 Build 1888 CU
 BUILD TR1 Transport Name
 
+enemy 0
+neutral 0
+
 shipyard
 
 END
@@ -51,6 +54,11 @@ START POST-ARRIVAL
 Transfer 123 CU PL Dupa Jasiu, TR1 Transport Name
    
 Transfer 0 AU TR1 Transport Name, PL Dupa Jasiu
+
+enemy 0
+ally SP Dupa
+neu 0
+
 END
 
 START STRIKES
