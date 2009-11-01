@@ -24,6 +24,7 @@ while ($line = <STDIN>)
     $no++;
     ($command, @comment) = split /;/, $line;
     chomp $command;
+    $command =~ s/\s+$// #remove trailing whitespace
 	
 	if ($command =~ /^\s*$/) {
 		next;
