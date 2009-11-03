@@ -24,7 +24,7 @@ while ($line = <STDIN>)
     $no++;
     ($command, @comment) = split /;/, $line;
     chomp $command;
-    $command =~ s/\s+$// #remove trailing whitespace
+    $command =~ s/\s+$//; #remove trailing whitespace
 	
 	if ($command =~ /^\s*$/) {
 		next;
@@ -96,6 +96,7 @@ while ($line = <STDIN>)
 		if ($command =~ /^INS\w*\s+(\d+\s+[AI]U\s+)?($planet)$/) { next;}	
 		if ($command =~ /^LAN\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
 		if ($command =~ /^NAM\w*\s+($pcoords)\s+($planet)$/) { next;}
+		if ($command =~ /^NEU\w*\s+\d+$/) { next;}		
 		if ($command =~ /^NEU\w*\s+($species)$/) { next;}
 		if ($command =~ /^ORB\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
 		
@@ -146,6 +147,7 @@ while ($line = <STDIN>)
 
 		if ($command =~ /^DEV\w*(\s+\d+){0,1}(\s+($planet)(,\s+($sship)){0,1}){0,1}$/) { next;}
 				
+		if ($command =~ /^ENE\w*\s+\d+$/) { next;}
 		if ($command =~ /^ENE\w*\s+($species)$/) { next;}
 		if ($command =~ /^EST\w*\s+($species)$/) { next;}
 		if ($command =~ /^HID\w*\s*$/) { next;}
@@ -156,6 +158,7 @@ while ($line = <STDIN>)
 		if ($command =~ /^ICO\w*\s+($species)\s+(($sship)|($base))(,\s*\d+\s*){0,1}$/) { next;}
 		
 		if ($command =~ /^INT\w*\s+\d+\s*$/) { next;}
+		if ($command =~ /^NEU\w*\s+\d+$/) { next;}
 		if ($command =~ /^NEU\w*\s+($species)$/) { next;}
 		if ($command =~ /^REC\w*\s+(($sship)|($base)|((\d+\s+){0,1}($gizmo)\s*))$/) { next;}
 		if ($command =~ /^RES\w*\s+\d+\s+($tech)\s*$/) { next;}
@@ -179,9 +182,11 @@ while ($line = <STDIN>)
 		if ($command =~ /^AUT\w*\s*$/) { next;}
 		if ($command =~ /^DEE\w*\s+($sship)$/) { next;}
 		if ($command =~ /^DES\w*\s+($sship)$/) { next;}				
+		if ($command =~ /^ENE\w*\s+\d+$/) { next;}
 		if ($command =~ /^ENE\w*\s+($species)$/) { next;}
 		if ($command =~ /^LAN\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
 		if ($command =~ /^NAM\w*\s+($coords)\s+($planet)$/) { next;}
+		if ($command =~ /^NEU\w*\s+\d+$/) { next;}
 		if ($command =~ /^NEU\w*\s+($species)$/) { next;}
 		if ($command =~ /^ORB\w*\s+($sship)(,\s*($planet)){0,1}$/) { next;}
 		
