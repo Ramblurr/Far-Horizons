@@ -18,6 +18,11 @@ EOF
     return 2
 fi
 
+if [ -e interspecies.dat ]; then 
+   echo "interspecies.dat present. Have you forgotten to fhclean?"
+   return 2
+fi
+
 if [ -d /tmp/fhtest.dir ]
 then
     echo "Removing old /tmp/fhtest.dir directory..."
