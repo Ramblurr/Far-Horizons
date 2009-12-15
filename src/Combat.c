@@ -724,9 +724,8 @@ find_start:
 		}
 
 		distorted_name = FALSE;
-		if (get_value())
+		if (get_value() && !isalpha(*input_line_pointer) && ((n = undistorted ((int) value)) != 0))
 		{
-		    n = undistorted ((int) value);
 		    distorted_name = TRUE;
 		    goto att1;
 		}
