@@ -31,21 +31,11 @@ int argc;
 char *argv[];
 
 {
-    int     i, n, x, y, z, line, x_count, n_columns, x_increment,
-    page_count, page, left_x, galactic_diameter, star_index;
-
-    FILE    *outfile;
+    int rc, galactic_diameter, star_index;
 
     struct star_data    *star;
-    int rc;
     xmlTextWriterPtr writer;
     char buffer[256];
-    
-    writer = xmlNewTextWriterFilename("galaxy.xml", 0);
-    if (writer == NULL) {
-        printf("Error creating the xml writer\n");
-        return;
-    }
 
     /* Check for valid command line. */
     if (argc != 1)
@@ -53,6 +43,12 @@ char *argv[];
         fprintf (stderr, "\n\tUsage: MapGalaxy\n\n");
         fprintf (stderr, "\tResults will be written to file galaxy.xml\n\n");
         exit (-1);
+    }
+
+    writer = xmlNewTextWriterFilename("galaxy.xml", 0);
+    if (writer == NULL) {
+        printf("Error creating the xml writer\n");
+        return;
     }
 
     /* Get all the raw data. */
