@@ -364,6 +364,7 @@ struct ship_data
 #define	KNOWLEDGE_TRANSFER		12
 #define	LANDING_REQUEST			13
 #define	LOOTING_EU_TRANSFER		14
+#define ALLIES_ORDER            15
 
 struct trans_data
 {
