@@ -11,8 +11,6 @@
 #include <libxml2/libxml/xmlwriter.h>
 
 
-int star_here[MAX_DIAMETER][MAX_DIAMETER];
-
 struct galaxy_data  galaxy;
 
 extern int  num_stars;
