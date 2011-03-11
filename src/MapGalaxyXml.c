@@ -51,7 +51,7 @@ char *argv[];
     if (argc != 1)
     {
         fprintf (stderr, "\n\tUsage: MapGalaxy\n\n");
-        fprintf (stderr, "\tResults will be written to file galaxy.map\n\n");
+        fprintf (stderr, "\tResults will be written to file galaxy.xml\n\n");
         exit (-1);
     }
 
