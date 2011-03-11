@@ -1,9 +1,5 @@
 
-/* This program will create an ASCII map of the galaxy and write the result
-   to file "galaxy.map".  It will paginate the output based on how many
-   columns your printer or display can handle.  Pages are separated by
-   formfeed characters. If you do not like the results, you can always
-   edit the output file with any text editor. */
+/* This program will output the map of the galaxy to the file "galaxy.xml"*/
 
 #define THIS_IS_MAIN
 
