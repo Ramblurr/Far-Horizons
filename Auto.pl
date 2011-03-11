@@ -51,13 +51,12 @@ $curr_sp_number = 1;
 
 foreach (@data)
 {
-    ( $email, $sp_name, $home_planet, $gov_name, $gov_type, $ML, $GV, $LS, $BI ) = @$_;
+    ( $email, $sp_name, $home_planet, $gov_name, $gov_type, $ML, $GV, $LS, $BI ) = split ',', "@$_";
     
     $ret = `../bin/HomeSystemAuto 12`;
     ($x, $y, $z, $n) = split(/ /, $ret);
     
     print "\n=========================== Executing AddSpecies ($curr_sp_number) ============================\n";
-
     @args = ("../bin/AddSpeciesAuto", $curr_sp_number, $sp_name, $home_planet, $gov_name, $gov_type, $x, $y, $z, $n, $ML, $GV, $LS, $BI );
     system(@args) == 0 || die "$args[0] failed: $?";
 
