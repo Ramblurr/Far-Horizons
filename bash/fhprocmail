@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======== Script parameters ========
-FH_DIR=/home/fh/fh
+FH_DIR=/home/ramblurr/src/fh/engine
 # ===================================
 
 cd $FH_DIR/game
@@ -22,12 +22,11 @@ num_species=$[ $n - 1 ]
 echo "$num_species species read from fh_names" >> fh.log
 
 cat > /tmp/fhorders.raw.$$
-
+echo "Saved raw orders" >> fh.log
     if egrep -iq '^Subject: .*fh.*order' /tmp/fhorders.raw.$$
-    then
-        head -1 /tmp/fhorders.raw.$$ > /tmp/fhorders.first_line.$$
-	read a from_address b < /tmp/fhorders.first_line.$$
-	from_address=`echo $from_address | tr 'A-Z' 'a-z'`
+	then
+	from_address=`grep '^From: ' /tmp/fhorders.raw.$$ | head -1 | sort -u | tr 'A-Z' 'a-z' | egrep -o '<.*>' | egrep -o '[^<].*[^>]'`
+	echo "Found from address: $from_address" >> fh.log
 
 	n=1
 	while [ $n -le $num_species ]
@@ -46,6 +45,6 @@ cat > /tmp/fhorders.raw.$$
 	done
     fi
 
-rm -f /tmp/fhorders.*.$$
+#rm -f /tmp/fhorders.*.$$
 
 cd -
