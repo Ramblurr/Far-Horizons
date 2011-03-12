@@ -45,6 +45,6 @@ echo "Saved raw orders" >> fh.log
 	done
     fi
 
-#rm -f /tmp/fhorders.*.$$
+rm -f /tmp/fhorders.*.$$
 
 cd -
