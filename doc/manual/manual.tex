@@ -11,7 +11,9 @@
 \usepackage{graphicx}
 \usepackage{abstract}
 \usepackage{calc}
+\usepackage{multirow}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{colortbl}
 \usepackage[bookmarks, pdftitle={Far Horizons Rules (7th ed)}, pdfauthor={Rick Morneau}]{hyperref}
 \hypersetup{
     colorlinks,%
@@ -22,8 +24,11 @@
 }
 %opening
 \title{
-{\small\MakeUppercase{Seventh Edition Rules}} \\ 
-{\Huge Far Horizons}
+\textbf{{\Huge Far Horizons}}
+\vspace{10pt}
+\hline
+\vspace{10pt}
+{\small\MakeUppercase{Seventh Edition Rules}}
 }
 \author{Rick Morneau}
 \date{January 2, 1999}
@@ -34,6 +39,7 @@
 \renewcommand{\abstracttextfont}{\normalfont}
 
 
+\definecolor{lightblue}{rgb}{0.8,0.85,1}
 \definecolor{lightyellow}{RGB}{255,255,153}
 \definecolor{lightgreen}{RGB}{153,255,153}
 \definecolor{lightred}{RGB}{255,153,153}
@@ -640,27 +646,36 @@ Earth.
 \subsubsection{TEMPERATURE CLASS}
 
 A planet's temperature class is listed in the ``Temp Class'' column and can have
-one of the following values:
-\begin{verbatim}
-  Temp.  Deg.                        Temp.   Deg.
-  Class  (C)   Examples              Class   (C)  Examples
- ----------------------------------------------------------------
-    1    -273  Pluto, absolute zero   16     180
-    2    -240  Mercury (dark side)    17     210
-    3    -210  Neptune                18     240
-    4    -180  Titan (moon of Saturn) 19     270
-    5    -150  Uranus, Saturn         20     300
-    6    -120  Jupiter                21     330
-    7     -90                         22     360
-    8     -60                         23     390
-    9     -30  Mars                   24     420
-   10       0                         25     450  Venus
-   11      30  Earth                  26     480
-   12      60                         27     510  Mercury
-   13      90                         28     540
-   14     120                         29     570
-   15     150                         30     600
-\end{verbatim}
+one of the values listed in Table~\ref{tab:temp}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|ccl|ccl|}
+\hline
+\rowcolor{lightblue} \textbf{Temp Class} & \textbf{Deg. (C)} & \textbf{Examples} & \textbf{Temp. Class} & \textbf{Deg. (C)} & \textbf{Examples} \\
+\hline
+    1 &    -273 &  Pluto, absolute zero   &   16 &     180 & \\
+    2 &    -240 &  Mercury (dark side)    &    17 &     210 & \\
+    3 &    -210 &  Neptune                &   18 &     240 & \\
+    4 &    -180 &  Titan (moon of Saturn) & 19 &    270 & \\
+    5 &    -150 &  Uranus, Saturn         &   20 &     300 & \\
+    6 &    -120 &  Jupiter                &   21 &     330 & \\
+    7 &     -90 &                         &   22 &     360 & \\
+    8 &     -60 &                         &   23 &     390 & \\
+    9 &     -30 &  Mars                   &   24 &     420 & \\
+   10 &       0 &                         &  25 &     450 &  Venus \\
+   11 &      30 &  Earth                  &   26 &     480 & \\
+   12 &      60 &                         &   27 &     510 &  Mercury \\
+   13 &      90 &                         &   28 &     540 & \\
+   14 &     120 &                         &   29 &     570 & \\
+   15 &     150 &                         &   30 &     600 & \\
+\hline
+\end{tabular}
+\caption{Planet Temperature Class}
+\label{tab:temp}
+\end{center}
+\end{table}
+
 The temperatures listed in the table are approximate, average temperatures that
 can be experienced on the surface of the planet.  Colonies are more likely to
 prosper if the temperature class of a planet is as close as possible to that of
@@ -671,27 +686,36 @@ be applied to produce an artificial environment for the colony.
 \subsubsection{PRESSURE CLASS}
 
 A planet's pressure class is listed in the ``Press Class'' column and can have
-one of the following values:
-\begin{verbatim}
-      Press.                           Press.
-      Class   Pressure  Examples       Class  Pressure  Examples
-    -------------------------------------------------------------
-        0       0.0000  Mercury,vacuum  15      32
-        1       0.0020                  16      64
-        2       0.0039                  17      128
-        3       0.0078  Mars            18      256
-        4       0.0156                  19      512
-        5       0.0312                  20      1024    Saturn
-        6       0.0625                  21      2048
-        7       0.125                   22      4096
-        8       0.25                    23      8192
-        9       0.5                     24      16384
-        10      1       Earth           25      32768
-        11      2       Uranus          26      65536   Jupiter
-        12      4                       27      131072
-        13      8       Neptune         28      262144
-        14      16      Venus           29      524288
-\end{verbatim}
+one of the values listed in Table~\ref{tab:press}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|ccl|ccl|}
+\hline
+\rowcolor{lightblue} \textbf{Press. Class} & \textbf{Pressure} & \textbf{Examples} & \textbf{Press. Class} & \textbf{Pressure}& \textbf{Examples} \\
+\hline
+        0  &     0.0000 &  Mercury,vacuum &  15  &    32  & \\
+        1  &     0.0020 &                 & 16   &   64  & \\
+        2  &     0.0039 &                 & 17   &   128 & \\
+        3  &     0.0078 & Mars            & 18   &   256 & \\
+        4  &     0.0156 &                 & 19   &   512 & \\
+        5  &     0.0312 &                 & 20   &   1024  &   Saturn \\
+        6  &     0.0625 &                 & 21   &   2048  & \\
+        7  &     0.125  &                 & 22   &   4096  & \\
+        8  &     0.25   &                 & 23   &   8192  & \\
+        9  &     0.5    &                 & 24   &   16384  & \\
+        10 &     1      & Earth           & 25   &   32768  & \\
+        11 &     2      & Uranus          & 26   &   65536  &    Jupiter \\
+        12 &     4      &                 & 27   &   131072 & \\
+        13 &     8      & Neptune         & 28   &   262144 & \\
+        14 &     16     & Venus           & 29   &   524288 & \\
+\hline
+\end{tabular}
+\caption{Planet Pressure Class}
+\label{tab:press}
+\end{center}
+\end{table}
+
 The pressures listed in the above table are multiples of Earth ``atmospheres''
 and are approximate, average values that can be experienced on the surface of
 the planet.  Colonies are more likely to prosper if the pressure class of a
@@ -728,9 +752,15 @@ apply to your species.
 
 A planetary atmosphere will be described in terms of the gases that are its
 major components.  Each gas in the atmosphere will have a percentage value
-associated with it.  The following gases and their symbols are used in this
-game:
-\begin{tabular}{ll}
+associated with it.  The gases and their symbols are used in this
+game are listed in Table~\ref{tab:gas}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+\rowcolor{lightblue} \textbf{Symbol} & \textbf{Name} \\
+\hline
 		H2	&Hydrogen \\
 		CH4	&Methane \\
 		He	&Helium \\
@@ -744,7 +774,13 @@ game:
 		H2O	&Water Vapor or Steam \\
 		SO2	&Sulfur Dioxide \\
 		H2S	&Hydrogen Sulfide \\
+\hline
 \end{tabular}
+\caption{Plantary Atmosphere Gases}
+\label{tab:gas}
+\end{center}
+\end{table}
+
 For example, an Earth-type atmosphere would be described as N2(78\%), O2(22\%).
 This means that Earth's atmosphere consists of approximately 78\% Nitrogen and
 22\% Oxygen.
@@ -1151,27 +1187,40 @@ over into later turns, but that unused production capacity may NOT.
 \label{sec:spaceships}
 
 
-Spaceships come in all sizes as can be seen in the following table:
+Spaceships come in all sizes as can be seen in Table~\ref{tab:ships}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|crlrrrl|}
+\hline
+  \rowcolor{lightblue} \textbf{Minimum}&    &  &              &   \textbf{Carrying} &    \multicolumn{2}{>{\columncolor{lightblue}}c|}{ \textbf{Cost}} \\
+\rowcolor{lightblue} \textbf{MA} &    \textbf{Abbr}   & \textbf{Class} &              \textbf{Tonnage} &   \textbf{Capacity} &  \textbf{FTL} &  \textbf{Sub-light} \\
+\hline
+      2 &    PB  &  Picketboat        &  10,000  &    1   &     100 &      75 \\
+      4 &    CT  &  Corvette          &  20,000  &    2   &     200 &     150 \\
+     10 &    ES  &  Escort            &  50,000  &    5   &     500 &     375 \\
+     20 &    FF  &  Frigate           & 100,000  &   10   &    1000 &     750 \\
+     30 &    DD  &  Destroyer         & 150,000  &   15   &    1500 &    1125 \\
+     40 &    CL  &  Light Cruiser     & 200,000  &   20   &    2000 &    1500 \\
+     50 &    CS  &  Strike Cruiser    & 250,000  &   25   &    2500 &    1875 \\
+     60 &    CA  &  Heavy Cruiser     & 300,000  &   30   &    3000 &    2250 \\
+     70 &    CC  &  Command Cruiser   & 350,000  &   35   &    3500 &    2625 \\
+     80 &    BC  &  Battlecruiser     & 400,000  &   40   &    4000 &    3000 \\
+     90 &    BS  &  Battleship        & 450,000  &   45   &    4500 &    3375 \\
+    100 &    DN  &  Dreadnought       & 500,000  &   50   &    5000 &    3750 \\
+    110 &    SD  &  Super Dreadnought & 550,000  &   55   &    5500 &    4125 \\
+    120 &    BM  &  Battlemoon        & 600,000  &   60   &    6000 &    4500 \\
+    130 &    BW  &  Battleworld       & 650,000  &   65   &    6500 &    4875 \\
+    140 &    BR  &  Battlestar        & 700,000  &   70   &    7000 &    5250 \\
+\hline
+\end{tabular}
+\caption{Spaceship Classes in Far Horizons}
+\label{tab:ships}
+\end{center}
+\end{table}
+
 \begin{verbatim}
-  Minimum                                      Carrying        Cost
-     MA    Abbr   Class              Tonnage   Capacity    FTL   Sub-light
- ---------------------------------------------------------------------------
-      2     PB    Picketboat          10,000      1        100       75
-      4     CT    Corvette            20,000      2        200      150
-     10     ES    Escort              50,000      5        500      375
-     20     FF    Frigate            100,000     10       1000      750
-     30     DD    Destroyer          150,000     15       1500     1125
-     40     CL    Light Cruiser      200,000     20       2000     1500
-     50     CS    Strike Cruiser     250,000     25       2500     1875
-     60     CA    Heavy Cruiser      300,000     30       3000     2250
-     70     CC    Command Cruiser    350,000     35       3500     2625
-     80     BC    Battlecruiser      400,000     40       4000     3000
-     90     BS    Battleship         450,000     45       4500     3375
-    100     DN    Dreadnought        500,000     50       5000     3750
-    110     SD    Super Dreadnought  550,000     55       5500     4125
-    120     BM    Battlemoon         600,000     60       6000     4500
-    130     BW    Battleworld        650,000     65       6500     4875
-    140     BR    Battlestar         700,000     70       7000     5250
+
 \end{verbatim}
 \texttt{Minimum MA} is the minimum Manufacturing tech level that a species must have
 before it is capable of building a ship of the corresponding tonnage.  For
@@ -1364,26 +1413,36 @@ The carrying capacity of a transport is calculated as follows:
 \end{equation*}
 
 For example, a TR7 (i.e. a 70,000 ton transport) has a carrying capacity of
-$(10 + 7/2) \times 7 = (10 + 3) \times 7 = 91$.  Note that fractions are dropped in the
-division.
+\[
+(10 + 7/2) \times 7 = (10 + 3) \times 7 = 91 
+\]
+Note that fractions are dropped in the division.
 
-Here are some more examples:
-\begin{verbatim}
-     Minimum                         Carrying      Cost
-        MA      Abbr    Tonnage      Capacity   FTL   Sub-light
-    ------------------------------------------------------------
-        2       TR1     10,000          10      100     75
-        4       TR2     20,000          22      200     150
-        10      TR5     50,000          60      500     375
-        12      TR6     60,000          78      600     450
-        20      TR10    100,000         150     1000    750
-        30      TR15    150,000         255     1500    1125
-        40      TR20    200,000         400     2000    1500
-        100     TR50    500,000         1750    5000    3750
-        120     TR60    600,000         2400    6000    4500
-\end{verbatim}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|crrrrl|}
+\hline
+  \rowcolor{lightblue} \textbf{Minimum}&    &           &   \textbf{Carrying} &    \multicolumn{2}{>{\columncolor{lightblue}}c|}{ \textbf{Cost}} \\
+\rowcolor{lightblue} \textbf{MA} &    \textbf{Abbr}   &              \textbf{Tonnage} &   \textbf{Capacity} &  \textbf{FTL} &  \textbf{Sub-light} \\
+\hline
+        2    &   TR1   &  10,000     &     10   &   100  &   75 \\
+        4    &   TR2   &  20,000     &     22   &   200  &   150 \\
+        10   &   TR5   &  50,000     &     60   &   500  &   375 \\
+        12   &   TR6   &  60,000     &     78   &   600  &   450 \\
+        20   &   TR10  &  100,000    &     150  &   1000 &   750 \\
+        30   &   TR15  &  150,000    &     255  &   1500 &   1125 \\
+        40   &   TR20  &  200,000    &     400  &   2000 &   1500 \\
+        100  &   TR50  &  500,000    &     1750 &   5000 &   3750 \\
+        120  &   TR60  &  600,000    &     2400 &   6000 &   4500 \\
+  \ldots  &\ldots&\ldots&\ldots&\ldots&\ldots\\
+\hline
+\end{tabular}
+\caption{Transport example listing (this is not exhaustive)}
+\label{tab:trans}
+\end{center}
+\end{table}
 
-You may build a transport of any tonnage as long as it is a multiple of 10,000,
+Table~\ref{tab:trans} lists several example Transport specifications. You may build a transport of any tonnage as long as it is a multiple of 10,000,
 and as long as your Manufacturing tech level is high enough.  Note that you do
 NOT have to calculate the carrying capacity of ships each time you give orders
 for the ships, since all capacities are listed on your status reports.
@@ -1575,16 +1634,26 @@ START PRODUCTION
 END PRODUCTION
 \end{verbatim} 
 
-\noindent Use the following abbreviations for tech levels:
+\noindent Use the abbreviations for tech levels listed in Table~\ref{tab:techabbrvs}.
 
-\begin{tabular}{ll}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|cl|}
+\hline
+\rowcolor{lightblue} \textbf{Abbr} &    \textbf{Name}   \\
+\hline
 	MI	&	Mining \\
 	MA	&	Manufacturing \\
 	ML	&	Military \\
 	GV	&	Gravitics \\
 	LS	&	Life Support\\
-	BI	&	Biology \\ \\
+	BI	&	Biology \\
+\hline
 \end{tabular}
+\caption{Technology abbreviations}
+\label{tab:techabbrvs}
+\end{center}
+\end{table}
 
 Spending on research does not guarantee success.  In general, the more you
 spend, the greater your chance of success will be, and the greater the increase
@@ -2439,16 +2508,23 @@ this reason also that the gravity of a planet is not a consideration.
 
 In order for a colony to be of any use, it must have people, raw materials,
 and production capacity.  In FAR HORIZONS, these needs have been met by
-implementing the following items:
+implementing the items in Table~\ref{tab:coloitems}.
 
-\begin{verbatim}
-                                                     Carrying
-       Abbr     Name                          Cost   Capacity
-     -----------------------------------------------------------
-        CU      Colonist Units                  1       1
-        IU      Colonial Mining Units           1       1
-        AU      Colonial Manufacturing Units    1       1\end{verbatim} 
-
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|clcc|}
+\hline
+\rowcolor{lightblue} \textbf{Abbr} &    \textbf{Name}  & Cost & Carrying Capacity \\
+\hline
+        CU  &    Colonist Units                &  1    &   1 \\
+        IU  &    Colonial Mining Units         &  1    &   1 \\
+        AU  &    Colonial Manufacturing Units  &  1    &   1 \\
+\hline
+\end{tabular}
+\caption{Required items for colonization}
+\label{tab:coloitems}
+\end{center}
+\end{table}
 
 A colonist unit is the approximate equivalent of 1000 humans.
 
@@ -2456,10 +2532,10 @@ Colonist units, colonial mining units, and colonial manufacturing units are
 used to establish the initial mining and manufacturing bases on a colony
 planet.  Units are installed as follows:
 \[
-    1 \textrm{colonist unit} + 1 \textrm{colonial mining unit} = 0.1 \textrm{mining base}
+    1 \text{ colonist unit} + 1 \textrm{ colonial mining unit} = 0.1 \textrm{ mining base}
 \]
 \[
-    1 \textrm{colonist unit} + 1 \textrm{colonial manufacturing unit} = 0.1 \textrm{manufacturing base}
+    1 \textrm{ colonist unit} + 1 \textrm{ colonial manufacturing unit} = 0.1 \textrm{ manufacturing base}
 \]
 In other words, a colonist unit consists of trained people, ready and willing
 to work.  A colonial mining unit or a colonial manufacturing unit contains the
@@ -3877,11 +3953,13 @@ Interception will only be used against ships that enter the sector via a JUMP,
 \texttt{PJUMP}, or \texttt{WORMHOLE} command.  Interception cannot be used against ships that
 \texttt{MOVE} into a sector.
 
-[A ship that \texttt{MOVE}s into a system is moving at sub-light speeds and will have
+\begin{informationnote}
+A ship that \texttt{MOVE}s into a system is moving at sub-light speeds and will have
 telemetry of the space ahead, as well as the time to analyze the telemetry.
-An \texttt{INTERCEPT} takes advantage of the "timelessness" of the jump and the complete
+An \texttt{INTERCEPT} takes advantage of the ``timelessness'' of the jump and the complete
 lack of data about the destination until the moment of emergence from the
-wormhole.]
+wormhole. 
+\end{informationnote}
 
 The main purpose of an interception is to prevent exploratory vessels from
 learning about the inhabitants of a star system.  It is NOT intended as
@@ -4298,14 +4376,14 @@ usable knowledge level will appear in your status report as in the following
 example: \\
 
 \noindent Tech Levels:
-\begin{quotation}
-   \noindent Mining = 17/21 \\
-   Manufacturing = 17 \\
-   Military = 9 \\
-   Gravitics = 8 \\
-   Life Support = 13/14  \\
-   Biology = 4 \\
-\end{quotation} 
+\begin{flalign*}
+   \text{Mining} &= 17/21 &\\
+   \text{Manufacturing} &= 17 &\\
+   \text{Military} &= 9 &\\
+   \text{Gravitics} &= 8 &\\
+   \text{Life Support} &= 13/14  &\\
+   \text{Biology} &= 4 &\\
+\end{flalign*} 
 
 The above indicates that your mining tech level is 17, but that you have
 knowledge up to 21.  Similarly for life support.
@@ -5103,7 +5181,7 @@ where they can be upgraded, a normal upgrade is not possible.  However, an
 effective upgrade can be accomplished by using Damage Repair Units, which are
 discussed in the next section.
 
-
+\newpage
 \subsection{DAMAGE REPAIR UNITS}
 
 A species with a Manufacturing tech level of at least 30 may build Damage
@@ -5216,6 +5294,7 @@ to predict which ships will be carrying them.
 	desired or expected result.
 \end{importantnote}
 
+\newpage
 \subsection{INTERSPECIES CONSTRUCTION}
 
 A species with a Manufacturing tech level of at least 25 may build items,
@@ -5331,7 +5410,7 @@ If the cost of an item is based on a tech level (such as terraforming plants),
 the cost will be based on the tech level of the builder.  However, the item
 will always operate at the tech level of whoever is using it.
 
-
+\newpage
 \subsection{AUXILIARY GUN UNITS}
 
 A species with a Military tech level of at least 10 may build Auxiliary Gun
@@ -5343,25 +5422,30 @@ Auxilairy gun units are designed to enhance the normal firepower of warships
 only.  They may not be used on transports or starbases, although they may be
 carried as cargo.
 
-Auxiliary gun units come in the following sizes:
+Auxiliary gun units come in the sizes listed in Table~\ref{tab:auxguns}.
 
-\begin{verbatim}
-
-                                         Needed                  Minimum
-        Unit            Equivalent      Carrying        Unit     Military
-    Abbreviation         Tonnage        Capacity        Cost    Tech Level
-   ------------------------------------------------------------------------
-        GU1              50,000           5             250        10
-        GU2             100,000           10            500        20
-        GU3             150,000           15            750        30
-        GU4             200,000           20            1000       40
-        GU5             250,000           25            1250       50
-        GU6             300,000           30            1500       60
-        GU7             350,000           35            1750       70
-        GU8             400,000           40            2000       80
-        GU9             450,000           45            2250       90
-\end{verbatim} 
-
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|cccrc|}
+\hline
+  \rowcolor{lightblue} \textbf{Unit}&  \textbf{Equivalent}  & \textbf{Needed Carrying}  &                & \textbf{Minimum Military}  \\
+\rowcolor{lightblue} \textbf{Abbreviation} &    \textbf{Tonnage}   & \textbf{Capacity} &   \textbf{Unit Cost}&   \textbf{Tech Level}\\
+\hline
+        GU1       &       50,000      &     5       &      250    &    10 \\
+        GU2       &      100,000      &     10      &      500    &    20 \\
+        GU3       &      150,000      &     15      &      750    &    30 \\
+        GU4       &      200,000      &     20      &      1000   &    40 \\
+        GU5       &      250,000      &     25      &      1250   &    50 \\
+        GU6       &      300,000      &     30      &      1500   &    60 \\
+        GU7       &      350,000      &     35      &      1750   &    70 \\
+        GU8       &      400,000      &     40      &      2000   &    80 \\
+        GU9       &      450,000      &     45      &      2250   &    90 \\
+\hline
+\end{tabular}
+\caption{Auxiliary gun unit sizes}
+\label{tab:auxguns}
+\end{center}
+\end{table}
 
 The `Equivalent tonnage' indicates the amount of additional offensive capacity
 that the unit provides.  For example, a 300,000 ton heavy cruiser carrying two
@@ -5392,6 +5476,7 @@ The total cost will be 1500.
 On the status reports, auxiliary gun units will be referred to as ``Mark-1 Gun
 Units'', ``Mark-2 Gun Units'', etc. corresponding respectively to GU1, GU2, etc.
 
+\newpage
 \subsection{FAIL-SAFE JUMP UNITS}
 
 A species with a Gravitics tech level of at least 20 may build Fail-Safe Jump
@@ -5420,6 +5505,7 @@ units, give the production order:
 \noindent Fail-safe jump units will be used automatically, whenever they are needed, as
 long as they are carried by a ship.
 
+\newpage
 \subsection{JUMP PORTAL UNITS}
 
 A species with a Gravitics tech level of at least 25 may build Jump Portal
@@ -5502,6 +5588,7 @@ effect at all.
 The use of jump portals by a starbase will have no effect on its offensive or
 defensive combat abilities.
 
+\newpage
 \subsection{FORCED MISJUMP UNITS}
 
 A species with a Gravitics tech level of at least 30 may build Forced Misjump
@@ -5549,6 +5636,7 @@ contain the designation ``FJ'' in the status report.  These ships will jump
 automatically in the jump phase of the next turn, and any explicit jump orders
 will be ignored.
 
+\newpage
 \subsection{FORCED JUMP UNITS}
 
 A species with a Gravitics tech level of at least 40 may build Forced Jump
@@ -5566,6 +5654,7 @@ In all other respects, forced jump units are like forced misjump units.
 Forced jump units have the class abbreviation ``FJ'', a cost of 125 each, and
 require a carrying capacity of 5 each.
 
+\newpage
 \subsection{GRAVITIC TELESCOPES}
 
 A species with a gravitics tech level of at least 50 may build Gravitic
@@ -5686,7 +5775,7 @@ they are being observed, then they may fail at hiding.  And even if a colony
 eventually discovers that it is being scanned by a gravitic telescope, it may
 be too late for it to successfully hide.
 
-
+\newpage
 \subsection{AUXILIARY SHIELD GENERATORS}
 
 A species with a Life Support tech level of at least 10 may build Auxiliary
@@ -5698,23 +5787,30 @@ Auxilairy shield generators are designed to enhance the normal defensive
 shields of warships only.  They may not be used on transports or starbases,
 although they may be carried as cargo.
 
-Shield generators come in the following sizes:
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|cccrc|}
+\hline
+  \rowcolor{lightblue} \textbf{Unit}&  \textbf{Equivalent}  & \textbf{Needed Carrying}  &                & \textbf{Minimum Life Support}  \\
+\rowcolor{lightblue} \textbf{Abbreviation} &    \textbf{Tonnage}   & \textbf{Capacity} &   \textbf{Unit Cost}&   \textbf{Tech Level}\\
+\hline
+        SG1     &         50,000    &       5       &      250    &    10 \\
+        SG2     &        100,000    &       10      &      500    &    20 \\
+        SG3     &        150,000    &       15      &      750    &    30 \\
+        SG4     &        200,000    &       20      &      1000   &    40 \\
+        SG5     &        250,000    &       25      &      1250   &    50 \\
+        SG6     &        300,000    &       30      &      1500   &    60 \\
+        SG7     &        350,000    &       35      &      1750   &    70 \\
+        SG8     &        400,000    &       40      &      2000   &    80 \\
+        SG9     &        450,000    &       45      &      2250   &    90 \\
+\hline
+\end{tabular}
+\caption{Shield generator sizes}
+\label{tab:shields}
+\end{center}
+\end{table}
 
-\begin{verbatim}
-                                         Needed                  Minimum
-        Unit            Equivalent      Carrying        Unit    Life Support
-    Abbreviation         Tonnage        Capacity        Cost    Tech Level
-   ------------------------------------------------------------------------
-        SG1              50,000           5             250        10
-        SG2             100,000           10            500        20
-        SG3             150,000           15            750        30
-        SG4             200,000           20            1000       40
-        SG5             250,000           25            1250       50
-        SG6             300,000           30            1500       60
-        SG7             350,000           35            1750       70
-        SG8             400,000           40            2000       80
-        SG9             450,000           45            2250       90\end{verbatim} 
-
+Shield generators come in the sizes listed in Table~\ref{tab:shields}.
 
 The `Equivalent tonnage' indicates the amount of additional defensive capacity
 that the unit provides.  For example, a 300,000 ton heavy cruiser carrying two
@@ -5743,7 +5839,7 @@ Use the BUILD command to build auxiliary shield units.  For example, to build
 ``Mark-1 Shield Generators'', ``Mark-2 Shield Generators'', etc. corresponding
 respectively to SG1, SG2, etc.
 
-
+\newpage
 \subsection{FIELD DISTORTION UNITS}
 
 A species with a Life Support tech level of at least 20 may build Field
@@ -5862,7 +5958,7 @@ Finally, note that by combining the use of field distortion units with the
 HIJACK command, a species can raid its enemies and commit other acts of piracy
 without giving away the attacker's identity.
 
-
+\newpage
 \subsection{POPULATION GROWTH}
 
 A species with a Biology tech level of at least 20 will experience enhanced
@@ -5878,7 +5974,7 @@ Biology tech level divided by 20, fractions dropped.  For example, if the
 normal population growth on a colony is 9 percent, and the Biology tech level
 is 59, then the actual growth rate will be 9 + 59/20 = 11 percent.
 
-
+\newpage
 \subsection{TERRAFORMING}
 
 A species with a Biology tech level of at least 40 may terraform a planet,
@@ -5964,7 +6060,7 @@ that violates this rule will be evicted from the game.
 The effects of terraforming will last until the end of a game, unless
 counteracted by terraforming by another species.
 
-
+\newpage
 \subsection{GERM WARFARE BOMBS}
 
 A species with a Biology tech level of at least 50 may build Germ Warfare
@@ -5998,67 +6094,57 @@ be safely colonized in the next turn.  Remember, ALL mining and manufacturing
 base that was originally on the planet will have been destroyed.  However, you
 will gain some economic units from looting.
 
-
+\newpage
 \section{CLASS ABBREVIATIONS}
 
-The following class abbreviations are currently being used in FAR HORIZONS:
-\begin{description}
-  \setlength{\itemsep}{1pt}
-  \setlength{\parskip}{0pt}
-  \setlength{\parsep}{0pt}
- \item[AU]	Colonial Manufacturing Unit
-\item[BAS]	Starbase
-\item[BC]	Battlecruiser
-\item[BI]	Biology tech level
-\item[BM]	Battlemoon
-\item[BR]	Battlestar
-\item[BS]	Battleship
-\item[BW]	Battleworld
-\item[CA]	Heavy Cruiser
-\item[CC]	Command Cruiser
-\item[CL]	Light Cruiser
-\item[CS]	Strike Cruiser
-\item[CT]	Corvette
-\item[CU]	Colonist Unit
-\item[DD]	Destroyer
-\item[DN]	Dreadnought
-\item[DR]	Damage Repair Unit
-\item[ES]	Escort
-\item[FD]	Field Distortion Unit
-\item[FF]	Frigate
-\item[FJ]	Forced Jump Unit
-\item[FM]	Forced Mis-jump Unit
-\item[FS]	Fail-Safe Jump Unit
-\item[GT]	Gravitic Telescope Unit
-\item[GUn]	Auxiliary Gun Unit, Mark-n
-\item[GV]	Gravitics tech level
-\item[GW]	Germ Warfare Bomb
-\item[IU]	Colonial Mining Unit
-\item[JP]	Jump Portal Units
-\item[LS]	Life Support tech level
-\item[MA]	Manufacturing tech level
-\item[MI]	Mining tech level
-\item[ML]	Military tech level
-\item[PB]	Picketboat
-\item[PD]	Planetary Defense Unit
-\item[PL]	Planet
-\item[RM]	Raw Material Unit
-\item[SD]	Super Dreadnought
-\item[SGn]	Auxiliary Shield Generator, Mark-n
-\item[SP]	Species
-\item[SU]	Starbase Unit
-\item[TP]	Terraforming Plant
-\item[TRn]	Transport, eg. TR7 for 70,000 tons, TR14 for 140,000 tons, etc.
-\end{description}
+The class abbreviations currently being used in FAR HORIZONS are listed in Table~\ref{tab:classabrvs}. 
 Remember, all ships may be built in sub-light versions, which have an ``S''
 suffixed to the abbreviation.  For example, a sub-light battleship has the
 class abbreviation ``BSS'', a sub-light 150,000 ton transport has the
 abbreviation ``TR15S'', etc.
 
+\begin{table}[ht]
+ \caption{Class Abbreviations} \label{tab:classabrvs}
+\begin{tabularx}{\textwidth}{|lX|lX|}
+\hline
+\rowcolor{lightblue} \textbf{Abbr} &    \textbf{Class Name} & \textbf{Abbreviation} &    \textbf{Class Name}  \\
+\hline
+AU & Colonial Manufacturing Unit &	FS & Fail-Safe Jump Unit\\ 
+BAS & Starbase& 	GT & Gravitic Telescope Unit\\ 
+BC & Battlecruiser& 	GUn & Auxiliary Gun Unit, Mark-n\\ 
+BI & Biology tech level& 	GV & Gravitics tech level\\ 
+BM & Battlemoon& 	GW & Germ Warfare Bomb\\ 
+BR & Battlestar& 	IU & Colonial Mining Unit\\ 
+BS & Battleship& 	JP & Jump Portal Units\\ 
+BW & Battleworld& 	LS & Life Support tech level\\ 
+CA & Heavy Cruiser& 	MA & Manufacturing tech level\\ 
+CC & Command Cruiser & MI & Mining tech level\\ 
+CL & Light Cruiser & ML & Military tech level\\ 
+CS & Strike Cruiser & PB & Picketboat\\ 
+CT & Corvette & PD & Planetary Defense Unit\\ 
+CU & Colonist Unit & PL & Planet\\ 
+DD & Destroyer & RM & Raw Material Unit\\ 
+DN & Dreadnought & SD & Super Dreadnought\\ 
+DR & Damage Repair Unit & SGn & Auxiliary Shield Generator, Mark-n\\ 
+ES & Escort & SP & Species\\ 
+FD & Field Distortion Unit & SU & Starbase Unit\\ 
+FF & Frigate & TP & Terraforming Plant\\ 
+FJ & Forced Jump Unit & &\\
+FM & Forced Mis-jump Unit  & TRn & Transport, eg. TR7 for 70,000 tons, TR14 for 140,000 tons, etc. \\ 	
+
+\hline
+\end{tabularx}
+\end{table}
+\newpage
 \section{COMMAND SUMMARY}
 
-The following commands are currently being used in FAR HORIZONS:
-\begin{longtable}{llp{9cm}}
+The commands currently being used in FAR HORIZONS are listed in Table~\ref{tab:commands}.
+ 
+\begin{longtable}{|llp{9cm}|}
+\caption{Command Summary} \label{tab:commands} \\
+\hline
+\rowcolor{lightblue} \textbf{Command} &    \textbf{Arguments} & \textbf{Explanation} \\
+\hline
 ALLY           & sp          &    Declare species ``sp'' to be an ally \\
 AMBUSH       &   n           &    Spend ``n'' in preparation for ambush \\
 ATTACK       &   sp          &    Attack opponent ``sp'' \\
@@ -6137,11 +6223,11 @@ VISITED   &      x y z      &     Mark a star system as having been visited, eve
 WITHDRAW   &     n1 n2 n3    &    Set conditions for withdrawing from combat \\
 WORMHOLE   &     ship [,pl]  &    Have ``ship'' jump to opposite end of wormhole and orbit planet ``pl'' on arrival \\
 WORMHOLE   &     base [,pl] &     Have starbase ``base'' jump to opposite end of wormhole and orbit planet ``pl'' on arrival \\
-ZZZ       &                  &    Terminate a MESSAGE
+ZZZ       &                  &    Terminate a MESSAGE \\
+\hline
 \end{longtable}
 
 where:
-
 \begin{tabular}{r@{ = }l}
 	\noindent ab & class abbreviation \\
 	base & name of a starbase, including ``BAS'' abbreviation \\
@@ -6161,6 +6247,7 @@ where:
 \end{tabular}
 
 
+
 \newpage
 
 \section{SET-UP FORM FOR ENTERING A GAME}
@@ -6169,14 +6256,13 @@ The following form must be filled out at the start of a game and sent to the
 gamemaster.  Refer to Chapter 3 for detailed information on how to fill out
 the form.
 
+\begin{verbatim}
 Allocate points to Military, Gravitics, Life Support, and Biology tech levels.
 You have a total of 15 points to allocate.
-
-\begin{verbatim}
      Military:
      Gravitics:
      Life Support:
-     Biology:\end{verbatim} 
+     Biology:
 
 [REMINDER: If a tech level is zero, you will not be able to raise it unless
 another species transfers the knowledge or technology to you.]
@@ -6184,7 +6270,6 @@ another species transfers the knowledge or technology to you.]
 Next, enter the names for your species, home planet, and government.
 You may use up to 31 characters each.
 
-\begin{verbatim}
      Species name (MUST contain 7 or more characters):
      Home planet name:
      Government name:
@@ -6200,11 +6285,12 @@ You may use up to 31 characters each.
 	least seven characters, including embedded spaces.
 \end{importantnote}
 
-Fill out the above items and send them to the gamemaster before the game
+\noindent Fill out the above items and send them to the gamemaster before the game
 starts.
 
 
 \begin{center}
-		End of Rules for FAR HORIZONS\end{center} 
+\textbf{End of Rules for FAR HORIZONS}
+\end{center} 
 
 \end{document}
