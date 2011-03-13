@@ -154,7 +154,10 @@ def main():
 			messages[recipient] = email_template_fail % (error_msg)
 		else:
 			messages[recipient] = email_template_success % (row.custom["speciesname"].text, row.custom["homeplanetname"].text, row.custom["governmentname"].text, row.custom["governmenttype"].text)
-			d = { "validated" : "Yes" }
+			d = {}
+			for k in row.custom:
+				d[k] = row.custom[k].text
+			d["validated"] = "Yes"
 			entry = gd_client.UpdateRow( row, d)
 			
 	#for email,msg in messages.iteritems():
