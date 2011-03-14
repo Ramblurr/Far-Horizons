@@ -160,8 +160,8 @@ def main():
 			d["validated"] = "Yes"
 			entry = gd_client.UpdateRow( row, d)
 			
-	#for email,msg in messages.iteritems():
-		#sendMail("FH Player Registration", email, msg)
+	for email,msg in messages.iteritems():
+		sendMail("FH Player Registration", email, msg)
 	print "All done"
 
 
