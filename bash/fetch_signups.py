@@ -50,7 +50,7 @@ Home Planet Name:  %s
 Government Name:   %s
 Government Type:   %s
 
-While waiting for the game to begin feel free to browse over the game manual again and familiarize yourself with the various orders. Also, check out the "Hints for Beginner's" section on the website [1].
+While waiting for the game to begin feel free to browse over the game manual again and familiarize yourself with the various orders. If you're new to Far Horizons check out the "Getting Started" section on the website [1].
 
 I will notify you when the game begins. If you have any questions just reply to this email.
 
@@ -58,7 +58,7 @@ Best,
 Casey
 Game Master
 
-[1] http://fh.binaryelysium.com/index.php?title=Beginner's_Guide
+[1] http://fh.binaryelysium.com/Getting_Started
 """
 
 def sendMail(subject, recipient, text, *attachmentFilePaths):
