@@ -1,0 +1,209 @@
+        Documentation for Star Mapping Program - Version 2.3
+        ====================================================
+
+This documentation and the accompanying program are
+Copyright  26 September, 1993 by David Mar.
+
+Permission is granted to distribute both freely, so long
+as no modifications are made. You may make modifications for your
+personal use, but please do not distribute them. If you come up with
+something new and wonderful, please tell me about it.
+This program was inspired by a MegaTraveller subsector map generating
+program by Travis McCord (mccord@equinox.unr.edu).
+Any comments, suggestions, bug reports, etc may be sent to me at
+             mar@physics.su.oz.au
+
+
+Changes from Version 1.0.
+
+Some small bugs (such as the program not compiling on some systems) have
+been fixed. The text size for printing the star names, etc, on the map
+has been reduced, in order to allow more stars on the one map without
+crowding the text. A three-dimensional plot style has been added, which
+is much nicer and easier to use than the stereo-pair plot. Comments may
+be included in the data files on lines beginning with '/' characters.
+
+Changes from Version 2.0
+
+More small bugs have been fixed. The program now accepts planetary orbit
+data too, and plots orbital diagrams - although this option is not fully
+functional yet.
+
+
+Compiling the Source Code.
+
+The accompanying program source code, map.c, should be compiled with a
+C compiler. For example, on a Unix system type
+     cc -o map map.c -lm
+(the -lm is needed to link the mathematics library).
+
+This documentation will assume that the resulting executable code is
+named "map", but it may just as well be renamed to anything else.
+
+The code is written to produce output suitable for A4 paper. If you use
+US letter paper, you should use your favourite text editor to change
+line 16 of the source code from:
+
+/*  #define USPAPER  */
+
+to:
+
+#define USPAPER
+
+before compiling.  (NB. The '#' character must be the first character on
+the line after doing this modification.)
+
+
+Using the Program.
+
+Map is a program which takes a data file, listing coordinates, names and
+spectral types of stars, and produces a postscript map of the stars. It is
+suitable for producing star maps for role playing games such as GURPS
+Space, etc. The maps a fairly generic, and could probably be used with
+most SF RPGs.
+
+A sample data file accompanies this program. The format of a data file line
+is as follows:
+
+          x,     y,    z,  starname,  spectral_type.  comments
+eg.
+       4.32, -2.45, 0.57,  {a} Indi,  K3 V.  A boring old star.
+
+The three numbers give the coordinates of the star in a 3D cartesian
+coordinate system. The name of the star may include spaces and punctuation
+characters other than commas. The '{' and '}' characters delimit characters
+which are to be interpreted as greek letters, as per the following table:
+
+a   alpha               k   kappa            u   upsilon
+b   beta                l   lambda           v   omega(variant)
+c   chi                 m   mu               w   omega
+d   delta               n   nu               x   xi
+e   epsilon             o   omicron          y   psi
+f   phi                 p   pi               z   zeta
+g   gamma               q   theta            \260   degree symbol
+h   eta                 r   rho              \300   aleph
+i   iota                s   sigma            \112   theta(variant)
+j   phi(variant)        t   tau              \126   sigma(variant)
+
+(Note that these are the standard postscript definitions for the Symbol
+font. The list can be extended to include all the Symbol encoded characters.)
+
+The spectral type is defined as in standard astronomical notation,
+comprising of a letter from the sequence 'OBAFGKM', followed immediately
+by a single digit, a space and a roman numeral from 'I' to 'V'.
+
+The punctuation of the data lines must follow the example given, with
+commas separating the data elements, and a full stop ('period' to the
+Americans) terminating the line. Anything after the full stop is ignored,
+so this space may be used for comments. A '/' character at the beginning
+of a line also denotes comments. Anything on a line beginning with a '/'
+will be ignored by the program.
+
+The sample data file 'sol' lists the stars in the neighbourhood of our sun.
+This file lists accurate, real life data, with the coordinates in parsecs.
+The x-y plane is the plane of the Milky Way Galaxy, the z-axis points
+towards Galactic north, and the x-axis points towards the Galactic core.
+For an example of the program at work, simply type
+            map sol
+and print the resulting file sol.ps. Note that the output is postscript,
+which may be printed as graphics on a Unix machine using
+            lw -X sol.ps
+
+
+This is a reproduction of the map Usage message:
+
+Usage: map [-xyzt | -p] [-sncdgro] [-l blh blv mw | -L xmin ymin zmin mw]
+           [-h planeheight] filename
+
+The default usage corresponds to:     map -z filename
+
+-x, -y, -z : These options result in postscript output which prints a
+             two-dimensional map of the stars in the given data file.
+             The output is stored in a file with the same file name as
+             the input data, with the suffix '.ps' appended. When printed,
+             this file produces the map and a sheet listing the star data.
+             The -x, -y or -z option specifies which axis to 'collapse'
+             in the two-dimensional output plot.
+
+-xy, -yz, -zx : These are equivalent to the -z, -x and -y options,
+             respectively. They specify the two uncollapsed axes.
+
+-p, -xyz : These two choices are identical. They produce a map in the
+           form of a stereo-pair of images. If one image is observed with
+           the left eye, and the other with the right eye, a three
+           dimensional effect is achieved. No star data sheet is produced.
+
+-t : Generates a three-dimensional plot using standard oblique projection.
+     The -x, -y and -z options specify which reference plane to use. The
+     two "uncollapsed" axes are plotted in a horizontal projected plane
+     and the third axis is plotted vertically on the page.
+
+-s : Displays the star spectral types on the map. (Default: not displayed.)
+
+-n : Displays the star names on the map. (Default: not displayed.)
+
+-c : Displays the star 'collapsed' coordinates on the map.
+     (Default: not displayed.)
+
+-d : Suppresses the production of the star data sheet.
+     (Default: sheet produced.)
+
+-g : Suppresses the grid lines on a two-dimensional map.
+     (Default: grid lines displayed.)
+
+-o : Draw a planetary orbit map of each star with planetary data. This
+     option is not yet fully functional, but will produce correct orbit
+     plots with no labelling. (Default: no orbit plot.)
+
+-r : Displays a vertical reference plane as well as the horizontal one in
+     the three-dimensional plot. This option will be implemented in a
+     future release. (Default: not displayed.)
+
+-l blh blv mw : Defines the two-dimensional map location and size. The
+                blh and blv parameters give the Bottom Left Horizontal
+         and Vertical coordinates for the map. Note that these will
+         correspond to x/y with the -z option, y/z with the -x option,
+         and z/x with the -y option. The mw parameter defines the Map
+         Width, in the same units as the coordinates.
+         (Default: auto-scaling.)
+
+-L xmin ymin zmin mw : Defines the three-dimensional map location and
+                       size. The xmin, ymin and zmin parameters give the
+         minimum x, y and z coordinates for the map. The mw parameter
+         defines the Map Width, in the same units as the coordinates.
+         (Default: auto-scaling.)
+
+-h planeheight : Defines the map coordinate of the reference plane height
+                 in the three-dimensional plot.
+
+
+Further Notes.
+
+The stars on the two- and three-dimensional plots are scaled in size
+according to their spectral type. A key is printed on the map sheet for
+reference. In the stereo-pair plot, the stars are scaled in size
+according to their distance from the observer point.
+
+The -l option can be used to produce small maps of subsets of the data
+file. If several of these are produced, they could be pasted together
+edge to edge to form very large maps.
+
+Grid lines on the map are auto-scaled to produce a reasonable number of
+grids, at sensible intervals.
+
+
+Bugs.
+
+In a two-dimensional plot, if there are many stars and you print the names,
+spectral types and/or compressed coordinates, the lettering may obscure
+some of the other stars. The solution is to print maps of smaller regions
+using the -l option and paste them together.
+
+Not really a bug, but the stereo-pair plot produced by the -p option
+is very difficult to view properly without a special stereo-image viewer.
+This option will probably not be very useful to most people.
+
+Also not really a bug, but the -r option has not yet been implemented.
+
+If you find anything else which might be a bug, please notify me.
+(me == mar@physics.su.oz.au)

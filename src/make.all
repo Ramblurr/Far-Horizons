@@ -31,3 +31,4 @@ make -f mk.no
 make -f mk.asc
 make -f mk.bin
 make -f mk.set
+make -f mk.mapprint
