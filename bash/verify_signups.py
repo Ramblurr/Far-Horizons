@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-# Utility to read player registrations from a google spreadsheet
+# Utility to verify player registrations from a google spreadsheet
 # Authentication credentials goes in 'gmail.cfg'
 
 import fhutils
@@ -106,8 +106,8 @@ def main():
             d["validated"] = "Yes"
             fhutils.update_row(row, d)
         
-    #for email,msg in messages.iteritems():
-        #send_mail("FH Player Registration", email, msg)
+    for email,msg in messages.iteritems():
+        fhutils.send_mail("FH Player Registration", email, msg)
     print "All done"
 
 

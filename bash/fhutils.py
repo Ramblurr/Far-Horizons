@@ -30,6 +30,7 @@ def load_config():
         sys.exit(1)
 
 def send_mail(subject, recipient, text, *attachmentFilePaths):
+    global user, password
     msg = MIMEMultipart()
     msg['From'] = user
     msg['To'] = recipient
@@ -37,13 +38,13 @@ def send_mail(subject, recipient, text, *attachmentFilePaths):
     msg.attach(MIMEText(text))
     for attachmentFilePath in attachmentFilePaths:
         msg.attach(getAttachment(attachmentFilePath))
-        mailServer = smtplib.SMTP('smtp.gmail.com', 587)
-        mailServer.ehlo()
-        mailServer.starttls()
-        mailServer.ehlo()
-        mailServer.login(user, password)
-        mailServer.sendmail(user, recipient, msg.as_string())
-        mailServer.close()
+    mailServer = smtplib.SMTP('smtp.gmail.com', 587)
+    mailServer.ehlo()
+    mailServer.starttls()
+    mailServer.ehlo()
+    mailServer.login(user, password)
+    mailServer.sendmail(user, recipient, msg.as_string())
+    mailServer.close()
     print('Sent email to %s' % recipient)
 
 def gd_connect():
