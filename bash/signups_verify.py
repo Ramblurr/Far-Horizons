@@ -1,6 +1,13 @@
 #!/usr/bin/python2
 # Utility to verify player registrations from a google spreadsheet
 # Authentication credentials goes in 'gmail.cfg'
+#
+# Run this script every time a user registers. It verifies the new registrations
+# then sends them a confirmation email. The valid registrations are marked as valid
+# in the spreadsheet, so you can safely run it multiple times without spamming
+# already validated players.
+#
+# Also, you probably want to edit the email template messages below
 
 import fhutils
 
