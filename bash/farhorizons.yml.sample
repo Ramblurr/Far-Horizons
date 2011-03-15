@@ -1,0 +1,19 @@
+# directory of far horizons executables
+bindir: /home/ramblurr/src/fh/engine
+
+googleaccount:
+    user: this should be an email
+    password:
+    spreadsheet: must be exact name
+
+# list of games goes here
+# this is so you can run multiple games at once
+games:
+    -Galaxy Alpha
+
+# individual game settings get their own section
+Galaxy Alpha:
+    # stub is a short whitespace-free acronym
+    stub: GA
+    # the game data location
+    datadir: /home/ramblurr/src/fh/engine/game

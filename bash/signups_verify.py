@@ -53,12 +53,16 @@ def check_length(string):
     return False
 
 def main():
-    rows = fhutils.get_registrations()
+    config = fhutils.GameConfig()
+    spreadsheet = config.registrations()
+    rows = spreadsheet.get_registrations()
     messages = {}
     for idx, row in enumerate(rows):
         if row.custom["validated"].text == "Yes":
             continue
         recipient = row.custom["email"].text
+        if recipient is None:
+            continue
         if len(recipient.strip()) == 0:
             continue
         print "Validating %s - %s" % (row.custom["speciesname"].text, row.custom["email"].text)
@@ -79,22 +83,22 @@ def main():
         converted = True
         try:
             bio = int(row.custom["biology"].text)
-        except ValueError:
+        except (TypeError,ValueError):
             error_msg += "* Biology tech value must be a number\n"
             converted = False
         try:
             grav = int(row.custom["gravitics"].text)
-        except ValueError:
+        except (TypeError,ValueError):
             error_msg += "* Gravitics tech value must be a number\n"
             converted = False
         try:
             mil = int(row.custom["military"].text)
-        except ValueError:
+        except (TypeError,ValueError):
             error_msg += "* Military tech value must be a number\n"
             converted = False
         try:
             life = int(row.custom["lifesupport"].text)
-        except ValueError:
+        except (TypeError,ValueError):
             error_msg += "* Life Support tech value must be a number\n"
             converted = False
             
@@ -104,6 +108,7 @@ def main():
                 error_msg += "* The total number of points allocated to technologies must be equal to 15\n"
         
         if len(error_msg) > 0:
+            print "\tErrors found"
             messages[recipient] = email_template_fail % (error_msg)
         else:
             messages[recipient] = email_template_success % (row.custom["speciesname"].text, row.custom["homeplanetname"].text, row.custom["governmentname"].text, row.custom["governmenttype"].text)
@@ -111,10 +116,10 @@ def main():
             for k in row.custom:
                 d[k] = row.custom[k].text
             d["validated"] = "Yes"
-            fhutils.update_row(row, d)
+            spreadsheet.update_row(row, d)
         
     for email,msg in messages.iteritems():
-        fhutils.send_mail("FH Player Registration", email, msg)
+        config.send_mail("FH Player Registration", email, msg)
     print "All done"
 
 

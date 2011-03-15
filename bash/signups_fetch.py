@@ -10,12 +10,16 @@
 import fhutils
 
 def main():
-    rows = fhutils.get_registrations()
+    config = fhutils.GameConfig()
+    spreadsheet = config.registrations()
+    rows = spreadsheet.get_registrations()
     messages = {}
     playerlist = []
     for idx, row in enumerate(rows):
          # email,sp_name,,home_planet_name,gov_name,gov_type,ML,GV,LS,BI
         email = row.custom["email"].text
+        if email is None:
+            continue
         if row.custom["validated"].text != "Yes":
             print "%s not validated" % (email)
             continue
