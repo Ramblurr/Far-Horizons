@@ -20,13 +20,13 @@ gd_client = None
 def load_config():
     try:
         config = ConfigParser.ConfigParser()
-        config.read('gmail.cfg')
+        config.read('farhorizons.cfg')
         global user, doc_name, password
         user = config.get("main", "user")
         doc_name = config.get("main", "spreadsheet")
         password = config.get("main", "password")
     except ConfigParser.Error:
-        print "Error parsing gmail.cfg file"
+        print "Error parsing farhorizons.cfg file"
         sys.exit(1)
 
 def send_mail(subject, recipient, text, *attachmentFilePaths):
