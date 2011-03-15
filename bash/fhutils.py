@@ -22,9 +22,9 @@ def load_config():
         config = ConfigParser.ConfigParser()
         config.read('farhorizons.cfg')
         global user, doc_name, password
-        user = config.get("main", "user")
-        doc_name = config.get("main", "spreadsheet")
-        password = config.get("main", "password")
+        user = config.get("googleaccount", "user")
+        doc_name = config.get("googleaccount", "spreadsheet")
+        password = config.get("googleaccount", "password")
     except ConfigParser.Error:
         print "Error parsing farhorizons.cfg file"
         sys.exit(1)
