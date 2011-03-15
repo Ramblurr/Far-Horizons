@@ -1,4 +1,5 @@
 *~
+*.pyc
 game/
 doc/manual/manual.pdf
 *.backup
