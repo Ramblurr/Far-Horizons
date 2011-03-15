@@ -8,8 +8,8 @@ bin/
 *.kdev4
 build/
 *.o
-*gmail.cfg*
-
+farhorizons.yml
+farhorizons.cfg
 
 # LaTeX
 *.aux
