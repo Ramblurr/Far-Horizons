@@ -55,11 +55,11 @@ I will not be looking at timestamps on the messages. Basically, if I have your o
 
 === Re-processing Turns ===
 Turns once ran, will not be re-ran for any reason except:
-* If I, the GM, make a serious mistake AND it is brought to my attention in a timely manner, where "timely manner" means BEFORE the next deadline. The GM retains discretion in what a 'serious mistake' is.
+* If &nbsp; I, the GM, make a serious mistake AND it is brought to my attention in a timely manner, where "timely manner" means BEFORE the next deadline. The GM retains discretion in what a 'serious mistake' is.
 
 The justification for this policy should be pretty obvious. It is fair to no one if a player receives unsatisfactory turn results, then concocts some reason for re-running the turns. 
 
-The timeliness clause exists so that a player cannot keep a mistake secret, play a couple turns, decide he doesn't like where things are going, and then call for a re-do.
+The timeliness clause exists so that a player cannot keep a mistake secret, play a couple of turns, decide he doesn't like where things are going, and then call for a re-do.
 
 === Voting Policy ===
 At any time a player may call for a vote regarding changing game policies (e.g., deadline times or days, turn frequency, remove the wait policy, etc.). All players will be given a chance to vote on the proposal, and the outcome applied.
