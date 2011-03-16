@@ -1,7 +1,8 @@
 #!/bin/bash
-FH_DIR=/home/ramblurr/src/fh/engine/game
-LISTGALAXY=../bin/ListGalaxy
-STARMAP=../bin/PrintMap
+FH_DIR=/home/ramblurr/src/fh/games/ga
+BIN_DIR=/home/ramblurr/src/fh/engine/bin
+LISTGALAXY=$BIN_DIR/ListGalaxy
+STARMAP=$BIN_DIR/PrintMap
 PS2PDF=/usr/bin/ps2pdf
 #############3
 cd $FH_DIR
@@ -11,11 +12,11 @@ head -n $(($num-4)) /tmp/fh.map.raw.$$ > /tmp/fh.map.$$
 cd /tmp
 
 #3d map
-$FH_DIR/$STARMAP -t /tmp/fh.map.$$
+$STARMAP -t /tmp/fh.map.$$
 $PS2PDF -dAutoRotatePages=/None /tmp/fh.map.$$.ps $FH_DIR/galaxy_map_3d.pdf
 
 
-$FH_DIR/$STARMAP /tmp/fh.map.$$
+$STARMAP /tmp/fh.map.$$
 $PS2PDF -dAutoRotatePages=/None /tmp/fh.map.$$.ps $FH_DIR/galaxy_map.pdf
 
 rm /tmp/fh.map.*
