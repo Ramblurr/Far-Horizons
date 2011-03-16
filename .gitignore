@@ -1,4 +1,5 @@
 *~
+players*.csv
 *.pyc
 game/
 doc/manual/manual.pdf
