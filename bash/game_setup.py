@@ -82,6 +82,7 @@ def main(argv):
     for col in data:
         email, sp_name, home_planet, gov_name, gov_type, ML, GV, LS, BI = col
 
+        print "\t Executing HomeSystemAuto (%s) " % (curr_sp_number)
         output = fhutils.run(bin_dir, "HomeSystemAuto", ["12"])
         x,y,z,n = output.split(" ")
         
@@ -92,7 +93,7 @@ def main(argv):
         try:
             fh_names.write("%02d\n%s\n%s\n" % (curr_sp_number, sp_name, email))
         except IOError:
-            print "cannot write tofh_names"
+            print "cannot write to fh_names"
             sys.exit(1)
         
         curr_sp_number += 1
