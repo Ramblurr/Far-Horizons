@@ -24,6 +24,6 @@ do
     #sp_num=`printf "%02d" $sp_num`
     file=sp${sp_num}.rpt.t$turn
     echo "Mailing $file (SP $sp_name) to $address:"
-    cat deadline.msg $file | mutt -a $file -s "FH Status Report: SP $sp_name t$turn (with orders template)" $address
+    cat deadline.msg $file | mutt -a $file -s "FH Status Report: SP $sp_name t$turn (with orders template)" -- $address
 
 done < fh_names

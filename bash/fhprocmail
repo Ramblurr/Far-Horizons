@@ -3,7 +3,7 @@
 FH_DIR=/home/ramblurr/src/fh/engine
 # ===================================
 
-cd $FH_DIR/game
+cd $FH_DIR/game.test
 pwd=`pwd`
 
 echo "--- Starting message processing ---" >> fh.log
@@ -23,10 +23,17 @@ echo "$num_species species read from fh_names" >> fh.log
 
 cat > /tmp/fhorders.raw.$$
 echo "Saved raw orders" >> fh.log
-    if egrep -iq '^Subject: .*fh.*order' /tmp/fhorders.raw.$$
+    if egrep -iq '^Subject: .*fh.*order.*GA' /tmp/fhorders.raw.$$
 	then
 	from_address=`grep '^From: ' /tmp/fhorders.raw.$$ | head -1 | sort -u | tr 'A-Z' 'a-z' | egrep -o '<.*>' | egrep -o '[^<].*[^>]'`
 	echo "Found from address: $from_address" >> fh.log
+
+    wait=false
+    if egrep -iq '^Subject: .*wait' /tmp/fhorders.raw.$$
+    then
+        echo "Wait flag set" >> fh.log
+        wait=true
+    fi
 
 	n=1
 	while [ $n -le $num_species ]
@@ -37,9 +44,20 @@ echo "Saved raw orders" >> fh.log
 		file=sp${sp_num[$n]}.ord
 		echo "Sender $from_address recognized, saving to $file" >> fh.log
 		sed 's/=A0/ /g' < /tmp/fhorders.body.$$ > $file
+        echo "Verifying" >> fh.log
 		$FH_DIR/bash/orders.pl < $file > /tmp/fhorders.verify.$$
-		mutt -a $file -s "Orders received" $from_address < /tmp/fhorders.verify.$$
-		break
+        echo "making wait" >> fh.log
+        if $wait ; then
+            touch sp${sp_num[$n]}.wait
+            subject="FH Orders received - wait set"
+        else
+            rm -f sp${sp_num[$n]}.wait
+            subject="FH Orders received - wait not set"
+        fi
+        echo $subject >> fh.log
+        #  from man mutt: When attaching single or multiple files, separating 
+        #                 filenames and recipient addresses with "--" is mandatory
+        mutt -a $file -s "$subject" -- "$from_address" < /tmp/fhorders.verify.$$ >> fh.log
 	    fi
 	    n=$[ $n + 1 ]
 	done
