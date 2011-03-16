@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ $# -ne 0  -o  "$1" = "-h"  -o  "$1" = "--help" ]
+then
+
+    cat - <<EOF
+
+    Usage: fhmake_packet
+
+    This script will create a zip file containing a first turn packet for a player.
+
+EOF
+    exit 2
+fi
+# ======== Script parameters ========
+BIN_DIR=/home/ramblurr/src/fh/engine/bin
+DATA_DIR=/home/ramblurr/src/fh/engine/game.test
+PDFTK=/usr/bin/pdftk
+# ===================================
+
+cd $DATA_DIR
+
+# prepare pretty galaxy map
+$PDFTK galaxy_map*.pdf cat output galaxy.map.pdf
+
+# prepare galaxy list
+$BIN_DIR/ListGalaxy -p > galaxy.list.txt
+
+n=1
+while read sp_num[$n]     # Species number
+do
+    read sp_name[$n]      # Species name
+    read address[$n]      # Email address
+    address[$n]=`echo ${address[$n]} | tr 'A-Z' 'a-z'`
+    echo "SP $n: ${address[$n]}" >> fh.log
+    n=$[ $n + 1 ]
+done < fh_names
+
+num_species=$[ $n - 1 ]
+
+n=1
+while [ $n -le $num_species ]
+do
+    zip sp${sp_num[$n]}.zip sp${sp_num[$n]}.rpt.t1 galaxy.map.pdf galaxy.map.txt game_policies.txt galaxy.list.txt
+#     mutt -a $file -s "$subject" -- "$from_address" < /tmp/fhorders.verify.$$ >> fh.log
+    n=$[ $n + 1 ]
+done
