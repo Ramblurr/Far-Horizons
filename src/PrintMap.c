@@ -1086,11 +1086,11 @@ char   *argv[];
       exit(1);
    }
 
-   if (stat(filename, &stbuf) != NOTFOUND) {
+   /*if (stat(filename, &stbuf) != NOTFOUND) {
       printf("Clobber existing %s? ",filename);
       if (tolower(*gets(line)) != 'y')
          exit(1);
-   }
+   }*/ /* ALWAYS OVER WRITE!*/
    if ((outfile = fopen(filename,"w")) == NULL) {
       printf("Cannot open output file %s\n",filename);
       exit(1);
