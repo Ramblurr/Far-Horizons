@@ -12,10 +12,12 @@ from email.MIMEAudio import MIMEAudio
 from email.MIMEImage import MIMEImage
 from email.Encoders import encode_base64
 
-def run(bindir, tool):
-    path = "%s/%s" %(bindir, tool)
+def run(bindir, tool, args = []):
+    path = ["%s/%s" %(bindir, tool)]
     try:
-        out = subprocess.check_output([path])
+        if len(args):
+            path.extend(args)
+        out = subprocess.check_output(path)
         return out
     except subprocess.CalledProcessError:
         print "Error detected in program %s!" % tool
