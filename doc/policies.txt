@@ -1,0 +1,74 @@
+== Policies ==
+
+=== Name ===
+* Galaxy Alpha refers to the name of this game of FH:TA. 
+* GA is shorthand for Galaxy Alpha.
+
+===Turns Frequency ===
+
+Registrations indicated an even split in preference between "3 turns/week" and "less than 3 turns/week". Given this data and the fact I was unable to decide on a suitable partition of the week into 3 sections, ''GA will have 2 turns per week.''
+
+=== Order Format ===
+* Orders must  be included as the body of the email, and should be the only content in the body.
+* The subject of the email must be: "<tt>FH Orders, GA</tt>" without quotes. This indicates the email contains Far Horizons Orders for game Galaxy Alpha. 
+* There is no need to include your species name, as you are identified by your email address.
+* You must send orders from the email address you registered with.
+
+It is worth quoting this section from the game manual:
+"Questions for the gamemaster should NOT be sent with your orders for the turn.
+You should send any questions to the gamemaster in a separate email message.
+It is quite possible that the gamemaster will never even see your orders, but
+will simply feed them to the computer."
+
+=== Order Deadlines ===
+Orders are due on '''Sunday and Wednesday at 13:00 (1 PM) UTC'''.
+
+That is, Sunday and Wednesday at:
+* 9:00 AM EDT
+* 6:00 AM PDT
+
+For other timezones see easy [http://www.thetimezoneconverter.com/?t=13:00&tz=UTC%20(Coordinated%20Universal%20Time) easy to use timezone converter]. Simply type your timezone into the white box.
+
+I promise to do my best to have the orders processed and reports returned to you within 2 hours of the deadline.
+
+=== Speeding Up Play ===
+* Once all orders are received, the turn will be processed and reports sent out.
+* If you wish to submit preliminary orders to leave open the chance for revision you must include the word "<tt>wait</tt>" in the subject of your email. 
+** For example, to submit orders and not have the turn processed until the deadline the subject should be: "<tt>FH Orders, GA wait</tt>"  without quotes.
+* Any subsequent orders you submit that turn cycle *must also have the wait* flag set, otherwise there is a chance the turn could be ran.
+* The deadlines will not change even after an early processing, otherwise it would get too confusing.
+** For example, if it is Monday and everyone has submitted orders (without "wait") then the turn will run and the next deadline will _still_ be Wednesday.
+
+Two turns/week  might be somewhat slow in the beginning, so this policy might help speed things up. Moreover, perhaps this group of players is really good about getting turns in early, in which case there is no need to make you wait needlessly. 
+
+Thus, it is possible for there to be more than 2 turns per week, but never less than 2. I expect heavy use of "wait" to occur once players encounter each other and start forming alliances and making dastardly plans.
+
+=== Multiple Orders ===
+* Only the most recent set of received orders will be used in processing. 
+
+Feel free to send multiple sets of orders if you change your mind, but know that when the deadline comes ''only'' the most recently received set will be considered.
+
+=== Late Orders ===
+* I only guarantee to process orders that I receive before the above deadlines.
+
+I will not be looking at timestamps on the messages. Basically, if I have your orders when I sit down to process the turns after the deadline, then they will be included in the turn.
+
+=== Re-processing Turns ===
+Turns once ran, will not be re-ran for any reason except:
+* If I, the GM, make a serious mistake AND it is brought to my attention in a timely manner, where "timely manner" means BEFORE the next deadline. The GM retains discretion in what a 'serious mistake' is.
+
+The justification for this policy should be pretty obvious. It is fair to no one if a player receives unsatisfactory turn results, then concocts some reason for re-running the turns. 
+
+The timeliness clause exists so that a player cannot keep a mistake secret, play a couple turns, decide he doesn't like where things are going, and then call for a re-do.
+
+=== Voting Policy ===
+At any time a player may call for a vote regarding changing game policies (e.g., deadline times or days, turn frequency, remove the wait policy, etc.). All players will be given a chance to vote on the proposal, and the outcome applied.
+
+The procedure for voting is:
+
+# Player emails the GM the proposed change, with a short explanation
+# At the next deadline, the GM removes identifiable information from the proposal, and forwards it to all players in the game.
+# Players have until the next deadline to submit their vote.
+# GM tallies votes, and implements change by notifying all players
+
+Players are encouraged to use the [http://playbymail.net/mybb/forumdisplay.php?fid=11 forum] for discussion (try not to let IC information slip), though I will only accept votes via the procedure described here.
