@@ -1,0 +1,25 @@
+Python deps:
+    - python-yaml
+    - ???
+
+The python utilities are designed to replace the bash scripts.
+
+farhorizons.yml   - configure your fh games here see farhorizons.yml.sample
+                    generally I would put this in the game data dir. this config file
+                    is required by all the scripts below.
+
+signups_verify.py - checks for new registrations in a google docs spreadsheet
+                    and verifies that the registriation is correct (15 tech points,
+                    less than 31 characters in names, etc.)
+
+signups_fetch.py  - use after signups close. downloads registration data into a csv
+                    for use with Auto.pl to create the game
+
+turn_run.py       - replaces fhtest. run this in the game directory to process a turn.
+                    however, it doesn't save the turn results. it places them in a 
+                    tmp folder so you can verify them.
+
+turn_confirm.py   - replaces fhsave. run from the game directory. copies the
+                    turn results generated with turn_run into the game directory.
+
+turn_save.py      - replaces fhclean. saves the turn into backup/ and reports directory.
