@@ -92,7 +92,7 @@ def main(argv):
     os.fsync(fd)
     fhutils.run(bin_dir, "PrintMap", ["-d", "-t", "%s"%(fd.name)])
     subprocess.call(["%s" % (PS2PDF), "-dAutoRotatePages=/None",fd.name+".ps", data_dir+"/galaxy_map_3d.pdf"])
-    fhutils.run(bin_dir, "PrintMap", ["-d", "-t", "%s"%(fd.name)])
+    fhutils.run(bin_dir, "PrintMap", ["-d", "%s"%(fd.name)])
     subprocess.call(["%s" % (PS2PDF), "-dAutoRotatePages=/None",fd.name+".ps", data_dir+"/galaxy_map.pdf"])
     fd.close()
 
