@@ -3,7 +3,6 @@
     This script will create a zip file containing a first turn packet for a player.
 """
 import fhutils
-import create_map
 import os, sys, tempfile, subprocess
 import getopt
 
@@ -41,7 +40,10 @@ def main(argv):
         
     players = fhutils.Game().players
     for p in players:
-        subprocess.call(["zip", "sp%s.zip" % (p['num']), "sp%s.rpt.t1" % (p['num']), "galaxy.map.pdf", "galaxy.map.txt",  "game_policies.txt", "galaxy.list.txt"])
+        try:
+            subprocess.check_call(["zip", "sp%s.zip" % (p['num']), "sp%s.rpt.t1" % (p['num']), "galaxy.map.pdf", "galaxy.map.txt",  "game_policies.pdf", "galaxy.list.txt"])
+        except CalledProcessError:
+            print "ERROR making zip: sp%s.zip" % (p['num'])
 
 if __name__ == "__main__":
     main(sys.argv[1:])
