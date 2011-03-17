@@ -5,6 +5,10 @@ import re, os, string, sys, subprocess, itertools
 import smtplib
 import mimetypes
 import yaml
+from dateutil import parser
+from dateutil import rrule
+import dateutil
+import datetime
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
@@ -32,7 +36,7 @@ def natatime(itr, fillvalue=None, n=2):
 
 class GameConfig(object):
 
-    def __init__(self, config_file = 'farhorizons.yml'):
+    def __init__(self, config_file="farhorizons.yml"):
         self.config_file = config_file
         self.load_config()
         
@@ -51,13 +55,19 @@ class GameConfig(object):
                 d['name'] = game
                 d['stub'] = self.config[game]['stub']
                 d['datadir'] = self.config[game]['datadir']
+                weekdays = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).weekday(), self.config[game]['deadlines'])) 
+                hours = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).hour, self.config[game]['deadlines'])) 
+                minutes = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).minute, self.config[game]['deadlines'])) 
+                d['deadline'] = rrule.rrule(rrule.WEEKLY, byweekday=weekdays,byhour=hours,byminute=minutes,dtstart=datetime.datetime.now(dateutil.tz.tzutc()))
+                    
                 if 'tmpdir' in self.config[game]:
                     d['tmpdir'] = self.config[game]['tmpdir']
                 self.gameslist.append( d )
             
 
         except yaml.YAMLError, exc:
-            print "Error parsing %s file" % (config_file)
+            print "Error parsing %s file" % (self.config_file)
+            print exc
             sys.exit(1)
 
     def registrations(self):
@@ -109,7 +119,7 @@ class GameConfig(object):
         
     def save(self):
         stream = file(self.config_file, 'w')
-        yaml.dump(self.config, stream)
+        yaml.dump(self.config, stream, default_flow_style=False)
         
     def write_tmpdir(self, game, tmpdir):
         """
