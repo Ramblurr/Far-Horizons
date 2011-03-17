@@ -13,6 +13,7 @@ def main():
     global server, port,ssl
     config = fhutils.GameConfig()
     data_dir = config.gameslist[0]['datadir']  #only support one game now
+    game_stub = config.gameslist[0]['stub']
     try:
        game = fhutils.Game()
     except IOError:
@@ -48,7 +49,7 @@ def main():
                 fd.close()
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 verify = p.communicate(input=orders)[0]
-                subject = "FH Orders recevied"
+                subject = "FH Orders, %s received" % (game_stub)
                 if wait:
                     subject += " - wait set"
                 else:
