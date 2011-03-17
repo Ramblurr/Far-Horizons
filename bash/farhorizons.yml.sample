@@ -17,3 +17,7 @@ Galaxy Alpha:
     stub: GA
     # the game data location
     datadir: /home/ramblurr/src/fh/engine/game
+    # the turn deadlines, must be in UTC and 14hr format
+    deadlines:
+        - 'Sunday 13:00'
+        - 'Wednesday 13:00'
