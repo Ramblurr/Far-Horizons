@@ -1,6 +1,7 @@
 Python deps:
     - python-yaml
     - IMAPClient - http://imapclient.freshfoo.com/
+    - dateutil   - http://labix.org/python-dateutil
 
 The python utilities are designed to replace the bash scripts.
 
@@ -30,3 +31,6 @@ turn_confirm.py   - replaces fhsave. run from the game directory. copies the
                     turn results generated with turn_run into the game directory.
 
 turn_save.py      - replaces fhclean. saves the turn into backup/ and reports directory.
+
+turn_end.py       - replaces fhreports. sends an email containing the turns results
+                    to all players. also notifies them of the next deadline.
