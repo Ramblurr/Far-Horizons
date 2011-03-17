@@ -70,7 +70,7 @@ class GameConfig(object):
         msg['Subject'] = subject
         msg.attach(MIMEText(text))
         for attachmentFilePath in attachmentFilePaths:
-            msg.attach(getAttachment(attachmentFilePath))
+            msg.attach(self._getAttachment(attachmentFilePath))
         mailServer = smtplib.SMTP('smtp.gmail.com', 587)
         mailServer.ehlo()
         mailServer.starttls()
@@ -78,7 +78,34 @@ class GameConfig(object):
         mailServer.login(self.user, self.password)
         mailServer.sendmail(self.user, recipient, msg.as_string())
         mailServer.close()
-        print('Sent email to %s' % recipient)
+        #print('Sent email to %s' % recipient)
+        
+    def _getAttachment(self, attachmentFilePath):
+        contentType, encoding = mimetypes.guess_type(attachmentFilePath)
+
+        if contentType is None or encoding is not None:
+            contentType = 'application/octet-stream'
+
+        mainType, subType = contentType.split('/', 1)
+        file = open(attachmentFilePath, 'rb')
+
+        if mainType == 'text':
+            attachment = MIMEText(file.read())
+        elif mainType == 'message':
+            attachment = email.message_from_file(file)
+        elif mainType == 'image':
+            attachment = MIMEImage(file.read(),_subType=subType)
+        elif mainType == 'audio':
+            attachment = MIMEAudio(file.read(),_subType=subType)
+        else:
+            attachment = MIMEBase(mainType, subType)
+        attachment.set_payload(file.read())
+        encode_base64(attachment)
+
+        file.close()
+
+        attachment.add_header('Content-Disposition', 'attachment',   filename=os.path.basename(attachmentFilePath))
+        return attachment
         
     def save(self):
         stream = file(self.config_file, 'w')
