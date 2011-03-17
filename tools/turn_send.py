@@ -35,6 +35,22 @@ have not arrived by that time, or if the Subject line is not correctly
 formatted, then I will not be able to process them.
 """
 
+start_msg = """
+The FH:TA game of Galaxy Alpha has begun!
+
+Your Far Horizons %s first turn packet is attached. It contains your first 
+turn report, the galaxy in several different formats, and the revised 
+game policies (please read them).
+
+%s
+
+As always, if there any problems, or you have a question, then shoot me an email.
+
+Best,
+Casey
+Gamemaster
+"""
+
 message = """
 Your Far Horizons %s turn results are attached.
 
@@ -46,6 +62,7 @@ Best,
 Casey
 Gamemaster
 """
+
 def main(argv):
     config_file = None
     test_flag = False
@@ -84,7 +101,7 @@ def main(argv):
         sys.exit(2)
     
     turn = fhutils.run(bin_dir, "TurnNumber").strip()
-    global message,deadline_msg
+    global message,deadline_msg, start_msg
     next_deadline = deadline_rule.after(datetime.now(dateutil.tz.tzutc()))
     est = zoneinfo.gettz('America/New_York')
     pst = zoneinfo.gettz('America/Los_Angeles')
@@ -94,18 +111,23 @@ def main(argv):
     time += "\n= " + next_deadline.astimezone(pst).strftime("%I:%M %p %Z")
 
     deadline_msg = deadline_msg %(day, time,game_stub, game_stub)
-    message = message %(game_name, deadline_msg)
+    msg = start_msg %(game_name, deadline_msg) if turn == "1" else message %(game_name, deadline_msg)
     for player in players:
-        report = "%s/sp%s.rpt.t%s" %(data_dir, player['num'], turn)
-        subject = "FH Turn Results - SP %s turn %s" % (player['name'], turn)        
+        if turn == "1":
+            report = "%s/sp%s.zip" %(data_dir, player['num'])
+            subject ="FH %s Game Start - %s" % (game_stub, player['name'])
+        else:
+            report = "%s/sp%s.rpt.t%s" %(data_dir, player['num'], turn)
+            subject = "FH %s Turn Results - %s turn %s" % (game_stub, player['name'], turn)
         if not test_flag:
             print "Mailing %s to %s (sp %s)" %(report, player['email'], player['name'])
-            config.send_mail(subject, player['email'], message, report)
+            #config.send_mail(subject, player['email'], msg, report)
         else:
+            print "Writing .test file"
             with open(report+".test", "w") as f:
                 f.write("To: %s\n" %( player['email']))
                 f.write("Subject: %s\n" %( subject))
-                f.write(message)
+                f.write(msg)
                 f.write("Attached: %s\n"  % (report))
 
 if __name__ == "__main__":

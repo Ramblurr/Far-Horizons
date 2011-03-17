@@ -32,7 +32,11 @@ turn_run.py       - replaces fhtest. run this in the game directory to process a
 turn_confirm.py   - replaces fhsave. run from the game directory. copies the
                     turn results generated with turn_run into the game directory.
 
+turn_send.py      - replaces fhreports. sends an email containing the turns results
+                    to all players. also notifies them of the next deadline.
+
+turn_inject.py    - injects input (from stdin) into the beginning of all the turn reports.
+
 turn_save.py      - replaces fhclean. saves the turn into backup/ and reports directory.
 
-turn_end.py       - replaces fhreports. sends an email containing the turns results
-                    to all players. also notifies them of the next deadline.
+
