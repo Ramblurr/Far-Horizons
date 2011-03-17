@@ -121,7 +121,7 @@ def main(argv):
             subject = "FH %s Turn Results - %s turn %s" % (game_stub, player['name'], turn)
         if not test_flag:
             print "Mailing %s to %s (sp %s)" %(report, player['email'], player['name'])
-            #config.send_mail(subject, player['email'], msg, report)
+            config.send_mail(subject, player['email'], msg, report)
         else:
             print "Writing .test file"
             with open(report+".test", "w") as f:
