@@ -67,6 +67,7 @@ def main(argv):
     data_dir = game['datadir']
     bin_dir = config.bindir
     PS2PDF = "/usr/bin/ps2pdf"
+    PDFTK = "/usr/bin/pdftk"
     
     os.chdir(data_dir)
     
@@ -95,6 +96,8 @@ def main(argv):
     fhutils.run(bin_dir, "PrintMap", ["-d", "%s"%(fd.name)])
     subprocess.call(["%s" % (PS2PDF), "-dAutoRotatePages=/None",fd.name+".ps", data_dir+"/galaxy_map.pdf"])
     fd.close()
+    
+    subprocess.call(["%s" % (PDFTK), data_dir+"/galaxy_map_3d.pdf", data_dir+"/galaxy_map.pdf", "cat", "output", data_dir+"/galaxy.map.pdf"])
 
 if __name__ == "__main__":
     main(sys.argv[1:])
