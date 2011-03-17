@@ -1,7 +1,7 @@
 import gdata.docs
 import gdata.docs.service
 import gdata.spreadsheet.service
-import re, os, string, sys, subprocess
+import re, os, string, sys, subprocess, itertools
 import smtplib
 import mimetypes
 import yaml
@@ -22,6 +22,13 @@ def run(bindir, tool, args = []):
     except subprocess.CalledProcessError:
         print "Error detected in program %s!" % tool
         sys.exit(1)
+
+def natatime(itr, fillvalue=None, n=2):
+    """
+    get values from an iterator n at a time
+    http://stackoverflow.com/questions/1528711/reading-lines-2-at-a-time/1528769#1528769
+    """
+    return itertools.izip_longest(*(iter(itr),)*n, fillvalue=fillvalue)
 
 class GameConfig(object):
 
@@ -120,3 +127,10 @@ class RegistrationSpreadsheet(object):
             return True
         else:
             return False
+
+class Game(object):
+    def __init__(self):
+        self.players = []
+        with open('fh_names') as f:
+            for num,name,email in natatime(f,'',3):
+                self.players.append({'num':num.strip(), 'name':name.strip(), 'email':email.strip()})
