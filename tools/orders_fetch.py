@@ -42,8 +42,20 @@ def main():
                 orders_file = "%s/sp%s.ord" %(data_dir, player['num'])
                 fd = open(orders_file, 'w')
                 if mail.is_multipart():
-                    print "MULTIPART MESSAGE DETECTED!"
-                    sys.exit(1)
+                    print "Multipart Message detected, searching for plain text payload!"
+                    payloads = mail.get_payload()
+                    try:
+                        found = False
+                        for loads in payloads:
+                            if loads.get_content_type()  == "text/plain":
+                                mail = loads
+                                found = True
+                                break
+                        if not found:
+                            raise email.errors.MessageError
+                    except email.errors.MessageError:
+                        print "Could not find text/plain payload for " + from_address
+                        sys.exit(1)
                 orders = mail.get_payload()
                 fd.write(orders)
                 fd.close()

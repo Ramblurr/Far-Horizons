@@ -1,10 +1,11 @@
 #!/usr/bin/python2
 """
-    Usage: turn_send.py [-h] -c config.yml
+    Usage: turn_send.py [-h] -c config.yml [-s num]
     
     -h, --help      print this message
     -c config.yml   use a particular config file
     -t              perform a test run, do not send any email.
+    -s species num  only do one species number
 
     This script will read file fh_names and mail report files to the
     appropriate players.  File deadline.msg will be inserted at the
@@ -66,8 +67,9 @@ Gamemaster
 def main(argv):
     config_file = None
     test_flag = False
+    species_num = None
     try:                                
-        opts, args = getopt.getopt(argv, "hc:t", ["help", "config=","test"])
+        opts, args = getopt.getopt(argv, "hc:ts:", ["help", "config=","test","species"])
     except getopt.GetoptError:          
         print __doc__                     
         sys.exit(2)
@@ -79,6 +81,8 @@ def main(argv):
             config_file = arg
         elif opt in ("-t", "--test"):
             test_flag = True
+        elif opt in ("-s", "--species"):
+            species_num = arg
 
     if config_file:
         config = fhutils.GameConfig(config_file)
@@ -113,6 +117,9 @@ def main(argv):
     deadline_msg = deadline_msg %(day, time,game_stub, game_stub)
     msg = start_msg %(game_name, deadline_msg) if turn == "1" else message %(game_name, deadline_msg)
     for player in players:
+        if species_num != None and species_num != player['num']:
+            print "skipping %s - %s" %(player['num'], player['name'])
+            continue
         if turn == "1":
             report = "%s/sp%s.zip" %(data_dir, player['num'])
             subject ="FH %s Game Start - %s" % (game_stub, player['name'])
