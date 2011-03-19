@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
     Usage: run_turn.py [-h] -c config.yml -d 
     

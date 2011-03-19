@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 
 import sys, subprocess, os
 from imapclient import IMAPClient

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
     Usage: turn_save.py [-h] -c config.yml -d 
     

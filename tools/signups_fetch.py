@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
  Utility to read player registrations from a google spreadsheet
  and save them in players.csv

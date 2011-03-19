@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
 
  The following script will auto-generate galaxy using data piped via stdio

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
     This script will create a zip file containing a first turn packet for a player.
 """

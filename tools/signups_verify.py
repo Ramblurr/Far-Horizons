@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 # Utility to verify player registrations from a google spreadsheet
 # Authentication credentials goes in 'gmail.cfg'
 #

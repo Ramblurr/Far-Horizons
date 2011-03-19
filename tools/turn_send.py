@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 """
     Usage: turn_send.py [-h] -c config.yml [-s num]
     
