@@ -170,4 +170,4 @@ class Game(object):
         self.players = []
         with open('fh_names') as f:
             for num,name,email in natatime(f,'',3):
-                self.players.append({'num':num.strip(), 'name':name.strip(), 'email':email.strip()})
+                self.players.append({'num':num.strip(), 'name':name.strip(), 'email':email.strip().lower()})
