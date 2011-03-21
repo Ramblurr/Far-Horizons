@@ -41,22 +41,39 @@ def main():
             if from_address == player['email']:
                 orders_file = "%s/sp%s.ord" %(data_dir, player['num'])
                 fd = open(orders_file, 'w')
+                orders = None
                 if mail.is_multipart():
                     print "Multipart Message detected, searching for plain text payload!"
-                    payloads = mail.get_payload()
-                    try:
-                        found = False
-                        for loads in payloads:
-                            if loads.get_content_type()  == "text/plain":
-                                mail = loads
-                                found = True
-                                break
-                        if not found:
-                            raise email.errors.MessageError
-                    except email.errors.MessageError:
-                        print "Could not find text/plain payload for " + from_address
-                        sys.exit(1)
-                orders = mail.get_payload()
+                    for part in mail.walk():
+                        # multipart/* are just containers
+                        if part.get_content_maintype() == 'multipart':
+                            continue
+                        filename = part.get_filename()
+                        if not filename:
+                            continue
+                        if part.get_content_type() != "text/plain":
+                            print "Error: attachment found, but not a plain text file for "  + from_address
+                        else:
+                            print "found orders in attachment"
+                            orders = part.get_payload(decode=True)
+                    if orders is None: # ok, no attachment, lets try the actual content
+                        payloads = mail.get_payload()
+                        try:
+                            found = False
+                            for loads in payloads:
+                                if loads.get_content_type()  == "text/plain":
+                                    mail = loads
+                                    found = True
+                                    print "found orders in multipart payload"
+                                    orders = loads.get_payload()
+                                    break
+                            if not found:
+                                raise email.errors.MessageError
+                        except email.errors.MessageError:
+                            print "Could not find text/plain payload for " + from_address
+                else:
+                    print "using orders in plain body"
+                    orders = mail.get_payload()
                 fd.write(orders)
                 fd.close()
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
