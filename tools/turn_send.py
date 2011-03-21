@@ -31,6 +31,9 @@ Subject: FH Orders, %s wait
 
 See the game policies for information on 'wait'.
 
+DO NOT send HTML formatted email!
+You can also attach a "orders.txt" or "orders.ord" PLAIN TEXT file to your email.
+
 I generally download orders within half an hour of the above deadline.  If they
 have not arrived by that time, or if the Subject line is not correctly
 formatted, then I will not be able to process them.
@@ -119,6 +122,9 @@ def main(argv):
     for player in players:
         if species_num != None and species_num != player['num']:
             print "skipping %s - %s" %(player['num'], player['name'])
+            continue
+        if player['email'] == "player_dropped":
+            print "skipping dropped player %s - %s" %(player['num'], player['name'])
             continue
         if turn == "1":
             report = "%s/sp%s.zip" %(data_dir, player['num'])
