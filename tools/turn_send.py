@@ -71,8 +71,10 @@ def main(argv):
     config_file = None
     test_flag = False
     species_num = None
+    file_name = None
+    subject = None
     try:                                
-        opts, args = getopt.getopt(argv, "hc:ts:", ["help", "config=","test","species"])
+        opts, args = getopt.getopt(argv, "hc:ts:f:u:", ["help", "config=","test","species","file","subject"])
     except getopt.GetoptError:          
         print __doc__                     
         sys.exit(2)
@@ -86,6 +88,13 @@ def main(argv):
             test_flag = True
         elif opt in ("-s", "--species"):
             species_num = arg
+        elif opt in ("-f", "--file"):
+            file_name = arg
+        elif opt in ("-u", "--subject"):
+            subject = arg
+    if (file_name != None and subject == None) or (file_name == None and subject != None):
+        print "if you specify file_name, you must specify subject.";
+        sys.exit(1)
 
     if config_file:
         config = fhutils.GameConfig(config_file)
@@ -126,7 +135,9 @@ def main(argv):
         if player['email'] == "player_dropped":
             print "skipping dropped player %s - %s" %(player['num'], player['name'])
             continue
-        if turn == "1":
+        if file_name != None:
+            report = "%s/%s" %(data_dir, file_name)
+        elif turn == "1":
             report = "%s/sp%s.zip" %(data_dir, player['num'])
             subject ="FH %s Game Start - %s" % (game_stub, player['name'])
         else:
