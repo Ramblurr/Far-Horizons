@@ -65,7 +65,7 @@ def main():
                                     mail = loads
                                     found = True
                                     print "found orders in multipart payload"
-                                    orders = loads.get_payload()
+                                    orders = loads.get_payload(decode=True)
                                     break
                             if not found:
                                 raise email.errors.MessageError
@@ -74,6 +74,7 @@ def main():
                 else:
                     print "using orders in plain body"
                     orders = mail.get_payload()
+                orders = orders.replace('\r\n', '\n').replace('\r', '\n')
                 fd.write(orders)
                 fd.close()
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
