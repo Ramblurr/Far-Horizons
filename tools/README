@@ -25,6 +25,9 @@ game_packet.py   -  tool that creates a first turn packet (a zip file )with gala
 orders_fetch.py   - replaces fhprocmail. fetches orders via imap from gmail and
                     verifies their accuracy, then sends a confirmation email.
 
+orders_status.py  - prints out the status of all players' orders.
+                    (errors, no orders, ready)
+
 orders_clean.py   - cleans orders before processing. removes empty lines.
 
 turn_run.py       - replaces fhtest. run this in the game directory to process a turn.
