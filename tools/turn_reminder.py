@@ -112,7 +112,7 @@ def main(argv):
             continue
         subject = "FH %s Orders Reminder - %s" % (game_stub, player['name'])
         if not test_flag:
-            print "Mailing reminder to %s (sp %s)" %(, player['email'], player['name'])
+            print "Mailing reminder to %s (sp %s)" %(player['email'], player['name'])
             config.send_mail(subject, player['email'], msg)
         else:
             print "Writing .test file"
