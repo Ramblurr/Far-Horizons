@@ -16,6 +16,7 @@ $fship = $shipprefix."\\s+".$object; # only FTL ship
 $base = "BAS\\s+".$object;
 $planet = "PL\\s+".$object;
 $any = "(".$base."|".$sship."|".$planet.")"; #planet, base or ship
+%found_sections;
 
 $problems = 0;
 
@@ -38,7 +39,13 @@ while ($line = <STDIN>)
 		    print "Line ".$no." : START inside section\n";
 		    $problems = 1;
 		}
-		$section = $1;
+        if( exists $found_sections{$1} ) {
+            print "Line ".$no." : duplicate ".$1." section detected\n";
+		    $problems = 1;
+        } else {
+            $found_sections{$1} = 1;
+        }
+        $section = $1;
 		next;
 	}
 	
