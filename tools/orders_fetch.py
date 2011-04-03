@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, subprocess, os
+import sys, subprocess, os, codecs
 from imapclient import IMAPClient
 import email, email.utils, email.parser
 import fhutils
@@ -40,7 +40,7 @@ def main():
         for player in game.players:
             if from_address == player['email']:
                 orders_file = "%s/sp%s.ord" %(data_dir, player['num'])
-                fd = open(orders_file, 'w')
+                fd = codecs.open(orders_file, 'w', 'utf-8')
                 orders = None
                 if mail.is_multipart():
                     print "Multipart Message detected, searching for plain text payload!"
@@ -75,6 +75,8 @@ def main():
                     print "using orders in plain body"
                     orders = mail.get_payload(decode=True)
                 orders = orders.replace('\r\n', '\n').replace('\r', '\n')
+                orders = unicode(orders, 'utf-8')
+                orders = orders.replace(u"\u00A0", " ").encode('utf-8')
                 fd.write(orders)
                 fd.close()
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
