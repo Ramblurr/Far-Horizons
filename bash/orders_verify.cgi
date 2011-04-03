@@ -140,7 +140,7 @@ for (split /^/, $orders)
 	if ($section eq "JUMPS")
 	{
 		if ($command =~ /^JUM\w*\s+($fship),\s*(($coords)|($pcoords)|($planet))\s*$/) { next;}				
-		if ($command =~ /^MOV\w*\s+(($fship)|($base)),\s*(($coords)|($pcoords)|($planet))\s*$/) { next;}
+		if ($command =~ /^MOV\w*\s+(($sship)|($base)),\s*(($coords)|($pcoords)|($planet))\s*$/) { next;}
 		if ($command =~ /^PJU\w*\s+($sship),\s*(($coords)|($pcoords)|($planet)),\s*($base)$/) { next;}				
 		if ($command =~ /^VIS\w*\s+($coords)\s*$/) { next;}		
 		if ($command =~ /^WOR\w*\s+(($sship)|($base))(,\s*($planet))?$/) { next;}
