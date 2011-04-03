@@ -57,7 +57,7 @@ def main():
                             print "found orders in attachment"
                             orders = part.get_payload(decode=True)
                     if orders is None: # ok, no attachment, lets try the actual content
-                        payloads = mail.get_payload()
+                        payloads = mail.get_payload(decode=True)
                         try:
                             found = False
                             for loads in payloads:
@@ -73,7 +73,7 @@ def main():
                             print "Could not find text/plain payload for " + from_address
                 else:
                     print "using orders in plain body"
-                    orders = mail.get_payload()
+                    orders = mail.get_payload(decode=True)
                 orders = orders.replace('\r\n', '\n').replace('\r', '\n')
                 fd.write(orders)
                 fd.close()
