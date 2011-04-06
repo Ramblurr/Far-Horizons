@@ -57,7 +57,7 @@ def main():
                             print "found orders in attachment"
                             orders = part.get_payload(decode=True)
                     if orders is None: # ok, no attachment, lets try the actual content
-                        payloads = mail.get_payload(decode=True)
+                        payloads = mail.get_payload()
                         try:
                             found = False
                             for loads in payloads:
