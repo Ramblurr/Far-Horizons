@@ -111,6 +111,22 @@ struct action_data	*act;
     combat_occurred = FALSE;
     while (total_shots > 0)
     {
+        /* check to make sure we arent in infinite loop
+         * that usually happens when there are shots remaining
+         * but the side with the shots has no more ships left*/
+        for( i = 0; i < act->num_units_fighting; ++i)
+        {
+            attacking_ship = (struct ship_data *) act->fighting_unit[i];
+            if (attacking_ship->age > 49 ||
+                attacking_ship->status == FORCED_JUMP ||
+                attacking_ship->status == JUMPED_IN_COMBAT ||
+                (attacking_ship->special == NON_COMBATANT  &&
+                    option != GERM_WARFARE) )
+            {
+                total_shots -= act->shots_left[i];
+                act->shots_left[i] = 0;
+            }
+        }
 	/* Determine who fires next. */
 	attacker_index = rnd(act->num_units_fighting) - 1;
 	if (act->unit_type[attacker_index] == SHIP)
