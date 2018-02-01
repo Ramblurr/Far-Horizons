@@ -4,7 +4,7 @@ COM2 = fight_par.o do_bat.o do_round.o do_bomb.o do_siege.o get_spnam.o with_che
 COM3 = regen_sh.o get_gal.o get_plan.o sav_plan.o get_transact.o sav_transact.o
 
 COMBAT_OBJS = Combat.o $(COM1) $(COM2) $(COM3)
-CC = cc -g -fno-stack-protector
+CC = cc -g -no-pie
 
 Combat: $(COMBAT_OBJS)
 	$(CC) $(COMBAT_OBJS) -o ../bin/Combat
