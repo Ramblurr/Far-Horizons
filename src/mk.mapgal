@@ -6,10 +6,10 @@ MapGalaxy: $(MAP_OBJS)
 	cc $(MAP_OBJS) -o ../bin/MapGalaxy
 
 MapGalaxy.o: MapGalaxy.c fh.h
-	cc -c MapGalaxy.c
+	cc -no-pie -c MapGalaxy.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c

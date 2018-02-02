@@ -6,25 +6,25 @@ AddSpeciesAuto: $(ADD_OBJS)
 	cc $(ADD_OBJS) -o ../bin/AddSpeciesAuto
 
 AddSpeciesAuto.o: AddSpeciesAuto.c fh.h
-	cc -c AddSpeciesAuto.c
+	cc -no-pie -c AddSpeciesAuto.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c
 
 sav_star.o: sav_star.c fh.h
-	cc -c sav_star.c
+	cc -no-pie -c sav_star.c
 
 scan.o: scan.c fh.h
-	cc -c scan.c
+	cc -no-pie -c scan.c
 
 gam_abo.o: gam_abo.c fh.h
-	cc -c gam_abo.c
+	cc -no-pie -c gam_abo.c

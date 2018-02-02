@@ -6,13 +6,13 @@ Setup: $(SETUP_OBJS)
 	cc $(SETUP_OBJS) -o FH:bin/Setup
 
 Setup.o: Setup.c fh.h
-	cc -c Setup.c
+	cc -no-pie -c Setup.c
 
 parse.o: parse.c fh.h
-	cc -c parse.c
+	cc -no-pie -c parse.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 gam_abo.o: gam_abo.c
-	cc -c gam_abo.c
+	cc -no-pie -c gam_abo.c

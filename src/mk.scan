@@ -9,22 +9,22 @@ ScanSpXYZ: $(SCAN_OBJS)
 	cc $(SCAN_OBJS) -o ../bin/ScanSpXYZ
 
 ScanSpXYZ.o: ScanSpXYZ.c fh.h
-	cc -c ScanSpXYZ.c
+	cc -no-pie -c ScanSpXYZ.c
 
 get_spec.o: get_spec.c fh.h
-	cc -c get_spec.c
+	cc -no-pie -c get_spec.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c
 
 scan.o: scan.c fh.h
-	cc -c scan.c
+	cc -no-pie -c scan.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c

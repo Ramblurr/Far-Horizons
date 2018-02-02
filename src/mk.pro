@@ -10,88 +10,88 @@ Production: $(PRO_OBJS)
 	cc $(PRO_OBJS) -o ../bin/Production
 
 Production.o: Production.c fh.h
-	cc -c Production.c
+	cc -no-pie -c Production.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 parse.o: parse.c fh.h
-	cc -c parse.c
+	cc -no-pie -c parse.c
 
 money.o: money.c fh.h
-	cc -c money.c
+	cc -no-pie -c money.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c
 
 get_ship.o: get_ship.c fh.h
-	cc -c get_ship.c
+	cc -no-pie -c get_ship.c
 
 get_spnam.o: get_spnam.c fh.h
-	cc -c get_spnam.c
+	cc -no-pie -c get_spnam.c
 
 sav_plan.o: sav_plan.c fh.h
-	cc -c sav_plan.c
+	cc -no-pie -c sav_plan.c
 
 do_prod.o: do_prod.c fh.h
-	cc -c do_prod.c
+	cc -no-pie -c do_prod.c
 
 do_build.o: do_build.c fh.h
-	cc -c do_build.c
+	cc -no-pie -c do_build.c
 
 do_recy.o: do_recy.c fh.h
-	cc -c do_recy.c
+	cc -no-pie -c do_recy.c
 
 do_res.o: do_res.c fh.h
-	cc -c do_res.c
+	cc -no-pie -c do_res.c
 
 do_est.o: do_est.c fh.h
-	cc -c do_est.c
+	cc -no-pie -c do_est.c
 
 do_upg.o: do_upg.c fh.h
-	cc -c do_upg.c
+	cc -no-pie -c do_upg.c
 
 do_amb.o: do_amb.c fh.h
-	cc -c do_amb.c
+	cc -no-pie -c do_amb.c
 
 do_int.o: do_int.c fh.h
-	cc -c do_int.c
+	cc -no-pie -c do_int.c
 
 do_hide.o: do_hide.c fh.h
-	cc -c do_hide.c
+	cc -no-pie -c do_hide.c
 
 do_ally.o: do_ally.c fh.h
-	cc -c do_ally.c
+	cc -no-pie -c do_ally.c
 
 do_enemy.o: do_enemy.c fh.h
-	cc -c do_enemy.c
+	cc -no-pie -c do_enemy.c
 
 do_neutral.o: do_neutral.c fh.h
-	cc -c do_neutral.c
+	cc -no-pie -c do_neutral.c
 
 do_shipyard.o: do_shipyard.c fh.h
-	cc -c do_shipyard.c
+	cc -no-pie -c do_shipyard.c
 
 do_dev.o: do_dev.c fh.h
-	cc -c do_dev.c
+	cc -no-pie -c do_dev.c
 
 gam_abo.o: gam_abo.c
-	cc -c gam_abo.c
+	cc -no-pie -c gam_abo.c
 
 get_transact.o: get_transact.c fh.h
-	cc -c get_transact.c
+	cc -no-pie -c get_transact.c
 
 get_loc.o: get_loc.c fh.h
-	cc -c get_loc.c
+	cc -no-pie -c get_loc.c
 
 sav_transact.o: sav_transact.c fh.h
-	cc -c sav_transact.c
+	cc -no-pie -c sav_transact.c
 
 get_transfer.o: get_transfer.c fh.h
-	cc -c get_transfer.c
+	cc -no-pie -c get_transfer.c

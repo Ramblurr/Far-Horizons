@@ -5,4 +5,4 @@ MapGalaxy: $(MAP_OBJS)
 	cc -o ../bin/PrintMap $(MAP_OBJS) -lm
 
 PrintMap.o: PrintMap.c
-	cc -c PrintMap.c
+	cc -no-pie -c PrintMap.c
