@@ -3,7 +3,7 @@ EDIT_OBJS = Edit.o utils.o get_gal.o get_star.o get_plan.o do_locs.o sav_plan.o 
 
 
 Edit: $(EDIT_OBJS)
-	cc $(EDIT_OBJS) -o ../bin/Edit
+	cc $(EDIT_OBJS) -no-pie -o ../bin/Edit
 
 Edit.o: Edit.c fh.h
 	cc -no-pie -c Edit.c

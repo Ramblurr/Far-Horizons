@@ -7,7 +7,7 @@ PRE4 = sav_star.o sav_plan.o get_loc.o get_ship.o gam_abo.o do_name.o get_spnam.
 PRE_OBJS = PreDeparture.o $(PRE1) $(PRE2) $(PRE3) $(PRE4)
 
 PreDeparture: $(PRE_OBJS)
-	cc $(PRE_OBJS) -o ../bin/PreDeparture
+	cc $(PRE_OBJS) -no-pie -o ../bin/PreDeparture
 
 PreDeparture.o: PreDeparture.c fh.h
 	cc -no-pie -c PreDeparture.c

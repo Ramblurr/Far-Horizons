@@ -5,7 +5,7 @@ LOC2 = get_gal.o get_plan.o get_star.o sav_plan.o
 LOC_OBJS = Locations.o $(LOC1) $(LOC2)
 
 Locations: $(LOC_OBJS)
-	cc $(LOC_OBJS) -o ../bin/Locations
+	cc $(LOC_OBJS) -no-pie -o ../bin/Locations
 
 Locations.o: Locations.c fh.h
 	cc -no-pie -c Locations.c

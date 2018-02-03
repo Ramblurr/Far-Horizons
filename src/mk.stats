@@ -2,7 +2,7 @@
 STAT_OBJS = Stats.o get_gal.o get_star.o get_plan.o utils.o combat_utils.o
 
 Stats: $(STAT_OBJS)
-	cc $(STAT_OBJS) -no-pie -o ../bin/Stats
+	cc $(STAT_OBJS) -no-pie -no-pie -o ../bin/Stats
 
 Stats.o: Stats.c fh.h
 	cc -no-pie -c Stats.c

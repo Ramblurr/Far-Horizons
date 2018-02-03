@@ -7,7 +7,7 @@ JUMP_OBJS = Jump.o $(JUMP1) $(JUMP2) $(JUMP3)
 CC = cc -g -no-pie
 
 Jump: $(JUMP_OBJS)
-	$(CC) $(JUMP_OBJS) -o ../bin/Jump
+	$(CC) $(JUMP_OBJS) -no-pie -o ../bin/Jump
 
 Jump.o: Jump.c fh.h
 	$(CC) -c Jump.c

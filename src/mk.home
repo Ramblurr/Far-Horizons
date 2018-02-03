@@ -3,7 +3,7 @@ HOM_OBJS = HomeSystem.o utils.o get_gal.o get_star.o sav_star.o get_plan.o sav_p
 
 
 HomeSystem: $(HOM_OBJS)
-	cc $(HOM_OBJS) -o ../bin/HomeSystem
+	cc $(HOM_OBJS) -no-pie -o ../bin/HomeSystem
 
 HomeSystem.o: HomeSystem.c fh.h
 	cc -no-pie -c HomeSystem.c

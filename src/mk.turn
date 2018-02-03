@@ -3,7 +3,7 @@ TURN_OBJS = TurnNumber.o get_gal.o
 
 
 TurnNumber: $(TURN_OBJS)
-	cc $(TURN_OBJS) -o ../bin/TurnNumber
+	cc $(TURN_OBJS) -no-pie -o ../bin/TurnNumber
 
 TurnNumber.o: TurnNumber.c fh.h
 	cc -no-pie -c TurnNumber.c

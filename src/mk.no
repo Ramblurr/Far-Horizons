@@ -6,7 +6,7 @@ NOO_OBJS = NoOrders.o $(NOO1) $(NOO2)
 
 
 NoOrders: $(NOO_OBJS)
-	cc $(NOO_OBJS) -o ../bin/NoOrders
+	cc $(NOO_OBJS) -no-pie -o ../bin/NoOrders
 
 NoOrders.o: NoOrders.c fh.h
 	cc -no-pie -c NoOrders.c

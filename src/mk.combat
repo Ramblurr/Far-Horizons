@@ -7,7 +7,7 @@ COMBAT_OBJS = Combat.o $(COM1) $(COM2) $(COM3)
 CC = cc -g -no-pie
 
 Combat: $(COMBAT_OBJS)
-	$(CC) $(COMBAT_OBJS) -o ../bin/Combat
+	$(CC) $(COMBAT_OBJS) -no-pie -o ../bin/Combat
 	rm -f ../bin/Strike
 	ln -s ../bin/Combat ../bin/Strike
 

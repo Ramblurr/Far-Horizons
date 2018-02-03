@@ -4,7 +4,7 @@ BINARY1 = BinaryToAscii.o get_gal.o get_star.o get_plan.o utils.o
 BINARY_OBJS = $(BINARY1)
 
 BinaryToAscii: $(BINARY_OBJS)
-	cc -o ../bin/BinaryToAscii $(BINARY_OBJS)
+	cc -no-pie -o ../bin/BinaryToAscii $(BINARY_OBJS)
 
 BinaryToAscii.o: BinaryToAscii.c fh.h
 	cc -no-pie -c BinaryToAscii.c

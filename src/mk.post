@@ -8,7 +8,7 @@ POST_OBJS = PostArrival.o $(POST1) $(POST2) $(POST3) $(POST4)
 CC = cc -g -no-pie
 
 PostArrival: $(POST_OBJS)
-	$(CC) $(POST_OBJS) -o ../bin/PostArrival
+	$(CC) $(POST_OBJS) -no-pie -o ../bin/PostArrival
 
 PostArrival.o: PostArrival.c fh.h
 	$(CC) -c PostArrival.c

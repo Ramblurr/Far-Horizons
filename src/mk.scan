@@ -6,7 +6,7 @@ SCAN_OBJS = ScanSpXYZ.o $(SCAN1) $(SCAN2)
 
 
 ScanSpXYZ: $(SCAN_OBJS)
-	cc $(SCAN_OBJS) -o ../bin/ScanSpXYZ
+	cc $(SCAN_OBJS) -no-pie -o ../bin/ScanSpXYZ
 
 ScanSpXYZ.o: ScanSpXYZ.c fh.h
 	cc -no-pie -c ScanSpXYZ.c

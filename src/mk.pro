@@ -7,7 +7,7 @@ PRO4 = get_loc.o do_amb.o get_transact.o sav_transact.o do_int.o get_star.o
 PRO_OBJS = Production.o $(PRO1) $(PRO2) $(PRO3) $(PRO4)
 
 Production: $(PRO_OBJS)
-	cc $(PRO_OBJS) -o ../bin/Production
+	cc $(PRO_OBJS) -no-pie -o ../bin/Production
 
 Production.o: Production.c fh.h
 	cc -no-pie -c Production.c

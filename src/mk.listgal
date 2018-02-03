@@ -3,7 +3,7 @@ LIST_OBJS = ListGalaxy.o utils.o get_gal.o get_star.o get_plan.o
 
 
 ListGalaxy: $(LIST_OBJS)
-	cc $(LIST_OBJS) -o ../bin/ListGalaxy
+	cc $(LIST_OBJS) -no-pie -o ../bin/ListGalaxy
 
 ListGalaxy.o: ListGalaxy.c fh.h
 	cc -no-pie -c ListGalaxy.c

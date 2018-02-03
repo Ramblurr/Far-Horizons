@@ -3,7 +3,7 @@ SETUP_OBJS = Setup.o parse.o get_gal.o gam_abo.o
 
 
 Setup: $(SETUP_OBJS)
-	cc $(SETUP_OBJS) -o FH:bin/Setup
+	cc $(SETUP_OBJS) -no-pie -o ..:bin/Setup
 
 Setup.o: Setup.c fh.h
 	cc -no-pie -c Setup.c

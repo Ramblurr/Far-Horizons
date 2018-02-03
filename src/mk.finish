@@ -5,7 +5,7 @@ FIN2 = get_gal.o get_star.o get_plan.o sav_plan.o do_locs.o
 FIN_OBJS = Finish.o $(FIN1) $(FIN2)
 
 Finish: $(FIN_OBJS)
-	cc $(FIN_OBJS) -o ../bin/Finish
+	cc $(FIN_OBJS) -no-pie -o ../bin/Finish
 
 Finish.o: Finish.c fh.h
 	cc -no-pie -c Finish.c

@@ -3,7 +3,7 @@ ADD_OBJS = AddSpeciesAuto.o utils.o get_gal.o get_star.o get_plan.o scan.o gam_a
 
 
 AddSpeciesAuto: $(ADD_OBJS)
-	cc $(ADD_OBJS) -o ../bin/AddSpeciesAuto
+	cc $(ADD_OBJS) -no-pie -o ../bin/AddSpeciesAuto
 
 AddSpeciesAuto.o: AddSpeciesAuto.c fh.h
 	cc -no-pie -c AddSpeciesAuto.c

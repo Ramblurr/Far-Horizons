@@ -3,7 +3,7 @@ MAP_OBJS = MapGalaxy.o get_gal.o get_star.o
 
 
 MapGalaxy: $(MAP_OBJS)
-	cc $(MAP_OBJS) -o ../bin/MapGalaxy
+	cc $(MAP_OBJS) -no-pie -o ../bin/MapGalaxy
 
 MapGalaxy.o: MapGalaxy.c fh.h
 	cc -no-pie -c MapGalaxy.c
