@@ -5,25 +5,25 @@ LOC2 = get_gal.o get_plan.o get_star.o sav_plan.o
 LOC_OBJS = Locations.o $(LOC1) $(LOC2)
 
 Locations: $(LOC_OBJS)
-	cc $(LOC_OBJS) -o ../bin/Locations
+	cc $(LOC_OBJS) -no-pie -o ../bin/Locations
 
 Locations.o: Locations.c fh.h
-	cc -c Locations.c
+	cc -no-pie -c Locations.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c
 
 get_star: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c
 
 sav_plan.o: sav_plan.c fh.h
-	cc -c sav_plan.c
+	cc -no-pie -c sav_plan.c
 
 do_locs.o: do_locs.c fh.h
-	cc -c do_locs.c
+	cc -no-pie -c do_locs.c

@@ -36,3 +36,7 @@ farhorizons.cfg
 *.nav
 *.snm
 *.vrb
+/.cproject
+/.project
+/.settings/
+/.pydevproject

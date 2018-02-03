@@ -3,13 +3,13 @@ MHO_OBJS = MakeHomes.o get_star.o utils.o
 
 
 MakeHomes: $(MHO_OBJS)
-	cc $(MHO_OBJS) -o ../bin/MakeHomes
+	cc $(MHO_OBJS) -no-pie -o ../bin/MakeHomes
 
 MakeHomes.o: MakeHomes.c fh.h
-	cc -c MakeHomes.c
+	cc -no-pie -c MakeHomes.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c

@@ -3,16 +3,16 @@ SHOW_OBJS = ShowGalaxy.o get_gal.o get_star.o get_plan.o
 
 
 ShowGalaxy: $(SHOW_OBJS)
-	cc $(SHOW_OBJS) -o ../bin/ShowGalaxy
+	cc $(SHOW_OBJS) -no-pie -o ../bin/ShowGalaxy
 
 ShowGalaxy.o: ShowGalaxy.c fh.h
-	cc -c ShowGalaxy.c
+	cc -no-pie -c ShowGalaxy.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c
