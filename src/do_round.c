@@ -240,11 +240,14 @@ struct action_data	*act;
 	    log_string (":\n");
 	    header_printed = TRUE;
 	}
-
+		int attackerGvMl = attacker_gv + attacker_ml;
+		if (attackerGvMl <= 0) {
+			attackerGvMl = 1;
+		}
 	/* Check if attacker has any forced jump units. The attacker will
 		place more emphasis on the use of these devices if he
 		emphasizes gravitics technology over military technology. */
-	fj_chance = 50 * attacker_gv / (attacker_gv + attacker_ml);
+		fj_chance = 50 * attacker_gv / attackerGvMl;
 	if (rnd(100) < fj_chance
 		&&  act->unit_type[attacker_index] == SHIP
 		&&  act->unit_type[defender_index] == SHIP)
@@ -313,10 +316,14 @@ fire:
 	if (act->unit_type[defender_index] == NAMPLA)
 	    log_string (" defenses");
 
+		int combinedMl = attacker_ml + defender_ml;
+		if (combinedMl <= 0) {
+			combinedMl = 1;
+		}
 	/* Get hit probability. The basic chance to hit is 1.5 times
 	   attackers ML over the sum of attacker's and defender's ML.
 	   Double this value if defender is surprised. */
-	chance_to_hit = (150 * attacker_ml) / (attacker_ml + defender_ml);
+		chance_to_hit = (150 * attacker_ml) / combinedMl;
 	if (act->surprised[defender_index])
 	{
 	    chance_to_hit *= 2;
@@ -401,11 +408,16 @@ fire:
 		act->shield_strength_left[defender_index] -= damage_to_shields;
 
 		/* Calculate percentage of shields left. */
-		if (act->shield_strength_left[defender_index] > 0)
+				if (act->shield_strength_left[defender_index] > 0) {
+					long int defenderShieldStrength =
+							act->shield_strength[defender_index];
+					if (defenderShieldStrength <= 0) {
+						defenderShieldStrength = 1;
+					}
 		    defending_ship->dest_y =
 			(100L * act->shield_strength_left[defender_index])
-				/ act->shield_strength[defender_index];
-		else
+							/ defenderShieldStrength;
+				} else
 		    defending_ship->dest_y = 0;
 	    }
 	    else  /* Planetary defenses. */
@@ -434,8 +446,13 @@ fire:
 		    damage_done = -act->shield_strength_left[defender_index];
 	    }
 
-	    percent_decrease =
-		(50L * damage_done) / act->shield_strength[defender_index];
+			long defenderShieldStrength = act->shield_strength[defender_index];
+			if (defenderShieldStrength <= 0) {
+				defenderShieldStrength = 1;
+			}
+
+			percent_decrease = (50L * damage_done) / defenderShieldStrength;
+			
 	    percent_decrease += ((rnd(51) - 26) * percent_decrease) / 100;
 	    if (percent_decrease > 100) percent_decrease = 100;
 
@@ -505,9 +522,16 @@ fire:
 			j = defending_ship->item_quantity[i];
 			if (j > 0)
 			{
-			    if (i == TP)
-				recycle_value = (j * item_cost[i])
-				    / (2L * (long) defending_species->tech_level[BI]);
+							if (i == TP) {
+								long int techLevel_2x =
+										2L
+												* (long) defending_species->tech_level[BI];
+								if (techLevel_2x <= 0) {
+									techLevel_2x = 1;
+								}
+								recycle_value = (j * item_cost[i])
+										/ techLevel_2x;
+							}
 			    else if (i == RM)
 				recycle_value = j / 5;
 			    else
