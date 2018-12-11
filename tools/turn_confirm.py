@@ -20,11 +20,11 @@ def main(argv):
     try:                                
         opts, args = getopt.getopt(argv, "hc:d", ["help", "config="])
     except getopt.GetoptError:          
-        print __doc__                     
+        print(__doc__)                     
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"): 
-            print __doc__                     
+            print(__doc__)                     
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -40,37 +40,37 @@ def main(argv):
     data_dir = game['datadir']
     bin_dir = config.bindir
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
         
     if not os.path.isdir(bin_dir):
-        print "Sorry bin directory %s does not exist." % (bin_dir)
+        print("Sorry bin directory %s does not exist." % (bin_dir))
         sys.exit(2)
     os.chdir(data_dir)
     if os.path.isfile("interspecies.dat"):
-        print "interspecies.dat present. Have you forgotten to fhclean?"
+        print("interspecies.dat present. Have you forgotten to fhclean?")
         sys.exit(2)
     tempdir = ''
     try:
         tempdir = game['tmpdir']
-        print tempdir
+        print(tempdir)
         if not os.path.isdir(tempdir):
             raise KeyError
     except KeyError: 
-        print "Temp directory doesn't exist for this game. You should use turn_run.py first."
+        print("Temp directory doesn't exist for this game. You should use turn_run.py first.")
         sys.exit(2)
 
     os.chdir(tempdir)
 
-    print "Copying *.dat files to $odn..."
+    print("Copying *.dat files to $odn...")
     os.system("cp -p *.dat %s" % (data_dir))
-    print "Copying order files to $odn..."
+    print("Copying order files to $odn...")
     os.system("cp -p *.ord %s" % (data_dir))
-    print "Copying report files to $odn..."
+    print("Copying report files to $odn...")
     os.system("cp -p *.rpt.* %s" % (data_dir))
 
     os.chdir(data_dir)
-    print "Turn Complete"
+    print("Turn Complete")
     shutil.rmtree(tempdir)
 
 if __name__ == "__main__":

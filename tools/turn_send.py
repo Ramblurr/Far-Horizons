@@ -76,11 +76,11 @@ def main(argv):
     try:                                
         opts, args = getopt.getopt(argv, "hc:ts:f:u:", ["help", "config=","test","species","file","subject"])
     except getopt.GetoptError:          
-        print __doc__                     
+        print(__doc__)                     
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"): 
-            print __doc__                     
+            print(__doc__)                     
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -93,7 +93,7 @@ def main(argv):
         elif opt in ("-u", "--subject"):
             subject = arg
     if (file_name != None and subject == None) or (file_name == None and subject != None):
-        print "if you specify file_name, you must specify subject.";
+        print("if you specify file_name, you must specify subject.");
         sys.exit(1)
 
     if config_file:
@@ -109,11 +109,11 @@ def main(argv):
     players = fhutils.Game().players
     
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
         
     if not os.path.isdir(bin_dir):
-        print "Sorry bin directory %s does not exist." % (bin_dir)
+        print("Sorry bin directory %s does not exist." % (bin_dir))
         sys.exit(2)
     
     turn = fhutils.run(bin_dir, "TurnNumber").strip()
@@ -130,10 +130,10 @@ def main(argv):
     msg = start_msg %(game_name, deadline_msg) if turn == "1" else message %(game_name, deadline_msg)
     for player in players:
         if species_num != None and species_num != player['num']:
-            print "skipping %s - %s" %(player['num'], player['name'])
+            print("skipping %s - %s" %(player['num'], player['name']))
             continue
         if player['email'] == "player_dropped":
-            print "skipping dropped player %s - %s" %(player['num'], player['name'])
+            print("skipping dropped player %s - %s" %(player['num'], player['name']))
             continue
         if file_name != None:
             report = "%s/%s" %(data_dir, file_name)
@@ -144,10 +144,10 @@ def main(argv):
             report = "%s/sp%s.rpt.t%s" %(data_dir, player['num'], turn)
             subject = "FH %s Turn Results - %s turn %s" % (game_stub, player['name'], turn)
         if not test_flag:
-            print "Mailing %s to %s (sp %s)" %(report, player['email'], player['name'])
+            print("Mailing %s to %s (sp %s)" %(report, player['email'], player['name']))
             config.send_mail(subject, player['email'], msg, report)
         else:
-            print "Writing .test file"
+            print("Writing .test file")
             with open(report+".test", "w") as f:
                 f.write("To: %s\n" %( player['email']))
                 f.write("Subject: %s\n" %( subject))

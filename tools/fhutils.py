@@ -25,7 +25,7 @@ def run(bindir, tool, args = []):
         out = subprocess.check_output(path)
         return out
     except subprocess.CalledProcessError:
-        print "Error detected in program %s!" % tool
+        print("Error detected in program %s!" % tool)
         sys.exit(1)
 
 def natatime(itr, fillvalue=None, n=2):
@@ -33,7 +33,7 @@ def natatime(itr, fillvalue=None, n=2):
     get values from an iterator n at a time
     http://stackoverflow.com/questions/1528711/reading-lines-2-at-a-time/1528769#1528769
     """
-    return itertools.izip_longest(*(iter(itr),)*n, fillvalue=fillvalue)
+    return itertools.zip_longest(*(iter(itr),)*n, fillvalue=fillvalue)
 
 class GameConfig(object):
 
@@ -62,9 +62,9 @@ class GameConfig(object):
                 d['zone'] = zone
                 do_parse = lambda x: add_default_tz(parse(x), zone)
 
-                weekdays = tuple(map(lambda x: do_parse(x).weekday(), self.config[game]['deadlines']))
-                hours = tuple(map(lambda x: do_parse(x).hour, self.config[game]['deadlines']))
-                minutes = tuple(map(lambda x: do_parse(x).minute, self.config[game]['deadlines']))
+                weekdays = tuple([do_parse(x).weekday() for x in self.config[game]['deadlines']])
+                hours = tuple([do_parse(x).hour for x in self.config[game]['deadlines']])
+                minutes = tuple([do_parse(x).minute for x in self.config[game]['deadlines']])
                 d['deadline'] = rrule.rrule(rrule.WEEKLY, byweekday=weekdays,byhour=hours,byminute=minutes,dtstart=datetime.datetime.now(zone))
 
                 if 'tmpdir' in self.config[game]:
@@ -72,9 +72,9 @@ class GameConfig(object):
                 self.gameslist.append( d )
 
 
-        except yaml.YAMLError, exc:
-            print "Error parsing %s file" % (self.config_file)
-            print exc
+        except yaml.YAMLError as exc:
+            print("Error parsing %s file" % (self.config_file))
+            print(exc)
             sys.exit(1)
 
     def registrations(self):

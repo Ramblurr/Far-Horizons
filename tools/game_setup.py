@@ -22,11 +22,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hc:", ["help", "config="])
     except getopt.GetoptError:
-        print __doc__
+        print(__doc__)
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -48,9 +48,9 @@ def main(argv):
 
     num_species = len(data)
 
-    print "%s species defined." % (num_species);
+    print("%s species defined." % (num_species));
 
-    print "Executing NewGalaxy "
+    print("Executing NewGalaxy ")
 
     # Galaxy size is calculated based on default star density and fixed number of stars per race
     # Adjust it here to create less crowded galaxy, players are asking for that
@@ -58,17 +58,17 @@ def main(argv):
 
     fhutils.run(bin_dir, "NewGalaxy", [adjusted_num_species])
 
-    print "Executing MakeHomes"
+    print("Executing MakeHomes")
     fhutils.run(bin_dir, "MakeHomes")
 
-    print "Executing ListGalaxy"
+    print("Executing ListGalaxy")
 
     output = fhutils.run(bin_dir, "ListGalaxy", ["-p"])
 
     star_list = [s for s in output.splitlines() if s] # strips empty lines from output
     uniq_list = list(set(star_list))  # uniques the list
     if len(star_list) != len(uniq_list):
-        print "Galaxy contains duplicate stars!!!"
+        print("Galaxy contains duplicate stars!!!")
         sys.exit(1)
 
     curr_sp_number = 1
@@ -77,30 +77,30 @@ def main(argv):
         fh_names = open("fh_names", "w")
         fh_names.truncate()
     except IOError:
-        print "cannot open fh_names"
+        print("cannot open fh_names")
         sys.exit(1)
 
     for col in data:
         email, sp_name, home_planet, gov_name, gov_type, ML, GV, LS, BI = col
 
-        print "\t Executing HomeSystemAuto (%s) " % (curr_sp_number)
+        print("\t Executing HomeSystemAuto (%s) " % (curr_sp_number))
         output = fhutils.run(bin_dir, "HomeSystemAuto", ["12"])
         x,y,z,n = output.split(" ")
 
-        print "\t Executing AddSpecies (%s) " % (curr_sp_number)
+        print("\t Executing AddSpecies (%s) " % (curr_sp_number))
         arg = [ str(curr_sp_number), sp_name, home_planet, gov_name, gov_type, x, y, z, n, ML, GV, LS, BI]
         output = fhutils.run(bin_dir, "AddSpeciesAuto", arg)
 
         try:
             fh_names.write("%02d\n%s\n%s\n" % (curr_sp_number, sp_name, email))
         except IOError:
-            print "cannot write to fh_names"
+            print("cannot write to fh_names")
             sys.exit(1)
 
         curr_sp_number += 1
     fh_names.close()
 
-    print "DONE";
+    print("DONE");
 
 if __name__ == "__main__":
     main(sys.argv[1:])

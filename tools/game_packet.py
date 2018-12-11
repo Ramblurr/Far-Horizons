@@ -12,11 +12,11 @@ def main(argv):
     try:                                
         opts, args = getopt.getopt(argv, "hc:", ["help", "config="])
     except getopt.GetoptError:          
-        print __doc__                     
+        print(__doc__)                     
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"): 
-            print __doc__                     
+            print(__doc__)                     
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -43,7 +43,7 @@ def main(argv):
         try:
             subprocess.check_call(["zip", "sp%s.zip" % (p['num']), "sp%s.rpt.t1" % (p['num']), "galaxy.map.pdf", "galaxy.map.txt",  "game_policies.pdf", "galaxy.list.txt"])
         except CalledProcessError:
-            print "ERROR making zip: sp%s.zip" % (p['num'])
+            print("ERROR making zip: sp%s.zip" % (p['num']))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

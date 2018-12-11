@@ -11,11 +11,11 @@ def main():
     try:
        game = fhutils.Game()
     except IOError:
-        print "Could not read fh_names"
+        print("Could not read fh_names")
         sys.exit(2)
     
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
     
     for player in game.players:
@@ -27,7 +27,7 @@ def main():
                 f.seek(0)
                 f.write(text2)
         except IOError:
-            print "Couldn't open %s" %(orders)
+            print("Couldn't open %s" %(orders))
                 
 if __name__ == "__main__":
     main()

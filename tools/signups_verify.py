@@ -65,7 +65,7 @@ def main():
             continue
         if len(recipient.strip()) == 0:
             continue
-        print "Validating %s - %s" % (row.custom["speciesname"].text, row.custom["email"].text)
+        print("Validating %s - %s" % (row.custom["speciesname"].text, row.custom["email"].text))
         error_msg = ""
         
         if not check_length(row.custom["speciesname"].text):
@@ -108,7 +108,7 @@ def main():
                 error_msg += "* The total number of points allocated to technologies must be equal to 15\n"
         
         if len(error_msg) > 0:
-            print "\tErrors found"
+            print("\tErrors found")
             messages[recipient] = email_template_fail % (error_msg)
         else:
             messages[recipient] = email_template_success % (row.custom["speciesname"].text, row.custom["homeplanetname"].text, row.custom["governmentname"].text, row.custom["governmenttype"].text)
@@ -118,9 +118,9 @@ def main():
             d["validated"] = "Yes"
             spreadsheet.update_row(row, d)
         
-    for email,msg in messages.iteritems():
+    for email,msg in messages.items():
         config.send_mail("FH Player Registration", email, msg)
-    print "All done"
+    print("All done")
 
 
 if __name__ == "__main__":

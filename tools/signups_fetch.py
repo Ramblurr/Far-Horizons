@@ -30,7 +30,7 @@ def main():
         if email is None:
             continue
         if row.custom["validated"].text != "Yes":
-            print "%s not validated" % (email)
+            print("%s not validated" % (email))
             continue
         species = row.custom["speciesname"].text
         gov_name = row.custom["governmentname"].text

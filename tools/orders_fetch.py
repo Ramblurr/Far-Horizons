@@ -17,11 +17,11 @@ def main():
     try:
        game = fhutils.Game()
     except IOError:
-        print "Could not read fh_names"
+        print("Could not read fh_names")
         sys.exit(2)
     
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
     
     server = IMAPClient(server, use_uid=True, ssl=ssl)
@@ -43,7 +43,7 @@ def main():
                 fd = codecs.open(orders_file, 'w', 'utf-8')
                 orders = None
                 if mail.is_multipart():
-                    print "Multipart Message detected, searching for plain text payload!"
+                    print("Multipart Message detected, searching for plain text payload!")
                     for part in mail.walk():
                         # multipart/* are just containers
                         if part.get_content_maintype() == 'multipart':
@@ -52,9 +52,9 @@ def main():
                         if not filename:
                             continue
                         if part.get_content_type() != "text/plain":
-                            print "Error: attachment found, but not a plain text file for "  + from_address
+                            print("Error: attachment found, but not a plain text file for "  + from_address)
                         else:
-                            print "found orders in attachment"
+                            print("found orders in attachment")
                             orders = part.get_payload(decode=True)
                     if orders is None: # ok, no attachment, lets try the actual content
                         payloads = mail.get_payload()
@@ -64,19 +64,19 @@ def main():
                                 if loads.get_content_type()  == "text/plain":
                                     mail = loads
                                     found = True
-                                    print "found orders in multipart payload"
+                                    print("found orders in multipart payload")
                                     orders = loads.get_payload(decode=True)
                                     break
                             if not found:
                                 raise email.errors.MessageError
                         except email.errors.MessageError:
-                            print "Could not find text/plain payload for " + from_address
+                            print("Could not find text/plain payload for " + from_address)
                 else:
-                    print "using orders in plain body"
+                    print("using orders in plain body")
                     orders = mail.get_payload(decode=True)
                 orders = orders.replace('\r\n', '\n').replace('\r', '\n')
-                orders = unicode(orders, 'utf-8')
-                orders = orders.replace(u"\u00A0", " ").encode('utf-8')
+                orders = str(orders, 'utf-8')
+                orders = orders.replace("\u00A0", " ").encode('utf-8')
                 fd.write(orders)
                 fd.close()
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -87,7 +87,7 @@ def main():
                 else:
                     subject += " - wait not set"
                 config.send_mail(subject, from_address, verify, orders_file)
-                print "Retrieved orders %s for sp%s - %s - %s" %("[WAIT]" if wait else "", player['num'], player['name'], from_address)
+                print("Retrieved orders %s for sp%s - %s - %s" %("[WAIT]" if wait else "", player['num'], player['name'], from_address))
                 
 if __name__ == "__main__":
     main()

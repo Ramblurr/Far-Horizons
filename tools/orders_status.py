@@ -11,11 +11,11 @@ def main():
     try:
        game = fhutils.Game()
     except IOError:
-        print "Could not read fh_names"
+        print("Could not read fh_names")
         sys.exit(2)
     
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
     longest_name = len(max([x['name'] for x in game.players], key=len))
     for player in game.players:
@@ -26,11 +26,11 @@ def main():
                 p = subprocess.Popen(["/usr/bin/perl", "/home/ramblurr/src/fh/engine/bash/orders.pl"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 verify = p.communicate(input=f.read())[0]
                 if "No errors found" in verify:
-                    print "%s - %s - Ready" %(player['num'], name)
+                    print("%s - %s - Ready" %(player['num'], name))
                 else:
-                    print "%s - %s - Errors" %(player['num'], name)
+                    print("%s - %s - Errors" %(player['num'], name))
         except IOError:
-            print "%s - %s - No Orders" %(player['num'], name)
+            print("%s - %s - No Orders" %(player['num'], name))
                 
 if __name__ == "__main__":
     main()

@@ -48,11 +48,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hc:", ["help", "config="])
     except getopt.GetoptError:
-        print __doc__
+        print(__doc__)
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg

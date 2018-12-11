@@ -55,11 +55,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hc:ts:", ["help", "config=","test","species"])
     except getopt.GetoptError:
-        print __doc__
+        print(__doc__)
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -81,11 +81,11 @@ def main(argv):
     players = fhutils.Game().players
 
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
 
     if not os.path.isdir(bin_dir):
-        print "Sorry bin directory %s does not exist." % (bin_dir)
+        print("Sorry bin directory %s does not exist." % (bin_dir))
         sys.exit(2)
 
     turn = fhutils.run(bin_dir, "TurnNumber").strip()
@@ -104,18 +104,18 @@ def main(argv):
     msg = message %(game_name, deadline_msg)
     for player in players:
         if species_num != None and species_num != player['num']:
-            print "skipping %s - %s" %(player['num'], player['name'])
+            print("skipping %s - %s" %(player['num'], player['name']))
             continue
         orders = "%s/sp%s.ord" %(data_dir, player['num'])
         if os.path.isfile(orders):
-            print "found orders for %s" %(player['name'])
+            print("found orders for %s" %(player['name']))
             continue
         subject = "FH %s Orders Reminder - %s" % (game_stub, player['name'])
         if not test_flag:
-            print "Mailing reminder to %s (sp %s)" %(player['email'], player['name'])
+            print("Mailing reminder to %s (sp %s)" %(player['email'], player['name']))
             config.send_mail(subject, player['email'], msg)
         else:
-            print "Writing .test file"
+            print("Writing .test file")
             with open("sp%s.test"%(player['num']), "w") as f:
                 f.write("To: %s\n" %( player['email']))
                 f.write("Subject: %s\n" %( subject))

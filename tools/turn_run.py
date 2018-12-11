@@ -23,11 +23,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hc:d", ["help", "config=","discard"])
     except getopt.GetoptError:
-        print __doc__
+        print(__doc__)
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -44,20 +44,20 @@ def main(argv):
     bin_dir = config.bindir
 
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
 
     if not os.path.isdir(bin_dir):
-        print "Sorry bin directory %s does not exist." % (bin_dir)
+        print("Sorry bin directory %s does not exist." % (bin_dir))
         sys.exit(2)
     os.chdir(data_dir)
     if os.path.isfile("interspecies.dat"):
-        print "interspecies.dat present. Have you forgotten to fhclean?"
+        print("interspecies.dat present. Have you forgotten to fhclean?")
         sys.exit(2)
     try:
         tempdir = game['tmpdir']
         if tempdir != '' and not discard:
-            print "Temp directory exists (%s). Do you need to save? Maybe you need --discard?" % (game['tmpdir'])
+            print("Temp directory exists (%s). Do you need to save? Maybe you need --discard?" % (game['tmpdir']))
             sys.exit(2)
         elif not os.path.isdir(tempdir) and discard:
             config.write_tmpdir(game_name, "")
@@ -68,8 +68,8 @@ def main(argv):
 
     tempdir = tempfile.mkdtemp("fhtest")
     config.write_tmpdir(game_name, tempdir)
-    print "Using tempdir %s" % (tempdir)
-    print "Copying all needed files to /tmp/fhtest.dir/ ..."
+    print("Using tempdir %s" % (tempdir))
+    print("Copying all needed files to /tmp/fhtest.dir/ ...")
     os.system("cp -p *.ord %s" % (tempdir))
     os.system("cp -p *.dat %s" % (tempdir))
     os.system("cp -p *.txt %s" % (tempdir))
@@ -80,40 +80,40 @@ def main(argv):
 
     t = fhutils.run(bin_dir, "TurnNumber").strip()
     if t != '0':
-        print "Running NoOrders..."
+        print("Running NoOrders...")
         fhutils.run(bin_dir, "NoOrders")
     else:
         print("Turn 1 hasn't happened yet, running Locations")
         fhutils.run(bin_dir, "Locations")
 
-    print "Running Combat..."
+    print("Running Combat...")
     ret = fhutils.run(bin_dir, "Combat")
 
-    print "Running PreDeparture..."
+    print("Running PreDeparture...")
     fhutils.run(bin_dir, "PreDeparture")
 
-    print "Running Jump..."
+    print("Running Jump...")
     fhutils.run(bin_dir, "Jump")
 
-    print "Running Production..."
+    print("Running Production...")
     fhutils.run(bin_dir, "Production")
 
-    print "Running PostArrival..."
+    print("Running PostArrival...")
     fhutils.run(bin_dir, "PostArrival")
 
-    print "Running Locations..."
+    print("Running Locations...")
     fhutils.run(bin_dir, "Locations")
 
-    print "Running Strike..."
+    print("Running Strike...")
     fhutils.run(bin_dir, "Strike")
 
-    print "Running Finish..."
+    print("Running Finish...")
     fhutils.run(bin_dir, "Finish")
 
-    print "Running Report..."
+    print("Running Report...")
     fhutils.run(bin_dir, "Report")
 
-    print "Success! Verify turn results: %s" % (tempdir)
+    print("Success! Verify turn results: %s" % (tempdir))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

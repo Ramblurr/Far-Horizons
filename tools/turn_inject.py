@@ -21,11 +21,11 @@ def main(argv):
     try:                                
         opts, args = getopt.getopt(argv, "hc:t", ["help", "config=","test"])
     except getopt.GetoptError:          
-        print __doc__                     
+        print(__doc__)                     
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-h", "--help"): 
-            print __doc__                     
+            print(__doc__)                     
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -46,11 +46,11 @@ def main(argv):
     players = fhutils.Game().players
     
     if not os.path.isdir(data_dir):
-        print "Sorry data directory %s does not exist." % (data_dir)
+        print("Sorry data directory %s does not exist." % (data_dir))
         sys.exit(2)
         
     if not os.path.isdir(bin_dir):
-        print "Sorry bin directory %s does not exist." % (bin_dir)
+        print("Sorry bin directory %s does not exist." % (bin_dir))
         sys.exit(2)
     
     turn = fhutils.run(bin_dir, "TurnNumber").strip()
@@ -62,7 +62,7 @@ def main(argv):
         report_name = "%s/sp%s.rpt.t%s" %(data_dir, player['num'], turn)
         with file(report_name, 'r') as original: report = original.read()
         if test_flag:
-            print inject_p + "\n\n" + report
+            print(inject_p + "\n\n" + report)
         else:
             with file(report_name, 'w') as modified: modified.write( inject_p + "\n\n" + report)    
 
