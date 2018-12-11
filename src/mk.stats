@@ -2,19 +2,19 @@
 STAT_OBJS = Stats.o get_gal.o get_star.o get_plan.o utils.o combat_utils.o
 
 Stats: $(STAT_OBJS)
-	cc $(STAT_OBJS) -o ../bin/Stats
+	cc $(STAT_OBJS) -no-pie -no-pie -o ../bin/Stats
 
 Stats.o: Stats.c fh.h
-	cc -c Stats.c
+	cc -no-pie -c Stats.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 combat_utils.o: combat_utils.c
-	cc -c combat_utils.c
+	cc -no-pie -c combat_utils.c
 
 get_gal.o: get_gal.c fh.h
-	cc -c get_gal.c
+	cc -no-pie -c get_gal.c
 
 get_plan.o: get_plan.c fh.h
-	cc -c get_plan.c
+	cc -no-pie -c get_plan.c

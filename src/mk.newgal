@@ -3,16 +3,16 @@ NEW_OBJS = NewGalaxy.o get_star.o utils.o gen_plan.o
 
 
 NewGalaxy: $(NEW_OBJS)
-	cc $(NEW_OBJS) -o ../bin/NewGalaxy
+	cc $(NEW_OBJS) -no-pie -o ../bin/NewGalaxy
 
 NewGalaxy.o: NewGalaxy.c fh.h
-	cc -c NewGalaxy.c
+	cc -no-pie -c NewGalaxy.c
 
 utils.o: utils.c fh.h
-	cc -c utils.c
+	cc -no-pie -c utils.c
 
 gen_plan.o: gen_plan.c fh.h
-	cc -c gen_plan.c
+	cc -no-pie -c gen_plan.c
 
 get_star.o: get_star.c fh.h
-	cc -c get_star.c
+	cc -no-pie -c get_star.c

@@ -5,10 +5,10 @@ POST3 = get_transact.o get_spnam.o do_name.o do_orbit.o do_tech.o do_send.o do_d
 POST4 = sav_star.o get_loc.o get_ship.o gam_abo.o do_mes.o do_terr.o do_enemy.o do_tel.o do_teach.o get_transfer.o
 
 POST_OBJS = PostArrival.o $(POST1) $(POST2) $(POST3) $(POST4)
-CC = cc -g
+CC = cc -g -no-pie
 
 PostArrival: $(POST_OBJS)
-	$(CC) $(POST_OBJS) -o ../bin/PostArrival
+	$(CC) $(POST_OBJS) -no-pie -o ../bin/PostArrival
 
 PostArrival.o: PostArrival.c fh.h
 	$(CC) -c PostArrival.c

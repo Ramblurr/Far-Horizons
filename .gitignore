@@ -37,3 +37,7 @@ venv
 *.nav
 *.snm
 *.vrb
+/.cproject
+/.project
+/.settings/
+/.pydevproject
