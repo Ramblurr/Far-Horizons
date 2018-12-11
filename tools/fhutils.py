@@ -1,12 +1,13 @@
-import gdata.docs
-import gdata.docs.service
-import gdata.spreadsheet.service
+#import gdata.docs
+#import gdata.docs.service
+#import gdata.spreadsheet.service
 import re, os, string, sys, subprocess, itertools
 import smtplib
 import mimetypes
 import yaml
-from dateutil import parser
 from dateutil import rrule
+from dateutil.parser import parse
+from dateutil import tz
 import dateutil
 import datetime
 from email.MIMEMultipart import MIMEMultipart
@@ -39,7 +40,7 @@ class GameConfig(object):
     def __init__(self, config_file="farhorizons.yml"):
         self.config_file = config_file
         self.load_config()
-        
+
     def load_config(self):
         try:
             stream = file(self.config_file, 'r')
@@ -47,7 +48,7 @@ class GameConfig(object):
             self.user = self.config['googleaccount']['user']
             self.doc_name = self.config['googleaccount']['spreadsheet']
             self.password = self.config['googleaccount']['password']
-            
+
             self.bindir = self.config['bindir']
             self.gameslist = []
             for game in self.config['games']:
@@ -55,15 +56,21 @@ class GameConfig(object):
                 d['name'] = game
                 d['stub'] = self.config[game]['stub']
                 d['datadir'] = self.config[game]['datadir']
-                weekdays = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).weekday(), self.config[game]['deadlines'])) 
-                hours = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).hour, self.config[game]['deadlines'])) 
-                minutes = tuple(map(lambda x: parser.parse(x, tzinfos=dateutil.tz.tzutc).minute, self.config[game]['deadlines'])) 
-                d['deadline'] = rrule.rrule(rrule.WEEKLY, byweekday=weekdays,byhour=hours,byminute=minutes,dtstart=datetime.datetime.now(dateutil.tz.tzutc()))
-                    
+                d['timezone'] = self.config[game]['timezone']
+                add_default_tz = lambda x, tzinfo: x.replace(tzinfo=x.tzinfo or tzinfo)
+                zone = tz.gettz(d['timezone'])
+                d['zone'] = zone
+                do_parse = lambda x: add_default_tz(parse(x), zone)
+
+                weekdays = tuple(map(lambda x: do_parse(x).weekday(), self.config[game]['deadlines']))
+                hours = tuple(map(lambda x: do_parse(x).hour, self.config[game]['deadlines']))
+                minutes = tuple(map(lambda x: do_parse(x).minute, self.config[game]['deadlines']))
+                d['deadline'] = rrule.rrule(rrule.WEEKLY, byweekday=weekdays,byhour=hours,byminute=minutes,dtstart=datetime.datetime.now(zone))
+
                 if 'tmpdir' in self.config[game]:
                     d['tmpdir'] = self.config[game]['tmpdir']
                 self.gameslist.append( d )
-            
+
 
         except yaml.YAMLError, exc:
             print "Error parsing %s file" % (self.config_file)
@@ -71,7 +78,8 @@ class GameConfig(object):
             sys.exit(1)
 
     def registrations(self):
-        return RegistrationSpreadsheet(self.user, self.password, self.doc_name)
+        pass
+        #return RegistrationSpreadsheet(self.user, self.password, self.doc_name)
 
     def send_mail(self, subject, recipient, text, *attachmentFilePaths):
         msg = MIMEMultipart()
@@ -89,7 +97,7 @@ class GameConfig(object):
         mailServer.sendmail(self.user, recipient, msg.as_string())
         mailServer.close()
         #print('Sent email to %s' % recipient)
-        
+
     def _getAttachment(self, attachmentFilePath):
         contentType, encoding = mimetypes.guess_type(attachmentFilePath)
 
@@ -116,11 +124,11 @@ class GameConfig(object):
 
         attachment.add_header('Content-Disposition', 'attachment',   filename=os.path.basename(attachmentFilePath))
         return attachment
-        
+
     def save(self):
         stream = file(self.config_file, 'w')
         yaml.dump(self.config, stream, default_flow_style=False)
-        
+
     def write_tmpdir(self, game, tmpdir):
         """
         Saves the tmpdir as a value under game.
@@ -130,40 +138,40 @@ class GameConfig(object):
         self.config[game]['tmpdir'] = tmpdir
         self.save()
 
-class RegistrationSpreadsheet(object):
-    def __init__(self, user, password, doc_name):
-        self.user = user
-        self.password = password
-        self.doc_name = doc_name
-        self.gd_connect()
-        
-    def gd_connect(self):
-        # Connect to Google
-        self.gd_client = gdata.spreadsheet.service.SpreadsheetsService()
-        self.gd_client.email = self.user
-        self.gd_client.password = self.password
-        self.gd_client.source = 'payne.org-example-1'
-        self.gd_client.ProgrammaticLogin()
+#class RegistrationSpreadsheet(object):
+    #def __init__(self, user, password, doc_name):
+        #self.user = user
+        #self.password = password
+        #self.doc_name = doc_name
+        #self.gd_connect()
 
-    def get_registrations(self):
-        if self.gd_client is None:
-            gd_connect()
-        q = gdata.spreadsheet.service.DocumentQuery()
-        q['title'] = self.doc_name
-        q['title-exact'] = 'true'
-        feed = self.gd_client.GetSpreadsheetsFeed(query=q)
-        spreadsheet_id = feed.entry[0].id.text.rsplit('/',1)[1]
-        feed = self.gd_client.GetWorksheetsFeed(spreadsheet_id)
-        worksheet_id = feed.entry[0].id.text.rsplit('/',1)[1]
-        rows = self.gd_client.GetListFeed(spreadsheet_id, worksheet_id).entry
-        return rows
+    #def gd_connect(self):
+        ## Connect to Google
+        #self.gd_client = gdata.spreadsheet.service.SpreadsheetsService()
+        #self.gd_client.email = self.user
+        #self.gd_client.password = self.password
+        #self.gd_client.source = 'payne.org-example-1'
+        #self.gd_client.ProgrammaticLogin()
 
-    def update_row(self, row, dict):
-        entry = self.gd_client.UpdateRow( row, dict)
-        if isinstance(entry, gdata.spreadsheet.SpreadsheetsList):
-            return True
-        else:
-            return False
+    #def get_registrations(self):
+        #if self.gd_client is None:
+            #gd_connect()
+        #q = gdata.spreadsheet.service.DocumentQuery()
+        #q['title'] = self.doc_name
+        #q['title-exact'] = 'true'
+        #feed = self.gd_client.GetSpreadsheetsFeed(query=q)
+        #spreadsheet_id = feed.entry[0].id.text.rsplit('/',1)[1]
+        #feed = self.gd_client.GetWorksheetsFeed(spreadsheet_id)
+        #worksheet_id = feed.entry[0].id.text.rsplit('/',1)[1]
+        #rows = self.gd_client.GetListFeed(spreadsheet_id, worksheet_id).entry
+        #return rows
+
+    #def update_row(self, row, dict):
+        #entry = self.gd_client.UpdateRow( row, dict)
+        #if isinstance(entry, gdata.spreadsheet.SpreadsheetsList):
+            #return True
+        #else:
+            #return False
 
 class Game(object):
     def __init__(self):

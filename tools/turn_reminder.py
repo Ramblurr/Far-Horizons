@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
     Usage: turn_send.py [-h] -c config.yml [-s num]
-    
+
     -h, --help      print this message
     -c config.yml   use a particular config file
     -t              perform a test run, do not send any email.
@@ -52,14 +52,14 @@ def main(argv):
     config_file = None
     test_flag = False
     species_num = None
-    try:                                
+    try:
         opts, args = getopt.getopt(argv, "hc:ts:", ["help", "config=","test","species"])
-    except getopt.GetoptError:          
-        print __doc__                     
+    except getopt.GetoptError:
+        print __doc__
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ("-h", "--help"): 
-            print __doc__                     
+        if opt in ("-h", "--help"):
+            print __doc__
             sys.exit(0)
         elif opt in ("-c", "--config"):
             config_file = arg
@@ -79,18 +79,18 @@ def main(argv):
     data_dir = game['datadir']
     bin_dir = config.bindir
     players = fhutils.Game().players
-    
+
     if not os.path.isdir(data_dir):
         print "Sorry data directory %s does not exist." % (data_dir)
         sys.exit(2)
-        
+
     if not os.path.isdir(bin_dir):
         print "Sorry bin directory %s does not exist." % (bin_dir)
         sys.exit(2)
-    
+
     turn = fhutils.run(bin_dir, "TurnNumber").strip()
     global message,deadline_msg, start_msg
-    next_deadline = deadline_rule.after(datetime.now(dateutil.tz.tzutc()))
+    next_deadline = deadline_rule.after(datetime.now(config['zone']))
     est = zoneinfo.gettz('America/New_York')
     pst = zoneinfo.gettz('America/Los_Angeles')
     poland = zoneinfo.gettz('Europe/Warsaw')
