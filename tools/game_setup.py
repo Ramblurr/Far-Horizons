@@ -100,7 +100,11 @@ def main(argv):
         curr_sp_number += 1
     fh_names.close()
 
-    print("DONE");
+    print("\t Preparing Turn 1: executing Finish")
+    fhutils.run(bin_dir, "Finish")
+    print("\t Reporting Turn 1: executing Report")
+    fhutils.run(bin_dir, "Report")
+    print("DONE")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
