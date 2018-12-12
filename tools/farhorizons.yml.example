@@ -1,5 +1,5 @@
 # directory of far horizons executables
-bindir: /home/ramblurr/src/fh/engine
+bindir: /home/ramblurr/src/fh/bin
 
 googleaccount:
     user: this should be an email
@@ -9,17 +9,18 @@ googleaccount:
 # list of games goes here
 # this is so you can run multiple games at once
 games:
-    -Galaxy Alpha
+    - Galaxy Alpha
 
 # individual game settings get their own section
 Galaxy Alpha:
-    # stub is a short whitespace-free acronym
+    # stub is a short whitespace-free acronym of the game name
     stub: GA
-    # the game data location
+    # the game data location, it shout NOT be the same as other games
     datadir: /home/ramblurr/src/fh/engine/game
-    # timezone to run the turn in 
+    # the timezone that your turn deadlines are in
     timezone: UTC
     # the turn deadlines, must be in 24hr format
     deadlines:
         - 'Sunday 13:00'
         - 'Wednesday 13:00'
+

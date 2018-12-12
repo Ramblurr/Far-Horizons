@@ -1,11 +1,38 @@
+# FH Gamemaster Tools
+
+Gamemaster tools for creating and running a game of Far Horizons.
+
+These python utilities are designed to replace the old bash scripts in ../bash.
+They wire together FH's various programs and provide simpler interface for a GM
+running a game.
+
+
+**Install Depedencies**
+
+You must have python 3 installed on your system.
+
+Debian/Ubuntu:
+
 ```
+apt install poppler-utils ps2pdf  python3-dateutil
+```
+
+Fedora:
+
+```
+dnf install poppler-utils ghostscript python3-dateutil
+```
+
+macOS:
+
+```
+brew install ghostscript poppler
 pip -r requirements.txt
 ```
 
 **Note:** google/gmail integration is currently not working as the code
 relies on broken google apis.
 
-The python utilities are designed to replace the old bash scripts in ../bash
 
 ```
 farhorizons.yml   - configure your fh games here see farhorizons.yml.sample
@@ -49,5 +76,36 @@ turn_inject.py    - injects input (from stdin) into the beginning of all the tur
 
 turn_save.py      - replaces fhclean. saves the turn into backup/ and reports directory.
 ```
+
+## Game setup
+
+To prepare a new game of FH:
+
+1. Ensure you've installed the dependencies listed above
+2. Collect signups in a csv file (see example.csv for the format)
+3. Edit your `farhorizons.yml`
+4. Create the game: `python game_setup.py < your_signups.csv`
+5. Create the maps: `python create_map.py`
+6. (optional) Inject the game start intro text into the turns (see
+   doc/intro.txt for the original FH intro)
+
+    ```python turn_inject.py < path/to/intro.txt```
+
+6. Create the first turn zip files: `python game_packet.py`
+
+Send out your game packets, and off you go!
+
+
+## Running a turn
+
+1. Add all the player's order files (with .ord extension) do your game's data
+   directory
+2. Run `python turn_run.py` It will output the results from the turn in a tmp
+   dirctory.
+3. Investigate this temp directory and ensure everything looks good.
+4. (optional) If something isn't right, or you want to run it again, add the
+   `--discard` flat to the `turn_run.py` command.
+5. Then confirm the turn with `python turn_confirm.py`
+6. Save the turn and create backup folders with `python turn_save.py`
 
 
