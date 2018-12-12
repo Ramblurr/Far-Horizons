@@ -5,7 +5,7 @@
 
 """
 import fhutils
-import os, sys, tempfile, subprocess
+import os, sys, tempfile, subprocess, shutil
 import getopt
 
 def pretty_star(stellar_code):
@@ -65,8 +65,9 @@ def main(argv):
     game_name = game['name']
     data_dir = game['datadir']
     bin_dir = config.bindir
-    PS2PDF = "/usr/bin/ps2pdf"
-    PDFTK = "/usr/bin/pdftk"
+    PS2PDF = shutil.which("ps2pdf")
+    PDFTK = shutil.which("pdftk")
+    PDFUNITE = shutil.which("pdfunite")
 
     os.chdir(data_dir)
 
@@ -86,7 +87,7 @@ def main(argv):
         except IndexError:
             continue
 
-    fd = tempfile.NamedTemporaryFile(delete=False)
+    fd = tempfile.NamedTemporaryFile(mode='w', delete=False)
     fd.writelines(lines)
     fd.flush()
     os.fsync(fd)
@@ -96,7 +97,16 @@ def main(argv):
     subprocess.call(["%s" % (PS2PDF), "-dAutoRotatePages=/None",fd.name+".ps", data_dir+"/galaxy_map.pdf"])
     fd.close()
 
-    #subprocess.call(["%s" % (PDFTK), data_dir+"/galaxy_map_3d.pdf", data_dir+"/galaxy_map.pdf", "cat", "output", data_dir+"/galaxy.map.pdf"])
+    if PDFTK is not None:
+        subprocess.call(["%s" % (PDFTK), data_dir+"/galaxy_map_3d.pdf", data_dir+"/galaxy_map.pdf", "cat", "output", data_dir+"/galaxy.map.pdf"])
+    elif PDFUNITE is not None:
+        subprocess.call(["%s" % (PDFUNITE), data_dir+"/galaxy_map_3d.pdf", data_dir+"/galaxy_map.pdf", data_dir+"/galaxy.map.pdf"])
+    else:
+        print("""Error: could not find pdftk nor pdfunite to merge the galaxy map
+       pdfs. You should manually merge galaxy_map_3d.pdf and
+       galaxy_map_2d.pdf into a single galaxy.map.pdf file before running
+       game_packet.py.""")
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
