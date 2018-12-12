@@ -15,8 +15,9 @@
 
 """
 import fhutils
-import os, tempfile, subprocess, sys, shutil
+import os, tempfile, subprocess, sys, shutil, glob
 import getopt
+
 
 def main(argv):
     config_file = None
@@ -48,31 +49,57 @@ def main(argv):
 
     os.chdir(data_dir)
 
-    if not os.path.isdir(data_dir+"/backup"):
-        print("Sorry backup directory %s does not exist." % (data_dir+"/backup"))
-        sys.exit(1)
+    backup_path = data_dir+"/backup"
+    reports_path = data_dir+"/reports"
+    stats_path = data_dir+"/reports/stats"
+    turn_path = data_dir+"/backup/turn%s" %(turn)
+    if not os.path.isdir(backup_path):
+        os.makedirs(backup_path)
 
-    if not os.path.isdir(data_dir+"/reports"):
-        print("Sorry reports directory %s does not exist." % (data_dir+"/reports"))
-        sys.exit(1)
+    if not os.path.isdir(reports_path):
+        os.makedirs(reports_path)
 
-    print('Moving sp*.ord files to backup/ ...')
-    os.system("mkdir -p backup/turn%s" %(turn))
-    os.system("mv sp*.ord backup/turn%s/" %(turn))
-    os.system("cp *.dat backup/turn%s/" %(turn))
+    if not os.path.isdir(stats_path):
+        os.makedirs(stats_path)
 
-    print('Moving all report files to reports/ ...')
-    os.system("mv *.rpt.* %s" %(data_dir+"/reports/"))
+    if not os.path.isdir(turn_path):
+        os.makedirs(turn_path)
 
-    print("Writing statistics for turn %s to reports/stats/stats.t%s..." % (turn, turn))
-    os.system("mkdir -p %s" % (data_dir+"/reports/stats"))
-    os.system("%s/Stats > %s/reports/stats/stats.t%s" %(bin_dir, data_dir, turn))
+    print("Moving sp*.ord files to backup/ ...")
+    for order in glob.glob(data_dir+"/sp*.ord"):
+        fname = os.path.basename(order)
+        os.rename(order, "%s/%s" % (turn_path, fname))
+
+    print("Moving *.dat files to backup/ ...")
+    for dat in glob.glob(data_dir+"/*.dat"):
+        fname = os.path.basename(dat)
+        shutil.copyfile(dat, "%s/%s" % (turn_path, fname))
+
+    for hs in glob.glob(data_dir+"/HS*"):
+        fname = os.path.basename(hs)
+        os.rename(hs, "%s/%s" % (turn_path, fname))
+
+    print("Moving all report files to reports/ ...")
+    for rpt in glob.glob(data_dir+"/*.rpt.*"):
+        fname = os.path.basename(rpt)
+        dest = "%s/%s" % (reports_path, fname)
+        os.rename(rpt, dest)
+
+    stats = fhutils.run(bin_dir, "Stats").strip()
+    stats_fname = "%s/stats.t%s" % (stats_path, turn)
+    print("Writing stats for turn %s to %s" % (turn, stats_fname))
+    with open(stats_fname, 'w') as f:
+        f.write(stats)
 
     print("Deleting temporary files...")
-    os.system("rm -f interspecies.dat")
-    os.system("rm -f *.log")
+    interspecies_path = data_dir + "/interspecies.dat"
+    if os.path.isfile(interspecies_path):
+        os.remove(interspecies_path)
+    for log in glob.glob(data_dir+"/*.log"):
+        os.remove(log)
 
     print("Done!")
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
