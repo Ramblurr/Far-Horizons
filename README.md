@@ -1,7 +1,7 @@
 FAR HORIZONS
 ============
 
-*Readme last updated by Raven Zachary (raven@rinzai.com) on 1 May 2021.*
+*This README.md file was last updated by Raven Zachary (raven@rinzai.com) on 1 May 2021.*
 
 FAR HORIZONS is a strategic play-by-email (PBeM) game of galactic exploration, trade, diplomacy, and conquest. The first and second editions were designed for play by postal mail. Later editions were designed for play by electronic mail. The seventh edition rules and source code were released in 1999 by [Rick Morneau](http://rickmor.x10.mx). The code was then modernized and updated by Casey Link in the 2009-2011 timeframe. Casey also created helpful Python scripts for the GM in the tools/ folder. In 2021, Raven Zachary forked Casey Link's inactive GitHub project and began to make additional updates.
 
