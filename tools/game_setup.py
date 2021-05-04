@@ -4,7 +4,7 @@
  The following script will auto-generate galaxy using data piped via stdio
  Player data is expected in the following format(one line per player):
 
- email,sp_name,,home_planet_name,gov_name,gov_type,ML,GV,LS,BI
+ email,sp_name,home_planet_name,gov_name,gov_type,ML,GV,LS,BI
 
  See example.csv for example
 
