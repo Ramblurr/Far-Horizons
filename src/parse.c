@@ -9,6 +9,29 @@ char	original_name[32], upper_name[32];
 long	value;
 FILE	*input_file;
 
+char *readln(char *dst, int len, FILE *fp) {
+	static char buf[1024];
+	char *p;
+	int i;
+	p = fgets(buf, 1024, fp);
+	for (i = 0; i < 1024; i++) {
+		if (buf[i] == '\r') {
+			buf[i] = '\n';
+		}
+		if (buf[i] == '\n') {
+			i++;
+			break;
+		}
+	}
+	for (; i < 1024; i++) {
+		buf[i] = 0;
+	}
+	for (i = 0; i < len; i++) {
+		dst[i] = buf[i];
+	}
+	dst[len-1] = 0;
+	return p;
+}
 
 /* Skip white space and comments. */
 skip_junk ()
@@ -16,7 +39,7 @@ skip_junk ()
 again:
 
     /* Read next line. */
-    input_line_pointer = fgets (input_line, 256, input_file);
+    input_line_pointer = readln (input_line, 256, input_file);
     if (input_line_pointer == NULL)
     {
 	end_of_file = TRUE;
@@ -33,7 +56,7 @@ again:
 	{
 	    while (TRUE)
 	    {
-		input_line_pointer = fgets (input_line, 256, input_file);
+		input_line_pointer = readln (input_line, 256, input_file);
 		if (input_line_pointer == NULL)
 		{
 		    end_of_file = TRUE;		/* Weird. */

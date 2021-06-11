@@ -10,6 +10,7 @@ extern FILE			*log_file, *input_file;
 extern struct species_data	*species;
 extern struct trans_data	transaction[MAX_TRANSACTIONS];
 
+char *readln(char *dst, int len, FILE *fp);
 
 do_MESSAGE_command ()
 
@@ -66,7 +67,7 @@ do_MESSAGE_command ()
     while (1)
     {
 	/* Read next line. */
-	input_line_pointer = fgets (input_line, 256, input_file);
+	input_line_pointer = readln (input_line, 256, input_file);
 	if (input_line_pointer == NULL)
 	{
 	    unterminated_message = TRUE;
