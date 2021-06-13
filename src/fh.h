@@ -1,9 +1,12 @@
+#ifndef FH_FH_H
+#define FH_FH_H
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <malloc.h>
 
+#include "utils.h"
 
 #define	TRUE	1
 #define	FALSE	0
@@ -228,7 +231,8 @@ struct species_data
 #define X4	36	/* Unassigned. */
 #define X5	37	/* Unassigned. */
 
-#define MAX_ITEMS	38	/* Always bump this up to a multiple of two.
+#define MAX_ITEMS	38
+/* Always bump this up to a multiple of two.
 				Don't forget to make room for zeroth element! */
 
 
@@ -670,4 +674,5 @@ struct trans_data
     extern char			command_abbr[NUM_COMMANDS][4];
     extern char			command_name[NUM_COMMANDS][16];
     
+#endif
 #endif

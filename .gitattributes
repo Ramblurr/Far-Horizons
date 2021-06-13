@@ -1,3 +1,6 @@
+.gitattributes text eol=lf
+.gitignore     text eol=lf
+bash/*         text eol=lf
 make.all       text eol=lf
 mk.addsp       text eol=lf
 mk.addsp.auto  text eol=lf
