@@ -1,7 +1,7 @@
 FAR HORIZONS
 ============
 
-This README is available on GitHub at [Ramblurr/Far-Horizons](https://github.com/Ramblurr/Far-Horizons/blob/main/README.md).
+> This README is available on GitHub at [Ramblurr/Far-Horizons](https://github.com/Ramblurr/Far-Horizons/blob/main/README.md).
 
 FAR HORIZONS is a strategic play-by-email (PBeM) game of galactic exploration,
 trade, diplomacy, and conquest. The first and second editions were designed for
@@ -42,10 +42,12 @@ If you're interested in what changes have been made, see the git history.
 RULES
 -----
 
-* [Rules in HTML](doc/manual/manual.html)
-* [Rules in PDF](doc/manual/manual.pdf)
 
-You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
+
+* Read the manual right in your browser: [Rules in HTML](http://ramblurr.github.io/Far-Horizons/)
+* Or in PDF format: [Rules in PDF](http://ramblurr.github.io/Far-Horizons/manual.pdf)
+* Or you can find the original 7th edition rules in all their fixed-width ASCII
+  glory here: [doc/rules](doc/rules).
 
 You can also build a PDF and HTML versions (if you have docker/podman
 installed):
