@@ -1,9 +1,13 @@
-all: dat2json
+all: fh dat2json
 	echo "make all ran successfully"
 
 ############################################################################
 CFLAGS=-Wno-format-contains-nul
 LDFLAGS=
+
+############################################################################
+fh:
+	./make.all
 
 ############################################################################
 dat2json_o = dat2json.o get_gal.o get_star.o get_plan.o utils.o
@@ -30,6 +34,7 @@ utils.o: utils.c fh.h
 .PHONY: clean check
 clean:
 	rm -f $(dat2json_o)
+	rm -f  ../bin/* *.o
 # check is not yet implemented
 check:
 	/bin/false
