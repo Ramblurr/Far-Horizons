@@ -6,8 +6,6 @@
 #include <ctype.h>
 #include <malloc.h>
 
-#include "utils.h"
-
 #define	TRUE	1
 #define	FALSE	0
 
@@ -673,6 +671,6 @@ struct trans_data
     extern short		ship_cost[NUM_SHIP_CLASSES];
     extern char			command_abbr[NUM_COMMANDS][4];
     extern char			command_name[NUM_COMMANDS][16];
-    
+
 #endif
 #endif
