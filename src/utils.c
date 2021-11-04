@@ -1,3 +1,4 @@
+#include <stdlib.h>
 
 #include "fh.h"
 
@@ -7,32 +8,52 @@
 
 unsigned long	last_random = 1924085713L;	/* Random seed. */
 
-int rnd (max)
+int
+rnd(unsigned int max) {
+    static unsigned long _lastRandom; // random seed
+    static int           seedState = 0;
+    unsigned long        a, b, c, cong_result, shift_result;
 
-unsigned int	max;
+    if (seedState == 0) {
+        char *envSeed = getenv("FH_SEED");
+        seedState = 1;
+        if (envSeed != NULL) {
+            for (; *envSeed != 0; envSeed++) {
+                if (isdigit(*envSeed)) {
+                    _lastRandom = _lastRandom * 10 + *envSeed - '0';
+                }
+            }
+            if (_lastRandom == 0) {
+                _lastRandom = 1924085713L;
+            }
+            seedState = 2;
+        }
+    }
+    if (seedState == 2) {
+        last_random = _lastRandom;
+    }
 
-{
-	unsigned long	a, b, c, cong_result, shift_result;
+    /* For congruential method, multiply previous value by the
+     * prime number 16417. */
+    a           = last_random;
+    b           = last_random << 5;
+    c           = last_random << 14;
+    cong_result = a + b + c;            /* Effectively multiply by 16417. */
 
-	/* For congruential method, multiply previous value by the
-	   prime number 16417. */
-	a = last_random;
-	b = last_random << 5;
-	c = last_random << 14;
-	cong_result = a + b + c;	/* Effectively multiply by 16417. */
+    /* For shift-register method, use shift-right 15 and shift-left 17
+     * with no-carry addition (i.e., exclusive-or). */
+    a             = last_random >> 15;
+    shift_result  = a ^ last_random;
+    a             = shift_result << 17;
+    shift_result ^= a;
 
-	/* For shift-register method, use shift-right 15 and shift-left 17
-	   with no-carry addition (i.e., exclusive-or). */
-	a = last_random >> 15;
-	shift_result = a ^ last_random;
-	a = shift_result << 17;
-	shift_result ^= a;
+    last_random = cong_result ^ shift_result;
 
-	last_random = cong_result ^ shift_result;
+    a = last_random & 0x0000FFFF;
 
-	a = last_random & 0x0000FFFF;
+    _lastRandom = last_random;
 
-	return (int) ((a * (long) max) >> 16) + 1L;
+    return((int)((a * (long)max) >> 16) + 1L);
 }
 
 

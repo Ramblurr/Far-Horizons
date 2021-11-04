@@ -1,0 +1,46 @@
+x = 2	y = 21	z = 14	stellar type =  F4
+x = 5	y = 8	z = 10	stellar type =  A7
+x = 5	y = 21	z = 12	stellar type =  B2
+x = 7	y = 15	z = 6	stellar type = gB2
+x = 7	y = 17	z = 4	stellar type =  B4
+x = 7	y = 23	z = 9	stellar type = dO0
+x = 8	y = 20	z = 28	stellar type =  B8
+x = 8	y = 29	z = 16	stellar type =  F0
+x = 9	y = 28	z = 19	stellar type = gM6
+x = 10	y = 13	z = 12	stellar type =  A0
+x = 10	y = 19	z = 5	stellar type =  G1
+x = 10	y = 22	z = 16	stellar type =  A9
+x = 11	y = 22	z = 25	stellar type = dB9
+x = 11	y = 25	z = 12	stellar type = gM2
+x = 13	y = 1	z = 17	stellar type =  K6
+x = 13	y = 20	z = 14	stellar type =  A5
+x = 13	y = 26	z = 16	stellar type =  K9
+x = 14	y = 1	z = 12	stellar type = DO7
+x = 14	y = 26	z = 17	stellar type =  B8
+x = 17	y = 5	z = 21	stellar type =  O3
+x = 17	y = 8	z = 17	stellar type = dM0
+x = 17	y = 13	z = 9	stellar type =  K4
+x = 17	y = 22	z = 24	stellar type =  F5
+x = 17	y = 25	z = 11	stellar type =  F9
+x = 18	y = 2	z = 14	stellar type = gK7
+x = 18	y = 27	z = 25	stellar type =  K3
+x = 18	y = 28	z = 17	stellar type =  G0
+x = 19	y = 6	z = 24	stellar type = DO7
+x = 19	y = 18	z = 1	stellar type =  K7
+x = 19	y = 21	z = 12	stellar type =  K7
+x = 21	y = 18	z = 11	stellar type = dO6
+x = 21	y = 24	z = 20	stellar type = dG1
+x = 22	y = 8	z = 26	stellar type =  G1
+x = 23	y = 3	z = 19	stellar type = dF7
+x = 23	y = 9	z = 13	stellar type =  G5
+x = 24	y = 7	z = 7	stellar type = gM9
+x = 24	y = 26	z = 7	stellar type =  M0
+x = 24	y = 27	z = 11	stellar type =  M3
+x = 24	y = 28	z = 17	stellar type =  K2
+x = 25	y = 18	z = 20	stellar type =  A0
+x = 26	y = 24	z = 21	stellar type =  G9
+x = 27	y = 14	z = 5	stellar type = DA0
+
+The galaxy has a radius of 16 parsecs.
+It contains 6 dwarf stars, 3 degenerate stars, 28 main sequence stars,
+    and 5 giant stars, for a total of 42 stars.

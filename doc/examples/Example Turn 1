@@ -1,0 +1,129 @@
+This day may very well be a defining moment in Mammals's history. Today is the 
+day you rose to power, and made it a priority to take your people to the stars.
+
+Your scientists have long known of nearby solar systems with planets rich in 
+natural resources; however, your kind lacked the technology to traverse the vast
+interstellar distances. That is, until today. Your scientists just completed a
+successful faster-than-light jump. The whole of the galaxy is now within reach.
+The scientists also speculate that a few of these solar systems may contain
+planets with the precise pressure, temperature, and atmospheric parameters
+suitable for Mammals, though perhaps someday, with the right technology,
+you will be able to transform any rock ball into a Mammals paradise.
+
+How your species flourishes among the stars is now in your hands. Whether you
+expand rapidly and colonize distant worlds to ensure the longevity of your
+species, or take to constructing mighty warfleets to exterminate all lesser
+forms of life, or seek to influence the history of the Galaxy itself, you will
+make these decisions. You are at a crossroads.
+
+
+
+
+Scan of home star system for SP Mammals:
+
+Coordinates:	x = 14	y = 26	z = 17	stellar type =  B8   8 planets.
+
+               Temp  Press Mining
+  #  Dia  Grav Class Class  Diff  LSN  Atmosphere
+ ---------------------------------------------------------------------
+  1   10  0.75  29     0    0.42   87  No atmosphere
+  2    6  0.32  23     1    0.37   69  Cl2(28%),H2O(43%),SO2(29%)
+  3   14  1.00  13    12    2.12    0  N2(85%),O2(15%)
+  4    9  0.56  11     6    0.55   24  CO2(86%),O2(14%)
+  5   20  1.41  11    10    1.03   18  NH3(100%)
+  6  177  3.31   8    12    3.04   21  NH3(100%)
+  7  112  2.07   6    28    1.01   78  H2(47%),CH4(3%),NH3(50%)
+  8   54  1.07   3    12    1.20   36  H2(56%),CH4(44%)
+
+
+
+			 SPECIES STATUS
+
+			START OF TURN 1
+
+Species name: Mammals
+Government name: Kingdom of Mammals
+Government type: Monarchy
+
+Tech Levels:
+   Mining = 10
+   Manufacturing = 10
+   Military = 4
+   Gravitics = 4
+   Life Support = 4
+   Biology = 3
+
+Atmospheric Requirement: 7%-30% O2
+Neutral Gases: H2, He, N2, CO2, H2O, SO2
+Poisonous Gases: CH4, NH3, HCl, Cl2, F2, H2S
+
+Fleet maintenance cost = 0 (0.00% of total production)
+
+Economic units = 0
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+HOME PLANET: PL Mammalland
+   Coordinates: x = 14, y = 26, z = 17, planet number 3
+
+Available population units = 1500
+
+Production penalty = 0% (LSN = 0)
+
+Economic efficiency = 100%
+
+Mining base = 110.4 (MI = 10, MD = 2.12)
+   520 raw material units will be produced this turn.
+Manufacturing base = 52.1 (MA = 10)
+   Production capacity this turn will be 521.
+
+Total available for spending this turn = 520 - 0 = 520
+
+Shipyard capacity = 1
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+ORDER SECTION. Remove these two lines and everything above
+  them, and submit only the orders below.
+
+START COMBAT
+; Place combat orders here.
+
+END
+
+START PRE-DEPARTURE
+; Place pre-departure orders here.
+
+END
+
+START JUMPS
+; Place jump orders here.
+
+END
+
+START PRODUCTION
+
+;   Economic units at start of turn = 0
+
+    PRODUCTION PL Mammalland
+    ; Place production orders here for planet Mammalland (sector 14 26 17 #3).
+    ;  Avail pop = 1500, shipyards = 1, to spend = 520 (max = no limit).
+
+END
+
+START POST-ARRIVAL
+; Place post-arrival orders here.
+
+END
+
+START STRIKES
+; Place strike orders here.
+
+END
