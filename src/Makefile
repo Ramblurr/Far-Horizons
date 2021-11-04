@@ -35,6 +35,6 @@ utils.o: utils.c fh.h
 clean:
 	rm -f $(dat2json_o)
 	rm -f  ../bin/* *.o
-# check is not yet implemented
+
 check:
-	/bin/false
+	@echo "Check not yet implemented"
