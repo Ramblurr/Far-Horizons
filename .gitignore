@@ -2,7 +2,6 @@
 players*.csv
 *.pyc
 game/
-doc/manual/manual.pdf
 *.backup
 bin/
 *.swp*
@@ -13,7 +12,6 @@ farhorizons.yml
 farhorizons.cfg
 venv
 
-# LaTeX
 *.aux
 *.bbl
 *.blg
