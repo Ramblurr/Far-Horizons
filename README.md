@@ -14,13 +14,16 @@ no immediate plans to make any.
 RULES
 -----
 
+* [Rules in HTML](doc/manual/manual.html)
+* [Rules in PDF](doc/manual/manual.pdf)
+
 You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
 
-You can also build a PDF and HTML versions of these if you have
-[pandoc](https://pandoc.org/) installed.
+You can also build a PDF and HTML versions (if you have docker/podman
+installed):
 
-    cd doc/manual
-    make
+    cd doc/manual/latex
+    make all
 
 BUILDING
 --------
