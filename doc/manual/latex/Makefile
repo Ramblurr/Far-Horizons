@@ -1,5 +1,5 @@
 DOCKER = docker
-PANDOC=${DOCKER} run -it --rm -v `pwd`:/data:z docker.io/pandoc/latex --verbose
+PANDOC=${DOCKER} run --rm -v `pwd`:/data:z docker.io/pandoc/latex --verbose
 default: docs
 
 
