@@ -50,16 +50,14 @@ You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
 You can also build a PDF and HTML versions (if you have docker/podman
 installed):
 
-    cd doc/manual/latex
-    make all
+    $ make manual
 
 BUILDING
 --------
 
 Compiling is easy:
 
-    $ cd src/
-    $ ./make.all
+    $ make
 
 All of the resulting binaries are in bin/
 
