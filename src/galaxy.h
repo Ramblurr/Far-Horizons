@@ -18,25 +18,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
+#ifndef FAR_HORIZONS_GALAXY_H
+#define FAR_HORIZONS_GALAXY_H
 
-struct galaxy_data galaxy;
+struct galaxy_data {
+    int d_num_species; /* Design number of species in galaxy. */
+    int num_species;   /* Actual number of species allocated. */
+    int radius;        /* Galactic radius in parsecs. */
+    int turn_number;   /* Current turn number. */
+};
 
-int
-main(int argc, char *argv[]) {
-    /* Check for valid command line. */
-    if (argc != 1) {
-        fprintf(stderr, "\n\tUsage: TurnNumber\n\n");
-        exit(0);
-    }
+void get_galaxy_data(void);
 
-    /* Get galaxy data. */
-    get_galaxy_data();
-
-    /* Print the current turn number. */
-    printf("%d\n", galaxy.turn_number);
-
-    exit(0);
-}
+#endif //FAR_HORIZONS_GALAXY_H
