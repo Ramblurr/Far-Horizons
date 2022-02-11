@@ -1,16 +1,14 @@
 *~
-players*.csv
-*.pyc
-game/
-doc/manual/manual.pdf
 *.backup
-bin/
-*.swp*
 *.kdev4
-build/
 *.o
+*.pyc
+*.pdf
+*.swp*
+doc/manual/manual.pdf
 farhorizons.yml
 farhorizons.cfg
+players*.csv
 venv
 
 # LaTeX
@@ -18,6 +16,7 @@ venv
 *.bbl
 *.blg
 *.dvi
+*.fdb_latexmk
 *.glg
 *.glo
 *.gls
@@ -28,16 +27,19 @@ venv
 *.lof
 *.log
 *.lot
+*.nav
 *.nlo
 *.out
-*.toc
-*.fdb_latexmk
 *.pdfsync
-*.synctex.gz
-*.nav
 *.snm
+*.synctex.gz
+*.toc
 *.vrb
-/.cproject
-/.project
-/.settings/
-/.pydevproject
+
+# IDE files
+.cproject/
+.idea/
+.project/
+.pydevproject/
+.settings/
+.vs/
