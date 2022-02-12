@@ -104,6 +104,16 @@ void do_locations(void) {
     }
 }
 
+// locationDataAsSExpr writes the current location data to a text file as an s-expression.
+void locationDataAsSExpr(FILE *fp) {
+    fprintf(fp, "(locations");
+    for (int i = 0; i < num_locs; i++) {
+        sp_loc_data_t *p = &loc[i];
+        fprintf(fp, "\n  (location (x %3d) (y %3d) (z %d) (species %3d))", p->x, p->y, p->z, p->s);
+    }
+    fprintf(fp, ")\n");
+}
+
 void save_location_data(void) {
     /* Open file 'locations.dat' for writing. */
     FILE *fp = fopen("locations.dat", "wb");

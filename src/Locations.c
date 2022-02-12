@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     long diff;
     long total;
     long *total_econ_base;
-    FILE *pData;
+    FILE *fp;
 
     /* Check for options, if any. */
     test_mode = FALSE;
@@ -146,15 +146,24 @@ int main(int argc, char *argv[]) {
 
 /* Clean up and exit. */
     save_location_data();
+
+    fp = fopen("locations.txt", "wb");
+    if (fp == NULL) {
+        perror("locations: main: unable to create 'locations.txt'\n");
+        exit(2);
+    }
+    locationDataAsSExpr(fp);
+    fclose(fp);
+
     save_planet_data();
 
-    pData = fopen("planets.txt", "wb");
-    if (pData == NULL) {
+    fp = fopen("planets.txt", "wb");
+    if (fp == NULL) {
         perror("locations: main: unable to create 'planets.txt'\n");
         exit(2);
     }
-    planetDataAsSExpr(pData);
-    fclose(pData);
+    planetDataAsSExpr(fp);
+    fclose(fp);
 
     free_species_data();
     free(planet_base);

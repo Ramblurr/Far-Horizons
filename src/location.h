@@ -20,6 +20,8 @@
 #ifndef FAR_HORIZONS_LOCATION_H
 #define FAR_HORIZONS_LOCATION_H
 
+#include <stdio.h>
+
 #define MAX_LOCATIONS    10000
 
 struct sp_loc_data {
@@ -29,8 +31,11 @@ struct sp_loc_data {
     char z;
 };
 
+typedef struct sp_loc_data sp_loc_data_t;
+
 void add_location(char x, char y, char z);
 void do_locations(void);
+void locationDataAsSExpr(FILE *fp);
 void save_location_data(void);
 
 #endif //FAR_HORIZONS_LOCATION_H
