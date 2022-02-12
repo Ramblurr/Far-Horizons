@@ -48,4 +48,4 @@ add_executable(fhorders
         src/ship.h src/ship.c
         src/location.h src/location.c
         src/no_orders.h src/no_orders.c
-        src/NoOrders.c)
+        src/fhorders.c)
