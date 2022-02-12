@@ -25,36 +25,20 @@
 #include "nampla.h"
 #include "ship.h"
 
-// from galaxy.c
-extern struct galaxy_data galaxy;
-
-// from species.c
-extern int species_number;
-extern int data_in_memory[];
-extern struct species_data *species;
-extern struct species_data *spec_data;
-
-// from nampla.c
-extern struct nampla_data **namp_data;
-extern struct nampla_data *nampla_base;
-extern struct nampla_data *nampla;
-
-// from ship.c
-extern struct ship_data **ship_data;
-extern struct ship_data *ship_base;
-extern struct ship_data *ship;
-
 int num_locs = 0;
 struct sp_loc_data loc[MAX_LOCATIONS];
 
 void add_location(char x, char y, char z) {
+    // from species.c
+    extern int species_number;
+
     for (int i = 0; i < num_locs; i++) {
         if (loc[i].x == x && loc[i].y == y && loc[i].z == z && loc[i].s == species_number) {
             return; /* This location is already in list for this species. */
         }
     }
 
-/* Add new location to the list. */
+    /* Add new location to the list. */
     loc[num_locs].x = x;
     loc[num_locs].y = y;
     loc[num_locs].z = z;
@@ -69,6 +53,22 @@ void add_location(char x, char y, char z) {
 
 /* This routine will create the "loc" array based on current species' data. */
 void do_locations(void) {
+    // from galaxy.c
+    extern struct galaxy_data galaxy;
+    // from species.c
+    extern int data_in_memory[];
+    extern struct species_data spec_data[MAX_SPECIES];
+    extern struct species_data *species;
+    extern int species_number;
+    // from nampla.c
+    extern struct nampla_data *namp_data[MAX_SPECIES];
+    extern struct nampla_data *nampla_base;
+    extern struct nampla_data *nampla;
+    // from ship.c
+    extern struct ship_data *ship_data[MAX_SPECIES];
+    extern struct ship_data *ship_base;
+    extern struct ship_data *ship;
+
     num_locs = 0;
     for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
         int spidx = species_number - 1;
@@ -140,7 +140,7 @@ void locationDataAsSExpr(FILE *fp) {
     fprintf(fp, "(locations");
     for (int i = 0; i < num_locs; i++) {
         sp_loc_data_t *p = &loc[i];
-        fprintf(fp, "\n  (location (x %3d) (y %3d) (z %d) (species %3d))", p->x, p->y, p->z, p->s);
+        fprintf(fp, "\n  (location (x %3d) (y %3d) (z %3d) (species %3d))", p->x, p->y, p->z, p->s);
     }
     fprintf(fp, ")\n");
 }

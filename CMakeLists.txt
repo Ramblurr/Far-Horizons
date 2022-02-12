@@ -36,7 +36,7 @@ add_executable(fhloc
         src/ship.h src/ship.c
         src/item.h src/item.c
         src/location.h src/location.c
-        src/Locations.c)
+        src/fhloc.c)
 
 add_executable(fhorders
         src/engine.h src/engine.c

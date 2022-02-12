@@ -37,39 +37,35 @@
 #include "ship.h"
 #include "location.h"
 
-// from galaxy.c
-extern struct galaxy_data galaxy;
 
-// from planet.c
-extern int num_planets;
-extern struct planet_data *planet;
-extern struct planet_data *planet_base;
-
-// from species.c
-extern int data_in_memory[];
-extern int data_modified[];
-extern struct species_data *spec_data;
-extern struct species_data *species;
-extern int species_number;
-
-// from nampla.c
-extern struct nampla_data *namp_data[MAX_SPECIES];
-extern struct nampla_data *nampla_base;
-extern struct nampla_data *nampla;
-
-// from ship.c
-extern struct ship_data *ship_base;
-extern struct ship_data *ship;
-
-// from location.c
-extern int num_locs;
-extern struct sp_loc_data loc[MAX_LOCATIONS];
-
-int species_index;
 int test_mode;
 int verbose_mode;
 
 int main(int argc, char *argv[]) {
+    // from galaxy.c
+    extern struct galaxy_data galaxy;
+    // from planet.c
+    extern int num_planets;
+    extern struct planet_data *planet;
+    extern struct planet_data *planet_base;
+    // from species.c
+    extern int data_in_memory[MAX_SPECIES];
+    extern int data_modified[MAX_SPECIES];
+    extern struct species_data spec_data[MAX_SPECIES];
+    extern struct species_data *species;
+    extern int species_number;
+    extern int species_index;
+    // from nampla.c
+    extern struct nampla_data *namp_data[MAX_SPECIES];
+    extern struct nampla_data *nampla_base;
+    extern struct nampla_data *nampla;
+    // from ship.c
+    extern struct ship_data *ship_base;
+    extern struct ship_data *ship;
+    // from location.c
+    extern int num_locs;
+    extern struct sp_loc_data loc[MAX_LOCATIONS];
+
     int i;
     int nampla_index;
     long diff;
@@ -88,27 +84,28 @@ int main(int argc, char *argv[]) {
         }
     }
 
-/* Get commonly used data. */
+    /* Get commonly used data. */
     get_galaxy_data();
     get_planet_data();
     get_species_data();
 
-/* Allocate memory for array "total_econ_base". */
+    /* Allocate memory for array "total_econ_base". */
     total_econ_base = (long *) calloc(num_planets, sizeof(long));
     if (total_econ_base == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
         exit(-1);
     }
 
-/* Initialize total econ base for each planet. */
+    /* Initialize total econ base for each planet. */
     planet = planet_base;
     for (i = 0; i < num_planets; i++) {
         total_econ_base[i] = 0;
         planet++;
     }
 
-/* Get total economic base for each planet from nampla data. */
+    /* Get total economic base for each planet from nampla data. */
     for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
+        struct species_data *sp;
         if (data_in_memory[species_number - 1] == FALSE) {
             continue;
         }
@@ -128,7 +125,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-/* Update economic efficiencies of all planets. */
+    /* Update economic efficiencies of all planets. */
     planet = planet_base;
     for (i = 0; i < num_planets; i++) {
         total = total_econ_base[i];
@@ -141,10 +138,10 @@ int main(int argc, char *argv[]) {
         planet++;
     }
 
-/* Create new locations array. */
+    /* Create new locations array. */
     do_locations();
 
-/* Clean up and exit. */
+    /* Clean up and exit. */
     save_location_data();
 
     fp = fopen("locations.txt", "wb");
