@@ -16,24 +16,24 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "galaxy.h"
 
-int main(int argc, char *argv[]) {
-    /* Check for valid command line. */
-    if (argc != 1) {
-        fprintf(stderr, "\n\tUsage: TurnNumber\n\n");
-        exit(0);
+struct galaxy_data galaxy;
+
+void get_galaxy_data(void) {
+    /* Open galaxy file. */
+    FILE *fp = fopen("galaxy.dat", "rb");
+    if (fp == NULL) {
+        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
+        exit(-1);
     }
-
-    /* Get galaxy data. */
-    get_galaxy_data();
-
-    /* Print the current turn number. */
-    printf("%d\n", galaxy.turn_number);
-
-    exit(0);
+    /* Read data. */
+    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
+        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
+        exit(-1);
+    }
+    fclose(fp);
 }

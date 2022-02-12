@@ -16,24 +16,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
+#include "engine.h"
+#include "nampla.h"
 
-int main(int argc, char *argv[]) {
-    /* Check for valid command line. */
-    if (argc != 1) {
-        fprintf(stderr, "\n\tUsage: TurnNumber\n\n");
-        exit(0);
-    }
+struct nampla_data *namp_data[MAX_SPECIES];
+struct nampla_data *nampla_base;
+struct nampla_data *nampla;
 
-    /* Get galaxy data. */
-    get_galaxy_data();
+// Additional memory must be allocated for routines that name planets.
+// This is the default 'extras', which may be changed, if necessary.
+int extra_namplas = NUM_EXTRA_NAMPLAS;
+int num_new_namplas[MAX_SPECIES];
 
-    /* Print the current turn number. */
-    printf("%d\n", galaxy.turn_number);
 
-    exit(0);
-}
+

@@ -25,5 +25,15 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(fhturn
         src/TurnNumber.c
-        src/get_gal.c
-        src/galaxy.h)
+        src/galaxy.h src/galaxy.c)
+
+add_executable(fhloc
+        src/Locations.c
+        src/galaxy.h src/galaxy.c
+        src/planet.h src/planet.c
+        src/species.h src/species.c
+        src/nampla.h src/nampla.c
+        src/ship.h src/ship.c
+        src/item.h src/item.c
+        src/location.h src/location.c
+        src/engine.h)

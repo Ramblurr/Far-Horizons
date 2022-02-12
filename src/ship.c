@@ -16,24 +16,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
+#include "ship.h"
+#include "species.h"
 
-int main(int argc, char *argv[]) {
-    /* Check for valid command line. */
-    if (argc != 1) {
-        fprintf(stderr, "\n\tUsage: TurnNumber\n\n");
-        exit(0);
-    }
+struct ship_data *ship_data[MAX_SPECIES];
+struct ship_data *ship_base;
+struct ship_data *ship;
 
-    /* Get galaxy data. */
-    get_galaxy_data();
-
-    /* Print the current turn number. */
-    printf("%d\n", galaxy.turn_number);
-
-    exit(0);
-}
+// Additional memory must be allocated for routines that build ships.
+// This is the default 'extras', which may be changed, if necessary.
+int extra_ships = NUM_EXTRA_SHIPS;
+int num_new_ships[MAX_SPECIES];

@@ -16,24 +16,28 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
+#ifndef FAR_HORIZONS_ENGINE_H
+#define FAR_HORIZONS_ENGINE_H
 
-int main(int argc, char *argv[]) {
-    /* Check for valid command line. */
-    if (argc != 1) {
-        fprintf(stderr, "\n\tUsage: TurnNumber\n\n");
-        exit(0);
-    }
+// declare constants
+#define TRUE  1
+#define FALSE 0
 
-    /* Get galaxy data. */
-    get_galaxy_data();
+#define STANDARD_NUMBER_OF_SPECIES      15 /* A standard game has 15 species. */
+#define STANDARD_NUMBER_OF_STAR_SYSTEMS 90 /* A standard game has 90 star systems. */
+#define STANDARD_GALACTIC_RADIUS        20 /* A standard game has a galaxy with a radius of 20 parsecs. */
 
-    /* Print the current turn number. */
-    printf("%d\n", galaxy.turn_number);
+/* Minimum and maximum values for a galaxy. */
+#define MIN_SPECIES  1
+#define MAX_SPECIES  100
+#define MIN_STARS    12
+#define MAX_STARS    1000
+#define MIN_RADIUS   6
+#define MAX_RADIUS   50
+#define MAX_DIAMETER (2*MAX_RADIUS)
+#define MAX_PLANETS  (9*MAX_STARS)
 
-    exit(0);
-}
+#define HP_AVAILABLE_POP 1500
+
+#endif //FAR_HORIZONS_ENGINE_H

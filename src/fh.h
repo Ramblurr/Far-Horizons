@@ -4,53 +4,15 @@
 #include <ctype.h>
 #include <malloc.h>
 
-
-#define	TRUE	1
-#define	FALSE	0
+#include "engine.h"
 
 
-#define	STANDARD_NUMBER_OF_SPECIES	15
-	/* A standard game has 15 species. */
-#define STANDARD_NUMBER_OF_STAR_SYSTEMS	90
-	/* A standard game has 90 star systems. */
-#define STANDARD_GALACTIC_RADIUS	20
-	/* A standard game has a galaxy with a radius of 20 parsecs. */
 
 
-/* Minimum and maximum values for a galaxy. */
-#define	MIN_SPECIES	1
-#define	MAX_SPECIES	100
-#define	MIN_STARS	12
-#define	MAX_STARS	1000
-#define	MIN_RADIUS	6
-#define	MAX_RADIUS	50
-#define	MAX_DIAMETER	2*MAX_RADIUS
-#define MAX_PLANETS	9*MAX_STARS
-
-#define	HP_AVAILABLE_POP	1500
-
-#define		NUM_EXTRA_NAMPLAS	50
-#define		NUM_EXTRA_SHIPS		100
 
 
-#define MAX_LOCATIONS	10000
-struct sp_loc_data
-{
-    char	s, x, y, z;	/* Species number, x, y, and z. */
-};
+#include "galaxy.h"
 
-
-struct galaxy_data
-{
-    int		d_num_species;	/* Design number of species in galaxy. */
-    int		num_species;	/* Actual number of species allocated. */
-    int		radius;		/* Galactic radius in parsecs. */
-    int		turn_number;	/* Current turn number. */
-};
-
-
-/* Assume at least 32 bits per long word. */
-#define NUM_CONTACT_WORDS	((MAX_SPECIES - 1) / 32) + 1
 
 
 /* Star types. */
@@ -109,31 +71,7 @@ struct star_data
 #define	SO2	12	/* Sulfur Dioxide */
 #define	H2S	13	/* Hydrogen Sulfide */
 
-struct planet_data
-{
-    char	temperature_class;  /* Temperature class, 1-30. */
-    char	pressure_class;	    /* Pressure class, 0-29. */
-    char	special;	    /* 0 = not special, 1 = ideal home planet,
-				       2 = ideal colony planet, 3 = radioactive
-				       hellhole. */
-    char	reserved1;	    /* Reserved for future use. Zero for now. */
-    char	gas[4];		    /* Gas in atmosphere. Zero if none. */
-    char	gas_percent[4];	    /* Percentage of gas in atmosphere. */
-    short	reserved2;	    /* Reserved for future use. Zero for now. */
-    short	diameter;	    /* Diameter in thousands of kilometers. */
-    short	gravity;	    /* Surface gravity. Multiple of Earth
-					gravity times 100. */
-    short	mining_difficulty;  /* Mining difficulty times 100. */
-    short	econ_efficiency;    /* Economic efficiency. Always 100 for a
-					home planet. */
-    short	md_increase;	    /* Increase in mining difficulty. */
-    long	message;	    /* Message associated with this planet,
-					if any. */
-    long	reserved3;	    /* Reserved for future use. Zero for now. */
-    long	reserved4;	    /* Reserved for future use. Zero for now. */
-    long	reserved5;	    /* Reserved for future use. Zero for now. */
-};
-
+#include "planet.h"
 
 /* Tech level ids. */
 #define	MI	0	/* Mining tech level. */
@@ -143,208 +81,16 @@ struct planet_data
 #define	LS	4	/* Life Support tech level. */
 #define	BI	5	/* Biology tech level. */
 
-struct species_data
-{
-    char	name[32];		/* Name of species. */
-    char	govt_name[32];		/* Name of government. */
-    char	govt_type[32];		/* Type of government. */
-    char	x, y, z, pn;		/* Coordinates of home planet. */
-    char	required_gas;		/* Gas required by species. */
-    char	required_gas_min;	/* Minimum needed percentage. */
-    char	required_gas_max;	/* Maximum allowed percentage. */
-    char	reserved5;		/* Zero for now. */
-    char	neutral_gas[6];		/* Gases neutral to species. */
-    char	poison_gas[6];		/* Gases poisonous to species. */
-    char	auto_orders;		/* AUTO command was issued. */
-    char	reserved3;		/* Zero for now. */
-    short	reserved4;		/* Zero for now. */
-    short	tech_level[6];		/* Actual tech levels. */
-    short	init_tech_level[6];	/* Tech levels at start of turn. */
-    short	tech_knowledge[6];	/* Unapplied tech level knowledge. */
-    int		num_namplas;		/* Number of named planets, including
-					   home planet and colonies. */
-    int		num_ships;		/* Number of ships. */
-    long	tech_eps[6];		/* Experience points for tech levels. */
-    long	hp_original_base;	/* If non-zero, home planet was bombed
-					   either by bombardment or germ
-					   warfare and has not yet fully
-					   recovered. Value is total economic
-					   base before bombing. */
-    long	econ_units;		/* Number of economic units. */
-    long	fleet_cost;		/* Total fleet maintenance cost. */
-    long	fleet_percent_cost;	/* Fleet maintenance cost as a
-					   percentage times one hundred. */
-    long	contact[NUM_CONTACT_WORDS];
-					/* A bit is set if corresponding
-					   species has been met. */
-    long	ally[NUM_CONTACT_WORDS];
-					/* A bit is set if corresponding
-					   species is considered an ally. */
-    long	enemy[NUM_CONTACT_WORDS];
-					/* A bit is set if corresponding
-					   species is considered an enemy. */
-    char	padding[12];		/* Use for expansion. Initialized to
-						all zeroes. */
-};
+#include "species.h"
+
+#include "item.h"
 
 
-/* Item IDs. */
-#define	RM	0	/* Raw Material Units. */
-#define	PD	1	/* Planetary Defense Units. */
-#define SU	2	/* Starbase Units. */
-#define	DR	3	/* Damage Repair Units. */
-#define	CU	4	/* Colonist Units. */
-#define	IU	5	/* Colonial Mining Units. */
-#define	AU	6	/* Colonial Manufacturing Units. */
-#define	FS	7	/* Fail-Safe Jump Units. */
-#define JP	8	/* Jump Portal Units. */
-#define FM	9	/* Forced Misjump Units. */
-#define	FJ	10	/* Forced Jump Units. */
-#define GT	11	/* Gravitic Telescope Units. */
-#define FD	12	/* Field Distortion Units. */
-#define TP	13	/* Terraforming Plants. */
-#define GW	14	/* Germ Warfare Bombs. */
-#define SG1	15	/* Mark-1 Auxiliary Shield Generators. */
-#define SG2	16	/* Mark-2. */
-#define SG3	17	/* Mark-3. */
-#define SG4	18	/* Mark-4. */
-#define SG5	19	/* Mark-5. */
-#define SG6	20	/* Mark-6. */
-#define SG7	21	/* Mark-7. */
-#define SG8	22	/* Mark-8. */
-#define SG9	23	/* Mark-9. */
-#define GU1	24	/* Mark-1 Auxiliary Gun Units. */
-#define GU2	25	/* Mark-2. */
-#define GU3	26	/* Mark-3. */
-#define GU4	27	/* Mark-4. */
-#define GU5	28	/* Mark-5. */
-#define GU6	29	/* Mark-6. */
-#define GU7	30	/* Mark-7. */
-#define GU8	31	/* Mark-8. */
-#define GU9	32	/* Mark-9. */
-#define X1	33	/* Unassigned. */
-#define X2	34	/* Unassigned. */
-#define X3	35	/* Unassigned. */
-#define X4	36	/* Unassigned. */
-#define X5	37	/* Unassigned. */
 
-#define MAX_ITEMS	38	/* Always bump this up to a multiple of two.
-				Don't forget to make room for zeroth element! */
+#include "nampla.h"
 
 
-/* Status codes for named planets. These are logically ORed together. */
-#define	HOME_PLANET		1
-#define	COLONY			2
-#define POPULATED		8
-#define MINING_COLONY		16
-#define RESORT_COLONY		32
-#define DISBANDED_COLONY	64
-
-struct nampla_data
-{
-    char	name[32];	/* Name of planet. */
-    char	x, y, z, pn;	/* Coordinates. */
-    char	status;		/* Status of planet. */
-    char	reserved1;	/* Zero for now. */
-    char	hiding;		/* HIDE order given. */
-    char	hidden;		/* Colony is hidden. */
-    short	reserved2;	/* Zero for now. */
-    short	planet_index;	/* Index (starting at zero) into the file
-				   "planets.dat" of this planet. */
-    short	siege_eff;	/* Siege effectiveness - a percentage between
-					0 and 99. */
-    short	shipyards;	/* Number of shipyards on planet. */
-    int		reserved4;	/* Zero for now. */
-    int		IUs_needed;	/* Incoming ship with only CUs on board. */
-    int		AUs_needed;	/* Incoming ship with only CUs on board. */
-    int		auto_IUs;	/* Number of IUs to be automatically installed. */
-    int		auto_AUs;	/* Number of AUs to be automatically installed. */
-    int		reserved5;	/* Zero for now. */
-    int		IUs_to_install;	/* Colonial mining units to be installed. */
-    int		AUs_to_install;	/* Colonial manufacturing units to be installed. */
-    long	mi_base;	/* Mining base times 10. */
-    long	ma_base;	/* Manufacturing base times 10. */
-    long	pop_units;	/* Number of available population units. */
-    long	item_quantity[MAX_ITEMS]; /* Quantity of each item available. */
-    long	reserved6;	/* Zero for now. */
-    long	use_on_ambush;	/* Amount to use on ambush. */
-    long	message;	/* Message associated with this planet,
-					if any. */
-    long	special;	/* Different for each application. */
-    char	padding[28];	/* Use for expansion. Initialized to
-					all zeroes. */
-};
-
-
-/* Ship classes. */
-#define	PB	0	/* Picketboat. */
-#define	CT	1	/* Corvette. */
-#define	ES	2	/* Escort. */
-#define	DD	3	/* Destroyer. */
-#define	FG	4	/* Frigate. */
-#define	CL	5	/* Light Cruiser. */
-#define	CS	6	/* Strike Cruiser. */
-#define	CA	7	/* Heavy Cruiser. */
-#define	CC	8	/* Command Cruiser. */
-#define	BC	9	/* Battlecruiser. */
-#define	BS	10	/* Battleship. */
-#define	DN	11	/* Dreadnought. */
-#define SD	12	/* Super Dreadnought. */
-#define	BM	13	/* Battlemoon. */
-#define	BW	14	/* Battleworld. */
-#define	BR	15	/* Battlestar. */
-#define	BA	16	/* Starbase. */
-#define	TR	17	/* Transport. */
-
-#define	NUM_SHIP_CLASSES	18
-
-/* Ship types. */
-#define	FTL		0
-#define	SUB_LIGHT	1
-#define	STARBASE	2
-
-/* Ship status codes. */
-#define	UNDER_CONSTRUCTION	0
-#define	ON_SURFACE		1
-#define	IN_ORBIT		2
-#define	IN_DEEP_SPACE		3
-#define	JUMPED_IN_COMBAT	4
-#define	FORCED_JUMP		5
-
-struct ship_data
-{
-    char	name[32];		/* Name of ship. */
-    char	x, y, z, pn;		/* Current coordinates. */
-    char	status;			/* Current status of ship. */
-    char	type;			/* Ship type. */
-    char	dest_x, dest_y;		/* Destination if ship was forced to
-					   jump from combat. */
-    char	dest_z;			/* Ditto. Also used by TELESCOPE command. */
-    char	just_jumped;		/* Set if ship jumped this turn. */
-    char	arrived_via_wormhole;	/* Ship arrived via wormhole in the
-					   PREVIOUS turn. */
-    char	reserved1;		/* Unused. Zero for now. */
-    short	reserved2;		/* Unused. Zero for now. */
-    short	reserved3;		/* Unused. Zero for now. */
-    short	class;			/* Ship class. */
-    short	tonnage;		/* Ship tonnage divided by 10,000. */
-    short	item_quantity[MAX_ITEMS]; /* Quantity of each item carried. */
-    short	age;			/* Ship age. */
-    short	remaining_cost;		/* The cost needed to complete the
-					   ship if still under construction. */
-    short	reserved4;		/* Unused. Zero for now. */
-    short	loading_point;		/* Nampla index for planet where ship
-					   was last loaded with CUs. Zero =
-					   none. Use 9999 for home planet. */
-    short	unloading_point;	/* Nampla index for planet that ship
-					   should be given orders to jump to
-					   where it will unload. Zero = none.
-					   Use 9999 for home planet. */
-    long	special;		/* Different for each application. */
-    char    	padding[28];		/* Use for expansion. Initialized to
-						all zeroes. */
-};
-
+#include "ship.h"
 
 /* Interspecies transactions. */
 
@@ -488,14 +234,7 @@ struct trans_data
 		"Biology"
 	};
 
-    int				data_in_memory[MAX_SPECIES];
-    int				data_modified[MAX_SPECIES];
-    int				num_new_namplas[MAX_SPECIES];
-    int				num_new_ships[MAX_SPECIES];
 
-    struct species_data		spec_data[MAX_SPECIES];
-    struct nampla_data		*namp_data[MAX_SPECIES];
-    struct ship_data		*ship_data[MAX_SPECIES];
 
     char
 	item_name[MAX_ITEMS][32] =

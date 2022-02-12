@@ -41,99 +41,10 @@ unsigned int	max;
 	"save_species_data" will write all data that has been modified, and
 	"free_species_data" will free memory used for all species data. */
 
-/* Additional memory must be allocated for routines that build ships or
-   name planets. Here are the default 'extras', which may be changed, if
-   necessary, by the main program. */
-
-long	extra_namplas = NUM_EXTRA_NAMPLAS;
-long	extra_ships = NUM_EXTRA_SHIPS;
 
 extern struct galaxy_data	galaxy;
 
 
-get_species_data ()
-
-{
-    int		species_fd, species_index;
-
-    long	n, num_bytes;
-
-    char	filename[16];
-
-    struct species_data		*sp;
-
-
-    for (species_index = 0; species_index < galaxy.num_species; species_index++)
-    {
-	data_modified[species_index] = FALSE;
-
-	sp = &spec_data[species_index];
-
-	/* Open the species data file. */
-	sprintf (filename, "sp%02d.dat\0", species_index + 1);
-	species_fd = open (filename, 0);
-	if (species_fd < 0)
-	{
-	    sp->pn = 0;	/* Extinct! */
-	    data_in_memory[species_index] = FALSE;
-	    continue;
-	}
-
-	/* Read in species data. */
-	num_bytes = read (species_fd, sp, sizeof(struct species_data));
-	if (num_bytes != sizeof(struct species_data))
-	{
-	    fprintf (stderr, "\n\tCannot read species record in file '%s'!\n\n",
-	    	filename);
-	    exit (-1);
-	}
-
-	/* Allocate enough memory for all namplas. */
-	num_bytes = (sp->num_namplas + extra_namplas) * sizeof (struct nampla_data);
-	namp_data[species_index] = (struct nampla_data *) malloc (num_bytes);
-	if (namp_data[species_index] == NULL)
-	{
-	    fprintf (stderr, "\nCannot allocate enough memory for nampla data!\n\n");
-	    exit (-1);
-	}
-
-	/* Read it all into memory. */
-	num_bytes = (long) sp->num_namplas * sizeof (struct nampla_data);
-	n = read (species_fd, namp_data[species_index], num_bytes);
-	if (n != num_bytes)
-	{
-	    fprintf (stderr, "\nCannot read nampla data into memory!\n\n");
-	    exit (-1);
-	}
-
-	/* Allocate enough memory for all ships. */
- 	num_bytes = (sp->num_ships + extra_ships) * sizeof (struct ship_data);
-	ship_data[species_index] = (struct ship_data *) malloc (num_bytes);
-	if (ship_data[species_index] == NULL)
-	{
-	    fprintf (stderr, "\nCannot allocate enough memory for ship data!\n\n");
-	    exit (-1);
-	}
-
-	if (sp->num_ships > 0)
-	{
-	    /* Read it all into memory. */
-	    num_bytes = (long) sp->num_ships * sizeof (struct ship_data);
-	    n = read (species_fd, ship_data[species_index], num_bytes);
-	    if (n != num_bytes)
-	    {
-	        fprintf (stderr, "\nCannot read ship data into memory!\n\n");
-	        exit (-1);
-	    }
-	}
-
-	close (species_fd);
-
-	data_in_memory[species_index] = TRUE;
-	num_new_namplas[species_index] = 0;
-	num_new_ships[species_index] = 0;
-    }
-}
 
 
 
@@ -203,26 +114,6 @@ save_species_data ()
 
 
 
-free_species_data ()
-
-{
-    int		species_index;
-
-
-    for (species_index = 0; species_index < galaxy.num_species; species_index++)
-    {
-	if (data_in_memory[species_index])
-	{
-	    free (namp_data[species_index]);
-
-	    if (spec_data[species_index].num_ships > 0)
-		free (ship_data[species_index]);
-
-	    data_in_memory[species_index] = FALSE;
-	    data_modified[species_index] = FALSE;
-	}
-    }
-}
 
 
 
@@ -568,9 +459,7 @@ long	value;
 
 
 
-int			num_locs = 0;
 
-struct sp_loc_data	loc[MAX_LOCATIONS];
 
 get_location_data ()
 
@@ -598,43 +487,6 @@ get_location_data ()
     if (n != file_size)
     {
 	fprintf (stderr, "\nCannot read file 'locations.dat' into memory!\n\n");
-	exit (-1);
-    }
-
-    close (locations_fd);
-}
-
-
-
-save_location_data ()
-
-{
-    int		locations_fd;
-
-    long	n, num_bytes;
-
-
-    /* Open file 'locations.dat' for writing. */
-    locations_fd = creat ("locations.dat", 0600);
-    if (locations_fd < 0)
-    {
-	fprintf (stderr, "\n\tCannot create file 'locations.dat'!\n\n");
-	exit (-1);
-    }
-
-    if (num_locs == 0)
-    {
-	close (locations_fd);
-	return;
-    }
-
-    /* Write array to disk. */
-    num_bytes = (long) num_locs * (long) sizeof(struct sp_loc_data);
-
-    n = write (locations_fd, loc, num_bytes);
-    if (n != num_bytes)
-    {
-	fprintf (stderr, "\n\n\tCannot write to 'locations.dat'!\n\n");
 	exit (-1);
     }
 
