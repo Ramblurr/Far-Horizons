@@ -28,6 +28,7 @@ int planet_data_modified;
 
 struct planet_data *planet_base;
 struct planet_data *planet;
+struct planet_data *home_planet;
 
 void get_planet_data(void) {
     /* Open planet file. */

@@ -25,27 +25,24 @@
 #include "nampla.h"
 #include "ship.h"
 
-// from galaxy.c
-extern struct galaxy_data galaxy;
-
-// from nampla.c
-extern int extra_namplas;
-extern struct nampla_data **namp_data;
-extern int *num_new_namplas;
-
-// from ship.c
-extern int extra_ships;
-extern struct ship_data **ship_data;
-extern int *num_new_ships;
-
 int data_in_memory[MAX_SPECIES];
 int data_modified[MAX_SPECIES];
 struct species_data spec_data[MAX_SPECIES];
-int species_number;
+int species_index; // zero-based index, mostly for accessing arrays
+int species_number; // one-based index, for reports and file names
 struct species_data *species;
 
 // free_species_data will free memory used for all species data
 void free_species_data(void) {
+    // from galaxy.c
+    extern struct galaxy_data galaxy;
+
+    // from nampla.c
+    extern struct nampla_data *namp_data[MAX_SPECIES];
+
+    // from ship.c
+    extern struct ship_data *ship_data[MAX_SPECIES];;
+
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
         if (data_in_memory[species_index] == FALSE) {
             continue;
@@ -61,6 +58,19 @@ void free_species_data(void) {
 
 // get_species_data will read in data files for all species
 void get_species_data(void) {
+    // from galaxy.c
+    extern struct galaxy_data galaxy;
+
+    // from nampla.c
+    extern int extra_namplas;
+    extern struct nampla_data *namp_data[MAX_SPECIES];
+    extern int num_new_namplas[MAX_SPECIES];
+
+    // from ship.c
+    extern int extra_ships;
+    extern struct ship_data *ship_data[MAX_SPECIES];
+    extern int num_new_ships[MAX_SPECIES];
+
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
         FILE *fp;
         char filename[16];

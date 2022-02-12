@@ -84,4 +84,6 @@ struct ship_data {
     char padding[28];               /* Use for expansion. Initialized to all zeroes. */
 };
 
+char *ship_name(struct ship_data *ship);
+
 #endif //FAR_HORIZONS_SHIP_H

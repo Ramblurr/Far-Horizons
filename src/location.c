@@ -104,6 +104,37 @@ void do_locations(void) {
     }
 }
 
+void get_location_data(void) {
+    long fileSize;
+
+    /* Open locations file. */
+    FILE *fp = fopen("locations.dat", "rb");
+    if (fp == NULL) {
+        fprintf(stderr, "\nCannot open file 'locations.dat' for reading!\n\n");
+        exit(-1);
+    }
+    /* Get size of file. */
+    fseek(fp, 0, SEEK_END);
+    fileSize = ftell(fp);
+    rewind(fp);
+    // get number of records in the file
+    num_locs = fileSize / sizeof(struct sp_loc_data);
+    if (fileSize != num_locs * sizeof(struct sp_loc_data)) {
+        fprintf(stderr, "\nFile locations.dat contains extra bytes (%d > %d)!\n\n", fileSize,
+                num_locs * sizeof(struct sp_loc_data));
+        exit(-1);
+    } else if (num_locs > MAX_LOCATIONS) {
+        fprintf(stderr, "\nFile locations.dat contains too many records (%d > %d)!\n\n", num_locs, MAX_LOCATIONS);
+        exit(-1);
+    }
+    /* Read it all into memory. */
+    if (fread(loc, sizeof(struct sp_loc_data), num_locs, fp) != num_locs) {
+        fprintf(stderr, "\nCannot read file 'locations.dat' into memory!\n\n");
+        exit(-1);
+    }
+    fclose(fp);
+}
+
 // locationDataAsSExpr writes the current location data to a text file as an s-expression.
 void locationDataAsSExpr(FILE *fp) {
     fprintf(fp, "(locations");

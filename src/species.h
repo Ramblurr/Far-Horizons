@@ -22,8 +22,13 @@
 
 #include "engine.h"
 
-/* Assume at least 32 bits per long word. */
-#define NUM_CONTACT_WORDS	((MAX_SPECIES - 1) / 32) + 1
+/* Tech level ids. */
+#define MI 0 /* Mining tech level. */
+#define MA 1 /* Manufacturing tech level. */
+#define ML 2 /* Military tech level. */
+#define GV 3 /* Gravitics tech level. */
+#define LS 4 /* Life Support tech level. */
+#define BI 5 /* Biology tech level. */
 
 struct species_data {
     char name[32];                      /* Name of species. */
@@ -56,6 +61,7 @@ struct species_data {
 };
 
 void free_species_data(void);
+
 void get_species_data(void);
 
 #endif //FAR_HORIZONS_SPECIES_H

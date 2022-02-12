@@ -24,11 +24,11 @@ include_directories(src)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(fhturn
-        src/TurnNumber.c
-        src/galaxy.h src/galaxy.c)
+        src/galaxy.h src/galaxy.c
+        src/TurnNumber.c)
 
 add_executable(fhloc
-        src/Locations.c
+        src/engine.h
         src/galaxy.h src/galaxy.c
         src/planet.h src/planet.c
         src/species.h src/species.c
@@ -36,4 +36,16 @@ add_executable(fhloc
         src/ship.h src/ship.c
         src/item.h src/item.c
         src/location.h src/location.c
-        src/engine.h)
+        src/Locations.c)
+
+add_executable(fhorders
+        src/engine.h src/engine.c
+        src/galaxy.h src/galaxy.c
+        src/star.h src/star.c
+        src/planet.h src/planet.c
+        src/species.h src/species.c
+        src/nampla.h src/nampla.c
+        src/ship.h src/ship.c
+        src/location.h src/location.c
+        src/no_orders.h src/no_orders.c
+        src/NoOrders.c)

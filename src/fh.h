@@ -5,55 +5,10 @@
 #include <malloc.h>
 
 #include "engine.h"
-
-
-
-
-
-
 #include "galaxy.h"
+#include "star.h"
 
 
-
-/* Star types. */
-#define	DWARF		1
-#define	DEGENERATE	2
-#define	MAIN_SEQUENCE	3
-#define	GIANT		4
-
-/* Star Colors. */
-#define	BLUE		1
-#define	BLUE_WHITE	2
-#define	WHITE		3
-#define	YELLOW_WHITE	4
-#define	YELLOW		5
-#define	ORANGE		6
-#define	RED		7
-
-struct star_data
-{
-    char	x,y,z;		/* Coordinates. */
-    char	type;		/* Dwarf, degenerate, main sequence or giant. */
-    char	color;		/* Star color. Blue, blue-white, etc. */
-    char	size;		/* Star size, from 0 thru 9 inclusive. */
-    char	num_planets;	/* Number of usable planets in star system. */
-    char	home_system;	/* TRUE if this is a good potential home system. */
-    char	worm_here;	/* TRUE if wormhole entry/exit. */
-    char	worm_x, worm_y, worm_z;
-    short	reserved1;	/* Reserved for future use. Zero for now. */
-    short	reserved2;	/* Reserved for future use. Zero for now. */
-    short	planet_index;	/* Index (starting at zero) into the file
-				   "planets.dat" of the first planet in the
-				   star system. */
-    long	message;	/* Message associated with this star system,
-					if any. */
-    long	visited_by[NUM_CONTACT_WORDS];
-				/* A bit is set if corresponding species has
-					been here. */
-    long	reserved3;	/* Reserved for future use. Zero for now. */
-    long	reserved4;	/* Reserved for future use. Zero for now. */
-    long	reserved5;	/* Reserved for future use. Zero for now. */
-};
 
 
 /* Gases in planetary atmospheres. */
@@ -73,23 +28,9 @@ struct star_data
 
 #include "planet.h"
 
-/* Tech level ids. */
-#define	MI	0	/* Mining tech level. */
-#define	MA	1	/* Manufacturing tech level. */
-#define	ML	2	/* Military tech level. */
-#define	GV	3	/* Gravitics tech level. */
-#define	LS	4	/* Life Support tech level. */
-#define	BI	5	/* Biology tech level. */
-
 #include "species.h"
-
 #include "item.h"
-
-
-
 #include "nampla.h"
-
-
 #include "ship.h"
 
 /* Interspecies transactions. */
@@ -328,17 +269,6 @@ struct trans_data
 		10,	20,	30,	40,	50,	60,	70,	80,
 		90,	999,	999,	999,	999,	999
 	};
-
-    char
-	ship_abbr[NUM_SHIP_CLASSES][4] =
-	{
-		"PB",	"CT",	"ES",	"FF",	"DD",	"CL",	"CS",
-		"CA",	"CC",	"BC",	"BS",	"DN",	"SD",	"BM",
-		"BW",	"BR",	"BA",	"TR"
-	};
-
-    char
-	ship_type[3][2] = {"", "S", "S"};
 
     short
 	ship_tonnage[NUM_SHIP_CLASSES] =

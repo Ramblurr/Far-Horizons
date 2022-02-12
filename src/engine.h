@@ -40,4 +40,10 @@
 
 #define HP_AVAILABLE_POP 1500
 
+/* Assume at least 32 bits per long word. */
+#define NUM_CONTACT_WORDS	((MAX_SPECIES - 1) / 32) + 1
+
+char *commas(long value);
+int rnd(unsigned int max);
+
 #endif //FAR_HORIZONS_ENGINE_H

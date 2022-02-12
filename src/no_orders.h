@@ -17,26 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_LOCATION_H
-#define FAR_HORIZONS_LOCATION_H
+#ifndef FAR_HORIZONS_NO_ORDERS_H
+#define FAR_HORIZONS_NO_ORDERS_H
 
-#include <stdio.h>
+#include "ship.h"
 
-#define MAX_LOCATIONS    10000
+void NoOrdersForSpecies(void);
+void print_mishap_chance(struct ship_data *ship, int destx, int desty, int destz);
 
-struct sp_loc_data {
-    char s;    /* Species number */
-    char x;
-    char y;
-    char z;
-};
-
-typedef struct sp_loc_data sp_loc_data_t;
-
-void add_location(char x, char y, char z);
-void do_locations(void);
-void get_location_data(void);
-void locationDataAsSExpr(FILE *fp);
-void save_location_data(void);
-
-#endif //FAR_HORIZONS_LOCATION_H
+#endif //FAR_HORIZONS_NO_ORDERS_H
