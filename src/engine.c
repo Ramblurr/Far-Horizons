@@ -26,6 +26,61 @@
 // allow callers to set the seed. ugh.
 unsigned long last_random = 1924085713L;    /* Random seed. */
 
+int	correct_spelling_required = FALSE;
+int prompt_gm;
+int test_mode;
+int verbose_mode;
+char upper_name[32];
+
+
+/* The following routine will return a score indicating how closely two strings match.
+ * If the score is exactly 10000, then the strings are identical.
+ * Otherwise, the value returned is the number of character matches, allowing for accidental transpositions, insertions, and deletions.
+ * Excess characters in either string will subtract from the score.
+ * Thus, it's possible for a score to be negative.
+ *
+ * In general, if the strings are at least 7 characters each, then you can assume the strings
+ * are the same if the highest score equals the length of the correct string, length-1,
+ * or length-2, AND if the score of the next best match is less than the highest score.
+ * A non-10000 score will never be higher than the length of the correct string. */
+int agrep_score(char *correct_string, char *unknown_string) {
+    int score;
+    char c1, c2, *p1, *p2;
+    if (strcmp(correct_string, unknown_string) == 0) {
+        return 10000;
+    }
+    score = 0;
+    p1 = correct_string;
+    p2 = unknown_string;
+    while (1) {
+        if ((c1 = *p1++) == '\0') {
+            score -= strlen(p2);    /* Reduce score by excess characters, if any. */
+            break;
+        }
+        if ((c2 = *p2++) == '\0') {
+            score -= strlen(p1);    /* Reduce score by excess characters, if any. */
+            break;
+        }
+        if (c1 == c2) {
+            ++score;
+        } else if (c1 == *p2 && c2 == *p1) {
+            /* Transposed. */
+            score += 2;
+            ++p1;
+            ++p2;
+        } else if (c1 == *p2) {
+            /* Unneeded character. */
+            ++score;
+            ++p2;
+        } else if (c2 == *p1) {
+            /* Missing character. */
+            ++score;
+            ++p1;
+        }
+    }
+    return score;
+}
+
 /* This routine is intended to take a long argument and return a pointer to a string that has embedded commas to make the string more readable. */
 char *commas(long value) {
     static char result_plus_commas[33];

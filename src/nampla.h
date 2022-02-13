@@ -26,6 +26,14 @@
 // This is the default 'extras', which may be changed, if necessary, by the main program.
 #define NUM_EXTRA_NAMPLAS 50
 
+/* Status codes for named planets. These are logically ORed together. */
+#define HOME_PLANET        1
+#define COLONY             2
+#define POPULATED          8
+#define MINING_COLONY      16
+#define RESORT_COLONY      32
+#define DISBANDED_COLONY   64
+
 struct nampla_data {
     char name[32];                  /* Name of planet. */
     char x, y, z, pn;               /* Coordinates. */
@@ -55,13 +63,8 @@ struct nampla_data {
     long special;                   /* Different for each application. */
     char padding[28];               /* Use for expansion. Initialized to all zeroes. */
 };
+typedef struct nampla_data nampla_data_t;
 
-/* Status codes for named planets. These are logically ORed together. */
-#define HOME_PLANET        1
-#define COLONY             2
-#define POPULATED          8
-#define MINING_COLONY      16
-#define RESORT_COLONY      32
-#define DISBANDED_COLONY   64
+int check_population(struct nampla_data *nampla);
 
 #endif //FAR_HORIZONS_NAMPLA_H

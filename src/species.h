@@ -21,6 +21,7 @@
 #define FAR_HORIZONS_SPECIES_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include "engine.h"
 
 /* Tech level ids. */
@@ -61,8 +62,13 @@ struct species_data {
     uint8_t padding[12];                   /* Use for expansion. Initialized to all zeroes. */
 };
 
-void free_species_data(void);
+typedef struct species_data species_data_t;
 
+int distorted(int species_number);
+void free_species_data(void);
 void get_species_data(void);
+void save_species_data(void);
+void speciesDataAsSExpr(FILE *fp, species_data_t *sp, int spNo);
+int undistorted(int distorted_species_number);
 
 #endif //FAR_HORIZONS_SPECIES_H

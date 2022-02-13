@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include "galaxy.h"
 #include "species.h"
 #include "nampla.h"
@@ -32,14 +31,28 @@ int species_index; // zero-based index, mostly for accessing arrays
 int species_number; // one-based index, for reports and file names
 struct species_data *species;
 
+/* The following routine provides the 'distorted' species number used to
+	identify a species that uses field distortion units. The input
+	variable 'species_number' is the same number used in filename
+	creation for the species. */
+int distorted(int species_number) {
+    int i, j, n, ls;
+    /* We must use the LS tech level at the start of the turn because
+       the distorted species number must be the same throughout the
+       turn, even if the tech level changes during production. */
+    ls = spec_data[species_number - 1].init_tech_level[LS];
+    i = species_number & 0x000F; /* Lower four bits. */
+    j = (species_number >> 4) & 0x000F; /* Upper four bits. */
+    n = (ls % 5 + 3) * (4 * i + j) + (ls % 11 + 7);
+    return n;
+}
+
 // free_species_data will free memory used for all species data
 void free_species_data(void) {
     // from galaxy.c
     extern struct galaxy_data galaxy;
-
     // from nampla.c
     extern struct nampla_data *namp_data[MAX_SPECIES];
-
     // from ship.c
     extern struct ship_data *ship_data[MAX_SPECIES];;
 
@@ -60,12 +73,10 @@ void free_species_data(void) {
 void get_species_data(void) {
     // from galaxy.c
     extern struct galaxy_data galaxy;
-
     // from nampla.c
     extern int extra_namplas;
     extern struct nampla_data *namp_data[MAX_SPECIES];
     extern int num_new_namplas[MAX_SPECIES];
-
     // from ship.c
     extern int extra_ships;
     extern struct ship_data *ship_data[MAX_SPECIES];
@@ -121,3 +132,77 @@ void get_species_data(void) {
         num_new_ships[species_index] = 0;
     }
 }
+
+// save_species_data will write all data that has been modified
+void save_species_data(void) {
+    // from galaxy.c
+    extern struct galaxy_data galaxy;
+    // from nampla.c
+    extern struct nampla_data *namp_data[MAX_SPECIES];
+    // from ship.c
+    extern struct ship_data *ship_data[MAX_SPECIES];;
+
+    for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
+        FILE *fp;
+        char filename[16];
+        struct species_data *sp;
+
+        if (!data_modified[species_index]) {
+            continue;
+        }
+        sp = &spec_data[species_index];
+        /* Open the species data file. */
+        sprintf(filename, "sp%02d.dat", species_index + 1);
+        fp = fopen(filename, "wb");
+        if (fp == NULL) {
+            perror("save_species_data");
+            fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
+            exit(-1);
+        }
+        /* Write species data. */
+        if (fwrite(sp, sizeof(struct species_data), 1, fp) != 1) {
+            perror("save_species_data");
+            fprintf(stderr, "\n\tCannot write species record to file '%s'!\n\n", filename);
+            exit(-1);
+        }
+        /* Write nampla data. */
+        if (fwrite(namp_data[species_index], sizeof(struct nampla_data), 1, fp) != 1) {
+            perror("save_species_data");
+            fprintf(stderr, "\n\tCannot write nampla data to file '%s'!\n\n", filename);
+            exit(-1);
+        }
+        /* Write ship data. */
+        if (sp->num_ships > 0) {
+            if (fwrite(ship_data[species_index], sizeof(struct ship_data), 1, fp) != 1) {
+                perror("save_species_data");
+                fprintf(stderr, "\n\tCannot write ship data to file '%s'!\n\n", filename);
+                exit(-1);
+            }
+        }
+        fclose(fp);
+        data_modified[species_index] = FALSE;
+    }
+}
+
+// speciesDataAsSExpr writes the current species data to a text file as an s-expression.
+void speciesDataAsSExpr(FILE *fp, species_data_t *sp, int spNo) {
+    fprintf(fp, "(species %3d (name \"%s\") (government (name \"%s\") (type \"%s\"))", spNo, sp->name, sp->govt_name,
+            sp->govt_type);
+    fprintf(fp, "\n  (name \"%s\")", sp->name);
+    fprintf(fp, "\n  (government (name \"%s\") (type \"%s\"))", sp->govt_name, sp->govt_type);
+    fprintf(fp, "\n  (homeworld (x %3d) (y %3d) (z %3d) (orbit %d))", sp->x, sp->y, sp->z, sp->pn);
+    fprintf(fp, ")\n");
+}
+
+int undistorted(int distorted_species_number) {
+    int i, species_number;
+    for (i = 0; i < MAX_SPECIES; i++) {
+        species_number = i + 1;
+        if (distorted(species_number) == distorted_species_number) {
+            return species_number;
+        }
+    }
+    return 0;    /* Not a legitimate species. */
+}
+
+

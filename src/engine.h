@@ -43,6 +43,7 @@
 /* Assume at least 32 bits per long word. */
 #define NUM_CONTACT_WORDS	((MAX_SPECIES - 1) / 32) + 1
 
+int agrep_score(char *correct_string, char *unknown_string);
 char *commas(long value);
 int rnd(unsigned int max);
 

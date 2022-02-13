@@ -84,6 +84,9 @@ struct ship_data {
     char padding[28];               /* Use for expansion. Initialized to all zeroes. */
 };
 
+void delete_ship(struct ship_data *ship);
+int get_ship(void);
+long power(short tonnage);
 char *ship_name(struct ship_data *ship);
 
 #endif //FAR_HORIZONS_SHIP_H

@@ -30,22 +30,37 @@ add_executable(fhturn
 add_executable(fhloc
         src/engine.h
         src/galaxy.h src/galaxy.c
-        src/planet.h src/planet.c
-        src/species.h src/species.c
-        src/nampla.h src/nampla.c
-        src/ship.h src/ship.c
         src/item.h src/item.c
         src/location.h src/location.c
+        src/nampla.h src/nampla.c
+        src/planet.h src/planet.c
+        src/ship.h src/ship.c
+        src/species.h src/species.c
         src/fhloc.c)
 
 add_executable(fhorders
         src/engine.h src/engine.c
         src/galaxy.h src/galaxy.c
-        src/star.h src/star.c
-        src/planet.h src/planet.c
-        src/species.h src/species.c
-        src/nampla.h src/nampla.c
-        src/ship.h src/ship.c
         src/location.h src/location.c
+        src/nampla.h src/nampla.c
         src/no_orders.h src/no_orders.c
+        src/planet.h src/planet.c
+        src/ship.h src/ship.c
+        src/species.h src/species.c
+        src/star.h src/star.c
         src/fhorders.c)
+
+add_executable(fhcombat
+        src/combat.h src/combat.c
+        src/command.h src/command.c
+        src/engine.h src/engine.c
+        src/galaxy.h src/galaxy.c
+        src/item.h src/item.c
+        src/location.h src/location.c
+        src/log.h src/log.c
+        src/nampla.h src/nampla.c
+        src/planet.h src/planet.c
+        src/ship.h src/ship.c
+        src/species.h src/species.c
+        src/transaction.c src/transaction.h
+        src/fhcombat.c)
