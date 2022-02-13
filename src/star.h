@@ -24,7 +24,7 @@
 #include "ship.h"
 
 /* In case gamemaster creates new star systems with Edit program. */
-#define NUM_EXTRA_STARS	20
+#define NUM_EXTRA_STARS    20
 
 /* Star types. */
 #define DWARF         1
@@ -65,6 +65,24 @@ struct star_data {
 };
 
 void closest_unvisited_star(struct ship_data *ship);
-void get_star_data (void);
+
+void get_star_data(void);
+
+void scan(int x, int y, int z);
+
+void save_star_data(void);
+
+int star_visited(int x, int y, int z);
+
+// globals. ugh.
+
+extern int num_stars;
+extern struct star_data *star;
+extern struct star_data *star_base;
+extern int star_data_modified;
+extern int x;
+extern int y;
+extern int z;
+extern int pn;
 
 #endif //FAR_HORIZONS_STAR_H

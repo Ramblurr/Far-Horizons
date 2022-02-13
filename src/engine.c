@@ -26,7 +26,9 @@
 // allow callers to set the seed. ugh.
 unsigned long last_random = 1924085713L;    /* Random seed. */
 
-int	correct_spelling_required = FALSE;
+int correct_spelling_required = FALSE;
+int first_pass = FALSE;
+int post_arrival_phase = FALSE;
 int prompt_gm;
 int test_mode;
 int verbose_mode;
@@ -118,6 +120,16 @@ char *commas(long value) {
     return &result_plus_commas[j];
 }
 
+/* Give the gamemaster a chance to abort. */
+void gamemaster_abort_option(void) {
+    char answer[16];
+    printf("*** Gamemaster safe-abort option ... type q or Q to quit: ");
+    fflush(stdout);
+    fgets(answer, 16, stdin);
+    if (answer[0] == 'q' || answer[0] == 'Q') {
+        exit(0);
+    }
+}
 
 // rnd returns a random int between 1 and max, inclusive.
 // It uses the so-called "Algorithm M" method, which is a combination

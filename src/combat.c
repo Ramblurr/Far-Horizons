@@ -27,6 +27,7 @@
 #include "species.h"
 #include "nampla.h"
 #include "ship.h"
+#include "item.h"
 #include "location.h"
 #include "command.h"
 #include "transaction.h"
@@ -56,11 +57,6 @@ char x_attacked_y[MAX_SPECIES][MAX_SPECIES];
 /* This routine will find all species that have declared alliance with both a traitor and betrayed species.
  * It will then set a flag to indicate that their allegiance should be changed from ALLY to ENEMY. */
 void auto_enemy(int traitor_species_number, int betrayed_species_number) {
-    // galaxy.c
-    extern struct galaxy_data galaxy;
-    // species.c
-    extern struct species_data spec_data[MAX_SPECIES];
-
     int traitor_array_index = (traitor_species_number - 1) / 32;
     long traitor_bit_mask = 1 << ((traitor_species_number - 1) % 32);
 
@@ -85,84 +81,30 @@ void auto_enemy(int traitor_species_number, int betrayed_species_number) {
 }
 
 void bad_argument(void) {
-    // input.c
-    extern char input_line[256];
-    // log.c
-    extern FILE *log_file;
-
     fprintf(log_file, "!!! Order ignored:\n");
     fprintf(log_file, "!!! %s", input_line);
     fprintf(log_file, "!!! Invalid argument in command.\n");
 }
 
 void bad_coordinates(void) {
-    // input.c
-    extern char input_line[256];
-    // log.c
-    extern FILE *log_file;
-
     fprintf(log_file, "!!! Order ignored:\n");
     fprintf(log_file, "!!! %s", input_line);
     fprintf(log_file, "!!! Invalid coordinates in command.\n");
 }
 
 void bad_species(void) {
-    // input.c
-    extern char input_line[256];
-    // log.c
-    extern FILE *log_file;
-
     fprintf(log_file, "!!! Order ignored:\n");
     fprintf(log_file, "!!! %s", input_line);
     fprintf(log_file, "!!! Invalid species name!\n");
 }
 
 void battle_error(int species_number) {
-    // input.c
-    extern char input_line[256];
-    // log.c
-    extern FILE *log_file;
     fprintf(log_file, "!!! Order ignored:\n");
     fprintf(log_file, "!!! %s", input_line);
     fprintf(log_file, "!!! Missing BATTLE command!\n");
 }
 
 void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base) {
-    // command.c
-    extern int end_of_file;
-    extern FILE *input_file;
-    extern char input_line[256];
-    extern char *input_line_pointer;
-    extern int just_opened_file;
-    extern long value;
-    // engine.c
-    extern long last_random;
-    extern int prompt_gm;
-    extern int test_mode;
-    extern int verbose_mode;
-    extern char upper_name[32];
-    // galaxy.c
-    extern struct galaxy_data galaxy;
-    // location.c
-    extern int num_locs;
-    extern struct sp_loc_data loc[MAX_LOCATIONS];
-    // log.c
-    extern FILE *log_file;
-    extern int log_stdout;
-    extern char original_line[256];
-    // nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    extern struct nampla_data *nampla_base;
-    // ship.c
-    extern struct ship_data *ship_data[MAX_SPECIES];
-    extern struct ship_data *ship_base;
-    extern struct ship_data *ship;
-    // species.c
-    extern int data_in_memory[MAX_SPECIES];
-    extern int data_modified[MAX_SPECIES];
-    extern struct species_data spec_data[MAX_SPECIES];
-    extern struct species_data *species;
-
     int i;
     int j;
     int k;
@@ -1192,12 +1134,9 @@ int disbanded_ship(int species_index, struct ship_data *sh) {
 }
 
 void do_ambush(int ambushing_species_index, struct battle_data *bat) {
-    // item.c
-    extern char item_abbr[MAX_ITEMS][4];
-    // ship.c
-    extern int truncate_name;
-
-    int i, j, n, num_sp, ambushed_species_index, num_ships, age_increment, species_number, old_truncate_name;
+    int i, j, n, num_sp, ambushed_species_index, num_ships, age_increment;
+    int species_number;
+    int old_truncate_name;
     long friendly_tonnage, enemy_tonnage;
     struct ship_data *sh;
 
@@ -1348,26 +1287,10 @@ void do_ambush(int ambushing_species_index, struct battle_data *bat) {
 }
 
 void do_battle(struct battle_data *bat) {
-    // engine.c
-    extern int prompt_gm;
-    // log.c
-    extern FILE *log_file;
-    extern int log_summary;
-    extern int logging_disabled;
-    extern FILE *summary_file;
-    // nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    // ship.c
-    extern int ignore_field_distorters;
-    extern struct ship_data *ship_data[MAX_SPECIES];
-    extern int truncate_name;
-    // species.c
-    extern int data_in_memory[MAX_SPECIES];
-    extern int data_modified[MAX_SPECIES];
-    extern struct species_data spec_data[MAX_SPECIES];
-
-
-    int i, j, k, species_index, species_number, num_sp, save,
+    int i, j, k;
+    int species_index;
+    int species_number;
+    int num_sp, save,
             max_rounds, round_number, battle_here, fight_here,
             unit_index, option_index, current_species, temp_status,
             temp_pn, num_namplas, array_index, bit_number, first_action,
@@ -1969,17 +1892,10 @@ void do_battle(struct battle_data *bat) {
 }
 
 void do_bombardment(int unit_index, struct action_data *act) {
-    // item.c
-    extern char item_name[MAX_ITEMS][32];
-    // planet.c
-    extern struct planet_data *planet_base;
-    // ship.c
-    extern short ship_tonnage[NUM_SHIP_CLASSES];
-
     int i, new_mi, new_ma, defending_species;
     long n, total_bomb_damage, CS_bomb_damage, new_pop, initial_base, total_pop, percent_damage;
-    struct planet_data *planet;
     struct nampla_data *attacked_nampla;
+    struct planet_data *planet;
     struct ship_data *sh;
 
     attacked_nampla = (struct nampla_data *) act->fighting_unit[unit_index];
@@ -2137,15 +2053,6 @@ void do_bombardment(int unit_index, struct action_data *act) {
 
 void do_germ_warfare(int attacking_species, int defending_species, int defender_index, struct battle_data *bat,
                      struct action_data *act) {
-    extern int num_transactions;
-    extern char field_distorted[MAX_SPECIES];
-    extern short germ_bombs_used[MAX_SPECIES][MAX_SPECIES];
-    extern struct planet_data *planet_base;
-    extern struct species_data *c_species[MAX_SPECIES];
-    extern struct nampla_data *c_nampla[MAX_SPECIES];
-    extern struct ship_data *c_ship[MAX_SPECIES];
-    extern struct trans_data transaction[MAX_TRANSACTIONS];
-
     int i, attacker_BI, defender_BI, success_chance, num_bombs, success;
     long econ_units_from_looting;
     struct planet_data *planet;
@@ -2272,15 +2179,6 @@ void do_germ_warfare(int attacking_species, int defending_species, int defender_
 
 /* The following routine will return TRUE if a round of combat actually occurred. Otherwise, it will return false. */
 int do_round(char option, int round_number, struct battle_data *bat, struct action_data *act) {
-    // item.c
-    extern long item_cost[MAX_ITEMS];
-    // log.c
-    extern int log_summary;
-    extern int log_to_file;
-    // ship.c
-    extern int ignore_field_distorters;
-    extern short ship_cost[NUM_SHIP_CLASSES];
-
     int i, j, n, unit_index, combat_occurred, total_shots,
             attacker_index, defender_index, found, chance_to_hit,
             attacker_ml, attacker_gv, defender_ml, target_index[MAX_SHIPS],
@@ -2870,12 +2768,6 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
 }
 
 void do_siege(struct battle_data *bat, struct action_data *act) {
-    // transaction.c
-    extern int num_transactions;
-
-    extern struct species_data *c_species[MAX_SPECIES];
-    extern struct trans_data transaction[MAX_TRANSACTIONS];
-
     int a, d, i, attacker_index, defender_index, attacking_species_number, defending_species_number;
     struct nampla_data *defending_nampla;
     struct ship_data *attacking_ship;
@@ -2930,20 +2822,18 @@ void do_siege(struct battle_data *bat, struct action_data *act) {
 */
 int fighting_params(char option, char location, struct battle_data *bat, struct action_data *act) {
     char x, y, z, pn;
-
-    int i, j, found, type, num_sp, unit_index, species_index,
-            ship_index, nampla_index, sp1, sp2, use_this_ship, n_shots,
-            engage_option, engage_location, attacking_ships_here,
-            defending_ships_here, attacking_pds_here, defending_pds_here,
-            num_fighting_units;
-
+    int i, j, found, type, num_sp, unit_index;
+    int species_index;
+    int ship_index;
+    int nampla_index;
+    int sp1, sp2, use_this_ship, n_shots;
+    int engage_option, engage_location, attacking_ships_here;
+    int defending_ships_here, attacking_pds_here, defending_pds_here;
+    int num_fighting_units;
     short tons;
-
     long ml, ls, unit_power, offensive_power, defensive_power;
-
     struct ship_data *sh;
     struct nampla_data *nam;
-
 
     /* Add fighting units to "act" arrays. At the same time, check if
 	a fight of the current option type will occur at the current
@@ -3291,19 +3181,6 @@ int fighting_params(char option, char location, struct battle_data *bat, struct 
  * It will return FALSE if the attacker has none or not enough. */
 int forced_jump_units_used(int attacker_index, int defender_index, int *total_shots, struct battle_data *bat,
                            struct action_data *act) {
-    // galaxy.c
-    extern struct galaxy_data galaxy;
-    // item.c
-    extern char item_name[MAX_ITEMS][32];
-    // log.c
-    extern FILE *log_file;
-    extern int log_summary;
-    // ship.c
-    extern int ignore_field_distorters;
-    extern char field_distorted[MAX_SPECIES];
-    // species.c
-    extern struct species_data *c_species[MAX_SPECIES];
-
     int i, att_sp_index, def_sp_index, attacker_gv, defender_gv, type, fj_num, fm_num, number, success_chance, failure;
     char x, y, z;
     struct ship_data *attacking_ship, *defending_ship;
@@ -3450,15 +3327,10 @@ void regenerate_shields(struct action_data *act) {
  * withdraw. If so, it will set the ship's status to JUMPED_IN_COMBAT.
  * The actual jump will be handled by the Jump program. */
 void withdrawal_check(struct battle_data *bat, struct action_data *act) {
-    // log.c
-    extern FILE *log_file;
-    extern FILE *summary_file;
-    // ship.c
-    extern char field_distorted[MAX_SPECIES];
-    extern int ignore_field_distorters;
-    extern int truncate_name;
-
-    int i, old_trunc, ship_index, species_index, percent_loss, num_ships_gone[MAX_SPECIES], num_ships_total[MAX_SPECIES];
+    int i, old_trunc;
+    int ship_index;
+    int species_index;
+    int percent_loss, num_ships_gone[MAX_SPECIES], num_ships_total[MAX_SPECIES];
     char withdraw_age;
     struct ship_data *sh;
 

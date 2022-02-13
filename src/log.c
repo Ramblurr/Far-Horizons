@@ -25,7 +25,6 @@
 /* The following routines will post an item to standard output and to an externally defined log file and summary file. */
 
 FILE *log_file;
-FILE *summary_file;
 int log_indentation = 0;
 char log_line[128];
 int log_position = 0;
@@ -34,6 +33,7 @@ int log_stdout = TRUE;
 int log_summary = FALSE;
 int log_to_file = TRUE;
 int logging_disabled = FALSE;
+FILE *summary_file;
 
 void log_char(char c) {
     int i, temp_position;

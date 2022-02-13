@@ -20,16 +20,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "galaxy.h"
+#include "planet.h"
 #include "species.h"
 #include "nampla.h"
 #include "ship.h"
 
 int data_in_memory[MAX_SPECIES];
 int data_modified[MAX_SPECIES];
+struct species_data *species;
 struct species_data spec_data[MAX_SPECIES];
 int species_index; // zero-based index, mostly for accessing arrays
 int species_number; // one-based index, for reports and file names
-struct species_data *species;
+
 
 /* The following routine provides the 'distorted' species number used to
 	identify a species that uses field distortion units. The input
@@ -46,6 +48,7 @@ int distorted(int species_number) {
     n = (ls % 5 + 3) * (4 * i + j) + (ls % 11 + 7);
     return n;
 }
+
 
 // free_species_data will free memory used for all species data
 void free_species_data(void) {
@@ -68,6 +71,38 @@ void free_species_data(void) {
         data_modified[species_index] = FALSE;
     }
 }
+
+
+/* Get life support tech level needed. */
+int life_support_needed(struct species_data *species, struct planet_data *home, struct planet_data *colony) {
+    int j, k, ls_needed;
+    int i = colony->temperature_class - home->temperature_class;
+    if (i < 0) { i = -i; }
+    ls_needed = 3 * i;        /* Temperature class. */
+    i = colony->pressure_class - home->pressure_class;
+    if (i < 0) { i = -i; }
+    ls_needed += 3 * i;        /* Pressure class. */
+    /* Check gases. Assume required gas is NOT present. */
+    ls_needed += 3;
+    /* Check gases on planet. */
+    for (j = 0; j < 4; j++) {
+        if (colony->gas_percent[j] == 0) { continue; }
+        /* Compare with poisonous gases. */
+        for (i = 0; i < 6; i++) {
+            if (species->poison_gas[i] == colony->gas[j]) {
+                ls_needed += 3;
+            }
+        }
+        if (colony->gas[j] == species->required_gas) {
+            if (colony->gas_percent[j] >= species->required_gas_min
+                && colony->gas_percent[j] <= species->required_gas_max) {
+                ls_needed -= 3;
+            }
+        }
+    }
+    return ls_needed;
+}
+
 
 // get_species_data will read in data files for all species
 void get_species_data(void) {

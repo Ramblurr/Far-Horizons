@@ -39,19 +39,6 @@
 
 #ifdef THIS_IS_MAIN
 
-    char
-	type_char[] = " dD g";
-    char
-	color_char[] = " OBAFGKM";
-    char
-	size_char[] = "0123456789";
-    char
-	gas_string[14][4] =
-	{
-		"   ",	"H2",	"CH4",	"He",	"NH3",	"N2",	"CO2",
-		"O2",	"HCl",	"Cl2",	"F2",	"H2O",	"SO2",	"H2S"
-	};
-
 #else
 
     extern char			type_char[];

@@ -30,4 +30,8 @@ struct galaxy_data {
 
 void get_galaxy_data(void);
 
+// globals. ugh.
+
+extern struct galaxy_data galaxy;
+
 #endif //FAR_HORIZONS_GALAXY_H

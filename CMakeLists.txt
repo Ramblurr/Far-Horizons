@@ -64,3 +64,20 @@ add_executable(fhcombat
         src/species.h src/species.c
         src/transaction.c src/transaction.h
         src/fhcombat.c)
+
+add_executable(fhpredep
+        src/command.h src/command.c
+        src/do.h src/do.c
+        src/engine.h src/engine.c
+        src/galaxy.h src/galaxy.c
+        src/item.h src/item.c
+        src/log.h src/log.c
+        src/nampla.h src/nampla.c
+        src/no_orders.h src/no_orders.c
+        src/planet.h src/planet.c
+        src/predeparture.c src/predeparture.h
+        src/ship.h src/ship.c
+        src/species.h src/species.c
+        src/star.h src/star.c
+        src/transaction.c src/transaction.h
+        src/fhpredep.c)

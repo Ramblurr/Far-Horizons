@@ -20,10 +20,25 @@
 #ifndef FAR_HORIZONS_LOG_H
 #define FAR_HORIZONS_LOG_H
 
+#include <stdio.h>
+
 void log_char(char c);
+
 void log_int(int value);
+
 void log_long(long value);
+
 void log_message(char *message_filename);
+
 void log_string(char *string);
+
+// globals. ugh.
+
+extern FILE *log_file;
+extern int log_stdout;
+extern int log_summary;
+extern int log_to_file;
+extern int logging_disabled;
+extern FILE *summary_file;
 
 #endif //FAR_HORIZONS_LOG_H

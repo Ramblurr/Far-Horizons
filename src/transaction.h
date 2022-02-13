@@ -60,7 +60,14 @@ struct trans_data {
 typedef struct trans_data trans_data_t;
 
 void get_transaction_data(void);
+
 void save_transaction_data(void);
+
 void transactionDataAsSExpr(FILE *fp);
+
+// globals. ugh.
+
+extern int num_transactions;
+extern struct trans_data transaction[MAX_TRANSACTIONS];
 
 #endif //FAR_HORIZONS_TRANSACTION_H

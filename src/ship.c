@@ -21,13 +21,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "ship.h"
 #include "species.h"
+#include "nampla.h"
 #include "command.h"
+#include "ship.h"
 
-struct ship_data *ship_data[MAX_SPECIES];
-struct ship_data *ship_base;
 struct ship_data *ship;
+struct ship_data *ship_base;
+struct ship_data *ship_data[MAX_SPECIES];
+int ship_index;
 
 // Additional memory must be allocated for routines that build ships.
 // This is the default 'extras', which may be changed, if necessary.
@@ -71,6 +73,7 @@ short ship_tonnage[NUM_SHIP_CLASSES] = {
 char ship_type[3][2] = {"", "S", "S"};
 int truncate_name = FALSE;
 
+
 void delete_ship(struct ship_data *ship) {
     /* Set all bytes of record to zero. */
     memset(ship, 0, sizeof(struct ship_data));
@@ -78,20 +81,28 @@ void delete_ship(struct ship_data *ship) {
     strcpy(ship->name, "Unused");
 }
 
+
+int disbanded_ship(struct ship_data *ship) {
+    struct nampla_data *nampla = nampla_base - 1;
+    for (int nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
+        nampla++;
+        if (nampla->x != ship->x) { continue; }
+        if (nampla->y != ship->y) { continue; }
+        if (nampla->z != ship->z) { continue; }
+        if (nampla->pn != ship->pn) { continue; }
+        if ((nampla->status & DISBANDED_COLONY) == 0) { continue; }
+        if (ship->type != STARBASE && ship->status == IN_ORBIT) { continue; }
+        /* This ship is either on the surface of a disbanded colony or is a starbase orbiting a disbanded colony. */
+        return TRUE;
+    }
+    return FALSE;
+}
+
+
 /* The following routine will return TRUE and set global variables "ship" and "ship_index" if a valid ship designation is found.
  * Otherwise, it will return FALSE.
  * The algorithm employed allows minor spelling errors, as well as accidental deletion of a ship abbreviation. */
 int get_ship(void) {
-    // command.c
-    extern int abbr_index;
-    extern int abbr_type;
-    extern char *input_line_pointer;
-    // engine.c
-    extern int correct_spelling_required;
-    extern char upper_name[32];
-    // species.c
-    extern struct species_data *species;
-
     int i, n, name_length, best_score, next_best_score, best_ship_index, first_try, minimum_score;
     char upper_ship_name[32], *temp1_ptr, *temp2_ptr;
     struct ship_data *best_ship = NULL;
@@ -216,6 +227,7 @@ int get_ship(void) {
     return TRUE;
 }
 
+
 long power(short tonnage) {
     long result;
     short t1, t2;
@@ -318,4 +330,3 @@ char *ship_name(struct ship_data *ship) {
     strcat(full_ship_id, ")");
     return &full_ship_id[0];
 }
-

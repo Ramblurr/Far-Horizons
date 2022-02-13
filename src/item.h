@@ -61,5 +61,12 @@
 #define X5           37    /* Unassigned. */
 #define MAX_ITEMS    38    /* Always bump this up to a multiple of two. Don't forget to make room for zeroth element! */
 
+// globals. ugh.
+
+extern char item_abbr[MAX_ITEMS][4];
+extern short item_carry_capacity[MAX_ITEMS];
+extern long item_cost[MAX_ITEMS];
+extern char item_name[MAX_ITEMS][32];
+
 
 #endif //FAR_HORIZONS_ITEM_H

@@ -21,6 +21,9 @@
 #include <string.h>
 #include <ctype.h>
 #include "engine.h"
+#include "galaxy.h"
+#include "star.h"
+#include "nampla.h"
 #include "ship.h"
 #include "item.h"
 #include "command.h"
@@ -47,6 +50,8 @@ char command_name[NUM_COMMANDS][16] = {
         "Upgrade", "Visited", "Withdraw", "Wormhole", "ZZZ"
 };
 int end_of_file = FALSE;
+int g_spec_number;
+char g_spec_name[32];
 char input_abbr[256];
 FILE *input_file;
 char input_line[256];
@@ -73,6 +78,114 @@ char tech_name[6][16] = {
 };
 int tonnage;
 long value;
+
+
+/* The following routine will check that the next argument in the current command line is followed by a comma or tab.
+ * If not present, it will try to insert a comma in the proper position.
+ * This routine should be called only AFTER an error has been detected. */
+void fix_separator(void) {
+    int n, first_class, fix_made, num_commas;
+    char c, *temp_ptr, *temp2_ptr, *first_comma;
+
+    skip_whitespace();
+    if (isdigit(*input_line_pointer)) {
+        /* Nothing can be done. */
+        return;
+    }
+    if (strchr(input_line_pointer, ' ') == NULL) {
+        /* Ditto. */
+        return;
+    }
+    fix_made = FALSE;
+
+    /* Look for a ship, planet, or species abbreviation after the first one.
+     * If it is preceeded by a space, convert the space to a comma. */
+    temp_ptr = input_line_pointer;
+    first_class = get_class_abbr();    /* Skip first one but remember what it was. */
+    while (1) {
+        skip_whitespace();
+        temp2_ptr = input_line_pointer - 1;
+        if (*input_line_pointer == '\n') {
+            break;
+        }
+        if (*input_line_pointer == ';') {
+            break;
+        }
+        /* The following is to prevent an infinite loop. */
+        if (!isalnum(*input_line_pointer)) {
+            ++input_line_pointer;
+            continue;
+        }
+
+        n = get_class_abbr();
+        if (n == SHIP_CLASS || n == PLANET_ID || n == SPECIES_ID) {
+            /* Convert space preceeding abbreviation to a comma. */
+            if (*temp2_ptr == ' ') {
+                *temp2_ptr = ',';
+                fix_made = TRUE;
+            }
+        }
+    }
+    input_line_pointer = temp_ptr;
+
+    if (fix_made) {
+        return;
+    }
+
+    /* Look for a space followed by a digit.
+     * If found, convert the space to a comma.
+     * If exactly two or four commas are added, re-convert the first one back to a space;
+     * e.g. Jump TR1 Seeker,7,99,99,99 or Build TR1 Seeker,7,50. */
+    num_commas = 0;
+    while (1) {
+        c = *temp_ptr++;
+        if (c == '\n') {
+            break;
+        }
+        if (c == ';') {
+            break;
+        }
+        if (c != ' ') {
+            continue;
+        }
+        if (isdigit(*temp_ptr)) {
+            --temp_ptr;        /* Convert space to a comma. */
+            *temp_ptr = ',';
+            if (num_commas++ == 0) {
+                first_comma = temp_ptr;
+            }
+            ++temp_ptr;
+            fix_made = TRUE;
+        }
+    }
+
+    if (fix_made) {
+        if (num_commas == 2 || num_commas == 4) {
+            *first_comma = ' ';
+        }
+        return;
+    }
+
+    /* Now's the time for wild guesses. */
+    temp_ptr = input_line_pointer;
+
+    /* If first word is a valid abbreviation, put a comma after the second word. */
+    if (first_class == SHIP_CLASS || first_class == PLANET_ID || first_class == SPECIES_ID) {
+        temp_ptr = strchr(temp_ptr, ' ') + 1;
+        temp_ptr = strchr(temp_ptr, ' ');
+        if (temp_ptr != NULL) {
+            *temp_ptr = ',';
+        }
+        return;
+    }
+
+    /* First word is not a valid abbreviation.  Put a comma after it. */
+    temp_ptr = strchr(temp_ptr, ' ');
+    if (temp_ptr != NULL) {
+        *temp_ptr = ',';
+    }
+}
+
 
 /* get_class_abbr will return 0 if the item found was not of the appropriate type, and 1 or greater if an item of the correct type was found. */
 /* Get a class abbreviation and return TECH_ID, ITEM_CLASS, SHIP_CLASS,
@@ -284,8 +397,6 @@ int get_class_abbr_from_arg(char *arg) {
 }
 
 
-
-
 /* get_command will return 0 if the item found was not of the appropriate type, and 1 or greater if an item of the correct type was found. */
 /* Get a command and return its index. */
 int get_command(void) {
@@ -341,6 +452,179 @@ int get_command(void) {
     return cmd_n;
 }
 
+
+/* This routine will assign values to global variables x, y, z, pn, star and nampla.
+ * If the location is not a named planet, then nampla will be set to NULL.
+ * If planet is not specified, pn will be set to zero.
+ * If location is valid, TRUE will be returned, otherwise FALSE will be returned. */
+int get_location(void) {
+    int i, n, found, temp_nampla_index, first_try, name_length;
+    int best_score, next_best_score, best_nampla_index;
+    int minimum_score;
+    char upper_nampla_name[32], *temp1_ptr, *temp2_ptr;
+    struct nampla_data *temp_nampla;
+
+    /* Check first if x, y, z are specified. */
+    nampla = NULL;
+    skip_whitespace();
+
+    if (get_value() == 0) {
+        goto get_planet;
+    }
+    x = value;
+
+    if (get_value() == 0) {
+        return FALSE;
+    }
+    y = value;
+
+    if (get_value() == 0) {
+        return FALSE;
+    }
+    z = value;
+
+    if (get_value() == 0) {
+        pn = 0;
+    } else {
+        pn = value;
+    }
+
+    if (pn == 0) {
+        return TRUE;
+    }
+
+    /* Get star. Check if planet exists. */
+    found = FALSE;
+    star = star_base - 1;
+    for (i = 0; i < num_stars; i++) {
+        star++;
+        if (star->x != x) {
+            continue;
+        }
+        if (star->y != y) {
+            continue;
+        }
+        if (star->z != z) {
+            continue;
+        }
+        if (pn > star->num_planets) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+
+    get_planet:
+
+    /* Save pointers in case of error. */
+    temp1_ptr = input_line_pointer;
+
+    get_class_abbr();
+
+    temp2_ptr = input_line_pointer;
+
+    first_try = TRUE;
+
+    again:
+
+    input_line_pointer = temp2_ptr;
+
+    if (abbr_type != PLANET_ID && !first_try) {
+        /* Assume abbreviation was accidentally omitted. */
+        input_line_pointer = temp1_ptr;
+    }
+
+    /* Get planet name. */
+    get_name();
+
+    /* Search all temp_namplas for name. */
+    temp_nampla = nampla_base - 1;
+    for (temp_nampla_index = 0; temp_nampla_index < species->num_namplas; temp_nampla_index++) {
+        temp_nampla++;
+        if (temp_nampla->pn == 99) {
+            continue;
+        }
+        /* Make upper case copy of temp_nampla name. */
+        for (i = 0; i < 32; i++) {
+            upper_nampla_name[i] = toupper(temp_nampla->name[i]);
+        }
+        /* Compare names. */
+        if (strcmp(upper_nampla_name, upper_name) == 0) { goto done; }
+    }
+
+    if (first_try) {
+        first_try = FALSE;
+        goto again;
+    }
+
+    /* Possibly a spelling error.  Find the best match that is approximately the same. */
+    first_try = TRUE;
+
+    yet_again:
+
+    input_line_pointer = temp2_ptr;
+
+    if (abbr_type != PLANET_ID && !first_try) {
+        /* Assume abbreviation was accidentally omitted. */
+        input_line_pointer = temp1_ptr;
+    }
+
+    /* Get planet name. */
+    get_name();
+
+    best_score = -9999;
+    next_best_score = -9999;
+    for (temp_nampla_index = 0; temp_nampla_index < species->num_namplas; temp_nampla_index++) {
+        temp_nampla = nampla_base + temp_nampla_index;
+        if (temp_nampla->pn == 99) {
+            continue;
+        }
+        /* Make upper case copy of temp_nampla name. */
+        for (i = 0; i < 32; i++) {
+            upper_nampla_name[i] = toupper(temp_nampla->name[i]);
+        }
+        /* Compare names. */
+        n = agrep_score(upper_nampla_name, upper_name);
+        if (n > best_score) {
+            best_score = n;    /* Best match so far. */
+            best_nampla_index = temp_nampla_index;
+        } else if (n > next_best_score) {
+            next_best_score = n;
+        }
+    }
+
+    temp_nampla = nampla_base + best_nampla_index;
+    name_length = strlen(temp_nampla->name);
+    minimum_score = name_length - ((name_length / 7) + 1);
+
+    if (best_score < minimum_score        /* Score too low. */
+        || name_length < 5            /* No errors allowed. */
+        || best_score == next_best_score)    /* Another name with equal score. */
+    {
+        if (first_try) {
+            first_try = FALSE;
+            goto yet_again;
+        } else {
+            return FALSE;
+        }
+    }
+
+    done:
+
+    abbr_type = PLANET_ID;
+
+    x = temp_nampla->x;
+    y = temp_nampla->y;
+    z = temp_nampla->z;
+    pn = temp_nampla->pn;
+    nampla = temp_nampla;
+
+    return TRUE;
+}
+
+
 /* get_name will return 0 if the item found was not of the appropriate type, and 1 or greater if an item of the correct type was found. */
 /* Get a name and copy original version to "original_name" and upper case version to "upper_name". Return length of name. */
 int get_name(void) {
@@ -379,6 +663,145 @@ int get_name(void) {
     upper_name[name_length] = '\0';
     return name_length;
 }
+
+
+/* This routine will get a species name and return TRUE if found and if it is valid.
+ * It will also set global values "g_species_number" and "g_species_name".
+ * The algorithm employed allows minor spelling errors, as well as accidental deletion of the SP abbreviation. */
+int get_species_name(void) {
+    int i, n, species_index, best_score, best_species_index, next_best_score, first_try, minimum_score, name_length;
+    char sp_name[32], *temp1_ptr, *temp2_ptr;
+    struct species_data *sp;
+
+    g_spec_number = 0;
+    /* Save pointers in case of error. */
+    temp1_ptr = input_line_pointer;
+    get_class_abbr();
+    temp2_ptr = input_line_pointer;
+
+    first_try = TRUE;
+
+    again:
+
+    input_line_pointer = temp2_ptr;
+
+    if (abbr_type != SPECIES_ID && !first_try) {
+        /* Assume abbreviation was accidentally omitted. */
+        input_line_pointer = temp1_ptr;
+    }
+
+    /* Get species name. */
+    get_name();
+
+    for (species_index = 0; species_index < galaxy.num_species; species_index++) {
+        if (!data_in_memory[species_index]) {
+            continue;
+        }
+        sp = &spec_data[species_index];
+
+        /* Copy name to g_spec_name and convert it to upper case. */
+        for (i = 0; i < 31; i++) {
+            g_spec_name[i] = sp->name[i];
+            sp_name[i] = toupper(g_spec_name[i]);
+        }
+        if (strcmp(sp_name, upper_name) == 0) {
+            g_spec_number = species_index + 1;
+            abbr_type = SPECIES_ID;
+            return TRUE;
+        }
+    }
+
+    if (first_try) {
+        first_try = FALSE;
+        goto again;
+    }
+
+    /* Possibly a spelling error.  Find the best match that is approximately the same. */
+    first_try = TRUE;
+
+    yet_again:
+
+    input_line_pointer = temp2_ptr;
+
+    if (abbr_type != SPECIES_ID && !first_try) {
+        /* Assume abbreviation was accidentally omitted. */
+        input_line_pointer = temp1_ptr;
+    }
+
+    /* Get species name. */
+    get_name();
+
+    best_score = -9999;
+    next_best_score = -9999;
+    for (species_index = 0; species_index < galaxy.num_species; species_index++) {
+        if (!data_in_memory[species_index]) {
+            continue;
+        }
+        sp = &spec_data[species_index];
+        /* Convert name to upper case. */
+        for (i = 0; i < 31; i++) {
+            sp_name[i] = toupper(sp->name[i]);
+        }
+        n = agrep_score(sp_name, upper_name);
+        if (n > best_score) {
+            /* Best match so far. */
+            best_score = n;
+            best_species_index = species_index;
+        } else if (n > next_best_score) {
+            next_best_score = n;
+        }
+    }
+
+    sp = &spec_data[best_species_index];
+    name_length = strlen(sp->name);
+    minimum_score = name_length - ((name_length / 7) + 1);
+
+    if (best_score < minimum_score        /* Score too low. */
+        || name_length < 5            /* No errors allowed. */
+        || best_score == next_best_score)    /* Another name with equal score. */
+    {
+        if (first_try) {
+            first_try = FALSE;
+            goto yet_again;
+        } else {
+            return FALSE;
+        }
+    }
+
+    /* Copy name to g_spec_name. */
+    for (i = 0; i < 31; i++) {
+        g_spec_name[i] = sp->name[i];
+    }
+    g_spec_number = best_species_index + 1;
+    abbr_type = SPECIES_ID;
+    return TRUE;
+}
+
+
+int get_transfer_point(void) {
+    char *temp_ptr;
+    /* Find out if it is a ship or a planet. First try for a correctly spelled ship name. */
+    temp_ptr = input_line_pointer;
+    correct_spelling_required = TRUE;
+    if (get_ship()) {
+        return TRUE;
+    }
+    /* Probably not a ship. See if it's a planet. */
+    input_line_pointer = temp_ptr;
+    if (get_location()) {
+        if (nampla != NULL) {
+            return TRUE;
+        }
+        return FALSE;
+    }
+    /* Now check for an incorrectly spelled ship name. */
+    input_line_pointer = temp_ptr;
+    if (get_ship()) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 
 /* Read a long decimal and place its value in 'value'. */
 int get_value(void) {
@@ -465,6 +888,3 @@ void skip_whitespace(void) {
         }
     }
 }
-
-
-

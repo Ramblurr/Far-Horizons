@@ -18,13 +18,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdio.h>
+#include <string.h>
 #include "engine.h"
 #include "nampla.h"
 #include "log.h"
 
-struct nampla_data *namp_data[MAX_SPECIES];
-struct nampla_data *nampla_base;
 struct nampla_data *nampla;
+struct nampla_data *nampla_base;
+struct nampla_data *namp_data[MAX_SPECIES];
+int nampla_index;
 
 // Additional memory must be allocated for routines that name planets.
 // This is the default 'extras', which may be changed, if necessary.
@@ -62,5 +64,19 @@ int check_population(struct nampla_data *nampla) {
     }
     return is_now_populated;
 }
+
+
+/* delete_nampla delete a nampla record. not really. */
+void delete_nampla(struct nampla_data *nampla) {
+/* Set all bytes of record to zero. */
+    memset(nampla, 0, sizeof(struct nampla_data));
+    strcpy(nampla->name, "Unused");
+    nampla->pn = 99;
+}
+
+
+
+
+
 
 

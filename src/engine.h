@@ -41,10 +41,25 @@
 #define HP_AVAILABLE_POP 1500
 
 /* Assume at least 32 bits per long word. */
-#define NUM_CONTACT_WORDS	((MAX_SPECIES - 1) / 32) + 1
+#define NUM_CONTACT_WORDS    ((MAX_SPECIES - 1) / 32) + 1
 
 int agrep_score(char *correct_string, char *unknown_string);
+
 char *commas(long value);
+
+void gamemaster_abort_option(void);
+
 int rnd(unsigned int max);
+
+// globals. ugh.
+
+extern int correct_spelling_required;
+extern int first_pass;
+extern unsigned long last_random;
+extern int post_arrival_phase;
+extern int prompt_gm;
+extern int test_mode;
+extern char upper_name[32];
+extern int verbose_mode;
 
 #endif //FAR_HORIZONS_ENGINE_H

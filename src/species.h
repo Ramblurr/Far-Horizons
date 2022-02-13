@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "engine.h"
+#include "planet.h"
 
 /* Tech level ids. */
 #define MI 0 /* Mining tech level. */
@@ -65,10 +66,26 @@ struct species_data {
 typedef struct species_data species_data_t;
 
 int distorted(int species_number);
+
 void free_species_data(void);
+
 void get_species_data(void);
+
+int life_support_needed(struct species_data *species, struct planet_data *home, struct planet_data *colony);
+
 void save_species_data(void);
+
 void speciesDataAsSExpr(FILE *fp, species_data_t *sp, int spNo);
+
 int undistorted(int distorted_species_number);
+
+// globals. ugh.
+
+extern int data_in_memory[MAX_SPECIES];
+extern int data_modified[MAX_SPECIES];
+extern struct species_data *species;
+extern struct species_data spec_data[MAX_SPECIES];
+extern int species_index;
+extern int species_number;
 
 #endif //FAR_HORIZONS_SPECIES_H

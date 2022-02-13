@@ -20,6 +20,7 @@
 #ifndef FAR_HORIZONS_SHIP_H
 #define FAR_HORIZONS_SHIP_H
 
+#include "species.h"
 #include "item.h"
 
 // Additional memory must be allocated for routines that build ships.
@@ -85,8 +86,25 @@ struct ship_data {
 };
 
 void delete_ship(struct ship_data *ship);
+
+int disbanded_ship(struct ship_data *ship);
+
 int get_ship(void);
+
 long power(short tonnage);
+
 char *ship_name(struct ship_data *ship);
+
+// globals. ugh.
+
+extern int ignore_field_distorters;
+extern int num_new_ships[MAX_SPECIES];
+extern struct ship_data *ship;
+extern struct ship_data *ship_base;
+extern struct ship_data *ship_data[MAX_SPECIES];
+extern short ship_cost[NUM_SHIP_CLASSES];
+extern int ship_index;
+extern short ship_tonnage[NUM_SHIP_CLASSES];
+extern int truncate_name;
 
 #endif //FAR_HORIZONS_SHIP_H
