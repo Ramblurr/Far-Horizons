@@ -67,12 +67,16 @@ int main(int argc, char *argv[]) {
     extern struct ship_data *ship_base;
     extern struct ship_data *ship;
 
-    int i, sp_index, num_species, sp_num[MAX_SPECIES], default_summary;
+    int default_summary;
     int do_all_species;
-    int save = FALSE;
+    int i;
     long n;
-    char sp_name[MAX_SPECIES][32];
+    int num_species;
+    int save = FALSE;
     struct species_data *sp;
+    int sp_index;
+    int sp_num[MAX_SPECIES];
+    char *sp_name[MAX_SPECIES];
 
     /* Seed random number generator. */
     last_random = time(NULL);
@@ -80,6 +84,9 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < n; i++) {
         rnd(10);
     }
+
+    // initialize arrays?
+    memset(sp_num, 0, sizeof(sp_num));
 
     /* Get commonly used data. */
     get_galaxy_data();
@@ -152,7 +159,7 @@ int main(int argc, char *argv[]) {
     get_species_data();
 
     for (sp_index = 0; sp_index < galaxy.num_species; sp_index++) {
-        sp_name[sp_index][0] = '\0';    /* Initialize. */
+        sp_name[sp_index] = calloc(1, 32);
         if (!data_in_memory[sp_index]) {
             /* No longer in game. */
             continue;
@@ -169,7 +176,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    combat(do_all_species, &loc[0]);
+    combat(do_all_species, num_species, sp_num, sp_name, &loc[0]);
 
     if (save) {
         save_planet_data();

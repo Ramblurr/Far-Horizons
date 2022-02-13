@@ -127,7 +127,7 @@ void battle_error(int species_number) {
     fprintf(log_file, "!!! Missing BATTLE command!\n");
 }
 
-void combat(int do_all_species, sp_loc_data_t *locations_base) {
+void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base) {
     // command.c
     extern int end_of_file;
     extern FILE *input_file;
@@ -176,8 +176,6 @@ void combat(int do_all_species, sp_loc_data_t *locations_base) {
     int num_enemies;
     int battle_index;
     int option_index;
-    int num_species;
-    int sp_num[MAX_SPECIES];
     int arg_index;
     int default_summary;
     int at_number;
@@ -205,7 +203,6 @@ void combat(int do_all_species, sp_loc_data_t *locations_base) {
     char z;
     char option;
     char filename[32];
-    char sp_name[MAX_SPECIES][32];
     char keyword[4];
     char answer[16];
     char log_line[256];

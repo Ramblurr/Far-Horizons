@@ -20,6 +20,7 @@
 #ifndef FAR_HORIZONS_COMBAT_H
 #define FAR_HORIZONS_COMBAT_H
 
+#include "ship.h"
 #include "location.h"
 
 #define MAX_BATTLES        50  /* Maximum number of battle locations for all players. */
@@ -96,7 +97,7 @@ void bad_species(void);
 
 void battle_error(int species_number);
 
-void combat(int do_all_species, sp_loc_data_t *locations_base);
+void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base);
 
 void consolidate_option(char option, char location);
 
