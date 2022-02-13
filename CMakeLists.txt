@@ -81,3 +81,6 @@ add_executable(fhpredep
         src/star.h src/star.c
         src/transaction.c src/transaction.h
         src/fhpredep.c)
+
+add_executable(fhjump
+        src/fhjump.c)
