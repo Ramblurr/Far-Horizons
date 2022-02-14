@@ -20,15 +20,10 @@
 #ifndef FAR_HORIZONS_NO_ORDERS_H
 #define FAR_HORIZONS_NO_ORDERS_H
 
-#include <stdio.h>
 #include "ship.h"
 
 void NoOrdersForSpecies(void);
 
 void print_mishap_chance(struct ship_data *ship, int destx, int desty, int destz);
-
-// globals. ugh.
-
-extern FILE *orders_file;
 
 #endif //FAR_HORIZONS_NO_ORDERS_H

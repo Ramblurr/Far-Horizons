@@ -17,22 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
-#include "galaxyvars.h"
+#include "jumpvars.h"
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+int using_alien_portal;
+
+short jump_portal_age;
+
+int jump_portal_gv;
+
+char jump_portal_name[128];
+
+short jump_portal_units;
+

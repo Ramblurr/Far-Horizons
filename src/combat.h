@@ -101,7 +101,7 @@ void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp
 
 void consolidate_option(char option, char location);
 
-int disbanded_ship(int species_index, struct ship_data *sh);
+int disbanded_species_ship(int species_index, struct ship_data *sh);
 
 void do_ambush(int ambushing_species_index, struct battle_data *bat);
 
@@ -124,5 +124,10 @@ int forced_jump_units_used(int attacker_index, int defender_index, int *total_sh
 void regenerate_shields(struct action_data *act);
 
 void withdrawal_check(struct battle_data *bat, struct action_data *act);
+
+// globals. ugh.
+
+extern struct battle_data *battle_base;
+extern int strike_phase;
 
 #endif //FAR_HORIZONS_COMBAT_H

@@ -69,12 +69,4 @@ int check_population(struct nampla_data *nampla);
 
 void delete_nampla(struct nampla_data *nampla);
 
-// globals. ugh.
-
-extern struct nampla_data *nampla;
-extern struct nampla_data *nampla_base;
-extern struct nampla_data *namp_data[MAX_SPECIES];
-extern int nampla_index;
-extern int num_new_namplas[MAX_SPECIES];
-
 #endif //FAR_HORIZONS_NAMPLA_H

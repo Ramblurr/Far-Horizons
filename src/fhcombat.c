@@ -36,37 +36,18 @@
 #include <time.h>
 #include <ctype.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "combat.h"
 #include "galaxy.h"
+#include "galaxyvars.h"
 #include "planet.h"
 #include "species.h"
-#include "ship.h"
+#include "shipvars.h"
 #include "transaction.h"
 #include "location.h"
+#include "logvars.h"
 
 int main(int argc, char *argv[]) {
-    // combat.c
-    extern struct battle_data *battle_base;
-    extern int strike_phase;
-    // engine.c
-    extern long last_random;
-    extern int prompt_gm;
-    extern int test_mode;
-    extern int verbose_mode;
-    // galaxy.c
-    extern struct galaxy_data galaxy;
-    // location.c
-    extern struct sp_loc_data loc[MAX_LOCATIONS];
-    // log.c
-    extern int log_stdout;
-    // species.c
-    extern int data_in_memory[MAX_SPECIES];
-    extern struct species_data spec_data[MAX_SPECIES];
-    // ship.c
-    extern struct ship_data *ship_data[MAX_SPECIES];
-    extern struct ship_data *ship_base;
-    extern struct ship_data *ship;
-
     int default_summary;
     int do_all_species;
     int i;

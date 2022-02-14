@@ -23,16 +23,6 @@
 #include "nampla.h"
 #include "log.h"
 
-struct nampla_data *nampla;
-struct nampla_data *nampla_base;
-struct nampla_data *namp_data[MAX_SPECIES];
-int nampla_index;
-
-// Additional memory must be allocated for routines that name planets.
-// This is the default 'extras', which may be changed, if necessary.
-int extra_namplas = NUM_EXTRA_NAMPLAS;
-int num_new_namplas[MAX_SPECIES];
-
 /* This routine will set or clear the POPULATED bit for a nampla.
  * It will return TRUE if the nampla is populated or FALSE if not.
  * It will also check if a message associated with this planet should be logged. */

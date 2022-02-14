@@ -30,42 +30,18 @@
 #include <string.h>
 #include <stdio.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "galaxy.h"
+#include "galaxyvars.h"
 #include "planet.h"
+#include "planetvars.h"
 #include "species.h"
 #include "nampla.h"
-#include "ship.h"
+#include "namplavars.h"
 #include "location.h"
 
 
-int test_mode;
-int verbose_mode;
-
 int main(int argc, char *argv[]) {
-    // from galaxy.c
-    extern struct galaxy_data galaxy;
-    // from planet.c
-    extern int num_planets;
-    extern struct planet_data *planet;
-    extern struct planet_data *planet_base;
-    // from species.c
-    extern int data_in_memory[MAX_SPECIES];
-    extern int data_modified[MAX_SPECIES];
-    extern struct species_data spec_data[MAX_SPECIES];
-    extern struct species_data *species;
-    extern int species_number;
-    extern int species_index;
-    // from nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    extern struct nampla_data *nampla_base;
-    extern struct nampla_data *nampla;
-    // from ship.c
-    extern struct ship_data *ship_base;
-    extern struct ship_data *ship;
-    // from location.c
-    extern int num_locs;
-    extern struct sp_loc_data loc[MAX_LOCATIONS];
-
     int i;
     int nampla_index;
     long diff;

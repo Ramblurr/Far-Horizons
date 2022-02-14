@@ -118,6 +118,7 @@ void get_species_data(void) {
     extern int num_new_ships[MAX_SPECIES];
 
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
+        size_t nRead;
         FILE *fp;
         char filename[16];
         struct species_data *sp = &spec_data[species_index];
@@ -132,25 +133,31 @@ void get_species_data(void) {
             continue;
         }
         /* Read in species data. */
-        if (fread(sp, sizeof(struct species_data), 1, fp) != 1) {
-            fprintf(stderr, "\n\tCannot read species record in file '%s'!\n\n", filename);
+        nRead = fread(sp, sizeof(struct species_data), 1, fp);
+        if (nRead != 1) {
+            fprintf(stderr, "\n\tCannot read species record in file '%s'!\n", filename);
+            fprintf(stderr, "\tRead %d records of %d bytes; expected to read %d\n\n", nRead, sizeof(struct species_data), 1);
             exit(-1);
         }
         /* Allocate enough memory for all namplas. */
         namp_data[species_index] = (struct nampla_data *) calloc(sp->num_namplas + extra_namplas,
                                                                  sizeof(struct nampla_data));
         if (namp_data[species_index] == NULL) {
+            perror("get_species_data");
             fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n\n");
             exit(-1);
         }
         /* Read it all into memory. */
-        if (fread(namp_data[species_index], sizeof(struct nampla_data), sp->num_namplas, fp) != sp->num_namplas) {
-            fprintf(stderr, "\nCannot read nampla data into memory!\n\n");
+        nRead = fread(namp_data[species_index], sizeof(struct nampla_data), sp->num_namplas, fp);
+        if (nRead != sp->num_namplas) {
+            fprintf(stderr, "\nCannot read nampla data into memory!\n");
+            fprintf(stderr, "\tRead %d records of %d bytes; expected to read %d\n\n", nRead, sizeof(struct nampla_data), sp->num_namplas);
             exit(-1);
         }
         /* Allocate enough memory for all ships. */
         ship_data[species_index] = (struct ship_data *) calloc(sp->num_ships + extra_ships, sizeof(struct ship_data));
         if (ship_data[species_index] == NULL) {
+            perror("get_species_data");
             fprintf(stderr, "\nCannot allocate enough memory for ship data!\n\n");
             exit(-1);
         }

@@ -19,12 +19,14 @@
 
 #include <stdio.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "species.h"
-#include "ship.h"
+#include "shipvars.h"
 #include "command.h"
-#include "log.h"
+#include "commandvars.h"
 #include "predeparture.h"
 #include "do.h"
+#include "logvars.h"
 
 void do_predeparture_orders(void) {
     int i, command, old_test_mode;

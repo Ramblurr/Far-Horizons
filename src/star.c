@@ -20,25 +20,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "star.h"
+#include "starvars.h"
 #include "planet.h"
+#include "planetvars.h"
 #include "species.h"
 #include "nampla.h"
+#include "namplavars.h"
 #include "ship.h"
+#include "locationvars.h"
 #include "log.h"
-#include "no_orders.h"
+#include "logvars.h"
+#include "ordervars.h"
 
-char color_char[] = " OBAFGKM";
-int print_LSN = TRUE;
-int num_stars;
-char size_char[] = "0123456789";
-struct star_data *star;
-struct star_data *star_base;
-int star_data_modified;
-char type_char[] = " dD g";
-int x;
-int y;
-int z;
-int pn;
+
+static char color_char[] = " OBAFGKM";
+
+static int print_LSN = TRUE;
+
+static char size_char[] = "0123456789";
+
+static char type_char[] = " dD g";
+
 
 void closest_unvisited_star(struct ship_data *ship) {
     int found = FALSE;

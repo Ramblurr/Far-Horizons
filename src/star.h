@@ -74,15 +74,4 @@ void save_star_data(void);
 
 int star_visited(int x, int y, int z);
 
-// globals. ugh.
-
-extern int num_stars;
-extern struct star_data *star;
-extern struct star_data *star_base;
-extern int star_data_modified;
-extern int x;
-extern int y;
-extern int z;
-extern int pn;
-
 #endif //FAR_HORIZONS_STAR_H

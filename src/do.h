@@ -28,7 +28,9 @@ void do_DISBAND_command(void);
 void do_ENEMY_command(void);
 void do_INSTALL_command(void);
 void do_LAND_command(void);
+void do_JUMP_command(int jumped_in_combat, int using_jump_portal);
 void do_MESSAGE_command(void);
+void do_MOVE_command(void);
 void do_NAME_command(void);
 void do_NEUTRAL_command(void);
 void do_ORBIT_command(void);
@@ -37,5 +39,7 @@ void do_SCAN_command(void);
 void do_SEND_command(void);
 void do_TRANSFER_command(void);
 void do_UNLOAD_command(void);
+void do_VISITED_command(void);
+void do_WORMHOLE_command(void);
 
 #endif //FAR_HORIZONS_DO_H

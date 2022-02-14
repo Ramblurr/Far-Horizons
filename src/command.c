@@ -21,63 +21,19 @@
 #include <string.h>
 #include <ctype.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "galaxy.h"
-#include "star.h"
+#include "galaxyvars.h"
+#include "starvars.h"
 #include "nampla.h"
+#include "namplavars.h"
 #include "ship.h"
+#include "shipvars.h"
 #include "item.h"
+#include "locationvars.h"
 #include "command.h"
-
-int abbr_type;
-int abbr_index;
-char command_abbr[NUM_COMMANDS][4] = {
-        "   ", "ALL", "AMB", "ATT", "AUT", "BAS", "BAT", "BUI", "CON",
-        "DEE", "DES", "DEV", "DIS", "END", "ENE", "ENG", "EST", "HAV",
-        "HID", "HIJ", "IBU", "ICO", "INS", "INT", "JUM", "LAN", "MES",
-        "MOV", "NAM", "NEU", "ORB", "PJU", "PRO", "REC", "REP", "RES",
-        "SCA", "SEN", "SHI", "STA", "SUM", "SUR", "TAR", "TEA", "TEC",
-        "TEL", "TER", "TRA", "UNL", "UPG", "VIS", "WIT", "WOR", "ZZZ"
-};
-char command_name[NUM_COMMANDS][16] = {
-        "Undefined", "Ally", "Ambush", "Attack", "Auto", "Base",
-        "Battle", "Build", "Continue", "Deep", "Destroy", "Develop",
-        "Disband", "End", "Enemy", "Engage", "Estimate", "Haven",
-        "Hide", "Hijack", "Ibuild", "Icontinue", "Install", "Intercept",
-        "Jump", "Land", "Message", "Move", "Name", "Neutral", "Orbit",
-        "Pjump", "Production", "Recycle", "Repair", "Research", "Scan",
-        "Send", "Shipyard", "Start", "Summary", "Surrender", "Target",
-        "Teach", "Tech", "Telescope", "Terraform", "Transfer", "Unload",
-        "Upgrade", "Visited", "Withdraw", "Wormhole", "ZZZ"
-};
-int end_of_file = FALSE;
-int g_spec_number;
-char g_spec_name[32];
-char input_abbr[256];
-FILE *input_file;
-char input_line[256];
-char *input_line_pointer;
-int just_opened_file;
-char original_line[256];
-char original_name[32];
-int sub_light;
-char tech_abbr[6][4] = {
-        "MI",
-        "MA",
-        "ML",
-        "GV",
-        "LS",
-        "BI"
-};
-char tech_name[6][16] = {
-        "Mining",
-        "Manufacturing",
-        "Military",
-        "Gravitics",
-        "Life Support",
-        "Biology"
-};
-int tonnage;
-long value;
+#include "commandvars.h"
+#include "jumpvars.h"
 
 
 /* The following routine will check that the next argument in the current command line is followed by a comma or tab.
@@ -450,6 +406,136 @@ int get_command(void) {
     }
 
     return cmd_n;
+}
+
+
+int get_jump_portal(void) {
+    int i, j, k, found, array_index, bit_number;
+    long bit_mask;
+    char start_x, start_y, start_z, upper_ship_name[32], *original_line_pointer;
+    struct species_data *original_species;
+    struct ship_data *temp_ship, *portal, *original_ship, *original_ship_base;
+
+    /* See if specified starbase is owned by the current species. */
+    original_line_pointer = input_line_pointer;
+    temp_ship = ship;
+    found = get_ship();
+    portal = ship;
+    ship = temp_ship;
+    using_alien_portal = FALSE;
+
+    if (found) {
+        if (portal->type != STARBASE) { return FALSE; }
+        jump_portal_age = portal->age;
+        jump_portal_gv = species->tech_level[GV];
+        jump_portal_units = portal->item_quantity[JP];
+        strcpy(jump_portal_name, ship_name(portal));
+        return TRUE;
+    }
+
+    start_x = ship->x;
+    start_y = ship->y;
+    start_z = ship->z;
+
+    if (abbr_type != SHIP_CLASS) { goto check_for_bad_spelling; }
+    if (abbr_index != BA) { goto check_for_bad_spelling; }
+
+    /* It IS the name of a starbase.  See if another species has given permission to use their starbase. */
+    for (other_species_number = 1; other_species_number <= galaxy.num_species; other_species_number++) {
+        if (!data_in_memory[other_species_number - 1]) { continue; }
+        if (other_species_number == species_number) { continue; }
+
+        other_species = &spec_data[other_species_number - 1];
+
+        found = FALSE;
+
+        /* Check if other species has declared this species as an ally. */
+        array_index = (species_number - 1) / 32;
+        bit_number = (species_number - 1) % 32;
+        bit_mask = 1 << bit_number;
+        if ((other_species->ally[array_index] & bit_mask) == 0) { continue; }
+
+        /* See if other species has a starbase with the specified name at the start location. */
+        alien_portal = ship_data[other_species_number - 1] - 1;
+        for (j = 0; j < other_species->num_ships; j++) {
+            ++alien_portal;
+            if (alien_portal->type != STARBASE) { continue; }
+            if (alien_portal->x != start_x) { continue; }
+            if (alien_portal->y != start_y) { continue; }
+            if (alien_portal->z != start_z) { continue; }
+            if (alien_portal->pn == 99) { continue; }
+            /* Make upper case copy of ship name. */
+            for (k = 0; k < 32; k++) {
+                upper_ship_name[k] = toupper(alien_portal->name[k]);
+            }
+            /* Compare names. */
+            if (strcmp(upper_ship_name, upper_name) == 0) {
+                found = TRUE;
+                break;
+            }
+        }
+
+        if (found) {
+            jump_portal_units = alien_portal->item_quantity[JP];
+            jump_portal_age = alien_portal->age;
+            jump_portal_gv = other_species->tech_level[GV];
+            strcpy(jump_portal_name, ship_name(alien_portal));
+            strcat(jump_portal_name, " owned by SP ");
+            strcat(jump_portal_name, other_species->name);
+            using_alien_portal = TRUE;
+            break;
+        }
+    }
+
+    if (found) { return TRUE; }
+
+    check_for_bad_spelling:
+
+    /* Try again, but allow spelling errors. */
+    original_ship = ship;
+    original_ship_base = ship_base;
+    original_species = species;
+
+    for (other_species_number = 1; other_species_number <= galaxy.num_species; other_species_number++) {
+        if (!data_in_memory[other_species_number - 1]) { continue; }
+        if (other_species_number == species_number) { continue; }
+        species = &spec_data[other_species_number - 1];
+
+        /* Check if other species has declared this species as an ally. */
+        array_index = (species_number - 1) / 32;
+        bit_number = (species_number - 1) % 32;
+        bit_mask = 1 << bit_number;
+        if ((species->ally[array_index] & bit_mask) == 0) { continue; }
+        input_line_pointer = original_line_pointer;
+        ship_base = ship_data[other_species_number - 1];
+        found = get_ship();
+        if (found) {
+            found = FALSE;
+            if (ship->type != STARBASE) { continue; }
+            if (ship->x != start_x) { continue; }
+            if (ship->y != start_y) { continue; }
+            if (ship->z != start_z) { continue; }
+            if (ship->pn == 99) { continue; }
+            found = TRUE;
+            break;
+        }
+    }
+
+    if (found) {
+        jump_portal_units = ship->item_quantity[JP];
+        jump_portal_age = ship->age;
+        jump_portal_gv = species->tech_level[GV];
+        strcpy(jump_portal_name, ship_name(ship));
+        strcat(jump_portal_name, " owned by SP ");
+        strcat(jump_portal_name, species->name);
+        using_alien_portal = TRUE;
+    }
+
+    species = original_species;
+    ship = original_ship;
+    ship_base = original_ship_base;
+
+    return found;
 }
 
 

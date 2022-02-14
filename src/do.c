@@ -21,16 +21,26 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include "enginevars.h"
 #include "galaxy.h"
+#include "galaxyvars.h"
 #include "star.h"
+#include "starvars.h"
 #include "planet.h"
+#include "planetvars.h"
 #include "species.h"
 #include "nampla.h"
+#include "namplavars.h"
 #include "ship.h"
+#include "shipvars.h"
+#include "locationvars.h"
 #include "transaction.h"
 #include "log.h"
+#include "logvars.h"
 #include "command.h"
+#include "commandvars.h"
 #include "do.h"
+#include "jumpvars.h"
 
 void do_ALLY_command(void) {
     int i, array_index, bit_number;
@@ -620,6 +630,333 @@ void do_INSTALL_command(void) {
 }
 
 
+void do_JUMP_command(int jumped_in_combat, int using_jump_portal) {
+    int i, n, found, max_xyz, temp_x, temp_y, temp_z, difference;
+    int status, mishap_gv;
+
+    long mishap_chance, success_chance;
+
+    char temp_string[32], *original_line_pointer;
+
+    short mishap_age;
+
+    struct ship_data *jump_portal;
+
+
+    /* Set default status at end of jump. */
+    status = IN_DEEP_SPACE;
+
+    /* Check if this ship jumped in combat. */
+    if (jumped_in_combat) {
+        x = ship->dest_x;
+        y = ship->dest_y;
+        z = ship->dest_z;
+        pn = 0;
+        using_jump_portal = FALSE;
+        nampla = NULL;
+        goto do_jump;
+    }
+
+    /* Get ship making the jump. */
+    original_line_pointer = input_line_pointer;
+    found = get_ship();
+    if (!found) {
+        input_line_pointer = original_line_pointer;
+        fix_separator();    /* Check for missing comma or tab. */
+        found = get_ship();    /* Try again. */
+        if (!found) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid ship name in JUMP or PJUMP command.\n");
+            return;
+        }
+    }
+
+    /* Make sure ship is not salvage of a disbanded colony. */
+    if (disbanded_ship(ship)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! This ship is salvage of a disbanded colony!\n");
+        return;
+    }
+
+    /* Check if this ship withdrew or was was forced to jump from combat.
+	If so, ignore specified coordinates and use those provided by the
+	combat program. */
+    if (ship->status == FORCED_JUMP || ship->status == JUMPED_IN_COMBAT) {
+        x = ship->dest_x;
+        y = ship->dest_y;
+        z = ship->dest_z;
+        pn = 0;
+        jumped_in_combat = TRUE;
+        using_jump_portal = FALSE;
+        nampla = NULL;
+        goto do_jump;
+    }
+
+    /* Make sure ship can jump. */
+    if (ship->status == UNDER_CONSTRUCTION) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s is still under construction!\n",
+                ship_name(ship));
+        return;
+    }
+
+    if (ship->type == STARBASE
+        || (!using_jump_portal && ship->type == SUB_LIGHT)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s cannot make an interstellar jump!\n",
+                ship_name(ship));
+        return;
+    }
+
+    /* Check if JUMP, MOVE, or WORMHOLE was already done for this ship. */
+    if (ship->just_jumped) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s already jumped or moved this turn!\n",
+                ship_name(ship));
+        return;
+    }
+
+    /* Get the destination. */
+    original_line_pointer = input_line_pointer;
+    found = get_location();
+    if (!found) {
+        if (using_jump_portal) {
+            input_line_pointer = original_line_pointer;
+            fix_separator();    /* Check for missing comma or tab. */
+            found = get_location();    /* Try again. */
+        }
+
+        if (!found) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid destination in JUMP or PJUMP command.\n");
+            return;
+        }
+    }
+
+    /* Set status to IN_ORBIT if destination is a planet. */
+    if (pn > 0) { status = IN_ORBIT; }
+
+    /* Check if a jump portal is being used. */
+    if (using_jump_portal) {
+        found = get_jump_portal();
+        if (!found) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid starbase name in PJUMP command.\n");
+            return;
+        }
+    }
+
+    /* If using a jump portal, make sure that starbase has sufficient number
+	of jump portal units. */
+    if (using_jump_portal) {
+        if (jump_portal_units < ship->tonnage) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Starbase does not have enough Jump Portal Units!\n");
+            return;
+        }
+    }
+
+    do_jump:
+
+    if (x == ship->x && y == ship->y && z == ship->z) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s was already at specified x,y,z.\n",
+                ship_name(ship));
+        return;
+    }
+
+    /* Set flags to show that ship jumped this turn. */
+    ship->just_jumped = TRUE;
+
+    /* Calculate basic mishap probability. */
+    if (using_jump_portal) {
+        mishap_age = jump_portal_age;
+        mishap_gv = jump_portal_gv;
+    } else {
+        mishap_age = ship->age;
+        mishap_gv = species->tech_level[GV];
+    }
+    mishap_chance = (100L * (long) (((x - ship->x) * (x - ship->x))
+                                    + ((y - ship->y) * (y - ship->y))
+                                    + ((z - ship->z) * (z - ship->z))))
+                    / (long) mishap_gv;
+
+    if (mishap_chance > 10000L) {
+        mishap_chance = 10000L;
+        goto start_jump;
+    }
+
+    /* Add aging effect. */
+    if (mishap_age > 0) {
+        success_chance = 10000L - mishap_chance;
+        success_chance -= (2L * (long) mishap_age * success_chance) / 100L;
+        if (success_chance < 0) { success_chance = 0; }
+        mishap_chance = 10000L - success_chance;
+    }
+
+
+    start_jump:
+
+    log_string("    ");
+    log_string(ship_name(ship));
+    log_string(" will try to jump to ");
+
+    if (nampla == NULL) {
+        log_int(x);
+        log_char(' ');
+        log_int(y);
+        log_char(' ');
+        log_int(z);
+    } else {
+        log_string("PL ");
+        log_string(nampla->name);
+    }
+
+    if (using_jump_portal) {
+        log_string(" via jump portal ");
+        log_string(jump_portal_name);
+
+        if (using_alien_portal && !first_pass) {
+            /* Define this transaction. */
+            if (num_transactions == MAX_TRANSACTIONS) {
+                fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+                exit(-1);
+            }
+
+            n = num_transactions++;
+            transaction[n].type = ALIEN_JUMP_PORTAL_USAGE;
+            transaction[n].number1 = other_species_number;
+            strcpy(transaction[n].name1, species->name);
+            strcpy(transaction[n].name2, ship_name(ship));
+            strcpy(transaction[n].name3, ship_name(alien_portal));
+        }
+    }
+
+    sprintf(temp_string, " (%ld.%02ld%%).\n", mishap_chance / 100L, mishap_chance % 100L);
+    log_string(temp_string);
+
+    jump_again:
+
+    if (first_pass || (rnd(10000) > mishap_chance)) {
+        ship->x = x;
+        ship->y = y;
+        ship->z = z;
+        ship->pn = pn;
+        ship->status = status;
+
+        if (!first_pass) { star_visited(x, y, z); }
+
+        return;
+    }
+
+    /* Ship had a mishap. Check if it has any fail-safe jump units. */
+    if (ship->item_quantity[FS] > 0) {
+        if (num_transactions == MAX_TRANSACTIONS) {
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+            exit(-1);
+        }
+
+        n = num_transactions++;
+        transaction[n].type = SHIP_MISHAP;
+        transaction[n].value = 4;    /* Use of one FS. */
+        transaction[n].number1 = species_number;
+        strcpy(transaction[n].name1, ship_name(ship));
+
+        ship->item_quantity[FS] -= 1;
+        goto jump_again;
+    }
+
+    /* If ship was forced to jump, and it reached this point, then it
+	self-destructed. */
+    if (ship->status == FORCED_JUMP) { goto self_destruct; }
+
+    /* Check if ship self-destructed or just mis-jumped. */
+    if (rnd(10000) > mishap_chance) {
+        /* Calculate mis-jump location. */
+        max_xyz = 2 * galaxy.radius - 1;
+
+        try_again:
+        temp_x = -1;
+        difference = (ship->x > x) ? (ship->x - x) : (x - ship->x);
+        difference = (2L * mishap_chance * difference) / 10000L;
+        if (difference < 3) { difference = 3; }
+        while (temp_x < 0 || temp_x > max_xyz) {
+            temp_x = x - rnd(difference) + rnd(difference);
+        }
+
+        temp_y = -1;
+        difference = (ship->y > y) ? (ship->y - y) : (y - ship->y);
+        difference = (2L * mishap_chance * difference) / 10000L;
+        if (difference < 3) { difference = 3; }
+        while (temp_y < 0 || temp_y > max_xyz) {
+            temp_y = y - rnd(difference) + rnd(difference);
+        }
+
+        temp_z = -1;
+        difference = (ship->z > z) ? (ship->z - z) : (z - ship->z);
+        difference = (2L * mishap_chance * difference) / 10000L;
+        if (difference < 3) { difference = 3; }
+        while (temp_z < 0 || temp_z > max_xyz) {
+            temp_z = z - rnd(difference) + rnd(difference);
+        }
+
+        if (x == temp_x && y == temp_y && z == temp_z) {
+            goto try_again;
+        }
+
+        if (num_transactions == MAX_TRANSACTIONS) {
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+            exit(-1);
+        }
+
+        n = num_transactions++;
+        transaction[n].type = SHIP_MISHAP;
+        transaction[n].value = 3;    /* Mis-jump. */
+        transaction[n].number1 = species_number;
+        strcpy(transaction[n].name1, ship_name(ship));
+        transaction[n].x = temp_x;
+        transaction[n].y = temp_y;
+        transaction[n].z = temp_z;
+
+        ship->x = temp_x;
+        ship->y = temp_y;
+        ship->z = temp_z;
+        ship->pn = 0;
+
+        ship->status = IN_DEEP_SPACE;
+
+        star_visited(temp_x, temp_y, temp_z);
+
+        return;
+    }
+
+    self_destruct:
+
+    /* Ship self-destructed. */
+    if (num_transactions == MAX_TRANSACTIONS) {
+        fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+        exit(-1);
+    }
+
+    n = num_transactions++;
+    transaction[n].type = SHIP_MISHAP;
+    transaction[n].value = 2;    /* Self-destruction. */
+    transaction[n].number1 = species_number;
+    strcpy(transaction[n].name1, ship_name(ship));
+
+    delete_ship(ship);
+}
+
+
 void do_LAND_command(void) {
     int i, n, found, siege_effectiveness, landing_detected, landed;
     int alien_number, alien_index, alien_pn, array_index, bit_number;
@@ -969,6 +1306,104 @@ void do_MESSAGE_command(void) {
     strcpy(transaction[i].name1, species->name);
     transaction[i].number2 = g_spec_number;
     strcpy(transaction[i].name2, g_spec_name);
+}
+
+
+void do_MOVE_command(void) {
+    int i, n;
+    char *original_line_pointer = input_line_pointer;
+    int found = get_ship();
+    if (!found) {
+        /* Check for missing comma or tab after ship name. */
+        input_line_pointer = original_line_pointer;
+        fix_separator();
+        found = get_ship();
+        if (!found) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid ship name in MOVE command.\n");
+            return;
+        }
+    }
+
+    if (ship->status == UNDER_CONSTRUCTION) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Ship is still under construction.\n");
+        return;
+    }
+
+    if (ship->status == FORCED_JUMP || ship->status == JUMPED_IN_COMBAT) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Ship jumped during combat and is still in transit.\n");
+        return;
+    }
+
+    /* Check if JUMP or MOVE was already done for this ship. */
+    if (ship->just_jumped) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s already jumped or moved this turn!\n",
+                ship_name(ship));
+        return;
+    }
+
+    /* Make sure ship is not salvage of a disbanded colony. */
+    if (disbanded_ship(ship)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! This ship is salvage of a disbanded colony!\n");
+        return;
+    }
+
+    /* Get the planet. */
+    found = get_location();
+    if (!found || nampla != NULL) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! You may not use a planet name in MOVE command.\n");
+        return;
+    }
+
+    /* Check if deltas are acceptable. */
+    i = x - ship->x;
+    if (i < 0) { n = -i; } else { n = i; }
+    i = y - ship->y;
+    if (i < 0) { n += -i; } else { n += i; }
+    i = z - ship->z;
+    if (i < 0) { n += -i; } else { n += i; }
+    if (n > 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Destination is too far in MOVE command.\n");
+        return;
+    }
+
+    /* Move the ship. */
+    ship->x = x;
+    ship->y = y;
+    ship->z = z;
+    ship->pn = 0;
+    ship->status = IN_DEEP_SPACE;
+    ship->just_jumped = 50;
+
+    if (!first_pass) { star_visited(x, y, z); }
+
+    /* Log result. */
+    log_string("    ");
+    log_string(ship_name(ship));
+    if (first_pass) {
+        log_string(" will move to sector ");
+    } else {
+        log_string(" moved to sector ");
+    }
+    log_int(x);
+    log_char(' ');
+    log_int(y);
+    log_char(' ');
+    log_int(z);
+    log_string(".\n");
 }
 
 
@@ -2262,4 +2697,133 @@ void do_UNLOAD_command(void) {
     log_string(" began on the planet.\n");
 
     check_population(nampla);
+}
+
+
+void do_VISITED_command(void) {
+    /* Get x y z coordinates. */
+    int found = get_location();
+    if (!found || nampla != NULL) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid coordinates in VISITED command.\n");
+        return;
+    }
+
+    found = star_visited(x, y, z);
+
+    if (!found) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! There is no star system at these coordinates.\n");
+        return;
+    }
+
+    /* Log result. */
+    log_string("    The star system at ");
+    log_int(x);
+    log_char(' ');
+    log_int(y);
+    log_char(' ');
+    log_int(z);
+    log_string(" was marked as visited.\n");
+}
+
+
+void do_WORMHOLE_command(void) {
+    int i, status;
+    struct star_data *star;
+
+    /* Get ship making the jump. */
+    char *original_line_pointer = input_line_pointer;
+    int found = get_ship();
+    if (!found) {
+        /* Check for missing comma or tab after ship name. */
+        input_line_pointer = original_line_pointer;
+        fix_separator();
+        found = get_ship();
+        if (!found) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid ship name in WORMHOLE command.\n");
+            return;
+        }
+    }
+
+    /* Make sure ship is not salvage of a disbanded colony. */
+    if (disbanded_ship(ship)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! This ship is salvage of a disbanded colony!\n");
+        return;
+    }
+
+    /* Make sure ship can jump. */
+    if (ship->status == UNDER_CONSTRUCTION) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s is still under construction!\n", ship_name(ship));
+        return;
+    }
+
+    /* Check if JUMP, MOVE, or WORMHOLE was already done for this ship. */
+    if (ship->just_jumped) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! %s already jumped or moved this turn!\n", ship_name(ship));
+        return;
+    }
+
+    /* Find star. */
+    star = star_base;
+    found = FALSE;
+    for (i = 0; i < num_stars; i++) {
+        if (star->x == ship->x && star->y == ship->y && star->z == ship->z) {
+            found = star->worm_here;
+            break;
+        }
+        ++star;
+    }
+
+    if (!found) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! There is no wormhole at ship's location!\n");
+        return;
+    }
+
+    /* Get the destination planet, if any. */
+    get_location();
+    if (nampla != NULL) {
+        if (nampla->x != star->worm_x || nampla->y != star->worm_y || nampla->z != star->worm_z) {
+            fprintf(log_file, "!!! WARNING - Destination planet is not at other end of wormhole!\n");
+            nampla = NULL;
+        }
+    }
+
+    /* Do the jump. */
+    log_string("    ");
+    log_string(ship_name(ship));
+    log_string(" will jump via natural wormhole at ");
+    log_int(ship->x);
+    log_char(' ');
+    log_int(ship->y);
+    log_char(' ');
+    log_int(ship->z);
+    ship->pn = 0;
+    ship->status = IN_DEEP_SPACE;
+
+    if (nampla != NULL) {
+        log_string(" to PL ");
+        log_string(nampla->name);
+        ship->pn = nampla->pn;
+        ship->status = IN_ORBIT;
+    }
+    log_string(".\n");
+    ship->x = star->worm_x;
+    ship->y = star->worm_y;
+    ship->z = star->worm_z;
+    ship->just_jumped = 99;    /* 99 indicates that a wormhole was used. */
+
+    if (!first_pass) { star_visited(ship->x, ship->y, ship->z); }
 }

@@ -22,13 +22,8 @@
 #include <stdlib.h>
 #include "engine.h"
 #include "planet.h"
+#include "planetvars.h"
 
-char gas_string[14][4] = {"   ", "H2", "CH4", "He", "NH3", "N2", "CO2", "O2", "HCl", "Cl2", "F2", "H2O", "SO2", "H2S"};
-struct planet_data *home_planet;
-int32_t num_planets;
-struct planet_data *planet;
-struct planet_data *planet_base;
-int planet_data_modified;
 
 void get_planet_data(void) {
     /* Open planet file. */

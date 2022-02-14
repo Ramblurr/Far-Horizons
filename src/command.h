@@ -20,8 +20,6 @@
 #ifndef FAR_HORIZONS_COMMAND_H
 #define FAR_HORIZONS_COMMAND_H
 
-#include <stdio.h>
-
 /* Command codes. */
 #define UNDEFINED    0
 #define ALLY         1
@@ -87,13 +85,15 @@
 #define PLANET_ID  4
 #define SPECIES_ID 5
 
-void fix_separator (void);
+void fix_separator(void);
 
 int get_class_abbr(void);
 
 int get_class_abbr_from_arg(char *arg);
 
 int get_command(void);
+
+int get_jump_portal(void);
 
 int get_location(void);
 
@@ -108,21 +108,5 @@ int get_value(void);
 void skip_junk(void);
 
 void skip_whitespace(void);
-
-// globals. ugh.
-
-extern int abbr_index;
-extern int abbr_type;
-extern int end_of_file;
-extern int g_spec_number;
-extern char g_spec_name[32];
-extern FILE *input_file;
-extern char input_line[256];
-extern char *input_line_pointer;
-extern int just_opened_file;
-extern char original_line[256];
-extern char original_name[32];
-extern long value;
-
 
 #endif //FAR_HORIZONS_COMMAND_H

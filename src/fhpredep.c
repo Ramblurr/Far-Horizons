@@ -23,16 +23,22 @@
 #include <ctype.h>
 #include <time.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "galaxy.h"
 #include "star.h"
+#include "starvars.h"
 #include "planet.h"
+#include "planetvars.h"
 #include "species.h"
-#include "nampla.h"
-#include "ship.h"
+#include "namplavars.h"
+#include "shipvars.h"
 #include "transaction.h"
 #include "command.h"
+#include "commandvars.h"
 #include "log.h"
+#include "logvars.h"
 #include "predeparture.h"
+#include "galaxyvars.h"
 
 int main(int argc, char *argv[]) {
     int i, n, found, num_species, sp_num[MAX_SPECIES], sp_index, command, do_all_species;

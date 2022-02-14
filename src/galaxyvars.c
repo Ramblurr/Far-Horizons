@@ -17,22 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "galaxy.h"
 #include "galaxyvars.h"
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+struct galaxy_data galaxy;

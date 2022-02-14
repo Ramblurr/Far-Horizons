@@ -17,22 +17,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
-#include "galaxyvars.h"
+#ifndef FAR_HORIZONS_COMMANDVARS_H
+#define FAR_HORIZONS_COMMANDVARS_H
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+#include <stdio.h>
+
+// globals. ugh.
+
+extern int abbr_index;
+extern int abbr_type;
+extern struct ship_data *alien_portal;
+extern char command_abbr[NUM_COMMANDS][4];
+extern int end_of_file;
+extern int g_spec_number;
+extern char g_spec_name[32];
+extern char input_abbr[256];
+extern FILE *input_file;
+extern char input_line[256];
+extern char *input_line_pointer;
+extern int just_opened_file;
+extern char original_line[256];
+extern char original_name[32];
+extern struct species_data *other_species;
+extern int other_species_number;
+extern int sub_light;
+extern char tech_abbr[6][4];
+extern int tonnage;
+extern long value;
+
+#endif //FAR_HORIZONS_COMMANDVARS_H

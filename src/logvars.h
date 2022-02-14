@@ -17,22 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
-#include "galaxyvars.h"
+#ifndef FAR_HORIZONS_LOGVARS_H
+#define FAR_HORIZONS_LOGVARS_H
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+#include <stdio.h>
+
+// globals. ugh.
+
+extern FILE *log_file;
+extern int log_stdout;
+extern int log_summary;
+extern int log_to_file;
+extern int logging_disabled;
+extern FILE *summary_file;
+
+#endif //FAR_HORIZONS_LOGVARS_H

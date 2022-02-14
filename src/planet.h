@@ -53,11 +53,4 @@ void planetDataAsSExpr(FILE *fp);
 
 void save_planet_data(void);
 
-// globals. ugh.
-
-extern char gas_string[14][4];
-extern struct planet_data *planet;
-extern struct planet_data *planet_base;
-extern int planet_data_modified;
-
 #endif //FAR_HORIZONS_PLANET_H

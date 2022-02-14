@@ -17,22 +17,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
-#include "galaxyvars.h"
+#include "planetvars.h"
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+char gas_string[14][4] = {"   ", "H2", "CH4", "He", "NH3", "N2", "CO2", "O2", "HCl", "Cl2", "F2", "H2O", "SO2", "H2S"};
+
+struct planet_data *home_planet;
+
+int32_t num_planets;
+
+struct planet_data *planet;
+
+struct planet_data *planet_base;
+
+int planet_data_modified;
+

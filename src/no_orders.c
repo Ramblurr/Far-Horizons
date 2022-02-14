@@ -26,8 +26,7 @@
 #include "ship.h"
 #include "location.h"
 #include "no_orders.h"
-
-FILE *orders_file;
+#include "ordervars.h"
 
 void NoOrdersForSpecies(void) {
     // from engine.c

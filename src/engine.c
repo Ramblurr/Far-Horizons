@@ -22,17 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "engine.h"
-
-// allow callers to set the seed. ugh.
-unsigned long last_random = 1924085713L;    /* Random seed. */
-
-int correct_spelling_required = FALSE;
-int first_pass = FALSE;
-int post_arrival_phase = FALSE;
-int prompt_gm;
-int test_mode;
-int verbose_mode;
-char upper_name[32];
+#include "enginevars.h"
 
 
 /* The following routine will return a score indicating how closely two strings match.

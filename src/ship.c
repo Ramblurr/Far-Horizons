@@ -21,38 +21,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include "enginevars.h"
 #include "species.h"
 #include "nampla.h"
-#include "command.h"
+#include "namplavars.h"
 #include "ship.h"
+#include "shipvars.h"
+#include "command.h"
+#include "commandvars.h"
 
-struct ship_data *ship;
-struct ship_data *ship_base;
-struct ship_data *ship_data[MAX_SPECIES];
-int ship_index;
 
-// Additional memory must be allocated for routines that build ships.
-// This is the default 'extras', which may be changed, if necessary.
-int extra_ships = NUM_EXTRA_SHIPS;
-int num_new_ships[MAX_SPECIES];
+static char full_ship_id[64];
 
-char full_ship_id[64];
-int ignore_field_distorters = FALSE;
-char ship_abbr[NUM_SHIP_CLASSES][4] = {
-        "PB", "CT", "ES", "FF", "DD", "CL", "CS",
-        "CA", "CC", "BC", "BS", "DN", "SD", "BM",
-        "BW", "BR", "BA", "TR"
-};
-short ship_cost[NUM_SHIP_CLASSES] = {
-        100, 200, 500, 1000, 1500, 2000, 2500,
-        3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 100, 100
-};
-int ship_index;
 /* Look-up table for ship defensive/offensive power uses ship->tonnage as an index.
  * Each value is equal to 100 * (ship->tonnage)^1.2.
  * The 'power' subroutine uses recursion to calculate values for tonnages over 100. */
-short ship_power[101] = {
+static short ship_power[101] = {
         0,    /* Zeroth element not used. */
         100, 230, 374, 528, 690, 859, 1033, 1213, 1397, 1585,
         1777, 1973, 2171, 2373, 2578, 2786, 2996, 3209, 3424, 3641,
@@ -65,13 +49,7 @@ short ship_power[101] = {
         19507, 19796, 20086, 20377, 20668, 20960, 21253, 21547, 21841, 22136,
         22431, 22727, 23024, 23321, 23619, 23918, 24217, 24517, 24818, 25119
 };
-short ship_tonnage[NUM_SHIP_CLASSES] = {
-        1, 2, 5, 10, 15, 20, 25,
-        30, 35, 40, 45, 50, 55, 60,
-        65, 70, 1, 1
-};
-char ship_type[3][2] = {"", "S", "S"};
-int truncate_name = FALSE;
+
 
 
 void delete_ship(struct ship_data *ship) {

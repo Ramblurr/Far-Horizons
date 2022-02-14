@@ -17,22 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "galaxy.h"
-#include "galaxyvars.h"
+#include "namplavars.h"
 
-void get_galaxy_data(void) {
-    /* Open galaxy file. */
-    FILE *fp = fopen("galaxy.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file galaxy.dat!\n");
-        exit(-1);
-    }
-    /* Read data. */
-    if (fread(&galaxy, sizeof(struct galaxy_data), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read data in file 'galaxy.dat'!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-}
+struct nampla_data *nampla;
+struct nampla_data *nampla_base;
+struct nampla_data *namp_data[MAX_SPECIES];
+int nampla_index;
+
+// Additional memory must be allocated for routines that name planets.
+// This is the default 'extras', which may be changed, if necessary.
+int extra_namplas = NUM_EXTRA_NAMPLAS;
+int num_new_namplas[MAX_SPECIES];

@@ -25,62 +25,135 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(fhturn
         src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
         src/fhturn.c)
 
 add_executable(fhloc
-        src/engine.h
+        src/fhloc.c
+        src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
         src/item.h src/item.c
+        src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplavars.h src/namplavars.c
         src/planet.h src/planet.c
+        src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipvars.h src/shipvars.c
         src/species.h src/species.c
-        src/fhloc.c)
+        src/starvars.h src/starvars.c)
 
 add_executable(fhorders
+        src/fhorders.c
+        src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
         src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
+        src/item.h src/item.c
+        src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplavars.h src/namplavars.c
         src/no_orders.h src/no_orders.c
+        src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipvars.h src/shipvars.c
         src/species.h src/species.c
         src/star.h src/star.c
-        src/fhorders.c)
+        src/starvars.h src/starvars.c)
 
 add_executable(fhcombat
+        src/fhcombat.c
         src/combat.h src/combat.c
         src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
         src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
         src/item.h src/item.c
+        src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationvars.h src/locationvars.c
         src/log.h src/log.c
+        src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplavars.h src/namplavars.c
+        src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
-        src/species.h src/species.c
-        src/transaction.c src/transaction.h
-        src/fhcombat.c)
-
-add_executable(fhpredep
-        src/command.h src/command.c
-        src/do.h src/do.c
-        src/engine.h src/engine.c
-        src/galaxy.h src/galaxy.c
-        src/item.h src/item.c
-        src/log.h src/log.c
-        src/nampla.h src/nampla.c
-        src/no_orders.h src/no_orders.c
-        src/planet.h src/planet.c
-        src/predeparture.c src/predeparture.h
-        src/ship.h src/ship.c
+        src/shipvars.h src/shipvars.c
         src/species.h src/species.c
         src/star.h src/star.c
-        src/transaction.c src/transaction.h
-        src/fhpredep.c)
+        src/starvars.h src/starvars.c
+        src/transaction.c src/transaction.h)
+
+add_executable(fhpredep
+        src/fhpredep.c
+        src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
+        src/do.h src/do.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
+        src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
+        src/item.h src/item.c
+        src/jumpvars.h src/jumpvars.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/nampla.h src/nampla.c
+        src/namplavars.h src/namplavars.c
+        src/ordervars.h src/ordervars.c
+        src/planet.h src/planet.c
+        src/planetvars.h src/planetvars.c
+        src/predeparture.c src/predeparture.h
+        src/ship.h src/ship.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/star.h src/star.c
+        src/starvars.h src/starvars.c
+        src/transaction.c src/transaction.h)
 
 add_executable(fhjump
-        src/fhjump.c)
+        src/fhjump.c
+        src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
+        src/do.h src/do.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
+        src/galaxy.h src/galaxy.c
+        src/galaxyvars.h src/galaxyvars.c
+        src/item.h src/item.c
+        src/jump.h src/jump.c
+        src/jumpvars.h src/jumpvars.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/nampla.h src/nampla.c
+        src/namplavars.h src/namplavars.c
+        src/ordervars.h src/ordervars.c
+        src/planet.h src/planet.c
+        src/planetvars.h src/planetvars.c
+        src/ship.h src/ship.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/star.h src/star.c
+        src/starvars.h src/starvars.c
+        src/transaction.c src/transaction.h)

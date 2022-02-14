@@ -22,16 +22,23 @@
 #include <string.h>
 #include <ctype.h>
 #include "engine.h"
+#include "enginevars.h"
 #include "galaxy.h"
+#include "galaxyvars.h"
 #include "planet.h"
+#include "planetvars.h"
 #include "species.h"
 #include "nampla.h"
+#include "namplavars.h"
 #include "ship.h"
+#include "shipvars.h"
 #include "item.h"
 #include "location.h"
 #include "command.h"
 #include "transaction.h"
 #include "log.h"
+#include "logvars.h"
+#include "commandvars.h"
 #include "combat.h"
 
 int ambush_took_place;
@@ -1116,7 +1123,8 @@ void consolidate_option(char option, char location) {
     num_combat_options++;
 }
 
-int disbanded_ship(int species_index, struct ship_data *sh) {
+
+int disbanded_species_ship(int species_index, struct ship_data *sh) {
     struct nampla_data *nam = c_nampla[species_index] - 1;
     for (int nampla_index = 0; nampla_index < c_species[species_index]->num_namplas; nampla_index++) {
         ++nam;
@@ -1129,9 +1137,9 @@ int disbanded_ship(int species_index, struct ship_data *sh) {
         /* This ship is either on the surface of a disbanded colony or is a starbase orbiting a disbanded colony. */
         return TRUE;
     }
-
     return FALSE;
 }
+
 
 void do_ambush(int ambushing_species_index, struct battle_data *bat) {
     int i, j, n, num_sp, ambushed_species_index, num_ships, age_increment;
@@ -2867,7 +2875,7 @@ int fighting_params(char option, char location, struct battle_data *bat, struct 
             if (sh->status == FORCED_JUMP) { continue; }
             if (sh->status == JUMPED_IN_COMBAT) { continue; }
             if (sh->class == TR && sh->pn != location && option != GERM_WARFARE) { continue; }
-            if (disbanded_ship(species_index, sh)) { continue; }
+            if (disbanded_species_ship(species_index, sh)) { continue; }
             if (option == SIEGE || option == PLANET_BOMBARDMENT) {
                 if (sh->special == NON_COMBATANT) { continue; }
             }
