@@ -90,7 +90,7 @@ void handle_intercept(int intercept_index) {
 
             /* This is an enemy ship that just jumped into the system. */
             if (num_enemy_ships == MAX_ENEMY_SHIPS) {
-                fprintf(stderr, "\n\tERROR! Array overflow in do_int.c!\n\n");
+                fprintf(stderr, "\n\tERROR! Array overflow in handle_intercept!\n\n");
                 exit(-1);
             }
             enemy_number[num_enemy_ships] = alien_index + 1;
@@ -158,7 +158,7 @@ void handle_intercept(int intercept_index) {
 
         /* Create interspecies transaction so that other player will be notified. */
         if (num_transactions == MAX_TRANSACTIONS) {
-            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in handle_intercept!\n\n");
             exit(-1);
         }
 

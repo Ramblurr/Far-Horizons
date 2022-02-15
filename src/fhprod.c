@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 
         end_of_file = FALSE;
 
-        just_opened_file = TRUE;    /* Tell parse.c to skip mail header, if any. */
+        just_opened_file = TRUE;    /* Tell command parser to skip mail header, if any. */
         find_start:
 
         /* Search for START PRODUCTION order. */

@@ -776,7 +776,7 @@ void do_BUILD_command(int continuing_construction, int interspecies_construction
         } else {
             ++num_new_namplas[species_index];
             if (num_new_namplas[species_index] > NUM_EXTRA_NAMPLAS) {
-                fprintf(stderr, "\n\n\tInsufficient memory for new planet name in do_build.c!\n");
+                fprintf(stderr, "\n\n\tInsufficient memory for new planet name in do_BUILD_command!\n");
                 exit(-1);
             }
             recipient_nampla = namp_data[g_spec_number - 1] + recipient_species->num_namplas;
@@ -2232,7 +2232,7 @@ void do_INTERCEPT_command(void) {
     }
 
     if (num_intercepts == MAX_INTERCEPTS) {
-        fprintf(stderr, "\n\tMAX_INTERCEPTS exceeded in do_int.c!\n\n");
+        fprintf(stderr, "\n\tMAX_INTERCEPTS exceeded in do_JUMP_command!\n\n");
         exit(-1);
     }
 
@@ -2476,7 +2476,7 @@ void do_JUMP_command(int jumped_in_combat, int using_jump_portal) {
     /* Ship had a mishap. Check if it has any fail-safe jump units. */
     if (ship->item_quantity[FS] > 0) {
         if (num_transactions == MAX_TRANSACTIONS) {
-            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_JUMP_command!\n\n");
             exit(-1);
         }
 
@@ -2529,7 +2529,7 @@ void do_JUMP_command(int jumped_in_combat, int using_jump_portal) {
         }
 
         if (num_transactions == MAX_TRANSACTIONS) {
-            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_JUMP_command!\n\n");
             exit(-1);
         }
 
@@ -2558,7 +2558,7 @@ void do_JUMP_command(int jumped_in_combat, int using_jump_portal) {
 
     /* Ship self-destructed. */
     if (num_transactions == MAX_TRANSACTIONS) {
-        fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_int.c!\n\n");
+        fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS in do_JUMP_command!\n\n");
         exit(-1);
     }
 
@@ -4855,7 +4855,7 @@ void do_TELESCOPE_command(void) {
             }
             if (!found) {
                 if (num_obs_locs == MAX_OBS_LOCS) {
-                    fprintf(stderr, "\n\nInternal error! MAX_OBS_LOCS exceeded in do_tel.c!\n\n");
+                    fprintf(stderr, "\n\nInternal error! MAX_OBS_LOCS exceeded in do_TELESCOPE_command!\n\n");
                     exit(-1);
                 }
                 obs_x[num_obs_locs] = alien_nampla->x;
@@ -4895,7 +4895,7 @@ void do_TELESCOPE_command(void) {
             }
             if (!found) {
                 if (num_obs_locs == MAX_OBS_LOCS) {
-                    fprintf(stderr, "\n\nInternal error! MAX_OBS_LOCS exceeded in do_tel.c!\n\n");
+                    fprintf(stderr, "\n\nInternal error! MAX_OBS_LOCS exceeded in do_TELESCOPE_command!\n\n");
                     exit(-1);
                 }
                 obs_x[num_obs_locs] = alien_ship->x;

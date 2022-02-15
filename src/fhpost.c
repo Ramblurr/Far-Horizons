@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
         end_of_file = FALSE;
 
-        /* Tell parse.c to skip mail header, if any. */
+        /* Tell command parser to skip mail header, if any. */
         just_opened_file = TRUE;
 
         find_start:

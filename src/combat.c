@@ -203,7 +203,7 @@ int combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_
 
         end_of_file = FALSE;
 
-        just_opened_file = TRUE;    /* Tell parse.c to skip mail header, if any. */
+        just_opened_file = TRUE;    /* Tell command parser to skip mail header, if any. */
         find_start:
 
         /* Search for START COMBAT order. */
@@ -2974,7 +2974,7 @@ int fighting_params(char option, char location, struct battle_data *bat, struct 
                         break;
 
                     default:
-                        fprintf(stderr, "\n\n\tInternal error #1 in fight_par.c - invalid engage option!\n\n");
+                        fprintf(stderr, "\n\n\tInternal error #1 in fighting_params - invalid engage option!\n\n");
                         exit(-1);
                 }
             }
@@ -3034,7 +3034,7 @@ int fighting_params(char option, char location, struct battle_data *bat, struct 
                         break;
 
                     default:
-                        fprintf(stderr, "\n\n\tInternal error #2 in fight_par.c - invalid engage option!\n\n");
+                        fprintf(stderr, "\n\n\tInternal error #2 in fighting_params - invalid engage option!\n\n");
                         exit(-1);
                 }
             }
@@ -3068,7 +3068,7 @@ int fighting_params(char option, char location, struct battle_data *bat, struct 
             break;
 
         default:
-            fprintf(stderr, "\n\n\tInternal error #3 in fight_par.c - invalid engage option!\n\n");
+            fprintf(stderr, "\n\n\tInternal error #3 in fighting_params - invalid engage option!\n\n");
             exit(-1);
     }
 

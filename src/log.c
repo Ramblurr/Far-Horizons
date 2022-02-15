@@ -129,7 +129,7 @@ void log_message(char *message_filename) {
     /* Open message file. */
     FILE *message_file = fopen(message_filename, "r");
     if (message_file == NULL) {
-        fprintf(stderr, "\n\tWARNING! utils.c: cannot open message file '%s'!\n\n", message_filename);
+        fprintf(stderr, "\n\tWARNING! log_message: cannot open message file '%s'!\n\n", message_filename);
         return;
     }
     /* Copy message to log file. */
