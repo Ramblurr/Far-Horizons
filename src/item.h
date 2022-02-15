@@ -61,6 +61,8 @@
 #define X5           37    /* Unassigned. */
 #define MAX_ITEMS    38    /* Always bump this up to a multiple of two. Don't forget to make room for zeroth element! */
 
+void check_high_tech_items (int tech, int old_tech_level, int new_tech_level);
+
 // globals. ugh.
 
 extern char item_abbr[MAX_ITEMS][4];

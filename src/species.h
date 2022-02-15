@@ -58,8 +58,9 @@ struct species_data {
     uint32_t ally[NUM_CONTACT_WORDS];    /* A bit is set if corresponding species is considered an ally. */
     uint32_t enemy[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species is considered an enemy. */
 };
-
 typedef struct species_data species_data_t;
+
+int alien_is_visible(int x, int y, int z, int species_number, int alien_number);
 
 int distorted(int species_number);
 

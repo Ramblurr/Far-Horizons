@@ -30,4 +30,6 @@ void log_message(char *message_filename);
 
 void log_string(char *string);
 
+void print_header(void);
+
 #endif //FAR_HORIZONS_LOG_H

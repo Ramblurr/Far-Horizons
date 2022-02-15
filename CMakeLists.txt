@@ -245,7 +245,7 @@ add_executable(fhpost
         src/do.h src/do.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
-        src/galaxyio.c
+        src/galaxyio.h src/galaxyio.c
         src/intercept.h src/intercept.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
@@ -271,4 +271,28 @@ add_executable(fhpost
         src/star.h src/star.c
         src/stario.h src/stario.c
         src/starvars.h src/starvars.c
+        src/transactionio.h src/transactionio.c)
+
+add_executable(fhfinish
+        src/fhfinish.c
+        src/commandvars.h src/commandvars.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
+        src/galaxyio.h src/galaxyio.c
+        src/item.h src/item.c
+        src/location.h src/location.c
+        src/locationio.h src/locationio.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
+        src/namplavars.h src/namplavars.c
+        src/planetio.h src/planetio.c
+        src/planetvars.h src/planetvars.c
+        src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
         src/transactionio.h src/transactionio.c)

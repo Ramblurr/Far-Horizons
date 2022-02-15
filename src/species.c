@@ -28,6 +28,62 @@
 
 
 
+int alien_is_visible(int x, int y, int z, int species_number, int alien_number) {
+    int i, j;
+    struct species_data *species, *alien;
+    struct nampla_data *nampla, *alien_nampla;
+    struct ship_data *alien_ship;
+
+    /* Check if the alien has a ship or starbase here that is in orbit or in deep space. */
+    alien = &spec_data[alien_number - 1];
+    alien_ship = ship_data[alien_number - 1] - 1;
+    for (i = 0; i < alien->num_ships; i++) {
+        ++alien_ship;
+
+        if (alien_ship->x != x) { continue; }
+        if (alien_ship->y != y) { continue; }
+        if (alien_ship->z != z) { continue; }
+        if (alien_ship->item_quantity[FD] == alien_ship->tonnage) { continue; }
+
+        if (alien_ship->status == IN_ORBIT || alien_ship->status == IN_DEEP_SPACE) {
+            return TRUE;
+        }
+    }
+
+    /* Check if alien has a planet that is not hidden. */
+    alien_nampla = namp_data[alien_number - 1] - 1;
+    for (i = 0; i < alien->num_namplas; i++) {
+        ++alien_nampla;
+
+        if (alien_nampla->x != x) { continue; }
+        if (alien_nampla->y != y) { continue; }
+        if (alien_nampla->z != z) { continue; }
+        if ((alien_nampla->status & POPULATED) == 0) { continue; }
+
+        if (!alien_nampla->hidden) { return TRUE; }
+
+        /* The colony is hidden. See if we have population on the same planet. */
+        species = &spec_data[species_number - 1];
+        nampla = namp_data[species_number - 1] - 1;
+        for (j = 0; j < species->num_namplas; j++) {
+            ++nampla;
+
+            if (nampla->x != x) { continue; }
+            if (nampla->y != y) { continue; }
+            if (nampla->z != z) { continue; }
+            if (nampla->pn != alien_nampla->pn) { continue; }
+            if ((nampla->status & POPULATED) == 0) { continue; }
+
+            /* We have population on the same planet, so the alien
+            cannot hide. */
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+
 /* The following routine provides the 'distorted' species number used to
 	identify a species that uses field distortion units. The input
 	variable 'species_number' is the same number used in filename

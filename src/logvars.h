@@ -24,6 +24,7 @@
 
 // globals. ugh.
 
+extern int header_printed;
 extern FILE *log_file;
 extern int log_stdout;
 extern int log_summary;

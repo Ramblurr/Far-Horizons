@@ -20,10 +20,17 @@
 #include "engine.h"
 #include "logvars.h"
 
+int header_printed;
+
 FILE *log_file;
+
 int log_stdout = TRUE;
+
 int log_summary = FALSE;
+
 int log_to_file = TRUE;
+
 int logging_disabled = FALSE;
+
 FILE *summary_file;
 

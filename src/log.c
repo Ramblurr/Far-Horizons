@@ -151,3 +151,11 @@ void log_string(char *string) {
         log_char(string[i]);
     }
 }
+
+
+void print_header(void) {
+    log_string("\nOther events:\n");
+    header_printed = TRUE;
+}
+
+
