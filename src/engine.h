@@ -37,7 +37,7 @@
 #define MAX_RADIUS   50
 #define MAX_DIAMETER (2*MAX_RADIUS)
 #define MAX_PLANETS  (9*MAX_STARS)
-
+#define MAX_OBS_LOCS 5000
 #define HP_AVAILABLE_POP 1500
 
 /* Assume at least 32 bits per long word. */

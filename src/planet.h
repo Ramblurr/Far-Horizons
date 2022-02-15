@@ -27,19 +27,19 @@
 #define NUM_EXTRA_PLANETS    100
 
 /* Gases in planetary atmospheres. */
-#define	H2	1	/* Hydrogen */
-#define	CH4	2	/* Methane */
-#define	HE	3	/* Helium */
-#define	NH3	4	/* Ammonia */
-#define	N2	5	/* Nitrogen */
-#define	CO2	6	/* Carbon Dioxide */
-#define	O2	7	/* Oxygen */
-#define	HCL	8	/* Hydrogen Chloride */
-#define	CL2	9	/* Chlorine */
-#define	F2	10	/* Fluorine */
-#define	H2O	11	/* Steam */
-#define	SO2	12	/* Sulfur Dioxide */
-#define	H2S	13	/* Hydrogen Sulfide */
+#define    H2    1    /* Hydrogen */
+#define    CH4    2    /* Methane */
+#define    HE    3    /* Helium */
+#define    NH3    4    /* Ammonia */
+#define    N2    5    /* Nitrogen */
+#define    CO2    6    /* Carbon Dioxide */
+#define    O2    7    /* Oxygen */
+#define    HCL    8    /* Hydrogen Chloride */
+#define    CL2    9    /* Chlorine */
+#define    F2    10    /* Fluorine */
+#define    H2O    11    /* Steam */
+#define    SO2    12    /* Sulfur Dioxide */
+#define    H2S    13    /* Hydrogen Sulfide */
 
 
 struct planet_data {
@@ -56,5 +56,7 @@ struct planet_data {
     int message;            /* Message associated with this planet, if any. */
 };
 typedef struct planet_data planet_data_t;
+
+void fix_gases(struct planet_data *pl);
 
 #endif //FAR_HORIZONS_PLANET_H
