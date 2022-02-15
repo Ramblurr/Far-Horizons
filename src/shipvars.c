@@ -19,6 +19,8 @@
 
 #include "shipvars.h"
 
+char full_ship_id[64];
+
 int ignore_field_distorters = FALSE;
 
 struct ship_data *ship;

@@ -32,8 +32,6 @@
 #include "commandvars.h"
 
 
-static char full_ship_id[64];
-
 /* Look-up table for ship defensive/offensive power uses ship->tonnage as an index.
  * Each value is equal to 100 * (ship->tonnage)^1.2.
  * The 'power' subroutine uses recursion to calculate values for tonnages over 100. */

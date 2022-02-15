@@ -296,3 +296,27 @@ add_executable(fhfinish
         src/speciesio.h src/speciesio.c
         src/speciesvars.h src/speciesvars.c
         src/transactionio.h src/transactionio.c)
+
+add_executable(fhreport
+        src/fhreport.c
+        src/commandvars.h src/commandvars.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
+        src/galaxyio.h src/galaxyio.c
+        src/item.h src/item.c
+        src/locationio.h src/locationio.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/namplaio.h src/namplaio.c
+        src/namplavars.h src/namplavars.c
+        src/planetio.h src/planetio.c
+        src/planetvars.h src/planetvars.c
+        src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
+        src/stario.h src/stario.c
+        )
