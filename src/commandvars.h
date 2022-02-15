@@ -21,6 +21,7 @@
 #define FAR_HORIZONS_COMMANDVARS_H
 
 #include <stdio.h>
+#include "command.h"
 
 // globals. ugh.
 
@@ -42,6 +43,7 @@ extern struct species_data *other_species;
 extern int other_species_number;
 extern int sub_light;
 extern char tech_abbr[6][4];
+extern char tech_name[6][16];
 extern int tonnage;
 extern long value;
 

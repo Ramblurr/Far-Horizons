@@ -30,6 +30,8 @@ extern struct nampla_data *nampla;
 extern struct nampla_data *nampla_base;
 extern struct nampla_data *namp_data[MAX_SPECIES];
 extern int nampla_index;
+extern struct nampla_data *next_nampla;
+extern int next_nampla_index;
 extern int num_new_namplas[MAX_SPECIES];
 
 #endif //FAR_HORIZONS_NAMPLAVARS_H

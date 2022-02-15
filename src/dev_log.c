@@ -17,14 +17,43 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#include "log.h"
+#include "dev_log.h"
 
-int sp_tech_level[6];
+void start_dev_log(int num_CUs, int num_IUs, int num_AUs) {
+    log_string("    ");
+    log_int(num_CUs);
+    log_string(" Colonist Unit");
+    if (num_CUs != 1) {
+        log_char('s'); }
 
-struct species_data *species;
+    if (num_IUs + num_AUs == 0) {
+        goto done;
+    }
 
-int species_index; // zero-based index, mostly for accessing arrays
+    if (num_IUs > 0) {
+        if (num_AUs == 0) {
+            log_string(" and ");
+        } else {
+            log_string(", ");
+        }
 
-int species_number; // one-based index, for reports and file names
+        log_int(num_IUs);
+        log_string(" Colonial Mining Unit");
+        if (num_IUs != 1) { log_char('s'); }
+    }
 
+    if (num_AUs > 0) {
+        if (num_IUs > 0) { log_char(','); }
+
+        log_string(" and ");
+
+        log_int(num_AUs);
+        log_string(" Colonial Manufacturing Unit");
+        if (num_AUs != 1) { log_char('s'); }
+    }
+
+    done:
+
+    log_string(" were built");
+}

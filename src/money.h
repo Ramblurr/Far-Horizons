@@ -17,14 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#ifndef FAR_HORIZONS_MONEY_H
+#define FAR_HORIZONS_MONEY_H
 
-int sp_tech_level[6];
+int check_bounced(long amount_needed);
 
-struct species_data *species;
+void transfer_balance(void);
 
-int species_index; // zero-based index, mostly for accessing arrays
+// globals. ugh.
 
-int species_number; // one-based index, for reports and file names
+extern long balance;
+extern long EU_spending_limit;
+extern long production_capacity;
+extern long raw_material_units;
 
+#endif //FAR_HORIZONS_MONEY_H

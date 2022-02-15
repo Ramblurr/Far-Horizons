@@ -24,6 +24,7 @@
 
 // globals. ugh.
 
+extern int sp_tech_level[6];
 extern struct species_data *species;
 extern int species_index;
 extern int species_number;

@@ -17,14 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#ifndef FAR_HORIZONS_PRODUCTIONVARS_H
+#define FAR_HORIZONS_PRODUCTIONVARS_H
 
-int sp_tech_level[6];
+// globals. ugh.
 
-struct species_data *species;
+extern int doing_production;
+extern int last_planet_produced;
+extern char production_done[1000];
+extern int shipyard_built;
+extern int shipyard_capacity;
 
-int species_index; // zero-based index, mostly for accessing arrays
-
-int species_number; // one-based index, for reports and file names
-
+#endif //FAR_HORIZONS_PRODUCTIONVARS_H

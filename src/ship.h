@@ -84,8 +84,6 @@ void delete_ship(struct ship_data *ship);
 
 int disbanded_ship(struct ship_data *ship);
 
-int get_ship(void);
-
 long power(short tonnage);
 
 char *ship_name(struct ship_data *ship);

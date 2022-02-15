@@ -29,6 +29,7 @@
 #include "starvars.h"
 #include "planet.h"
 #include "planetio.h"
+#include "planetvars.h"
 #include "species.h"
 #include "speciesio.h"
 #include "speciesvars.h"
@@ -45,6 +46,61 @@
 #include "commandvars.h"
 #include "do.h"
 #include "jumpvars.h"
+#include "productionvars.h"
+#include "money.h"
+#include "dev_log.h"
+#include "intercept.h"
+
+
+void do_AMBUSH_command(void) {
+    int n, status;
+    long cost;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get amount to spend. */
+    status = get_value();
+    if (status == 0 || value < 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid or missing amount.\n");
+        return;
+    }
+    if (value == 0) { value = balance; }
+    if (value == 0) { return; }
+    cost = value;
+
+    /* Check if planet is under siege. */
+    if (nampla->siege_eff != 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Besieged planet cannot ambush!\n");
+        return;
+    }
+
+    /* Check if sufficient funds are available. */
+    if (check_bounced(cost)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    /* Increment amount spent on ambush. */
+    nampla->use_on_ambush += cost;
+
+    /* Log transaction. */
+    log_string("    Spent ");
+    log_long(cost);
+    log_string(" in preparation for an ambush.\n");
+}
+
 
 void do_ALLY_command(void) {
     int i, array_index, bit_number;
@@ -332,6 +388,939 @@ void do_BASE_command(void) {
 }
 
 
+void do_BUILD_command(int continuing_construction, int interspecies_construction) {
+    int i, n, class, critical_tech, found, name_length,
+            siege_effectiveness, cost_given, new_ship, max_tonnage,
+            tonnage_increase, alien_number, cargo_on_board,
+            unused_nampla_available, unused_ship_available, capacity,
+            pop_check_needed, contact_word_number, contact_bit_number,
+            already_notified[MAX_SPECIES];
+
+    char upper_ship_name[32], *commas(), *src, *dest,
+            *original_line_pointer;
+
+    long cost, cost_argument, unit_cost, num_items, pop_reduction,
+            premium, total_cost, original_num_items, contact_mask,
+            max_funds_available;
+
+    struct species_data *recipient_species;
+    struct nampla_data *recipient_nampla, *unused_nampla,
+            *destination_nampla, *temp_nampla;
+    struct ship_data *recipient_ship, *unused_ship;
+
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get ready if planet is under siege. */
+    if (nampla->siege_eff < 0) {
+        siege_effectiveness = -nampla->siege_eff;
+    } else {
+        siege_effectiveness = nampla->siege_eff;
+    }
+
+    /* Get species name and make appropriate tests if this is an interspecies construction order. */
+    if (interspecies_construction) {
+        original_line_pointer = input_line_pointer;
+        if (!get_species_name()) {
+            /* Check for missing comma or tab after species name. */
+            input_line_pointer = original_line_pointer;
+            fix_separator();
+            if (!get_species_name()) {
+                fprintf(log_file, "!!! Order ignored:\n");
+                fprintf(log_file, "!!! %s", original_line);
+                fprintf(log_file, "!!! Invalid species name.\n");
+                return;
+            }
+        }
+        recipient_species = &spec_data[g_spec_number - 1];
+
+        if (species->tech_level[MA] < 25) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! MA tech level must be at least 25 to do interspecies construction.\n");
+            return;
+        }
+
+        /* Check if we've met this species and make sure it is not an enemy. */
+        contact_word_number = (g_spec_number - 1) / 32;
+        contact_bit_number = (g_spec_number - 1) % 32;
+        contact_mask = 1 << contact_bit_number;
+        if ((species->contact[contact_word_number] & contact_mask) == 0) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! You can't do interspecies construction for a species you haven't met.\n");
+            return;
+        }
+        if (species->enemy[contact_word_number] & contact_mask) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! You can't do interspecies construction for an ENEMY.\n");
+            return;
+        }
+    }
+
+    /* Get number of items to build. */
+    i = get_value();
+
+    if (i == 0) {
+        goto build_ship;
+    }    /* Not an item. */
+    num_items = value;
+    original_num_items = value;
+
+    /* Get class of item. */
+    class = get_class_abbr();
+
+    if (class != ITEM_CLASS || abbr_index == RM) {
+        /* Players sometimes accidentally use "MI" for "IU" or "MA" for "AU". */
+        if (class == TECH_ID && abbr_index == MI) {
+            abbr_index = IU;
+        } else if (class == TECH_ID && abbr_index == MA) {
+            abbr_index = AU;
+        } else {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid item class.\n");
+            return;
+        }
+    }
+    class = abbr_index;
+
+    if (interspecies_construction) {
+        if (class == PD || class == CU) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! You cannot build CUs or PDs for another species.\n");
+            return;
+        }
+    }
+
+    /* Make sure species knows how to build this item. */
+    critical_tech = item_critical_tech[class];
+    if (species->tech_level[critical_tech] < item_tech_requirment[class]) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Insufficient tech level to build item.\n");
+        return;
+    }
+
+    /* Get cost of item. */
+    if (class == TP) {
+        /* Terraforming plant. */
+        unit_cost = item_cost[class] / species->tech_level[critical_tech];
+    } else {
+        unit_cost = item_cost[class];
+    }
+
+    if (num_items == 0) { num_items = balance / unit_cost; }
+    if (num_items == 0) { return; }
+
+    /* Make sure item count is meaningful. */
+    if (num_items < 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Meaningless item count.\n");
+        return;
+    }
+
+    /* Make sure there is enough available population. */
+    pop_reduction = 0;
+    if (class == CU || class == PD) {
+        if (nampla->pop_units < num_items) {
+            if (original_num_items == 0) {
+                num_items = nampla->pop_units;
+                if (num_items == 0) { return; }
+            } else {
+                if (nampla->pop_units > 0) {
+                    fprintf(log_file, "! WARNING: %s", original_line);
+                    fprintf(log_file,
+                            "! Insufficient available population units. Substituting %ld for %ld.\n",
+                            nampla->pop_units, num_items);
+                    num_items = nampla->pop_units;
+                } else {
+                    fprintf(log_file, "!!! Order ignored:\n");
+                    fprintf(log_file, "!!! %s", original_line);
+                    fprintf(log_file, "!!! Insufficient available population units.\n");
+                    return;
+                }
+            }
+        }
+        pop_reduction = num_items;
+    }
+
+    /* Calculate total cost and see if planet has enough money. */
+    do_cost:
+    cost = num_items * unit_cost;
+    if (interspecies_construction) {
+        premium = (cost + 9) / 10;
+    } else {
+        premium = 0;
+    }
+
+    cost += premium;
+
+    if (check_bounced(cost)) {
+        if (interspecies_construction && original_num_items == 0) {
+            --num_items;
+            if (num_items < 1) { return; }
+            goto do_cost;
+        }
+
+        max_funds_available = species->econ_units;
+        if (max_funds_available > EU_spending_limit) {
+            max_funds_available = EU_spending_limit;
+        }
+        max_funds_available += balance;
+
+        num_items = max_funds_available / unit_cost;
+        if (interspecies_construction) { num_items -= (num_items + 9) / 10; }
+
+        if (num_items > 0) {
+            fprintf(log_file, "! WARNING: %s", original_line);
+            fprintf(log_file, "! Insufficient funds. Substituting %ld for %ld.\n",
+                    num_items, original_num_items);
+            goto do_cost;
+        } else {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+            return;
+        }
+    }
+
+    /* Update planet inventory. */
+    nampla->item_quantity[class] += num_items;
+    nampla->pop_units -= pop_reduction;
+
+    /* Log what was produced. */
+    log_string("    ");
+    log_long(num_items);
+    log_char(' ');
+    log_string(item_name[class]);
+
+    if (num_items > 1) {
+        log_string("s were");
+    } else {
+        log_string(" was");
+    }
+
+    if (first_pass && class == PD && siege_effectiveness > 0) {
+        log_string(" scheduled for production despite the siege.\n");
+        return;
+    } else {
+        log_string(" produced");
+        if (interspecies_construction) {
+            log_string(" for SP ");
+            log_string(recipient_species->name);
+        }
+    }
+
+    if (unit_cost != 1 || premium != 0) {
+        log_string(" at a cost of ");
+        log_long(cost);
+    }
+
+    /* Check if planet is under siege and if production of planetary defenses was detected. */
+    if (class == PD && rnd(100) <= siege_effectiveness) {
+        log_string(". However, they were detected and destroyed by the besiegers!!!\n");
+        nampla->item_quantity[PD] = 0;
+
+        /* Make sure we don't notify the same species more than once. */
+        for (i = 0; i < MAX_SPECIES; i++) { already_notified[i] = FALSE; }
+
+        for (i = 0; i < num_transactions; i++) {
+            /* Find out who is besieging this planet. */
+            if (transaction[i].type != BESIEGE_PLANET) { continue; }
+            if (transaction[i].x != nampla->x) { continue; }
+            if (transaction[i].y != nampla->y) { continue; }
+            if (transaction[i].z != nampla->z) { continue; }
+            if (transaction[i].pn != nampla->pn) { continue; }
+            if (transaction[i].number2 != species_number) { continue; }
+
+            alien_number = transaction[i].number1;
+
+            if (already_notified[alien_number - 1]) { continue; }
+
+            /* Define a 'detection' transaction. */
+            if (num_transactions == MAX_TRANSACTIONS) {
+                fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+                exit(-1);
+            }
+
+            n = num_transactions++;
+            transaction[n].type = DETECTION_DURING_SIEGE;
+            transaction[n].value = 3;    /* Construction of PDs. */
+            strcpy(transaction[n].name1, nampla->name);
+            strcpy(transaction[n].name3, species->name);
+            transaction[n].number3 = alien_number;
+
+            already_notified[alien_number - 1] = TRUE;
+        }
+        return;
+    }
+
+    if (!interspecies_construction) {
+        /* Get destination of transfer, if any. */
+        pop_check_needed = FALSE;
+        temp_nampla = nampla;
+        found = get_transfer_point();
+        destination_nampla = nampla;
+        nampla = temp_nampla;
+        if (!found) { goto done_transfer; }
+
+        if (abbr_type == SHIP_CLASS)    /* Destination is 'ship'. */
+        {
+            if (ship->x != nampla->x || ship->y != nampla->y || ship->z != nampla->z ||
+                ship->status == UNDER_CONSTRUCTION) {
+                goto done_transfer;
+            }
+
+            if (ship->class == TR) {
+                capacity = (10 + ((int) ship->tonnage / 2)) * (int) ship->tonnage;
+            } else if (ship->class == BA) {
+                capacity = 10 * ship->tonnage;
+            } else {
+                capacity = ship->tonnage;
+            }
+
+            for (i = 0; i < MAX_ITEMS; i++) {
+                capacity -= ship->item_quantity[i] * item_carry_capacity[i];
+            }
+
+            n = num_items;
+            if (num_items * item_carry_capacity[class] > capacity) {
+                num_items = capacity / item_carry_capacity[class];
+            }
+
+            ship->item_quantity[class] += num_items;
+            nampla->item_quantity[class] -= num_items;
+            log_string(" and ");
+            if (n > num_items) {
+                log_long(num_items);
+                log_string(" of them ");
+            }
+            if (num_items == 1) {
+                log_string("was");
+            } else {
+                log_string("were");
+            }
+            log_string(" transferred to ");
+            log_string(ship_name(ship));
+
+            if (class == CU && num_items > 0) {
+                if (nampla == nampla_base) {
+                    ship->loading_point = 9999;    /* Home planet. */
+                } else {
+                    ship->loading_point = (nampla - nampla_base);
+                }
+            }
+        } else {
+            /* Destination is 'destination_nampla'. */
+            if (destination_nampla->x != nampla->x || destination_nampla->y != nampla->y ||
+                destination_nampla->z != nampla->z) {
+                goto done_transfer;
+            }
+
+            if (nampla->siege_eff != 0) { goto done_transfer; }
+            if (destination_nampla->siege_eff != 0) { goto done_transfer; }
+
+            destination_nampla->item_quantity[class] += num_items;
+            nampla->item_quantity[class] -= num_items;
+            log_string(" and transferred to PL ");
+            log_string(destination_nampla->name);
+            pop_check_needed = TRUE;
+        }
+
+        done_transfer:
+
+        log_string(".\n");
+
+        if (pop_check_needed) { check_population(destination_nampla); }
+
+        return;
+    }
+
+    log_string(".\n");
+
+    /* Check if recipient species has a nampla at this location. */
+    found = FALSE;
+    unused_nampla_available = FALSE;
+    recipient_nampla = namp_data[g_spec_number - 1] - 1;
+    for (i = 0; i < recipient_species->num_namplas; i++) {
+        ++recipient_nampla;
+
+        if (recipient_nampla->pn == 99) {
+            unused_nampla = recipient_nampla;
+            unused_nampla_available = TRUE;
+        }
+
+        if (recipient_nampla->x != nampla->x) { continue; }
+        if (recipient_nampla->y != nampla->y) { continue; }
+        if (recipient_nampla->z != nampla->z) { continue; }
+        if (recipient_nampla->pn != nampla->pn) { continue; }
+
+        found = TRUE;
+        break;
+    }
+
+    if (!found) {
+        /* Add new nampla to database for the recipient species. */
+        if (unused_nampla_available) {
+            recipient_nampla = unused_nampla;
+        } else {
+            ++num_new_namplas[species_index];
+            if (num_new_namplas[species_index] > NUM_EXTRA_NAMPLAS) {
+                fprintf(stderr, "\n\n\tInsufficient memory for new planet name in do_build.c!\n");
+                exit(-1);
+            }
+            recipient_nampla = namp_data[g_spec_number - 1] + recipient_species->num_namplas;
+            recipient_species->num_namplas += 1;
+            delete_nampla(recipient_nampla);    /* Set everything to zero. */
+        }
+
+        /* Initialize new nampla. */
+        strcpy(recipient_nampla->name, nampla->name);
+        recipient_nampla->x = nampla->x;
+        recipient_nampla->y = nampla->y;
+        recipient_nampla->z = nampla->z;
+        recipient_nampla->pn = nampla->pn;
+        recipient_nampla->planet_index = nampla->planet_index;
+        recipient_nampla->status = COLONY;
+    }
+
+    /* Transfer the goods. */
+    nampla->item_quantity[class] -= num_items;
+    recipient_nampla->item_quantity[class] += num_items;
+    data_modified[g_spec_number - 1] = TRUE;
+
+    if (first_pass) { return; }
+
+    /* Define transaction so that recipient will be notified. */
+    if (num_transactions == MAX_TRANSACTIONS) {
+        fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+        exit(-1);
+    }
+
+    n = num_transactions++;
+    transaction[n].type = INTERSPECIES_CONSTRUCTION;
+    transaction[n].donor = species_number;
+    transaction[n].recipient = g_spec_number;
+    transaction[n].value = 1;    /* Items, not ships. */
+    transaction[n].number1 = num_items;
+    transaction[n].number2 = class;
+    transaction[n].number3 = cost;
+    strcpy(transaction[n].name1, species->name);
+    strcpy(transaction[n].name2, recipient_nampla->name);
+
+    return;
+
+
+    build_ship:
+
+    original_line_pointer = input_line_pointer;
+    if (continuing_construction) {
+        found = get_ship();
+        if (!found) {
+            /* Check for missing comma or tab after ship name. */
+            input_line_pointer = original_line_pointer;
+            fix_separator();
+            found = get_ship();
+        }
+
+        if (found) { goto check_ship; }
+        input_line_pointer = original_line_pointer;
+    }
+
+    class = get_class_abbr();
+
+    if (class != SHIP_CLASS || tonnage < 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Invalid ship class.\n");
+        return;
+    }
+    class = abbr_index;
+
+    /* Get ship name. */
+    name_length = get_name();
+    if (name_length < 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Invalid ship name.\n");
+        return;
+    }
+
+    /* Search all ships for name. */
+    found = FALSE;
+    ship = ship_base - 1;
+    unused_ship_available = FALSE;
+    for (ship_index = 0; ship_index < species->num_ships; ship_index++) {
+        ++ship;
+
+        if (ship->pn == 99) {
+            unused_ship_available = TRUE;
+            unused_ship = ship;
+            continue;
+        }
+
+        /* Make upper case copy of ship name. */
+        for (i = 0; i < 32; i++) {
+            upper_ship_name[i] = toupper(ship->name[i]);
+        }
+
+        /* Compare names. */
+        if (strcmp(upper_ship_name, upper_name) == 0) {
+            found = TRUE;
+            break;
+        }
+    }
+
+    check_ship:
+
+    if (found) {
+        /* Check if BUILD was accidentally used instead of CONTINUE. */
+        if ((ship->status == UNDER_CONSTRUCTION || ship->type == STARBASE) && ship->x == nampla->x &&
+            ship->y == nampla->y && ship->z == nampla->z && ship->pn == nampla->pn) {
+            continuing_construction = TRUE;
+        }
+
+        if ((ship->status != UNDER_CONSTRUCTION && ship->type != STARBASE) || (!continuing_construction)) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Ship name already in use.\n");
+            return;
+        }
+
+        new_ship = FALSE;
+    } else {
+        /* If CONTINUE command was used, the player probably mis-spelled the name. */
+        if (continuing_construction) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Invalid ship name.\n");
+            return;
+        }
+
+        if (unused_ship_available) {
+            ship = unused_ship;
+        } else {
+            /* Make sure we have enough memory for new ship. */
+            if (num_new_ships[species_index] >= NUM_EXTRA_SHIPS) {
+                if (num_new_ships[species_index] == 9999) { return; }
+
+                fprintf(log_file, "!!! Order ignored:\n");
+                fprintf(log_file, "!!! %s", original_line);
+                fprintf(log_file, "!!! You cannot build more than %d ships per turn!\n", NUM_EXTRA_SHIPS);
+                num_new_ships[species_index] = 9999;
+                return;
+            }
+            new_ship = TRUE;
+            ship = ship_base + (int) species->num_ships;
+            /* Initialize everything to zero. */
+            delete_ship(ship);
+        }
+
+        /* Initialize non-zero data for new ship. */
+        strcpy(ship->name, original_name);
+        ship->x = nampla->x;
+        ship->y = nampla->y;
+        ship->z = nampla->z;
+        ship->pn = nampla->pn;
+        ship->status = UNDER_CONSTRUCTION;
+        if (class == BA) {
+            ship->type = STARBASE;
+            ship->status = IN_ORBIT;
+        } else if (sub_light) {
+            ship->type = SUB_LIGHT;
+        } else {
+            ship->type = FTL;
+        }
+        ship->class = class;
+        ship->age = -1;
+        if (ship->type != STARBASE) { ship->tonnage = tonnage; }
+        ship->remaining_cost = ship_cost[class];
+        if (ship->class == TR) {
+            ship->remaining_cost = ship_cost[TR] * tonnage;
+        }
+        if (ship->type == SUB_LIGHT) {
+            ship->remaining_cost = (3L * (long) ship->remaining_cost) / 4L;
+        }
+        ship->just_jumped = FALSE;
+
+        /* Everything else was set to zero in above call to 'delete_ship'. */
+    }
+
+    /* Check if amount to spend was specified. */
+    cost_given = get_value();
+    cost = value;
+    cost_argument = value;
+
+    if (cost_given) {
+        if (interspecies_construction && (ship->type != STARBASE)) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Amount to spend may not be specified.\n");
+            return;
+        }
+
+        if (cost == 0) {
+            cost = balance;
+            if (ship->type == STARBASE) {
+                if (cost % ship_cost[BA] != 0) {
+                    cost = ship_cost[BA] * (cost / ship_cost[BA]);
+                }
+            }
+            if (cost < 1) {
+                if (new_ship) { delete_ship(ship); }
+                return;
+            }
+        }
+
+        if (cost < 1) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Amount specified is meaningless.\n");
+            if (new_ship) { delete_ship(ship); }
+            return;
+        }
+
+        if (ship->type == STARBASE) {
+            if (cost % ship_cost[BA] != 0) {
+                fprintf(log_file, "!!! Order ignored:\n");
+                fprintf(log_file, "!!! %s", original_line);
+                fprintf(log_file, "!!! Amount spent on starbase must be multiple of %d.\n", ship_cost[BA]);
+                if (new_ship) { delete_ship(ship); }
+                return;
+            }
+        }
+    } else {
+        if (ship->type == STARBASE) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Amount to spend MUST be specified for starbase.\n");
+            if (new_ship) { delete_ship(ship); }
+            return;
+        }
+
+        cost = ship->remaining_cost;
+    }
+
+    /* Make sure species can build a ship of this size. */
+    max_tonnage = species->tech_level[MA] / 2;
+    if (ship->type == STARBASE) {
+        tonnage_increase = cost / (long) ship_cost[BA];
+        tonnage = ship->tonnage + tonnage_increase;
+        if (tonnage > max_tonnage && cost_argument == 0) {
+            tonnage_increase = max_tonnage - ship->tonnage;
+            if (tonnage_increase < 1) { return; }
+            tonnage = ship->tonnage + tonnage_increase;
+            cost = tonnage_increase * (int) ship_cost[BA];
+        }
+    }
+
+    if (tonnage > max_tonnage) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Maximum allowable tonnage exceeded.\n");
+        if (new_ship) { delete_ship(ship); }
+        return;
+    }
+
+    /* Make sure species has gravitics technology if this is an FTL ship. */
+    if (ship->type == FTL && species->tech_level[GV] < 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Gravitics tech needed to build FTL ship!\n");
+        if (new_ship) { delete_ship(ship); }
+        return;
+    }
+
+    /* Make sure amount specified is not an overpayment. */
+    if (ship->type != STARBASE && cost > ship->remaining_cost) {
+        cost = ship->remaining_cost;
+    }
+
+    /* Make sure planet has sufficient shipyards. */
+    if (shipyard_capacity < 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Shipyard capacity exceeded!\n");
+        if (new_ship) { delete_ship(ship); }
+        return;
+    }
+
+    /* Make sure there is enough money to pay for it. */
+    premium = 0;
+    if (interspecies_construction) {
+        if (ship->class == TR || ship->type == STARBASE) {
+            total_cost = ship_cost[ship->class] * tonnage;
+        } else {
+            total_cost = ship_cost[ship->class];
+        }
+
+        if (ship->type == SUB_LIGHT) {
+            total_cost = (3 * total_cost) / 4;
+        }
+
+        premium = total_cost / 10;
+        if (total_cost % 10) { ++premium; }
+    }
+
+    if (check_bounced(cost + premium)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        if (new_ship) { delete_ship(ship); }
+        return;
+    }
+
+    --shipyard_capacity;
+
+    /* Test if this is a starbase and if planet is under siege. */
+    if (ship->type == STARBASE && siege_effectiveness > 0) {
+        log_string("    Your attempt to build ");
+        log_string(ship_name(ship));
+        log_string(" was detected by the besiegers and the starbase was destroyed!!!\n");
+
+        /* Make sure we don't notify the same species more than once. */
+        for (i = 0; i < MAX_SPECIES; i++) { already_notified[i] = FALSE; }
+
+        for (i = 0; i < num_transactions; i++) {
+            /* Find out who is besieging this planet. */
+            if (transaction[i].type != BESIEGE_PLANET) { continue; }
+            if (transaction[i].x != nampla->x) { continue; }
+            if (transaction[i].y != nampla->y) { continue; }
+            if (transaction[i].z != nampla->z) { continue; }
+            if (transaction[i].pn != nampla->pn) { continue; }
+            if (transaction[i].number2 != species_number) { continue; }
+
+            alien_number = transaction[i].number1;
+
+            if (already_notified[alien_number - 1]) { continue; }
+
+            /* Define a 'detection' transaction. */
+            if (num_transactions == MAX_TRANSACTIONS) {
+                fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+                exit(-1);
+            }
+
+            n = num_transactions++;
+            transaction[n].type = DETECTION_DURING_SIEGE;
+            transaction[n].value = 2;    /* Construction of ship/starbase. */
+            strcpy(transaction[n].name1, nampla->name);
+            strcpy(transaction[n].name2, ship_name(ship));
+            strcpy(transaction[n].name3, species->name);
+            transaction[n].number3 = alien_number;
+
+            already_notified[alien_number - 1] = TRUE;
+        }
+
+        delete_ship(ship);
+
+        return;
+    }
+
+    /* Finish up and log results. */
+    log_string("    ");
+    if (ship->type == STARBASE) {
+        if (ship->tonnage == 0) {
+            log_string(ship_name(ship));
+            log_string(" was constructed");
+        } else {
+            /* Weighted average. */
+            ship->age = ((ship->age * ship->tonnage) - tonnage_increase) / tonnage;
+            log_string("Size of ");
+            log_string(ship_name(ship));
+            log_string(" was increased to ");
+            log_string(commas(10000L * (long) tonnage));
+            log_string(" tons");
+        }
+
+        ship->tonnage = tonnage;
+    } else {
+        ship->remaining_cost -= cost;
+        if (ship->remaining_cost == 0) {
+            ship->status = ON_SURFACE;    /* Construction is complete. */
+            if (continuing_construction) {
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string("An attempt will be made to finish construction on ");
+                } else {
+                    log_string("Construction finished on ");
+                }
+                log_string(ship_name(ship));
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string(" despite the siege");
+                }
+            } else {
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string("An attempt will be made to construct ");
+                }
+                log_string(ship_name(ship));
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string(" despite the siege");
+                } else {
+                    log_string(" was constructed");
+                }
+            }
+        } else {
+            if (continuing_construction) {
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string("An attempt will be made to continue construction on ");
+                } else {
+                    log_string("Construction continued on ");
+                }
+                log_string(ship_name(ship));
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string(" despite the siege");
+                }
+            } else {
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string("An attempt will be made to start construction on ");
+                } else {
+                    log_string("Construction started on ");
+                }
+                log_string(ship_name(ship));
+                if (first_pass && siege_effectiveness > 0) {
+                    log_string(" despite the siege");
+                }
+            }
+        }
+    }
+    log_string(" at a cost of ");
+    log_long(cost + premium);
+
+    if (interspecies_construction) {
+        log_string(" for SP ");
+        log_string(recipient_species->name);
+    }
+
+    log_char('.');
+
+    if (new_ship && (!unused_ship_available)) {
+        ++num_new_ships[species_index];
+        ++species->num_ships;
+    }
+
+    /* Check if planet is under siege and if construction was detected. */
+    if (!first_pass && rnd(100) <= siege_effectiveness) {
+        log_string(" However, the work was detected by the besiegers and the ship was destroyed!!!");
+
+        /* Make sure we don't notify the same species more than once. */
+        for (i = 0; i < MAX_SPECIES; i++) { already_notified[i] = FALSE; }
+
+        for (i = 0; i < num_transactions; i++) {
+            /* Find out who is besieging this planet. */
+            if (transaction[i].type != BESIEGE_PLANET) { continue; }
+            if (transaction[i].x != nampla->x) { continue; }
+            if (transaction[i].y != nampla->y) { continue; }
+            if (transaction[i].z != nampla->z) { continue; }
+            if (transaction[i].pn != nampla->pn) { continue; }
+            if (transaction[i].number2 != species_number) { continue; }
+
+            alien_number = transaction[i].number1;
+
+            if (already_notified[alien_number - 1]) { continue; }
+
+            /* Define a 'detection' transaction. */
+            if (num_transactions == MAX_TRANSACTIONS) {
+                fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+                exit(-1);
+            }
+
+            n = num_transactions++;
+            transaction[n].type = DETECTION_DURING_SIEGE;
+            transaction[n].value = 2;    /* Construction of ship/starbase. */
+            strcpy(transaction[n].name1, nampla->name);
+            strcpy(transaction[n].name2, ship_name(ship));
+            strcpy(transaction[n].name3, species->name);
+            transaction[n].number3 = alien_number;
+
+            already_notified[alien_number - 1] = TRUE;
+        }
+
+        /* Remove ship from inventory. */
+        delete_ship(ship);
+    }
+
+    log_char('\n');
+
+    if (!interspecies_construction) { return; }
+
+    /* Transfer any cargo on the ship to the planet. */
+    cargo_on_board = FALSE;
+    for (i = 0; i < MAX_ITEMS; i++) {
+        if (ship->item_quantity[i] > 0) {
+            nampla->item_quantity[i] += ship->item_quantity[i];
+            ship->item_quantity[i] = 0;
+            cargo_on_board = TRUE;
+        }
+    }
+    if (cargo_on_board) {
+        log_string("      Forgotten cargo on the ship was first transferred to the planet.\n");
+    }
+
+    /* Transfer the ship to the recipient species. */
+    unused_ship_available = FALSE;
+    recipient_ship = ship_data[g_spec_number - 1];
+    for (i = 0; i < recipient_species->num_ships; i++) {
+        if (recipient_ship->pn == 99) {
+            unused_ship_available = TRUE;
+            break;
+        }
+
+        ++recipient_ship;
+    }
+
+    if (!unused_ship_available) {
+        /* Make sure we have enough memory for new ship. */
+        if (num_new_ships[g_spec_number - 1] == NUM_EXTRA_SHIPS) {
+            fprintf(stderr, "\n\n\tInsufficient memory for new recipient ship!\n\n");
+            exit(-1);
+        }
+        recipient_ship = ship_data[g_spec_number - 1] + (int) recipient_species->num_ships;
+        ++recipient_species->num_ships;
+        ++num_new_ships[g_spec_number - 1];
+    }
+
+    /* Copy donor ship to recipient ship. */
+    src = (char *) ship;
+    dest = (char *) recipient_ship;
+    for (i = 0; i < sizeof(struct ship_data); i++) {
+        *dest++ = *src++;
+    }
+
+    recipient_ship->status = IN_ORBIT;
+
+    data_modified[g_spec_number - 1] = TRUE;
+
+    /* Delete donor ship. */
+    delete_ship(ship);
+
+    if (first_pass) { return; }
+
+    /* Define transaction so that recipient will be notified. */
+    if (num_transactions == MAX_TRANSACTIONS) {
+        fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+        exit(-1);
+    }
+
+    n = num_transactions++;
+    transaction[n].type = INTERSPECIES_CONSTRUCTION;
+    transaction[n].donor = species_number;
+    transaction[n].recipient = g_spec_number;
+    transaction[n].value = 2;    /* Ship, not items. */
+    transaction[n].number3 = total_cost + premium;
+    strcpy(transaction[n].name1, species->name);
+    strcpy(transaction[n].name2, ship_name(recipient_ship));
+}
+
+
 void do_DEEP_command(void) {
     /* Get the ship. */
     char *original_line_pointer = input_line_pointer;
@@ -408,6 +1397,412 @@ void do_DESTROY_command(void) {
 }
 
 
+void do_DEVELOP_command(void) {
+    int i, num_CUs, num_AUs, num_IUs, more_args, load_transport,
+            capacity, resort_colony, mining_colony, production_penalty,
+            CUs_only;
+
+    char c, *original_line_pointer, *tp;
+
+    long n, ni, na, amount_to_spend, original_cost, max_funds_available,
+            ls_needed, raw_material_units, production_capacity,
+            colony_production, ib, ab, md, denom, reb, specified_max;
+
+    struct planet_data *colony_planet, *home_planet;
+    struct nampla_data *temp_nampla, *colony_nampla;
+
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get default spending limit. */
+    max_funds_available = species->econ_units;
+    if (max_funds_available > EU_spending_limit) {
+        max_funds_available = EU_spending_limit;
+    }
+    max_funds_available += balance;
+
+    /* Get specified spending limit, if any. */
+    specified_max = -1;
+    if (get_value()) {
+        if (value == 0) {
+            max_funds_available = balance;
+        } else if (value > 0) {
+            specified_max = value;
+            if (value <= max_funds_available) {
+                max_funds_available = value;
+            } else {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient funds. Substituting %ld for %ld.\n", max_funds_available, value);
+                if (max_funds_available == 0) { return; }
+            }
+        } else {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", input_line);
+            fprintf(log_file, "!!! Invalid spending limit.\n");
+            return;
+        }
+    }
+
+    /* See if there are any more arguments. */
+    tp = input_line_pointer;
+    more_args = FALSE;
+    while (c = *tp++) {
+        if (c == ';' || c == '\n') { break; }
+        if (c == ' ' || c == '\t') { continue; }
+        more_args = TRUE;
+        break;
+    }
+
+    if (!more_args) {
+        /* Make sure planet is not a healthy home planet. */
+        if (nampla->status & HOME_PLANET) {
+            reb = species->hp_original_base - (nampla->mi_base + nampla->ma_base);
+            if (reb > 0) {
+                /* Home planet is recovering from bombing. */
+                if (reb < max_funds_available) { max_funds_available = reb; }
+            } else {
+                fprintf(log_file, "!!! Order ignored:\n");
+                fprintf(log_file, "!!! %s", input_line);
+                fprintf(log_file, "!!! You can only DEVELOP a home planet if it is recovering from bombing.\n");
+                return;
+            }
+        }
+
+        /* No arguments. Order is for this planet. */
+        num_CUs = nampla->pop_units;
+        if (2 * num_CUs > max_funds_available) {
+            num_CUs = max_funds_available / 2;
+        }
+        if (num_CUs <= 0) { return; }
+
+        colony_planet = planet_base + (long) nampla->planet_index;
+        ib = nampla->mi_base + nampla->IUs_to_install;
+        ab = nampla->ma_base + nampla->AUs_to_install;
+        md = colony_planet->mining_difficulty;
+
+        denom = 100 + md;
+        num_AUs =
+                (100 * (num_CUs + ib) - (md * ab) + denom / 2) / denom;
+        num_IUs = num_CUs - num_AUs;
+
+        if (num_IUs < 0) {
+            num_AUs = num_CUs;
+            num_IUs = 0;
+        }
+        if (num_AUs < 0) {
+            num_IUs = num_CUs;
+            num_AUs = 0;
+        }
+
+        amount_to_spend = num_CUs + num_AUs + num_IUs;
+
+        if (check_bounced(amount_to_spend)) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Internal error. Please notify GM!\n");
+            return;
+        }
+
+        nampla->pop_units -= num_CUs;
+        nampla->item_quantity[CU] += num_CUs;
+        nampla->item_quantity[IU] += num_IUs;
+        nampla->item_quantity[AU] += num_AUs;
+
+        nampla->auto_IUs += num_IUs;
+        nampla->auto_AUs += num_AUs;
+
+        start_dev_log(num_CUs, num_IUs, num_AUs);
+        log_string(".\n");
+
+        check_population(nampla);
+
+        return;
+    }
+
+    /* Get the planet to be developed. */
+    temp_nampla = nampla;
+    original_line_pointer = input_line_pointer;
+    i = get_location();
+    if (!i || nampla == NULL) {
+        /* Check for missing comma or tab after source name. */
+        input_line_pointer = original_line_pointer;
+        fix_separator();
+        i = get_location();
+    }
+    colony_nampla = nampla;
+    nampla = temp_nampla;
+    if (!i || colony_nampla == NULL) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid planet name in DEVELOP command.\n");
+        return;
+    }
+
+    /* Make sure planet is not a healthy home planet. */
+    if (colony_nampla->status & HOME_PLANET) {
+        reb = species->hp_original_base - (colony_nampla->mi_base + colony_nampla->ma_base);
+        if (reb > 0) {
+            /* Home planet is recovering from bombing. */
+            if (reb < max_funds_available) { max_funds_available = reb; }
+        } else {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", input_line);
+            fprintf(log_file, "!!! You can only DEVELOP a home planet if it is recovering from bombing.\n");
+            return;
+        }
+    }
+
+    /* Determine if its a mining or resort colony, and if it can afford to
+	build its own IUs and AUs. Note that we cannot use nampla->status
+	because it is not correctly set until the Finish program is run. */
+
+    home_planet = planet_base + (long) nampla_base->planet_index;
+    colony_planet = planet_base + (long) colony_nampla->planet_index;
+    ls_needed = life_support_needed(species, home_planet, colony_planet);
+
+    ni = colony_nampla->mi_base + colony_nampla->IUs_to_install;
+    na = colony_nampla->ma_base + colony_nampla->AUs_to_install;
+
+    if (ni > 0 && na == 0) {
+        colony_production = 0;
+        mining_colony = TRUE;
+        resort_colony = FALSE;
+    } else if (na > 0 && ni == 0 && ls_needed <= 6 && colony_planet->gravity <= home_planet->gravity) {
+        colony_production = 0;
+        resort_colony = TRUE;
+        mining_colony = FALSE;
+    } else {
+        mining_colony = FALSE;
+        resort_colony = FALSE;
+
+        raw_material_units = (10L * (long) species->tech_level[MI] * ni) / (long) colony_planet->mining_difficulty;
+        production_capacity = ((long) species->tech_level[MA] * na) / 10L;
+
+        if (ls_needed == 0) {
+            production_penalty = 0;
+        } else {
+            production_penalty = (100 * ls_needed) / species->tech_level[LS];
+        }
+
+        raw_material_units -= (production_penalty * raw_material_units) / 100;
+        production_capacity -= (production_penalty * production_capacity) / 100;
+
+        colony_production = (production_capacity > raw_material_units) ? raw_material_units : production_capacity;
+
+        colony_production -= colony_nampla->IUs_needed + colony_nampla->AUs_needed;
+        /* In case there is more than one DEVELOP order for this colony. */
+    }
+
+    /* See if there are more arguments. */
+    tp = input_line_pointer;
+    more_args = FALSE;
+    while (c = *tp++) {
+        if (c == ';' || c == '\n') { break; }
+        if (c == ' ' || c == '\t') { continue; }
+        more_args = TRUE;
+        break;
+    }
+
+    if (more_args) {
+        load_transport = TRUE;
+
+        /* Get the ship to receive the cargo. */
+        if (!get_ship()) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Ship to be loaded does not exist!\n");
+            return;
+        }
+
+        if (ship->class == TR) {
+            capacity = (10 + ((int) ship->tonnage / 2)) * (int) ship->tonnage;
+        } else if (ship->class == BA) {
+            capacity = 10 * ship->tonnage;
+        } else {
+            capacity = ship->tonnage;
+        }
+
+        for (i = 0; i < MAX_ITEMS; i++) {
+            capacity -= ship->item_quantity[i] * item_carry_capacity[i];
+        }
+
+        if (capacity <= 0) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! %s was already full and could take no more cargo!\n", ship_name(ship));
+            return;
+        }
+
+        if (capacity > max_funds_available) {
+            capacity = max_funds_available;
+            if (max_funds_available != specified_max) {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient funds to completely fill %s!\n", ship_name(ship));
+                fprintf(log_file, "! Will use all remaining funds (= %d).\n", capacity);
+            }
+        }
+    } else {
+        load_transport = FALSE;
+
+        /* No more arguments. Order is for a colony in the same sector as the producing planet. */
+        if (nampla->x != colony_nampla->x || nampla->y != colony_nampla->y || nampla->z != colony_nampla->z) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Colony and producing planet are not in the same sector.\n");
+            return;
+        }
+
+        num_CUs = nampla->pop_units;
+        if (2 * num_CUs > max_funds_available) {
+            num_CUs = max_funds_available / 2;
+        }
+    }
+
+    CUs_only = FALSE;
+    if (mining_colony) {
+        if (load_transport) {
+            num_CUs = capacity / 2;
+            if (num_CUs > nampla->pop_units) {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient available population! %d CUs are needed", num_CUs);
+                num_CUs = nampla->pop_units;
+                fprintf(log_file, " to fill ship but only %d can be built.\n", num_CUs);
+            }
+        }
+
+        num_AUs = 0;
+        num_IUs = num_CUs;
+    } else if (resort_colony) {
+        if (load_transport) {
+            num_CUs = capacity / 2;
+            if (num_CUs > nampla->pop_units) {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient available population! %d CUs are needed", num_CUs);
+                num_CUs = nampla->pop_units;
+                fprintf(log_file, " to fill ship but only %d can be built.\n", num_CUs);
+            }
+        }
+
+        num_IUs = 0;
+        num_AUs = num_CUs;
+    } else {
+        if (load_transport) {
+            if (colony_production >= capacity) {
+                /* Colony can build its own IUs and AUs. */
+                num_CUs = capacity;
+                CUs_only = TRUE;
+            } else {
+                /* Build IUs and AUs for the colony. */
+                num_CUs = capacity / 2;
+            }
+
+            if (num_CUs > nampla->pop_units) {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient available population! %d CUs are needed", num_CUs);
+                num_CUs = nampla->pop_units;
+                fprintf(log_file, " to fill ship, but\n!   only %d can be built.\n", num_CUs);
+            }
+        }
+
+        colony_planet = planet_base + (long) colony_nampla->planet_index;
+
+        i = 100 + (int) colony_planet->mining_difficulty;
+        num_AUs = ((100 * num_CUs) + (i + 1) / 2) / i;
+        num_IUs = num_CUs - num_AUs;
+    }
+
+    if (num_CUs <= 0) { return; }
+
+    /* Make sure there's enough money to pay for it all. */
+    if (load_transport && CUs_only) {
+        amount_to_spend = num_CUs;
+    } else {
+        amount_to_spend = num_CUs + num_IUs + num_AUs;
+    }
+
+    if (check_bounced(amount_to_spend)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Internal error. Notify GM!\n");
+        return;
+    }
+
+    /* Start logging what happened. */
+    if (load_transport && CUs_only) {
+        start_dev_log(num_CUs, 0, 0);
+    } else {
+        start_dev_log(num_CUs, num_IUs, num_AUs);
+    }
+
+    log_string(" for PL ");
+    log_string(colony_nampla->name);
+
+    nampla->pop_units -= num_CUs;
+
+    if (load_transport) {
+        if (CUs_only) {
+            colony_nampla->IUs_needed += num_IUs;
+            colony_nampla->AUs_needed += num_AUs;
+        }
+
+        if (nampla->x != ship->x || nampla->y != ship->y || nampla->z != ship->z) {
+            nampla->item_quantity[CU] += num_CUs;
+            if (!CUs_only) {
+                nampla->item_quantity[IU] += num_IUs;
+                nampla->item_quantity[AU] += num_AUs;
+            }
+
+            log_string(" but will remain on the planet's surface because ");
+            log_string(ship_name(ship));
+            log_string(" is not in the same sector.");
+        } else {
+            ship->item_quantity[CU] += num_CUs;
+            if (!CUs_only) {
+                ship->item_quantity[IU] += num_IUs;
+                ship->item_quantity[AU] += num_AUs;
+            }
+
+            n = colony_nampla - nampla_base;
+            if (n == 0) {
+                /* Home planet. */
+                n = 9999;
+            }
+            ship->unloading_point = n;
+
+            n = nampla - nampla_base;
+            if (n == 0) {
+                /* Home planet. */
+                n = 9999;
+            }
+            ship->loading_point = n;
+
+            log_string(" and transferred to ");
+            log_string(ship_name(ship));
+        }
+    } else {
+        colony_nampla->item_quantity[CU] += num_CUs;
+        colony_nampla->item_quantity[IU] += num_IUs;
+        colony_nampla->item_quantity[AU] += num_AUs;
+
+        colony_nampla->auto_IUs += num_IUs;
+        colony_nampla->auto_AUs += num_AUs;
+
+        log_string(" and transferred to PL ");
+        log_string(colony_nampla->name);
+
+        check_population(colony_nampla);
+    }
+
+    log_string(".\n");
+}
+
+
 void do_DISBAND_command(void) {
     /* Get the planet. */
     int found = get_location();
@@ -480,6 +1875,151 @@ void do_ENEMY_command(void) {
         log_string(g_spec_name);
     }
     log_string(".\n");
+}
+
+
+void do_ESTIMATE_command(void) {
+    int i, max_error, estimate[6], contact_word_number, contact_bit_number;
+    long cost, contact_mask;
+    struct species_data *alien;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get name of alien species. */
+    if (!get_species_name()) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid species name in ESTIMATE command.\n");
+        return;
+    }
+
+    /* Check if we've met this species. */
+    contact_word_number = (g_spec_number - 1) / 32;
+    contact_bit_number = (g_spec_number - 1) % 32;
+    contact_mask = 1 << contact_bit_number;
+    if ((species->contact[contact_word_number] & contact_mask) == 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! You can't do an estimate of a species you haven't met.\n");
+        return;
+    }
+
+    /* Check if sufficient funds are available. */
+    cost = 25;
+    if (check_bounced(cost)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    /* Log the result. */
+    if (first_pass) {
+        log_string("    An estimate of the technology of SP ");
+        log_string(g_spec_name);
+        log_string(" was made at a cost of ");
+        log_long(cost);
+        log_string(".\n");
+        return;
+    }
+
+    /* Make the estimates. */
+    alien = &spec_data[g_spec_number - 1];
+    for (i = 0; i < 6; i++) {
+        max_error = (int) alien->tech_level[i] - (int) species->tech_level[i];
+        if (max_error < 1) { max_error = 1; }
+        estimate[i] = (int) alien->tech_level[i] + rnd((2 * max_error) + 1) - (max_error + 1);
+        if (alien->tech_level[i] == 0) { estimate[i] = 0; }
+        if (estimate[i] < 0) { estimate[i] = 0; }
+    }
+
+    log_string("    Estimate of the technology of SP ");
+    log_string(alien->name);
+    log_string(" (government name '");
+    log_string(alien->govt_name);
+    log_string("', government type '");
+    log_string(alien->govt_type);
+    log_string("'):\n      MI = ");
+    log_int(estimate[MI]);
+    log_string(", MA = ");
+    log_int(estimate[MA]);
+    log_string(", ML = ");
+    log_int(estimate[ML]);
+    log_string(", GV = ");
+    log_int(estimate[GV]);
+    log_string(", LS = ");
+    log_int(estimate[LS]);
+    log_string(", BI = ");
+    log_int(estimate[BI]);
+    log_string(".\n");
+}
+
+
+void do_HIDE_command(void) {
+    int n, status;
+    long cost;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Make sure this is not a mining colony or home planet. */
+    if (nampla->status & HOME_PLANET) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! You may not HIDE a home planet.\n");
+        return;
+    }
+    if (nampla->status & RESORT_COLONY) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! You may not HIDE a resort colony.\n");
+        return;
+    }
+
+    /* Check if planet is under siege. */
+    if (nampla->siege_eff != 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Besieged planet cannot HIDE!\n");
+        return;
+    }
+
+    /* Check if sufficient funds are available. */
+    cost = (nampla->mi_base + nampla->ma_base) / 10L;
+    if (nampla->status & MINING_COLONY) {
+        if (cost > species->econ_units) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", input_line);
+            fprintf(log_file, "!!! Mining colony does not have sufficient EUs to hide.\n");
+            return;
+        } else {
+            species->econ_units -= cost;
+        }
+    } else if (check_bounced(cost)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    /* Set 'hiding' flag. */
+    nampla->hiding = TRUE;
+
+    /* Log transaction. */
+    log_string("    Spent ");
+    log_long(cost);
+    log_string(" hiding this colony.\n");
 }
 
 
@@ -631,6 +2171,77 @@ void do_INSTALL_command(void) {
         goto check_items;
     }
     check_population(nampla);
+}
+
+
+void do_INTERCEPT_command(void) {
+    int i, n, status;
+    long cost;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get amount to spend. */
+    status = get_value();
+    if (status == 0 || value < 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid or missing amount.\n");
+        return;
+    }
+    if (value == 0) { value = balance; }
+    if (value == 0) { return; }
+    cost = value;
+
+    /* Check if planet is under siege. */
+    if (nampla->siege_eff != 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Besieged planet cannot INTERCEPT!\n");
+        return;
+    }
+
+    /* Check if sufficient funds are available. */
+    if (check_bounced(cost)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    log_string("    Preparations were made for an interception at a cost of ");
+    log_long(cost);
+    log_string(".\n");
+
+    if (first_pass) { return; }
+
+    /* Allocate funds. */
+    for (i = 0; i < num_intercepts; i++) {
+        if (nampla->x != intercept[i].x) { continue; }
+        if (nampla->y != intercept[i].y) { continue; }
+        if (nampla->z != intercept[i].z) { continue; }
+
+        /* This interception was started by another planet in the same star system. */
+        intercept[i].amount_spent += cost;
+        return;
+    }
+
+    if (num_intercepts == MAX_INTERCEPTS) {
+        fprintf(stderr, "\n\tMAX_INTERCEPTS exceeded in do_int.c!\n\n");
+        exit(-1);
+    }
+
+    intercept[num_intercepts].x = nampla->x;
+    intercept[num_intercepts].y = nampla->y;
+    intercept[num_intercepts].z = nampla->z;
+    intercept[num_intercepts].amount_spent = cost;
+
+    ++num_intercepts;
 }
 
 
@@ -1719,6 +3330,741 @@ void do_ORBIT_command(void) {
 }
 
 
+void do_PRODUCTION_command(int missing_production_order) {
+    int i, j, abbr_type, name_length, found, alien_number, under_siege,
+            siege_percent_effectiveness, new_alien, num_siege_ships,
+            mining_colony, resort_colony, special_colony, ship_index,
+            enemy_on_same_planet, trans_index, production_penalty,
+            ls_needed, shipyards_for_this_species;
+
+    char upper_nampla_name[32];
+
+    long n, RMs_produced, num_bytes, total_siege_effectiveness,
+            siege_effectiveness[MAX_SPECIES + 1], EUs_available_for_siege,
+            EUs_for_distribution, EUs_for_this_species, total_EUs_stolen,
+            special_production, pop_units_here[MAX_SPECIES + 1],
+            alien_pop_units, total_alien_pop_here, total_besieged_pop,
+            ib_for_this_species, ab_for_this_species, total_ib, total_ab,
+            total_effective_tonnage;
+
+    struct species_data *alien;
+    struct nampla_data *alien_nampla_base, *alien_nampla;
+    struct ship_data *alien_ship_base, *alien_ship, *ship;
+
+
+    if (doing_production) {
+        /* Terminate production for previous planet. */
+        if (last_planet_produced) {
+            transfer_balance();
+            last_planet_produced = FALSE;
+        }
+
+        /* Give gamemaster option to abort. */
+        if (first_pass) { gamemaster_abort_option(); }
+        log_char('\n');
+    }
+
+    doing_production = TRUE;
+
+    if (missing_production_order) {
+        nampla = next_nampla;
+        nampla_index = next_nampla_index;
+
+        goto got_nampla;
+    }
+
+    /* Get PL abbreviation. */
+    abbr_type = get_class_abbr();
+
+    if (abbr_type != PLANET_ID) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid planet name in PRODUCTION command.\n");
+        return;
+    }
+
+    /* Get planet name. */
+    name_length = get_name();
+
+    /* Search all namplas for name. */
+    found = FALSE;
+    nampla = nampla_base - 1;
+    for (nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
+        ++nampla;
+
+        if (nampla->pn == 99) { continue; }
+
+        /* Make upper case copy of nampla name. */
+        for (i = 0; i < 32; i++) {
+            upper_nampla_name[i] = toupper(nampla->name[i]);
+        }
+
+        /* Compare names. */
+        if (strcmp(upper_nampla_name, upper_name) == 0) {
+            found = TRUE;
+            break;
+        }
+    }
+
+    if (!found) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid planet name in PRODUCTION command.\n");
+        return;
+    }
+
+    /* Check if production was already done for this planet. */
+    if (production_done[nampla_index]) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! More than one PRODUCTION command for planet.\n");
+        return;
+    }
+    production_done[nampla_index] = TRUE;
+
+    /* Check if this colony was disbanded. */
+    if (nampla->status & DISBANDED_COLONY) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Production orders cannot be given for a disbanded colony!\n");
+        return;
+    }
+
+    got_nampla:
+
+    last_planet_produced = TRUE;
+    shipyard_built = FALSE;
+    shipyard_capacity = nampla->shipyards;
+
+    /* See if this is a mining or resort colony. */
+    mining_colony = FALSE;
+    resort_colony = FALSE;
+    special_colony = FALSE;
+    if (nampla->status & MINING_COLONY) {
+        mining_colony = TRUE;
+        special_colony = TRUE;
+    } else if (nampla->status & RESORT_COLONY) {
+        resort_colony = TRUE;
+        special_colony = TRUE;
+    }
+
+    /* Get planet data for this nampla. */
+    planet = planet_base + (long) nampla->planet_index;
+
+    /* Check if fleet maintenance cost is so high that riots ensued. */
+    i = 0;
+    j = (species->fleet_percent_cost - 10000) / 100;
+    if (rnd(100) <= j) {
+        log_string("!!! WARNING! Riots on PL ");
+        log_string(nampla->name);
+        log_string(" due to excessive and unpopular military build-up reduced ");
+
+        if (mining_colony || !special_colony) {
+            log_string("mining base by ");
+            i = rnd(j);
+            log_int(i);
+            log_string(" percent ");
+            nampla->mi_base -= (i * nampla->mi_base) / 100;
+        }
+
+        if (resort_colony || !special_colony) {
+            if (i) { log_string("and "); }
+            log_string("manufacturing base by ");
+            i = rnd(j);
+            log_int(i);
+            log_string(" percent");
+            nampla->ma_base -= (i * nampla->ma_base) / 100;
+        }
+        log_string("!\n\n");
+    }
+
+    /* Calculate "balance" available for spending and create pseudo "checking account". */
+    ls_needed = life_support_needed(species, home_planet, planet);
+
+    if (ls_needed == 0) {
+        production_penalty = 0;
+    } else {
+        production_penalty = (100 * ls_needed) / species->tech_level[LS];
+    }
+
+    RMs_produced = (10L * (long) species->tech_level[MI] * (long) nampla->mi_base) / (long) planet->mining_difficulty;
+    RMs_produced -= (production_penalty * RMs_produced) / 100;
+    RMs_produced = (((long) planet->econ_efficiency * RMs_produced) + 50) / 100;
+
+    if (special_colony) {
+        /* RMs just 'sitting' on the planet cannot be converted to EUs on a mining colony, and cannot create a 'balance' on a resort colony. */
+        raw_material_units = 0;
+    } else {
+        raw_material_units = RMs_produced + nampla->item_quantity[RM];
+    }
+
+    production_capacity = ((long) species->tech_level[MA] * (long) nampla->ma_base) / 10L;
+    production_capacity -= (production_penalty * production_capacity) / 100;
+    production_capacity = (((long) planet->econ_efficiency * production_capacity) + 50) / 100;
+
+    balance = (raw_material_units > production_capacity) ? production_capacity : raw_material_units;
+
+    if (species->fleet_percent_cost > 10000) {
+        n = 10000;
+    } else {
+        n = species->fleet_percent_cost;
+    }
+
+    if (special_colony) {
+        EU_spending_limit = 0;
+    } else {
+        /* Only excess RMs may be recycled. */
+        nampla->item_quantity[RM] = raw_material_units - balance;
+
+        balance -= ((n * balance) + 5000) / 10000;
+        raw_material_units = balance;
+        production_capacity = balance;
+        EUs_available_for_siege = balance;
+        if (nampla->status & HOME_PLANET) {
+            if (species->hp_original_base != 0) {
+                /* HP was bombed. */
+                EU_spending_limit = 4 * balance;  /* Factor = 4 + 1 = 5. */
+            } else {
+                EU_spending_limit = species->econ_units;
+            }
+        } else {
+            EU_spending_limit = balance;
+        }
+    }
+
+    /* Log what was done. Balances for mining and resort colonies will always
+	be zero and should not be printed. */
+    log_string("  Start of production on PL ");
+    log_string(nampla->name);
+    log_char('.');
+    if (!special_colony) {
+        log_string(" (Initial balance is ");
+        log_long(balance);
+        log_string(".)");
+    }
+    log_char('\n');
+
+    /* If this IS a mining or resort colony, convert RMs or production capacity to EUs. */
+    if (mining_colony) {
+        special_production = (2 * RMs_produced) / 3;
+        special_production -= ((n * special_production) + 5000) / 10000;
+        log_string("    Mining colony ");
+    } else if (resort_colony) {
+        special_production = (2 * production_capacity) / 3;
+        special_production -= ((n * special_production) + 5000) / 10000;
+        log_string("    Resort colony ");
+    }
+
+    if (special_colony) {
+        log_string(nampla->name);
+        log_string(" generated ");
+        log_long(special_production);
+        log_string(" economic units.\n");
+
+        EUs_available_for_siege = special_production;
+        species->econ_units += special_production;
+
+        if (mining_colony && !first_pass) {
+            planet->mining_difficulty += RMs_produced / 150;
+            planet_data_modified = TRUE;
+        }
+    }
+
+    /* Check if this planet is under siege. */
+    nampla->siege_eff = 0;
+    under_siege = FALSE;
+    alien_number = 0;
+    num_siege_ships = 0;
+    total_siege_effectiveness = 0;
+    enemy_on_same_planet = FALSE;
+    total_alien_pop_here = 0;
+    for (i = 1; i <= MAX_SPECIES; i++) {
+        siege_effectiveness[i] = 0;
+        pop_units_here[i] = 0;
+    }
+
+    for (trans_index = 0; trans_index < num_transactions; trans_index++) {
+        /* Check if this is a siege of this nampla. */
+        if (transaction[trans_index].type != BESIEGE_PLANET) { continue; }
+        if (transaction[trans_index].x != nampla->x) { continue; }
+        if (transaction[trans_index].y != nampla->y) { continue; }
+        if (transaction[trans_index].z != nampla->z) { continue; }
+        if (transaction[trans_index].pn != nampla->pn) { continue; }
+        if (transaction[trans_index].number2 != species_number) { continue; }
+
+        /* Check if alien ship is still in the same star system as the planet. */
+        if (alien_number != transaction[trans_index].number1) {
+            /* First transaction for this alien. */
+            alien_number = transaction[trans_index].number1;
+            if (!data_in_memory[alien_number - 1]) {
+                fprintf(stderr, "\n\tData for species #%d should be in memory but is not!\n\n", alien_number);
+                exit(-1);
+            }
+            alien = &spec_data[alien_number - 1];
+            alien_nampla_base = namp_data[alien_number - 1];
+            alien_ship_base = ship_data[alien_number - 1];
+
+            new_alien = TRUE;
+        }
+
+        /* Find the alien ship. */
+        found = FALSE;
+        alien_ship = alien_ship_base - 1;
+        for (i = 0; i < alien->num_ships; i++) {
+            ++alien_ship;
+
+            if (alien_ship->pn == 99) { continue; }
+
+            if (strcmp(alien_ship->name, transaction[trans_index].name3) == 0) {
+                found = TRUE;
+                break;
+            }
+        }
+
+        /* Check if alien ship is still at the siege location. */
+        if (!found) {
+            /* It must have jumped away and self-destructed, or was recycled. */
+            continue;
+        }
+        if (alien_ship->x != nampla->x) { continue; }
+        if (alien_ship->y != nampla->y) { continue; }
+        if (alien_ship->z != nampla->z) { continue; }
+        if (alien_ship->class == TR) { continue; }
+
+        /* This nampla is under siege. */
+        if (!under_siege) {
+            log_string("\n    WARNING! PL ");
+            log_string(nampla->name);
+            log_string(" is under siege by the following:\n      ");
+            under_siege = TRUE;
+        }
+
+        if (num_siege_ships++ > 0) { log_string(", "); }
+        if (new_alien) {
+            log_string(alien->name);
+            log_char(' ');
+            new_alien = FALSE;
+
+            /* Check if this alien has a colony on the same planet. */
+            alien_nampla = alien_nampla_base - 1;
+            for (i = 0; i < alien->num_namplas; i++) {
+                ++alien_nampla;
+
+                if (alien_nampla->x != nampla->x) { continue; }
+                if (alien_nampla->y != nampla->y) { continue; }
+                if (alien_nampla->z != nampla->z) { continue; }
+                if (alien_nampla->pn != nampla->pn) { continue; }
+
+                /* Enemy population that will count for both detection AND assimilation. */
+                alien_pop_units = alien_nampla->mi_base + alien_nampla->ma_base + alien_nampla->IUs_to_install +
+                                  alien_nampla->AUs_to_install;
+
+                /* Any base over 200.0 has only 5% effectiveness. */
+                if (alien_pop_units > 2000) {
+                    alien_pop_units = (alien_pop_units - 2000) / 20 + 2000;
+                }
+
+                /* Enemy population that counts ONLY for detection. */
+                n = alien_nampla->pop_units + alien_nampla->item_quantity[CU] + alien_nampla->item_quantity[PD];
+
+                if (alien_pop_units > 0) {
+                    enemy_on_same_planet = TRUE;
+                    pop_units_here[alien_number] = alien_pop_units;
+                    total_alien_pop_here += alien_pop_units;
+                } else if (n > 0) {
+                    enemy_on_same_planet = TRUE;
+                }
+
+                if (alien_nampla->item_quantity[PD] == 0) { continue; }
+
+                log_string("planetary defenses of PL ");
+                log_string(alien_nampla->name);
+                log_string(", ");
+
+                n = (4 * alien_nampla->item_quantity[PD]) / 5;
+                n = (n * (long) alien->tech_level[ML]) / ((long) species->tech_level[ML] + 1);
+                total_siege_effectiveness += n;
+                siege_effectiveness[alien_number] += n;
+            }
+        }
+        log_string(ship_name(alien_ship));
+
+        /* Determine the number of planets that this ship is besieging. */
+        n = 0;
+        for (j = 0; j < num_transactions; j++) {
+            if (transaction[j].type != BESIEGE_PLANET) { continue; }
+            if (transaction[j].number1 != alien_number) { continue; }
+            if (strcmp(transaction[j].name3, alien_ship->name) != 0) { continue; }
+
+            ++n;
+        }
+
+        /* Determine the effectiveness of this ship on the siege. */
+        if (alien_ship->type == STARBASE) {
+            i = alien_ship->tonnage;    /* One quarter of normal ships. */
+        } else {
+            i = 4 * (int) alien_ship->tonnage;
+        }
+
+        i = (i * (int) alien->tech_level[ML]) / ((int) species->tech_level[ML] + 1);
+
+        i /= n;
+
+        total_siege_effectiveness += i;
+        siege_effectiveness[alien_number] += i;
+    }
+
+    if (under_siege) {
+        log_string(".\n");
+    } else {
+        return;
+    }
+
+    /* Determine percent effectiveness of the siege. */
+    total_effective_tonnage = 2500 * total_siege_effectiveness;
+
+    if (nampla->mi_base + nampla->ma_base == 0) {
+        siege_percent_effectiveness = -9999;    /* New colony with nothing installed yet. */
+    } else {
+        siege_percent_effectiveness = total_effective_tonnage /
+                                      ((((long) species->tech_level[MI] * (long) nampla->mi_base) +
+                                        ((long) species->tech_level[MA] * (long) nampla->ma_base)) / 10L);
+    }
+
+    if (siege_percent_effectiveness > 95) {
+        siege_percent_effectiveness = 95;
+    } else if (siege_percent_effectiveness == -9999) {
+        log_string("      However, although planet is populated, it has no economic base.\n\n");
+        return;
+    } else if (siege_percent_effectiveness < 1) {
+        log_string("      However, because of the weakness of the siege, it was completely ineffective!\n\n");
+        return;
+    }
+
+    if (enemy_on_same_planet) {
+        nampla->siege_eff = -siege_percent_effectiveness;
+    } else {
+        nampla->siege_eff = siege_percent_effectiveness;
+    }
+
+    log_string("      The siege is approximately ");
+    log_int(siege_percent_effectiveness);
+    log_string("% effective.\n");
+
+    /* Add siege EU transfer(s). */
+    EUs_for_distribution = (siege_percent_effectiveness * EUs_available_for_siege) / 100;
+
+    total_EUs_stolen = 0;
+
+    for (alien_number = 1; alien_number <= MAX_SPECIES; alien_number++) {
+        n = siege_effectiveness[alien_number];
+        if (n < 1) { continue; }
+        alien = &spec_data[alien_number - 1];
+        EUs_for_this_species = (n * EUs_for_distribution) / total_siege_effectiveness;
+        if (EUs_for_this_species < 1) { continue; }
+        total_EUs_stolen += EUs_for_this_species;
+        log_string("      ");
+        log_long(EUs_for_this_species);
+        log_string(" economic unit");
+        if (EUs_for_this_species > 1) {
+            log_string("s were");
+        } else {
+            log_string(" was");
+        }
+        log_string(" lost and 25% of the amount was transferred to SP ");
+        log_string(alien->name);
+        log_string(".\n");
+
+        if (first_pass) { continue; }
+
+        /* Define this transaction and add to list of transactions. */
+        if (num_transactions == MAX_TRANSACTIONS) {
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+            exit(-1);
+        }
+
+        trans_index = num_transactions++;
+        transaction[trans_index].type = SIEGE_EU_TRANSFER;
+        transaction[trans_index].donor = species_number;
+        transaction[trans_index].recipient = alien_number;
+        transaction[trans_index].value = EUs_for_this_species / 4;
+        transaction[trans_index].x = nampla->x;
+        transaction[trans_index].y = nampla->y;
+        transaction[trans_index].z = nampla->z;
+        transaction[trans_index].number1 = siege_percent_effectiveness;
+        strcpy(transaction[trans_index].name1, species->name);
+        strcpy(transaction[trans_index].name2, alien->name);
+        strcpy(transaction[trans_index].name3, nampla->name);
+    }
+    log_char('\n');
+
+    /* Correct balances. */
+    if (special_colony) {
+        species->econ_units -= total_EUs_stolen;
+    } else {
+        if (check_bounced(total_EUs_stolen)) {
+            fprintf(stderr, "\nWARNING! Internal error! Should never reach this point!\n\n");
+            exit(-1);
+        }
+    }
+
+    if (!enemy_on_same_planet) { return; }
+
+    /* All ships currently under construction may be detected by the besiegers and destroyed. */
+    for (ship_index = 0; ship_index < species->num_ships; ship_index++) {
+        ship = ship_base + ship_index;
+
+        if (ship->status == UNDER_CONSTRUCTION && ship->x == nampla->x && ship->y == nampla->y &&
+            ship->z == nampla->z && ship->pn == nampla->pn) {
+            if (rnd(100) > siege_percent_effectiveness) { continue; }
+
+            log_string("      ");
+            log_string(ship_name(ship));
+            log_string(", under construction when the siege began, was detected by the besiegers and destroyed!\n");
+            if (!first_pass) { delete_ship(ship); }
+        }
+    }
+
+    /* Check for assimilation. */
+    if (nampla->status & HOME_PLANET) { return; }
+    if (total_alien_pop_here < 1) { return; }
+
+    total_besieged_pop = nampla->mi_base + nampla->ma_base + nampla->IUs_to_install + nampla->AUs_to_install;
+
+    /* Any base over 200.0 has only 5% effectiveness. */
+    if (total_besieged_pop > 2000) {
+        total_besieged_pop = (total_besieged_pop - 2000) / 20 + 2000;
+    }
+
+    if (total_besieged_pop / total_alien_pop_here >= 5) { return; }
+    if (siege_percent_effectiveness < 95) { return; }
+
+    log_string("      PL ");
+    log_string(nampla->name);
+    log_string(" has become assimilated by the besieging species");
+    log_string(" and is no longer under your control.\n\n");
+
+    total_ib = nampla->mi_base;  /* My stupid compiler can't add an int and an unsigned short. */
+    total_ib += nampla->IUs_to_install;
+    total_ab = nampla->ma_base;
+    total_ab += nampla->AUs_to_install;
+
+    for (alien_number = 1; alien_number <= MAX_SPECIES; alien_number++) {
+        n = pop_units_here[alien_number];
+        if (n < 1) { continue; }
+
+        shipyards_for_this_species = (n * nampla->shipyards) / total_alien_pop_here;
+
+        ib_for_this_species = (n * total_ib) / total_alien_pop_here;
+        total_ib -= ib_for_this_species;
+
+        ab_for_this_species = (n * total_ab) / total_alien_pop_here;
+        total_ab -= ab_for_this_species;
+
+        if (ib_for_this_species == 0 && ab_for_this_species == 0) { continue; }
+
+        if (first_pass) { continue; }
+
+        /* Define this transaction and add to list of transactions. */
+        if (num_transactions == MAX_TRANSACTIONS) {
+            fprintf(stderr, "\n\n\tERROR! num_transactions > MAX_TRANSACTIONS!\n\n");
+            exit(-1);
+        }
+
+        trans_index = num_transactions++;
+        transaction[trans_index].type = ASSIMILATION;
+        transaction[trans_index].value = alien_number;
+        transaction[trans_index].x = nampla->x;
+        transaction[trans_index].y = nampla->y;
+        transaction[trans_index].z = nampla->z;
+        transaction[trans_index].pn = nampla->pn;
+        transaction[trans_index].number1 = ib_for_this_species / 2;
+        transaction[trans_index].number2 = ab_for_this_species / 2;
+        transaction[trans_index].number3 = shipyards_for_this_species;
+        strcpy(transaction[trans_index].name1, species->name);
+        strcpy(transaction[trans_index].name2, nampla->name);
+    }
+
+    /* Erase the original colony. */
+    balance = 0;
+    EU_spending_limit = 0;
+    raw_material_units = 0;
+    production_capacity = 0;
+    nampla->mi_base = 0;
+    nampla->ma_base = 0;
+    nampla->IUs_to_install = 0;
+    nampla->AUs_to_install = 0;
+    nampla->pop_units = 0;
+    nampla->siege_eff = 0;
+    nampla->status = COLONY;
+    nampla->shipyards = 0;
+    nampla->hiding = 0;
+    nampla->hidden = 0;
+    nampla->use_on_ambush = 0;
+
+    for (i = 0; i < MAX_ITEMS; i++) { nampla->item_quantity[i] = 0; }
+}
+
+
+void do_RECYCLE_command(void) {
+    int i, class, cargo;
+    long recycle_value, original_cost, units_available;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get number of items to recycle. */
+    i = get_value();
+
+    if (i == 0) {
+        goto recycle_ship;
+    }    /* Not an item. */
+
+    /* Get class of item. */
+    class = get_class_abbr();
+
+    if (class != ITEM_CLASS) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid item class in RECYCLE command.\n");
+        return;
+    }
+    class = abbr_index;
+
+    /* Make sure value is meaningful. */
+    if (value == 0) { value = nampla->item_quantity[class]; }
+    if (value == 0) { return; }
+    if (value < 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid item count in RECYCLE command.\n");
+        return;
+    }
+
+    /* Make sure that items exist. */
+    units_available = nampla->item_quantity[class];
+    if (value > units_available) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Attempt to recycle more items than are available.\n");
+        return;
+    }
+
+    /* Determine recycle value. */
+    if (class == TP) {
+        recycle_value = (value * item_cost[class]) / (2L * (long) species->tech_level[BI]);
+    } else if (class == RM) {
+        recycle_value = value / 5L;
+    } else {
+        recycle_value = (value * item_cost[class]) / 2L;
+    }
+
+    /* Update inventories. */
+    nampla->item_quantity[class] -= value;
+    if (class == PD || class == CU) { nampla->pop_units += value; }
+    species->econ_units += recycle_value;
+    if (nampla->status & HOME_PLANET) { EU_spending_limit += recycle_value; }
+
+    /* Log what was recycled. */
+    log_string("    ");
+    log_long(value);
+    log_char(' ');
+    log_string(item_name[class]);
+
+    if (value > 1) {
+        log_string("s were");
+    } else {
+        log_string(" was");
+    }
+
+    log_string(" recycled, generating ");
+    log_long(recycle_value);
+    log_string(" economic units.\n");
+
+    return;
+
+
+    recycle_ship:
+
+    correct_spelling_required = TRUE;
+    if (!get_ship()) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Ship to be recycled does not exist.\n");
+        return;
+    }
+
+    /* Make sure it didn't just jump. */
+    if (ship->just_jumped) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Ship just jumped and is still in transit.\n");
+        return;
+    }
+
+    /* Make sure item is at producing planet. */
+    if (ship->x != nampla->x || ship->y != nampla->y || ship->z != nampla->z || ship->pn != nampla->pn) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Ship is not at the production planet.\n");
+        return;
+    }
+
+    /* Calculate recycled value. */
+    if (ship->class == TR || ship->type == STARBASE) {
+        original_cost = ship_cost[ship->class] * ship->tonnage;
+    } else {
+        original_cost = ship_cost[ship->class];
+    }
+
+    if (ship->type == SUB_LIGHT) {
+        original_cost = (3 * original_cost) / 4;
+    }
+
+    if (ship->status == UNDER_CONSTRUCTION) {
+        recycle_value = (original_cost - (long) ship->remaining_cost) / 2;
+    } else {
+        recycle_value = (3 * original_cost * (60 - (long) ship->age)) / 200;
+    }
+
+    species->econ_units += recycle_value;
+    if (nampla->status & HOME_PLANET) { EU_spending_limit += recycle_value; }
+
+    /* Log what was recycled. */
+    log_string("    ");
+    log_string(ship_name(ship));
+    log_string(" was recycled, generating ");
+    log_long(recycle_value);
+    log_string(" economic units");
+
+    /* Transfer cargo, if any, from ship to planet. */
+    cargo = FALSE;
+    for (i = 0; i < MAX_ITEMS; i++) {
+        if (ship->item_quantity[i] > 0) {
+            nampla->item_quantity[i] += ship->item_quantity[i];
+            cargo = TRUE;
+        }
+    }
+
+    if (cargo) {
+        log_string(". Cargo onboard ");
+        log_string(ship_name(ship));
+        log_string(" was first transferred to PL ");
+        log_string(nampla->name);
+    }
+
+    log_string(".\n");
+
+    /* Remove ship from inventory. */
+    delete_ship(ship);
+}
+
+
 void do_REPAIR_command(void) {
     int i, j, n, x, y, z, age_reduction, num_dr_units;
     int total_dr_units, dr_units_used, max_age, desired_age;
@@ -1924,6 +4270,118 @@ void do_REPAIR_command(void) {
 }
 
 
+void do_RESEARCH_command(void) {
+    int n, status, tech, initial_level, current_level, need_amount_to_spend;
+    long cost, amount_spent, cost_for_one_level, funds_remaining, max_funds_available;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get amount to spend. */
+    status = get_value();
+    need_amount_to_spend = (status == 0);    /* Sometimes players reverse
+						   the arguments. */
+    /* Get technology. */
+    if (get_class_abbr() != TECH_ID) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid or missing technology.\n");
+        return;
+    }
+    tech = abbr_index;
+
+    if (species->tech_knowledge[tech] == 0 && sp_tech_level[tech] == 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Zero level can only be raised via TECH or TEACH.\n");
+        return;
+    }
+
+    /* Get amount to spend if it was not obtained above. */
+    if (need_amount_to_spend) { status = get_value(); }
+
+    if (status == 0 || value < 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Invalid or missing amount to spend!\n");
+        return;
+    }
+
+    do_cost:
+
+    if (value == 0) { value = balance; }
+    if (value == 0) { return; }
+    cost = value;
+
+    /* Check if sufficient funds are available. */
+    if (check_bounced(cost)) {
+        max_funds_available = species->econ_units;
+        if (max_funds_available > EU_spending_limit) {
+            max_funds_available = EU_spending_limit;
+        }
+        max_funds_available += balance;
+
+        if (max_funds_available > 0) {
+            fprintf(log_file, "! WARNING: %s", input_line);
+            fprintf(log_file, "! Insufficient funds. Substituting %ld for %ld.\n",
+                    max_funds_available, cost);
+            value = max_funds_available;
+            goto do_cost;
+        }
+
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    /* Check if we already have knowledge of this technology. */
+    funds_remaining = cost;
+    amount_spent = 0;
+    initial_level = sp_tech_level[tech];
+    current_level = initial_level;
+    while (current_level < species->tech_knowledge[tech]) {
+        cost_for_one_level = current_level * current_level;
+        cost_for_one_level -= cost_for_one_level / 4;    /* 25% discount. */
+        if (funds_remaining < cost_for_one_level) { break; }
+        funds_remaining -= cost_for_one_level;
+        amount_spent += cost_for_one_level;
+        ++current_level;
+    }
+
+    if (current_level > initial_level) {
+        log_string("    Spent ");
+        log_long(amount_spent);
+        log_string(" raising ");
+        log_string(tech_name[tech]);
+        log_string(" tech level from ");
+        log_int(initial_level);
+        log_string(" to ");
+        log_int(current_level);
+        log_string(" using transferred knowledge.\n");
+
+        sp_tech_level[tech] = current_level;
+    }
+
+    if (funds_remaining == 0) { return; }
+
+    /* Increase in experience points is equal to whatever was not spent above. */
+    species->tech_eps[tech] += funds_remaining;
+
+    /* Log transaction. */
+    log_string("    Spent ");
+    log_long(funds_remaining);
+    log_string(" on ");
+    log_string(tech_name[tech]);
+    log_string(" research.\n");
+}
+
+
 void do_SCAN_command(void) {
     int i, x, y, z;
     int found = get_ship();
@@ -2064,6 +4522,53 @@ void do_SEND_command(void) {
     /* Make the transfer to the alien. */
     spec_data[g_spec_number - 1].econ_units += item_count;
     data_modified[g_spec_number - 1] = TRUE;
+}
+
+
+void do_SHIPYARD_command(void) {
+    long cost;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Make sure this is not a mining or resort colony. */
+    if ((nampla->status & MINING_COLONY) || (nampla->status & RESORT_COLONY)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! You may not build shipyards on a mining or resort colony!\n");
+        return;
+    }
+
+    /* Check if planet has already built a shipyard. */
+    if (shipyard_built) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Only one shipyard can be built per planet per turn!\n");
+        return;
+    }
+
+    /* Check if sufficient funds are available. */
+    cost = 10 * species->tech_level[MA];
+    if (check_bounced(cost)) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    ++nampla->shipyards;
+
+    shipyard_built = TRUE;
+
+    /* Log transaction. */
+    log_string("    Spent ");
+    log_long(cost);
+    log_string(" to increase shipyard capacity by 1.\n");
 }
 
 
@@ -2702,6 +5207,139 @@ void do_UNLOAD_command(void) {
 
     check_population(nampla);
 }
+
+
+void do_UPGRADE_command(void) {
+    int age_reduction, value_specified;
+    char *original_line_pointer;
+    long amount_to_spend, original_cost, max_funds_available;
+
+    /* Check if this order was preceded by a PRODUCTION order. */
+    if (!doing_production) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Missing PRODUCTION order!\n");
+        return;
+    }
+
+    /* Get the ship to be upgraded. */
+    original_line_pointer = input_line_pointer;
+    if (!get_ship()) {
+        /* Check for missing comma or tab after ship name. */
+        input_line_pointer = original_line_pointer;
+        fix_separator();
+        if (!get_ship()) {
+            fprintf(log_file, "!!! Order ignored:\n");
+            fprintf(log_file, "!!! %s", original_line);
+            fprintf(log_file, "!!! Ship to be upgraded does not exist.\n");
+            return;
+        }
+    }
+
+    /* Make sure it didn't just jump. */
+    if (ship->just_jumped) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Ship just jumped and is still in transit.\n");
+        return;
+    }
+
+    /* Make sure it's in the same sector as the producing planet. */
+    if (ship->x != nampla->x || ship->y != nampla->y || ship->z != nampla->z) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Item to be upgraded is not in the same sector as the production planet.\n");
+        return;
+    }
+
+    if (ship->status == UNDER_CONSTRUCTION) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Item to be upgraded is still under construction.\n");
+        return;
+    }
+
+    if (ship->age < 1) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Ship or starbase is too new to upgrade.\n");
+        return;
+    }
+
+    /* Calculate the original cost of the ship. */
+    if (ship->class == TR || ship->type == STARBASE) {
+        original_cost = ship_cost[ship->class] * ship->tonnage;
+    } else {
+        original_cost = ship_cost[ship->class];
+    }
+
+    if (ship->type == SUB_LIGHT) {
+        original_cost = (3 * original_cost) / 4;
+    }
+
+    /* Get amount to be spent. */
+    if (value_specified = get_value()) {
+        if (value == 0) {
+            amount_to_spend = balance;
+        } else {
+            amount_to_spend = value;
+        }
+
+        age_reduction = (40 * amount_to_spend) / original_cost;
+    } else {
+        age_reduction = ship->age;
+    }
+
+    try_again:
+
+    if (age_reduction < 1) {
+        if (value == 0) { return; }
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", original_line);
+        fprintf(log_file, "!!! Amount specified is not enough to do an upgrade.\n");
+        return;
+    }
+
+    if (age_reduction > ship->age) { age_reduction = ship->age; }
+
+    /* Check if sufficient funds are available. */
+    amount_to_spend = ((age_reduction * original_cost) + 39) / 40;
+    if (check_bounced(amount_to_spend)) {
+        max_funds_available = species->econ_units;
+        if (max_funds_available > EU_spending_limit) {
+            max_funds_available = EU_spending_limit;
+        }
+        max_funds_available += balance;
+
+        if (max_funds_available > 0) {
+            if (value_specified) {
+                fprintf(log_file, "! WARNING: %s", input_line);
+                fprintf(log_file, "! Insufficient funds. Substituting %ld for %ld.\n", max_funds_available, value);
+            }
+            amount_to_spend = max_funds_available;
+            age_reduction = (40 * amount_to_spend) / original_cost;
+            goto try_again;
+        }
+
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! Insufficient funds to execute order.\n");
+        return;
+    }
+
+    /* Log what was upgraded. */
+    log_string("    ");
+    log_string(ship_name(ship));
+    log_string(" was upgraded from age ");
+    log_int((int) ship->age);
+    log_string(" to age ");
+    ship->age -= age_reduction;
+    log_int((int) ship->age);
+    log_string(" at a cost of ");
+    log_long(amount_to_spend);
+    log_string(".\n");
+}
+
 
 
 void do_VISITED_command(void) {

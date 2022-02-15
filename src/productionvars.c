@@ -17,14 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#include "engine.h"
+#include "productionvars.h"
 
-int sp_tech_level[6];
+int doing_production;
 
-struct species_data *species;
+int last_planet_produced = FALSE;
 
-int species_index; // zero-based index, mostly for accessing arrays
+char production_done[1000];
 
-int species_number; // one-based index, for reports and file names
+int shipyard_built;
 
+int shipyard_capacity;

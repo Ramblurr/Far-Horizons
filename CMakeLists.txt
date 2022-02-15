@@ -128,17 +128,20 @@ add_executable(fhpredep
         src/fhpredep.c
         src/command.h src/command.c
         src/commandvars.h src/commandvars.c
+        src/dev_log.h src/dev_log.c
         src/do.h src/do.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
         src/galaxyio.h src/galaxyio.c
         src/galaxyvars.h src/galaxyvars.c
+        src/intercept.h src/intercept.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
+        src/money.h src/money.c
         src/nampla.h src/nampla.c
         src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
@@ -147,6 +150,7 @@ add_executable(fhpredep
         src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/predeparture.c src/predeparture.h
+        src/productionvars.h src/productionvars.c
         src/ship.h src/ship.c
         src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
@@ -163,18 +167,21 @@ add_executable(fhjump
         src/fhjump.c
         src/command.h src/command.c
         src/commandvars.h src/commandvars.c
+        src/dev_log.h src/dev_log.c
         src/do.h src/do.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
         src/galaxyio.c
         src/galaxyvars.h src/galaxyvars.c
+        src/intercept.h src/intercept.c
         src/item.h src/item.c
         src/jump.h src/jump.c
         src/jumpvars.h src/jumpvars.c
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
+        src/money.h src/money.c
         src/nampla.h src/nampla.c
         src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
@@ -182,6 +189,7 @@ add_executable(fhjump
         src/planet.h src/planet.c
         src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
+        src/productionvars.h src/productionvars.c
         src/ship.h src/ship.c
         src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
@@ -193,3 +201,39 @@ add_executable(fhjump
         src/starvars.h src/starvars.c
         src/transaction.c src/transaction.h
         src/transactionio.h src/transactionio.c)
+
+add_executable(fhprod
+        src/fhprod.c
+        src/command.h src/command.c
+        src/commandvars.h src/commandvars.c
+        src/dev_log.h src/dev_log.c
+        src/do.h src/do.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
+        src/galaxyio.c
+        src/intercept.h src/intercept.c
+        src/item.h src/item.c
+        src/jumpvars.h src/jumpvars.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/money.h src/money.c
+        src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
+        src/namplavars.h src/namplavars.c
+        src/ordervars.h src/ordervars.c
+        src/planetio.h src/planetio.c
+        src/planetvars.h src/planetvars.c
+        src/production.h src/production.c
+        src/productionvars.h src/productionvars.c
+        src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
+        src/star.h src/star.c
+        src/stario.h src/stario.c
+        src/starvars.h src/starvars.c
+        src/transactionio.h src/transactionio.c
+        )

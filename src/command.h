@@ -99,6 +99,8 @@ int get_location(void);
 
 int get_name(void);
 
+int get_ship(void);
+
 int get_species_name(void);
 
 int get_transfer_point(void);

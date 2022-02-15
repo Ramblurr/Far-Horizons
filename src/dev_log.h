@@ -17,14 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#ifndef FAR_HORIZONS_DEV_LOG_H
+#define FAR_HORIZONS_DEV_LOG_H
 
-int sp_tech_level[6];
+void start_dev_log(int num_CUs, int num_IUs, int num_AUs);
 
-struct species_data *species;
-
-int species_index; // zero-based index, mostly for accessing arrays
-
-int species_number; // one-based index, for reports and file names
-
+#endif //FAR_HORIZONS_DEV_LOG_H

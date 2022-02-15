@@ -20,9 +20,16 @@
 #include "namplavars.h"
 
 struct nampla_data *nampla;
+
 struct nampla_data *nampla_base;
+
 struct nampla_data *namp_data[MAX_SPECIES];
+
 int nampla_index;
+
+struct nampla_data *next_nampla;
+
+int next_nampla_index;
 
 // Additional memory must be allocated for routines that name planets.
 // This is the default 'extras', which may be changed, if necessary.

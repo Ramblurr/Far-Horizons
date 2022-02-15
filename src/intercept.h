@@ -17,14 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "species.h"
-#include "speciesvars.h"
+#ifndef FAR_HORIZONS_INTERCEPT_H
+#define FAR_HORIZONS_INTERCEPT_H
 
-int sp_tech_level[6];
+#define MAX_INTERCEPTS 1000
 
-struct species_data *species;
+typedef struct {
+    int x, y, z;
+    long amount_spent;
+} intercept_t;
 
-int species_index; // zero-based index, mostly for accessing arrays
+void handle_intercept(int intercept_index);
 
-int species_number; // one-based index, for reports and file names
+// globals. ugh.
 
+extern intercept_t intercept[MAX_INTERCEPTS];
+extern int num_intercepts;
+
+#endif //FAR_HORIZONS_INTERCEPT_H

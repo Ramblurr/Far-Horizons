@@ -66,7 +66,8 @@
 extern char item_abbr[MAX_ITEMS][4];
 extern short item_carry_capacity[MAX_ITEMS];
 extern long item_cost[MAX_ITEMS];
+extern char item_critical_tech[MAX_ITEMS];
 extern char item_name[MAX_ITEMS][32];
-
+extern short item_tech_requirment[MAX_ITEMS];
 
 #endif //FAR_HORIZONS_ITEM_H

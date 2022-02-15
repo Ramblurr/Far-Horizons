@@ -20,13 +20,19 @@
 #ifndef FAR_HORIZONS_DO_H
 #define FAR_HORIZONS_DO_H
 
+void do_AMBUSH_command(void);
 void do_ALLY_command(void);
 void do_BASE_command(void);
+void do_BUILD_command(int continuing_construction, int interspecies_construction);
 void do_DEEP_command(void);
 void do_DESTROY_command(void);
+void do_DEVELOP_command(void);
 void do_DISBAND_command(void);
 void do_ENEMY_command(void);
+void do_ESTIMATE_command(void);
+void do_HIDE_command(void);
 void do_INSTALL_command(void);
+void do_INTERCEPT_command(void);
 void do_LAND_command(void);
 void do_JUMP_command(int jumped_in_combat, int using_jump_portal);
 void do_MESSAGE_command(void);
@@ -34,11 +40,16 @@ void do_MOVE_command(void);
 void do_NAME_command(void);
 void do_NEUTRAL_command(void);
 void do_ORBIT_command(void);
+void do_PRODUCTION_command(int missing_production_order);
+void do_RECYCLE_command(void);
 void do_REPAIR_command(void);
+void do_RESEARCH_command(void);
 void do_SCAN_command(void);
 void do_SEND_command(void);
+void do_SHIPYARD_command(void);
 void do_TRANSFER_command(void);
 void do_UNLOAD_command(void);
+void do_UPGRADE_command(void);
 void do_VISITED_command(void);
 void do_WORMHOLE_command(void);
 
