@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     int i;
     long n;
     int num_species;
-    int save = FALSE;
+    int save;
     struct species_data *sp;
     int sp_index;
     int sp_num[MAX_SPECIES];
@@ -95,7 +95,6 @@ int main(int argc, char *argv[]) {
     num_species = 0;
     default_summary = FALSE;
     prompt_gm = FALSE;
-    save = FALSE;
     test_mode = FALSE;
     verbose_mode = FALSE;
 
@@ -112,8 +111,6 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
-        } else if (strcmp(argv[i], "-S") == 0) {
-            save = TRUE;
         } else {
             n = atoi(argv[i]);
             if (0 < n && n <= galaxy.num_species) {
@@ -159,7 +156,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    combat(do_all_species, num_species, sp_num, sp_name, &loc[0]);
+    save = combat(do_all_species, num_species, sp_num, sp_name, &loc[0]);
 
     if (save) {
         save_planet_data();

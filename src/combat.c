@@ -115,7 +115,9 @@ void battle_error(int species_number) {
     fprintf(log_file, "!!! Missing BATTLE command!\n");
 }
 
-void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base) {
+// combat returns TRUE if planet, species, and transaction data should be saved
+int combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base) {
+    int save = TRUE;
     int i;
     int j;
     int k;
@@ -140,7 +142,6 @@ void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp
     int enemy_bit_number;
     int log_open;
     int distorted_name;
-    int save;
     int best_score;
     int next_best_score;
     int best_species_index;
@@ -1057,7 +1058,6 @@ void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp
         }
     }
 
-    save = TRUE;
     if (prompt_gm) {
         printf("\n*** Gamemaster safe-abort option ... type q or Q to quit: ");
 
@@ -1104,6 +1104,8 @@ void combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp
         /* Delete temporary log file. */
         unlink(filename);
     }
+
+    return save;
 }
 
 void consolidate_option(char option, char location) {
