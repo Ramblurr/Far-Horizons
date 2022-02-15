@@ -23,11 +23,4 @@ char gas_string[14][4] = {"   ", "H2", "CH4", "He", "NH3", "N2", "CO2", "O2", "H
 
 struct planet_data *home_planet;
 
-int32_t num_planets;
-
 struct planet_data *planet;
-
-struct planet_data *planet_base;
-
-int planet_data_modified;
-

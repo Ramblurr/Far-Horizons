@@ -17,15 +17,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_SPECIESIO_H
+#define FAR_HORIZONS_SPECIESIO_H
 
-#include "planet.h"
+#include <stdio.h>
+#include "species.h"
+
+void get_species_data(void);
+
+void save_species_data(void);
+
+void speciesDataAsSExpr(species_data_t *sp, int spNo, FILE *fp);
 
 // globals. ugh.
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+extern int data_in_memory[MAX_SPECIES];
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+extern int data_modified[MAX_SPECIES];
+
+extern struct species_data spec_data[MAX_SPECIES];
+
+#endif //FAR_HORIZONS_SPECIESIO_H

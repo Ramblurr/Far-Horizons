@@ -17,15 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_NAMPLAIO_H
+#define FAR_HORIZONS_NAMPLAIO_H
 
-#include "planet.h"
+#include <stdio.h>
 
-// globals. ugh.
+struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp);
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp);
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+#endif //FAR_HORIZONS_NAMPLAIO_H

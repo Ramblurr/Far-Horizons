@@ -23,8 +23,11 @@
 #include "engine.h"
 #include "enginevars.h"
 #include "galaxy.h"
-#include "galaxyvars.h"
+#include "galaxyio.h"
+#include "stario.h"
 #include "starvars.h"
+#include "speciesio.h"
+#include "speciesvars.h"
 #include "nampla.h"
 #include "namplavars.h"
 #include "ship.h"
@@ -660,6 +663,7 @@ int get_location(void) {
     /* Get planet name. */
     get_name();
 
+    best_nampla_index = 0;
     best_score = -9999;
     next_best_score = -9999;
     for (temp_nampla_index = 0; temp_nampla_index < species->num_namplas; temp_nampla_index++) {

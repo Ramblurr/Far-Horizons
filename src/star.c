@@ -20,10 +20,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "star.h"
-#include "starvars.h"
+#include "stario.h"
 #include "planet.h"
+#include "planetio.h"
 #include "planetvars.h"
 #include "species.h"
+#include "speciesvars.h"
 #include "nampla.h"
 #include "namplavars.h"
 #include "ship.h"
@@ -96,57 +98,6 @@ void closest_unvisited_star(struct ship_data *ship) {
     } else {
         fprintf(orders_file, "???");
     }
-}
-
-void get_star_data(void) {
-    /* Open star file. */
-    FILE *fp = fopen("stars.dat", "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "\n\tCannot open file stars.dat!\n");
-        exit(-1);
-    }
-    /* Read header data. */
-    if (fread(&num_stars, sizeof(num_stars), 1, fp) != 1) {
-        fprintf(stderr, "\n\tCannot read num_stars in file 'stars.dat'!\n\n");
-        exit(-1);
-    }
-    /* Allocate enough memory for all stars. */
-    star_base = (struct star_data *) calloc(num_stars + NUM_EXTRA_STARS, sizeof(struct star_data));
-    if (star_base == NULL) {
-        fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
-        exit(-1);
-    }
-    /* Read it all into memory. */
-    if (fread(star_base, sizeof(struct star_data), num_stars, fp) != num_stars) {
-        fprintf(stderr, "\nCannot read star file into memory!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
-    star_data_modified = FALSE;
-}
-
-
-void save_star_data(void) {
-    /* Open star file for writing. */
-    FILE *fp = fopen("stars.dat", "wb");
-    if (fp == NULL) {
-        perror("save_star_data");
-        fprintf(stderr, "\n\tCannot create file 'stars.dat'!\n");
-        exit(-1);
-    }
-    /* Write header data. */
-    if (fwrite(&num_stars, sizeof(num_stars), 1, fp) != 1) {
-        perror("save_star_data");
-        fprintf(stderr, "\n\tCannot write num_stars to file 'stars.dat'!\n\n");
-        exit(-1);
-    }
-    /* Write star data to disk. */
-    if (fwrite(star_base, sizeof(struct star_data), num_stars, fp) != num_stars) {
-        perror("save_star_data");
-        fprintf(stderr, "\nCannot write star data to disk!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
 }
 
 

@@ -34,33 +34,29 @@
 #define BI 5 /* Biology tech level. */
 
 struct species_data {
-    uint8_t name[32];                      /* Name of species. */
-    uint8_t govt_name[32];                 /* Name of government. */
-    uint8_t govt_type[32];                 /* Type of government. */
-    uint8_t x, y, z, pn;                   /* Coordinates of home planet. */
-    uint8_t required_gas;                  /* Gas required by species. */
-    uint8_t required_gas_min;              /* Minimum needed percentage. */
-    uint8_t required_gas_max;              /* Maximum allowed percentage. */
-    uint8_t reserved5;                     /* Zero for now. */
-    uint8_t neutral_gas[6];                /* Gases neutral to species. */
-    uint8_t poison_gas[6];                 /* Gases poisonous to species. */
-    uint8_t auto_orders;                   /* AUTO command was issued. */
-    uint8_t reserved3;                     /* Zero for now. */
-    int16_t reserved4;                     /* Zero for now. */
-    int16_t tech_level[6];                 /* Actual tech levels. */
-    int16_t init_tech_level[6];            /* Tech levels at start of turn. */
-    int16_t tech_knowledge[6];             /* Unapplied tech level knowledge. */
-    int32_t num_namplas;                   /* Number of named planets, including home planet and colonies. */
-    int32_t num_ships;                     /* Number of ships. */
-    int32_t tech_eps[6];                   /* Experience points for tech levels. */
-    int32_t hp_original_base;              /* If non-zero, home planet was bombed either by bombardment or germ warfare and has not yet fully recovered. Value is total economic base before bombing. */
-    int32_t econ_units;                    /* Number of economic units. */
-    int32_t fleet_cost;                    /* Total fleet maintenance cost. */
-    int32_t fleet_percent_cost;            /* Fleet maintenance cost as a percentage times one hundred. */
-    uint32_t contact[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species has been met. */
-    uint32_t ally[NUM_CONTACT_WORDS];      /* A bit is set if corresponding species is considered an ally. */
-    uint32_t enemy[NUM_CONTACT_WORDS];     /* A bit is set if corresponding species is considered an enemy. */
-    uint8_t padding[12];                   /* Use for expansion. Initialized to all zeroes. */
+    char name[32];                       /* Name of species. */
+    char govt_name[32];                  /* Name of government. */
+    char govt_type[32];                  /* Type of government. */
+    int x, y, z, pn;                     /* Coordinates of home planet. */
+    int required_gas;                    /* Gas required by species. */
+    int required_gas_min;                /* Minimum needed percentage. */
+    int required_gas_max;                /* Maximum allowed percentage. */
+    int neutral_gas[6];                  /* Gases neutral to species. */
+    int poison_gas[6];                   /* Gases poisonous to species. */
+    int auto_orders;                     /* AUTO command was issued. */
+    int tech_level[6];                   /* Actual tech levels. */
+    int init_tech_level[6];              /* Tech levels at start of turn. */
+    int tech_knowledge[6];               /* Unapplied tech level knowledge. */
+    int num_namplas;                     /* Number of named planets, including home planet and colonies. */
+    int num_ships;                       /* Number of ships. */
+    int tech_eps[6];                     /* Experience points for tech levels. */
+    int hp_original_base;                /* If non-zero, home planet was bombed either by bombardment or germ warfare and has not yet fully recovered. Value is total economic base before bombing. */
+    int econ_units;                      /* Number of economic units. */
+    int fleet_cost;                      /* Total fleet maintenance cost. */
+    int fleet_percent_cost;              /* Fleet maintenance cost as a percentage times one hundred. */
+    uint32_t contact[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been met. */
+    uint32_t ally[NUM_CONTACT_WORDS];    /* A bit is set if corresponding species is considered an ally. */
+    uint32_t enemy[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species is considered an enemy. */
 };
 
 typedef struct species_data species_data_t;
@@ -69,23 +65,8 @@ int distorted(int species_number);
 
 void free_species_data(void);
 
-void get_species_data(void);
-
 int life_support_needed(struct species_data *species, struct planet_data *home, struct planet_data *colony);
 
-void save_species_data(void);
-
-void speciesDataAsSExpr(FILE *fp, species_data_t *sp, int spNo);
-
 int undistorted(int distorted_species_number);
-
-// globals. ugh.
-
-extern int data_in_memory[MAX_SPECIES];
-extern int data_modified[MAX_SPECIES];
-extern struct species_data *species;
-extern struct species_data spec_data[MAX_SPECIES];
-extern int species_index;
-extern int species_number;
 
 #endif //FAR_HORIZONS_SPECIES_H

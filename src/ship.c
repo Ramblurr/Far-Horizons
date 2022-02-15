@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include "enginevars.h"
 #include "species.h"
+#include "speciesvars.h"
 #include "nampla.h"
 #include "namplavars.h"
 #include "ship.h"

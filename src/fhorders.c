@@ -25,10 +25,13 @@
 #include <sys/stat.h>
 #include "engine.h"
 #include "galaxy.h"
-#include "star.h"
+#include "galaxyio.h"
+#include "stario.h"
 #include "planet.h"
+#include "planetio.h"
 #include "species.h"
-#include "location.h"
+#include "speciesio.h"
+#include "locationio.h"
 #include "no_orders.h"
 
 int main(int argc, char *argv[]) {

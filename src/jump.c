@@ -26,6 +26,7 @@
 #include "do.h"
 #include "jump.h"
 #include "logvars.h"
+#include "speciesvars.h"
 
 void do_jump_orders(void) {
     int i, command;

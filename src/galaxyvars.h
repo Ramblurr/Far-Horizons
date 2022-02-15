@@ -22,6 +22,4 @@
 
 // globals. ugh.
 
-extern struct galaxy_data galaxy;
-
 #endif //FAR_HORIZONS_GALAXYVARS_H

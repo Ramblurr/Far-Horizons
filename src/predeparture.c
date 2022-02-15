@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "engine.h"
 #include "enginevars.h"
-#include "species.h"
+#include "speciesvars.h"
 #include "shipvars.h"
 #include "command.h"
 #include "commandvars.h"

@@ -19,10 +19,5 @@
 
 #include "starvars.h"
 
-int num_stars;
-
 struct star_data *star;
 
-struct star_data *star_base;
-
-int star_data_modified;

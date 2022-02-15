@@ -25,6 +25,7 @@
 
 // globals. ugh.
 
+extern int extra_namplas;
 extern struct nampla_data *nampla;
 extern struct nampla_data *nampla_base;
 extern struct nampla_data *namp_data[MAX_SPECIES];

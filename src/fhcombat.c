@@ -37,15 +37,17 @@
 #include <ctype.h>
 #include "engine.h"
 #include "enginevars.h"
-#include "combat.h"
 #include "galaxy.h"
-#include "galaxyvars.h"
+#include "galaxyio.h"
 #include "planet.h"
+#include "planetio.h"
 #include "species.h"
+#include "speciesio.h"
 #include "shipvars.h"
-#include "transaction.h"
-#include "location.h"
+#include "transactionio.h"
+#include "locationio.h"
 #include "logvars.h"
+#include "combat.h"
 
 int main(int argc, char *argv[]) {
     int default_summary;

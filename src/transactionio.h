@@ -17,15 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_TRANSACTIONIO_H
+#define FAR_HORIZONS_TRANSACTIONIO_H
 
-#include "planet.h"
+#include <stdio.h>
+#include "transaction.h"
+
+void get_transaction_data(void);
+
+void save_transaction_data(void);
+
+void transactionDataAsSExpr(FILE *fp);
+
 
 // globals. ugh.
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+extern int num_transactions;
+extern struct trans_data transaction[MAX_TRANSACTIONS];
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+#endif //FAR_HORIZONS_TRANSACTIONIO_H

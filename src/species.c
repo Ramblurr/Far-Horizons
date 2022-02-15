@@ -17,20 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "galaxy.h"
+#include "galaxyio.h"
 #include "planet.h"
 #include "species.h"
-#include "nampla.h"
-#include "ship.h"
+#include "speciesio.h"
+#include "namplavars.h"
+#include "shipvars.h"
 
-int data_in_memory[MAX_SPECIES];
-int data_modified[MAX_SPECIES];
-struct species_data *species;
-struct species_data spec_data[MAX_SPECIES];
-int species_index; // zero-based index, mostly for accessing arrays
-int species_number; // one-based index, for reports and file names
 
 
 /* The following routine provides the 'distorted' species number used to
@@ -52,20 +47,14 @@ int distorted(int species_number) {
 
 // free_species_data will free memory used for all species data
 void free_species_data(void) {
-    // from galaxy.c
-    extern struct galaxy_data galaxy;
-    // from nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    // from ship.c
-    extern struct ship_data *ship_data[MAX_SPECIES];;
-
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        if (data_in_memory[species_index] == FALSE) {
-            continue;
+        if (namp_data[species_index] != NULL) {
+            free(namp_data[species_index]);
+            namp_data[species_index] = NULL;
         }
-        free(namp_data[species_index]);
-        if (spec_data[species_index].num_ships > 0) {
+        if (ship_data[species_index] != NULL) {
             free(ship_data[species_index]);
+            ship_data[species_index] = NULL;
         }
         data_in_memory[species_index] = FALSE;
         data_modified[species_index] = FALSE;
@@ -103,138 +92,6 @@ int life_support_needed(struct species_data *species, struct planet_data *home, 
     return ls_needed;
 }
 
-
-// get_species_data will read in data files for all species
-void get_species_data(void) {
-    // from galaxy.c
-    extern struct galaxy_data galaxy;
-    // from nampla.c
-    extern int extra_namplas;
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    extern int num_new_namplas[MAX_SPECIES];
-    // from ship.c
-    extern int extra_ships;
-    extern struct ship_data *ship_data[MAX_SPECIES];
-    extern int num_new_ships[MAX_SPECIES];
-
-    for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        size_t nRead;
-        FILE *fp;
-        char filename[16];
-        struct species_data *sp = &spec_data[species_index];
-        data_modified[species_index] = FALSE;
-
-        /* Open the species data file. */
-        sprintf(filename, "sp%02d.dat", species_index + 1);
-        fp = fopen(filename, "rb");
-        if (fp == NULL) {
-            sp->pn = 0;    /* Extinct! */
-            data_in_memory[species_index] = FALSE;
-            continue;
-        }
-        /* Read in species data. */
-        nRead = fread(sp, sizeof(struct species_data), 1, fp);
-        if (nRead != 1) {
-            fprintf(stderr, "\n\tCannot read species record in file '%s'!\n", filename);
-            fprintf(stderr, "\tRead %d records of %d bytes; expected to read %d\n\n", nRead, sizeof(struct species_data), 1);
-            exit(-1);
-        }
-        /* Allocate enough memory for all namplas. */
-        namp_data[species_index] = (struct nampla_data *) calloc(sp->num_namplas + extra_namplas,
-                                                                 sizeof(struct nampla_data));
-        if (namp_data[species_index] == NULL) {
-            perror("get_species_data");
-            fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n\n");
-            exit(-1);
-        }
-        /* Read it all into memory. */
-        nRead = fread(namp_data[species_index], sizeof(struct nampla_data), sp->num_namplas, fp);
-        if (nRead != sp->num_namplas) {
-            fprintf(stderr, "\nCannot read nampla data into memory!\n");
-            fprintf(stderr, "\tRead %d records of %d bytes; expected to read %d\n\n", nRead, sizeof(struct nampla_data), sp->num_namplas);
-            exit(-1);
-        }
-        /* Allocate enough memory for all ships. */
-        ship_data[species_index] = (struct ship_data *) calloc(sp->num_ships + extra_ships, sizeof(struct ship_data));
-        if (ship_data[species_index] == NULL) {
-            perror("get_species_data");
-            fprintf(stderr, "\nCannot allocate enough memory for ship data!\n\n");
-            exit(-1);
-        }
-        if (sp->num_ships > 0) {
-            /* Read it all into memory. */
-            if (fread(ship_data[species_index], sizeof(struct ship_data), sp->num_ships, fp) != sp->num_ships) {
-                fprintf(stderr, "\nCannot read ship data into memory!\n\n");
-                exit(-1);
-            }
-        }
-        fclose(fp);
-        data_in_memory[species_index] = TRUE;
-        num_new_namplas[species_index] = 0;
-        num_new_ships[species_index] = 0;
-    }
-}
-
-// save_species_data will write all data that has been modified
-void save_species_data(void) {
-    // from galaxy.c
-    extern struct galaxy_data galaxy;
-    // from nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    // from ship.c
-    extern struct ship_data *ship_data[MAX_SPECIES];;
-
-    for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        FILE *fp;
-        char filename[16];
-        struct species_data *sp;
-
-        if (!data_modified[species_index]) {
-            continue;
-        }
-        sp = &spec_data[species_index];
-        /* Open the species data file. */
-        sprintf(filename, "sp%02d.dat", species_index + 1);
-        fp = fopen(filename, "wb");
-        if (fp == NULL) {
-            perror("save_species_data");
-            fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
-            exit(-1);
-        }
-        /* Write species data. */
-        if (fwrite(sp, sizeof(struct species_data), 1, fp) != 1) {
-            perror("save_species_data");
-            fprintf(stderr, "\n\tCannot write species record to file '%s'!\n\n", filename);
-            exit(-1);
-        }
-        /* Write nampla data. */
-        if (fwrite(namp_data[species_index], sizeof(struct nampla_data), 1, fp) != 1) {
-            perror("save_species_data");
-            fprintf(stderr, "\n\tCannot write nampla data to file '%s'!\n\n", filename);
-            exit(-1);
-        }
-        /* Write ship data. */
-        if (sp->num_ships > 0) {
-            if (fwrite(ship_data[species_index], sizeof(struct ship_data), 1, fp) != 1) {
-                perror("save_species_data");
-                fprintf(stderr, "\n\tCannot write ship data to file '%s'!\n\n", filename);
-                exit(-1);
-            }
-        }
-        fclose(fp);
-        data_modified[species_index] = FALSE;
-    }
-}
-
-// speciesDataAsSExpr writes the current species data to a text file as an s-expression.
-void speciesDataAsSExpr(FILE *fp, species_data_t *sp, int spNo) {
-    fprintf(fp, "(species %3d (name \"%s\") (government (name \"%s\") (type \"%s\"))", spNo, sp->name, sp->govt_name,
-            sp->govt_type);
-    fprintf(fp, "\n  (name \"%s\")", sp->name);
-    fprintf(fp, "\n  (government (name \"%s\") (type \"%s\"))", sp->govt_name, sp->govt_type);
-    fprintf(fp, "\n  (homeworld (x %3d) (y %3d) (z %3d) (orbit %d))", sp->x, sp->y, sp->z, sp->pn);
-    fprintf(fp, ")\n");
-}
 
 int undistorted(int distorted_species_number) {
     int i, species_number;

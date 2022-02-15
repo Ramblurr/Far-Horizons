@@ -41,33 +41,21 @@
 #define ALLIES_ORDER               15
 
 struct trans_data {
-    int type;         /* Transaction type. */
-    short donor;
-    short recipient;
-    long value;      /* Value of transaction. */
-    char x;
-    char y;
-    char z;
-    char pn;         /* Location associated with transaction. */
-    long number1;    /* Other items associated with transaction.*/
+    int type;       /* Transaction type. */
+    int donor;
+    int recipient;
+    int value;      /* Value of transaction. */
+    int x;
+    int y;
+    int z;
+    int pn;         /* Location associated with transaction. */
+    int number1;    /* Other items associated with transaction.*/
     char name1[40];
-    long number2;
+    int number2;
     char name2[40];
-    long number3;
+    int number3;
     char name3[40];
 };
-
 typedef struct trans_data trans_data_t;
-
-void get_transaction_data(void);
-
-void save_transaction_data(void);
-
-void transactionDataAsSExpr(FILE *fp);
-
-// globals. ugh.
-
-extern int num_transactions;
-extern struct trans_data transaction[MAX_TRANSACTIONS];
 
 #endif //FAR_HORIZONS_TRANSACTION_H

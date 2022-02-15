@@ -24,8 +24,7 @@ include_directories(src)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(fhturn
-        src/galaxy.h src/galaxy.c
-        src/galaxyvars.h src/galaxyvars.c
+        src/galaxyio.h src/galaxyio.c
         src/fhturn.c)
 
 add_executable(fhloc
@@ -34,21 +33,27 @@ add_executable(fhloc
         src/commandvars.h src/commandvars.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
-        src/galaxy.h src/galaxy.c
-        src/galaxyvars.h src/galaxyvars.c
+        src/galaxyio.h src/galaxyio.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationio.h src/locationio.c
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/planet.h src/planet.c
+        src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
+        src/stario.h src/stario.c
         src/starvars.h src/starvars.c)
 
 add_executable(fhorders
@@ -57,24 +62,30 @@ add_executable(fhorders
         src/commandvars.h src/commandvars.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
-        src/galaxy.h src/galaxy.c
-        src/galaxyvars.h src/galaxyvars.c
+        src/galaxyio.h src/galaxyio.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationio.h src/locationio.c
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/no_orders.h src/no_orders.c
         src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
         src/star.h src/star.c
+        src/stario.h src/stario.c
         src/starvars.h src/starvars.c)
 
 add_executable(fhcombat
@@ -85,24 +96,33 @@ add_executable(fhcombat
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyio.h src/galaxyio.c
         src/galaxyvars.h src/galaxyvars.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
         src/location.h src/location.c
+        src/locationio.h src/locationio.c
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
         src/star.h src/star.c
+        src/stario.h src/stario.c
         src/starvars.h src/starvars.c
-        src/transaction.c src/transaction.h)
+        src/transaction.c src/transaction.h
+        src/transactionio.h src/transactionio.c)
 
 add_executable(fhpredep
         src/fhpredep.c
@@ -112,6 +132,7 @@ add_executable(fhpredep
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyio.h src/galaxyio.c
         src/galaxyvars.h src/galaxyvars.c
         src/item.h src/item.c
         src/jumpvars.h src/jumpvars.c
@@ -119,17 +140,24 @@ add_executable(fhpredep
         src/log.h src/log.c
         src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/predeparture.c src/predeparture.h
         src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
         src/star.h src/star.c
+        src/stario.h src/stario.c
         src/starvars.h src/starvars.c
-        src/transaction.c src/transaction.h)
+        src/transaction.c src/transaction.h
+        src/transactionio.h src/transactionio.c)
 
 add_executable(fhjump
         src/fhjump.c
@@ -139,6 +167,7 @@ add_executable(fhjump
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/galaxy.h src/galaxy.c
+        src/galaxyio.c
         src/galaxyvars.h src/galaxyvars.c
         src/item.h src/item.c
         src/jump.h src/jump.c
@@ -147,13 +176,20 @@ add_executable(fhjump
         src/log.h src/log.c
         src/logvars.h src/logvars.c
         src/nampla.h src/nampla.c
+        src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/ordervars.h src/ordervars.c
         src/planet.h src/planet.c
+        src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/ship.h src/ship.c
+        src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
         src/star.h src/star.c
+        src/stario.h src/stario.c
         src/starvars.h src/starvars.c
-        src/transaction.c src/transaction.h)
+        src/transaction.c src/transaction.h
+        src/transactionio.h src/transactionio.c)

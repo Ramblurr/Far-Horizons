@@ -25,6 +25,7 @@
 
 // globals. ugh.
 
+extern int extra_ships;
 extern int ignore_field_distorters;
 extern int num_new_ships[MAX_SPECIES];
 extern struct ship_data *ship;

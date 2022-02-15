@@ -17,15 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#include "species.h"
+#include "speciesvars.h"
 
-#include "planet.h"
+struct species_data *species;
 
-// globals. ugh.
+int species_index; // zero-based index, mostly for accessing arrays
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+int species_number; // one-based index, for reports and file names
 
-#endif //FAR_HORIZONS_PLANETVARS_H

@@ -16,7 +16,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
 
 #ifndef FAR_HORIZONS_GALAXY_H
 #define FAR_HORIZONS_GALAXY_H
@@ -27,7 +26,5 @@ struct galaxy_data {
     int radius;        /* Galactic radius in parsecs. */
     int turn_number;   /* Current turn number. */
 };
-
-void get_galaxy_data(void);
 
 #endif //FAR_HORIZONS_GALAXY_H

@@ -17,15 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_LOCATIONIO_H
+#define FAR_HORIZONS_LOCATIONIO_H
 
-#include "planet.h"
+#include <stdio.h>
+#include "location.h"
+
+void get_location_data(void);
+
+void locationDataAsSExpr(FILE *fp);
+
+void save_location_data(void);
 
 // globals. ugh.
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+extern struct sp_loc_data loc[MAX_LOCATIONS];
+extern int num_locs;
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+#endif //FAR_HORIZONS_LOCATIONIO_H

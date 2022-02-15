@@ -26,31 +26,35 @@
 /* In case gamemaster creates new star systems with Edit program. */
 #define NUM_EXTRA_PLANETS    100
 
+/* Gases in planetary atmospheres. */
+#define	H2	1	/* Hydrogen */
+#define	CH4	2	/* Methane */
+#define	HE	3	/* Helium */
+#define	NH3	4	/* Ammonia */
+#define	N2	5	/* Nitrogen */
+#define	CO2	6	/* Carbon Dioxide */
+#define	O2	7	/* Oxygen */
+#define	HCL	8	/* Hydrogen Chloride */
+#define	CL2	9	/* Chlorine */
+#define	F2	10	/* Fluorine */
+#define	H2O	11	/* Steam */
+#define	SO2	12	/* Sulfur Dioxide */
+#define	H2S	13	/* Hydrogen Sulfide */
+
+
 struct planet_data {
-    uint8_t temperature_class;  /* Temperature class, 1-30. */
-    uint8_t pressure_class;     /* Pressure class, 0-29. */
-    uint8_t special;            /* 0 = not special, 1 = ideal home planet, 2 = ideal colony planet, 3 = radioactive hellhole. */
-    uint8_t reserved1;          /* Reserved for future use. Zero for now. */
-    uint8_t gas[4];             /* Gas in atmosphere. Zero if none. */
-    uint8_t gas_percent[4];     /* Percentage of gas in atmosphere. */
-    int16_t reserved2;          /* Reserved for future use. Zero for now. */
-    int16_t diameter;           /* Diameter in thousands of kilometers. */
-    int16_t gravity;            /* Surface gravity. Multiple of Earth gravity times 100. */
-    int16_t mining_difficulty;  /* Mining difficulty times 100. */
-    int16_t econ_efficiency;    /* Economic efficiency. Always 100 for a home planet. */
-    int16_t md_increase;        /* Increase in mining difficulty. */
-    int32_t message;            /* Message associated with this planet, if any. */
-    int32_t reserved3;          /* Reserved for future use. Zero for now. */
-    int32_t reserved4;          /* Reserved for future use. Zero for now. */
-    int32_t reserved5;          /* Reserved for future use. Zero for now. */
+    int temperature_class;  /* Temperature class, 1-30. */
+    int pressure_class;     /* Pressure class, 0-29. */
+    int special;            /* 0 = not special, 1 = ideal home planet, 2 = ideal colony planet, 3 = radioactive hellhole. */
+    int gas[4];             /* Gas in atmosphere. Zero if none. */
+    int gas_percent[4];     /* Percentage of gas in atmosphere. */
+    int diameter;           /* Diameter in thousands of kilometers. */
+    int gravity;            /* Surface gravity. Multiple of Earth gravity times 100. */
+    int mining_difficulty;  /* Mining difficulty times 100. */
+    int econ_efficiency;    /* Economic efficiency. Always 100 for a home planet. */
+    int md_increase;        /* Increase in mining difficulty. */
+    int message;            /* Message associated with this planet, if any. */
 };
-
 typedef struct planet_data planet_data_t;
-
-void get_planet_data(void);
-
-void planetDataAsSExpr(FILE *fp);
-
-void save_planet_data(void);
 
 #endif //FAR_HORIZONS_PLANET_H

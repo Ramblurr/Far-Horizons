@@ -32,13 +32,17 @@
 #include "engine.h"
 #include "enginevars.h"
 #include "galaxy.h"
-#include "galaxyvars.h"
+#include "galaxyio.h"
 #include "planet.h"
+#include "planetio.h"
 #include "planetvars.h"
 #include "species.h"
+#include "speciesio.h"
+#include "speciesvars.h"
 #include "nampla.h"
 #include "namplavars.h"
 #include "location.h"
+#include "locationio.h"
 
 
 int main(int argc, char *argv[]) {

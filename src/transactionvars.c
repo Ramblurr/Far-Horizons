@@ -17,15 +17,4 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
-
-#include "planet.h"
-
-// globals. ugh.
-
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
-
-#endif //FAR_HORIZONS_PLANETVARS_H
+#include "transactionvars.h"

@@ -17,15 +17,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_GALAXYIO_H
+#define FAR_HORIZONS_GALAXYIO_H
 
-#include "planet.h"
+#include <stdio.h>
+
+void galaxyDataASSexpr(FILE *fp);
+
+void get_galaxy_data(void);
+
+void save_galaxy_data(void);
 
 // globals. ugh.
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+extern struct galaxy_data galaxy;
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+#endif //FAR_HORIZONS_GALAXYIO_H

@@ -70,19 +70,14 @@ struct ship_data {
     char dest_z;                    /* Ditto. Also used by TELESCOPE command. */
     char just_jumped;               /* Set if ship jumped this turn. */
     char arrived_via_wormhole;      /* Ship arrived via wormhole in the PREVIOUS turn. */
-    char reserved1;                 /* Unused. Zero for now. */
-    short reserved2;                /* Unused. Zero for now. */
-    short reserved3;                /* Unused. Zero for now. */
     short class;                    /* Ship class. */
     short tonnage;                  /* Ship tonnage divided by 10,000. */
     short item_quantity[MAX_ITEMS]; /* Quantity of each item carried. */
     short age;                      /* Ship age. */
     short remaining_cost;           /* The cost needed to complete the ship if still under construction. */
-    short reserved4;                /* Unused. Zero for now. */
     short loading_point;            /* Nampla index for planet where ship was last loaded with CUs. Zero = none. Use 9999 for home planet. */
     short unloading_point;          /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
     long special;                   /* Different for each application. */
-    char padding[28];               /* Use for expansion. Initialized to all zeroes. */
 };
 
 void delete_ship(struct ship_data *ship);

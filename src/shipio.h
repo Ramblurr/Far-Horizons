@@ -17,15 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETVARS_H
-#define FAR_HORIZONS_PLANETVARS_H
+#ifndef FAR_HORIZONS_SHIPIO_H
+#define FAR_HORIZONS_SHIPIO_H
 
-#include "planet.h"
+#include <stdio.h>
+#include "ship.h"
 
-// globals. ugh.
+struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp);
 
-extern char gas_string[14][4];
-extern struct planet_data *home_planet;
-extern struct planet_data *planet;
+void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp);
 
-#endif //FAR_HORIZONS_PLANETVARS_H
+#endif //FAR_HORIZONS_SHIPIO_H

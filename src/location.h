@@ -25,23 +25,15 @@
 #define MAX_LOCATIONS    10000
 
 struct sp_loc_data {
-    char s;    /* Species number */
-    char x;
-    char y;
-    char z;
+    int s;    /* Species number */
+    int x;
+    int y;
+    int z;
 };
-
 typedef struct sp_loc_data sp_loc_data_t;
 
-void add_location(char x, char y, char z);
+void add_location(int x, int y, int z);
+
 void do_locations(void);
-void get_location_data(void);
-void locationDataAsSExpr(FILE *fp);
-void save_location_data(void);
-
-// globals. ugh.
-
-extern struct sp_loc_data loc[MAX_LOCATIONS];
-extern int num_locs;
 
 #endif //FAR_HORIZONS_LOCATION_H

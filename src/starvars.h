@@ -24,9 +24,6 @@
 
 // globals. ugh.
 
-extern int num_stars;
 extern struct star_data *star;
-extern struct star_data *star_base;
-extern int star_data_modified;
 
 #endif //FAR_HORIZONS_STARVARS_H
