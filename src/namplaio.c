@@ -113,6 +113,13 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
 }
 
 
+
+void namplaDataAsSExpr(struct nampla_data *namplaData, int num_namplas, FILE *fp) {
+    fprintf(fp, "(namplas %4d", num_namplas);
+    fprintf(fp, ")\n");
+}
+
+
 void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) {
     /* Allocate enough memory for all namplas. */
     binary_data_t *binData = (binary_data_t *) calloc(numNamplas, sizeof(binary_data_t));
@@ -163,3 +170,5 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
     /* release the binary data memory we allocated */
     free(binData);
 }
+
+

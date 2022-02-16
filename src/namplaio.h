@@ -24,6 +24,8 @@
 
 struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp);
 
+void namplaDataAsSExpr(struct nampla_data *namplaData, int num_namplas, FILE *fp);
+
 void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp);
 
 #endif //FAR_HORIZONS_NAMPLAIO_H

@@ -27,4 +27,6 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp);
 
 void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp);
 
+void shipDataAsSExpr(struct ship_data *shipData, int num_ships, FILE *fp);
+
 #endif //FAR_HORIZONS_SHIPIO_H

@@ -180,15 +180,6 @@ void save_star_data(void) {
     star_data_modified = FALSE;
 
     free(starData);
-
-    fp = fopen("stars.txt", "wb");
-    if (fp == NULL) {
-        perror("save_stars_data");
-        fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
-        exit(-1);
-    }
-    starDataAsSexpr(fp);
-    fclose(fp);
 }
 
 

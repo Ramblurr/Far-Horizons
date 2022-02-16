@@ -143,15 +143,6 @@ void save_location_data(void) {
         free(binData);
     }
     fclose(fp);
-
-    fp = fopen("locations.txt", "wb");
-    if (fp == NULL) {
-        perror("save_location_data");
-        fprintf(stderr, "\n\tCannot create new version of file 'locations.txt'!\n");
-        exit(-1);
-    }
-    locationDataAsSExpr(fp);
-    fclose(fp);
 }
 
 

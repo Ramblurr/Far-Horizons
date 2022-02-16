@@ -180,13 +180,4 @@ void save_planet_data(void) {
     planet_data_modified = FALSE;
 
     free(planetData);
-
-    fp = fopen("planets.txt", "wb");
-    if (fp == NULL) {
-        perror("save_planets_data");
-        fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
-        exit(-1);
-    }
-    planetDataAsSExpr(fp);
-    fclose(fp);
 }

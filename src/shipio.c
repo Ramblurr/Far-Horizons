@@ -148,3 +148,13 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     /* release the binary data memory we allocated */
     free(binData);
 }
+
+
+void shipDataAsSExpr(struct ship_data *shipData, int num_ships, FILE *fp) {
+    fprintf(fp, "(ships %5d", num_ships);
+    for (int i = 0; i < num_ships; i++) {
+        struct ship_data *ship = &shipData[i];
+        fprintf(fp, "\n  (ship (id %6d) (name '%s')", i + 1, ship->name);
+    }
+    fprintf(fp, ")\n");
+}

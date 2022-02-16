@@ -76,13 +76,4 @@ void save_galaxy_data(void) {
         exit(-1);
     }
     fclose(fp);
-
-    fp = fopen("galaxy.txt", "wb");
-    if (fp == NULL) {
-        perror("save_galaxy_data");
-        fprintf(stderr, "\n\tCannot create new version of file 'galaxy.txt'!\n");
-        exit(-1);
-    }
-    galaxyDataAsSexpr(fp);
-    fclose(fp);
 }

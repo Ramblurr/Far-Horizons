@@ -260,17 +260,6 @@ void save_species_data(void) {
 
             fclose(fp);
         }
-
-        // get the filename for the species
-        sprintf(filename, "sp%02d.txt", species_index + 1);
-        fp = fopen(filename, "wb");
-        if (fp == NULL) {
-            perror("save_galaxy_data");
-            fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
-            exit(-1);
-        }
-        speciesDataAsSexpr(sp, species_index + 1, fp);
-        fclose(fp);
     }
 
     free(data);
@@ -280,17 +269,23 @@ void save_species_data(void) {
 static const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};
 
 
-// speciesDataAsSexpr writes the current species data to a text file as an s-expression.
-void speciesDataAsSexpr(species_data_t *sp, int spNo, FILE *fp) {
+// speciesDataAsSExpr writes the current species data to a text file as an s-expression.
+void speciesDataAsSExpr(species_data_t *sp, int spNo, FILE *fp) {
     fprintf(fp, "(species (id %3d) (name '%s') (auto %s)", spNo, sp->name, sp->auto_orders ? "true" : "false");
     fprintf(fp, "\n         (government (name '%s') (type '%s'))", sp->govt_name, sp->govt_type);
-    fprintf(fp, "\n         (homeworld (x %3d) (y %3d) (z %3d) (orbit %d))", sp->x, sp->y, sp->z, sp->pn);
+    fprintf(fp, "\n         (homeworld (x %3d) (y %3d) (z %3d) (orbit %d) (hp_base %d))", sp->x, sp->y, sp->z, sp->pn, sp->hp_original_base);
+    fprintf(fp, "\n         (atmosphere");
+    fprintf(fp, "\n           (required (gas %2d) (min %3d) (max %3d))", sp->required_gas, sp->required_gas_min, sp->required_gas_max);
+    fprintf(fp, "\n           (neutral %2d %2d %2d %2d %2d %2d)", sp->neutral_gas[0], sp->neutral_gas[1], sp->neutral_gas[2], sp->neutral_gas[3], sp->neutral_gas[4], sp->neutral_gas[5]);
+    fprintf(fp, "\n           (poison  %2d %2d %2d %2d %2d %2d)", sp->poison_gas[0], sp->poison_gas[1], sp->poison_gas[2], sp->poison_gas[3], sp->poison_gas[4], sp->poison_gas[5]);
+    fprintf(fp, ")");
     fprintf(fp, "\n         (technology");
     for (int i = 0; i < 6; i++) {
         fprintf(fp, "\n           (tech (code '%s') (level %3d) (knowledge %3d) (init %2d) (xp %5d))", tech_level_names[i], sp->tech_level[i], sp->tech_knowledge[i], sp->init_tech_level[i], sp->tech_eps[i]);
     }
     fprintf(fp, ")");
-    fprintf(fp, "\n         (fleet_maintenance\n           (cost %9d)\n           (percent %6d))", sp->fleet_cost, sp->fleet_percent_cost);
+    fprintf(fp, "\n         (fleet (num_ships %5d) (maintenance (cost %9d) (percent %6d)))", sp->num_ships, sp->fleet_cost, sp->fleet_percent_cost);
+    fprintf(fp, "\n         (num_namplas %7d)", sp->num_namplas);
     fprintf(fp, "\n         (banked_eu %9d)", sp->econ_units);
     fprintf(fp, "\n         (contacts");
     for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
@@ -299,14 +294,14 @@ void speciesDataAsSexpr(species_data_t *sp, int spNo, FILE *fp) {
         }
     }
     fprintf(fp, ")");
-    fprintf(fp, "\n         (allies");
+    fprintf(fp, "\n         (allies  ");
     for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
         if ((sp->ally[spidx / 32] & (1 << (spidx % 32))) != 0) {
             fprintf(fp, " %3d", spidx + 1);
         }
     }
     fprintf(fp, ")");
-    fprintf(fp, "\n         (enemies");
+    fprintf(fp, "\n         (enemies ");
     for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
         if ((sp->enemy[spidx / 32] & (1 << (spidx % 32))) != 0) {
             fprintf(fp, " %3d", spidx + 1);
