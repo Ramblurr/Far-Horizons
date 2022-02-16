@@ -33,21 +33,22 @@
 #include "enginevars.h"
 
 
-int dumpCommand(int argc, char *argv[]);
+int convertToSExprCommand(int argc, char *argv[]);
 
 int logRandomCommand(int argc, char *argv[]);
+
 
 int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
             printf("  opt: --help  show this helpful text\n");
-            printf("  cmd: dump    convert binary .dat to s-expression\n");
-            printf("       args:   galaxy | stars | planets | species | locations | transactions\n");
-            printf("  cmd: logrnd  display a list of random values for testing the PRNG\n");
+            printf("  cmd: convert  convert binary .dat to s-expression\n");
+            printf("         args:  galaxy | stars | planets | species | locations | transactions\n");
+            printf("  cmd: logrnd   display a list of random values for testing the PRNG\n");
             return 0;
-        } else if (strcmp(argv[i], "dump") == 0) {
-            return dumpCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "convert") == 0) {
+            return convertToSExprCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
         } else {
@@ -59,51 +60,52 @@ int main(int argc, char *argv[]) {
     return 2;
 }
 
-int dumpCommand(int argc, char *argv[]) {
+
+int convertToSExprCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: %s: loading galaxy file...\n", cmdName);
+    printf("fh: %s: loading    galaxy file...\n", cmdName);
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
-        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
+        // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: %s: dumping %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: converting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.txt", "wb");
             if (fp == NULL) {
-                perror("fh: dump:");
+                perror("fh: convert:");
                 fprintf(stderr, "\n\tCannot create new version of file 'galaxy.txt'!\n");
                 return 2;
             }
             galaxyDataAsSexpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: %s: loading %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: loading    %s file...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: %s: dumping %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: converting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.txt", "wb");
             if (fp == NULL) {
-                perror("fh: dump:");
+                perror("fh: convert:");
                 fprintf(stderr, "\n\tCannot create new version of file 'locations.txt'!\n");
                 return 2;
             }
             locationDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: %s: loading %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: loading    %s file...\n", cmdName, argv[i]);
             get_planet_data();
-            printf("fh: %s: dumping %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: converting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.txt", "wb");
             if (fp == NULL) {
-                perror("fh: dump:");
+                perror("fh: convert:");
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
                 return 2;
             }
             planetDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: %s: loading %s files...\n", cmdName, argv[i]);
+            printf("fh: %s: loading    %s file...\n", cmdName, argv[i]);
             get_species_data();
-            printf("fh: %s: dumping %s files...\n", cmdName, argv[i]);
+            printf("fh: %s: converting %s files...\n", cmdName, argv[i]);
             for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
                 if (data_in_memory[species_index]) {
                     struct species_data *sp = &spec_data[species_index];
@@ -112,7 +114,7 @@ int dumpCommand(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.species.txt", species_index + 1);
                     FILE *fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: dump:");
+                        perror("fh: convert:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -122,7 +124,7 @@ int dumpCommand(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.namplas.txt", species_index + 1);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: dump:");
+                        perror("fh: convert:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -132,7 +134,7 @@ int dumpCommand(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.ships.txt", species_index + 1);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: dump:");
+                        perror("fh: convert:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -141,12 +143,12 @@ int dumpCommand(int argc, char *argv[]) {
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: %s: loading %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: loading    %s file...\n", cmdName, argv[i]);
             get_star_data();
-            printf("fh: %s: dumping %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: converting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.txt", "wb");
             if (fp == NULL) {
-                perror("fh: dump:");
+                perror("fh: convert:");
                 fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
                 return 2;
             }
