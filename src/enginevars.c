@@ -20,15 +20,24 @@
 #include "engine.h"
 #include "enginevars.h"
 
-// allow callers to set the seed. ugh.
-unsigned long last_random = 1924085713L;    /* Random seed. */
 
 int correct_spelling_required = FALSE;
+
+const unsigned long defaultHistoricalSeedValue = 1924085713L;
+
 int first_pass = FALSE;
+
+unsigned long last_random = defaultHistoricalSeedValue; // allow callers to set the seed. ugh.
+
 int post_arrival_phase = FALSE;
+
 int prompt_gm;
+
 int test_mode;
+
 int verbose_mode;
+
 char upper_name[32];
+
 
 

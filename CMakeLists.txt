@@ -25,6 +25,8 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(fh
         src/fh.c src/fh.c
+        src/engine.h src/engine.c
+        src/enginevars.h src/enginevars.c
         src/galaxyio.h src/galaxyio.c
         src/locationio.h src/locationio.c
         src/locationvars.h src/locationvars.c

@@ -30,10 +30,12 @@
 #include "namplaio.h"
 #include "shipio.h"
 #include "shipvars.h"
+#include "enginevars.h"
 
 
 int dumpCommand(int argc, char *argv[]);
 
+int logRandomCommand(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
@@ -42,9 +44,12 @@ int main(int argc, char *argv[]) {
             printf("  opt: --help  show this helpful text\n");
             printf("  cmd: dump    convert binary .dat to s-expression\n");
             printf("       args:   galaxy | stars | planets | species | locations | transactions\n");
+            printf("  cmd: logrnd  display a list of random values for testing the PRNG\n");
             return 0;
         } else if (strcmp(argv[i], "dump") == 0) {
             return dumpCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "logrnd") == 0) {
+            return logRandomCommand(argc - i, argv + i);
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
             return 2;
@@ -53,7 +58,6 @@ int main(int argc, char *argv[]) {
     printf("fh: try `fh --help` for instructions\n");
     return 2;
 }
-
 
 int dumpCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
@@ -151,6 +155,26 @@ int dumpCommand(int argc, char *argv[]) {
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
             return 2;
+        }
+    }
+    return 0;
+}
+
+
+// logRandomCommand generates random numbers using the historical default seed value.
+int logRandomCommand(int argc, char *argv[]) {
+    // delete any seed from the environment so that we're sure our value is used
+    putenv("FH_SEED");
+    last_random = defaultHistoricalSeedValue;
+
+    for (int i = 0; i < 1000000; i++) {
+        int r = rnd(1024 * 1024);
+        if (i < 10) {
+            printf("%9d %9d\n", i, r);
+        } else if (1000 < i && i < 1010) {
+            printf("%9d %9d\n", i, r);
+        } else if ((i % 85713) == 0) {
+            printf("%9d %9d\n", i, r);
         }
     }
     return 0;

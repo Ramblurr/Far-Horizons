@@ -23,6 +23,7 @@
 // globals. ugh.
 
 extern int correct_spelling_required;
+extern const unsigned long defaultHistoricalSeedValue;
 extern int first_pass;
 extern unsigned long last_random;
 extern int post_arrival_phase;

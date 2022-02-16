@@ -20,6 +20,8 @@
 #ifndef FAR_HORIZONS_ENGINE_H
 #define FAR_HORIZONS_ENGINE_H
 
+#include <stdio.h>
+
 // declare constants
 #define TRUE  1
 #define FALSE 0
