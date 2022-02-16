@@ -98,7 +98,7 @@ void bad_species(void);
 void battle_error(int species_number);
 
 // combat returns TRUE if planet, species, and transaction data should be saved
-int combat(int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base);
+int combat(int default_summary, int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base);
 
 void consolidate_option(char option, char location);
 

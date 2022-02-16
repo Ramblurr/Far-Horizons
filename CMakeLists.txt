@@ -23,9 +23,30 @@ include_directories(src)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(fhturn
+add_executable(fh
+        src/fh.c src/fh.c
         src/galaxyio.h src/galaxyio.c
-        src/fhturn.c)
+        src/locationio.h src/locationio.c
+        src/locationvars.h src/locationvars.c
+        src/log.h src/log.c
+        src/logvars.h src/logvars.c
+        src/namplaio.h src/namplaio.c
+        src/namplavars.h src/namplavars.c
+        src/ordervars.h src/ordervars.c
+        src/planetio.h src/planetio.c
+        src/planetvars.h src/planetvars.c
+        src/shipio.h src/shipio.c
+        src/shipvars.h src/shipvars.c
+        src/species.h src/species.c
+        src/speciesio.h src/speciesio.c
+        src/speciesvars.h src/speciesvars.c
+        src/star.h src/star.c
+        src/stario.h src/stario.c
+        )
+
+add_executable(fhturn
+        src/fhturn.c
+        src/galaxyio.h src/galaxyio.c)
 
 add_executable(fhloc
         src/fhloc.c

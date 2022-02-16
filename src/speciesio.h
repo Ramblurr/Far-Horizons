@@ -27,7 +27,7 @@ void get_species_data(void);
 
 void save_species_data(void);
 
-void speciesDataAsSExpr(species_data_t *sp, int spNo, FILE *fp);
+void speciesDataAsSexpr(species_data_t *sp, int spNo, FILE *fp);
 
 // globals. ugh.
 

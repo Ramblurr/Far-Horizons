@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 
-void galaxyDataASSexpr(FILE *fp);
+void galaxyDataAsSexpr(FILE *fp);
 
 void get_galaxy_data(void);
 

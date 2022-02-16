@@ -26,18 +26,18 @@
 struct galaxy_data galaxy;
 
 typedef struct {
-    int32_t d_num_species;    /* Design number of species in galaxy. */
+    int32_t d_num_species;  /* Design number of species in galaxy. */
     int32_t num_species;    /* Actual number of species allocated. */
-    int32_t radius;        /* Galactic radius in parsecs. */
+    int32_t radius;         /* Galactic radius in parsecs. */
     int32_t turn_number;    /* Current turn number. */
 } binary_data_t;
 
 static binary_data_t galaxyData;
 
 
-void galaxyDataASSexpr(FILE *fp) {
-    fprintf(fp, "(galaxy (turn %4d) (num_species %4d) (d_num_species %4d) (radius %6d))\n",
-            galaxy.turn_number, galaxy.num_species, galaxy.num_species, galaxy.radius);
+void galaxyDataAsSexpr(FILE *fp) {
+    fprintf(fp, "(galaxy (turn %13d)\n        (num_species %6d)\n        (d_num_species %4d)\n        (radius %11d))\n",
+            galaxy.turn_number, galaxy.num_species, galaxy.d_num_species, galaxy.radius);
 }
 
 
@@ -83,6 +83,6 @@ void save_galaxy_data(void) {
         fprintf(stderr, "\n\tCannot create new version of file 'galaxy.txt'!\n");
         exit(-1);
     }
-    galaxyDataASSexpr(fp);
+    galaxyDataAsSexpr(fp);
     fclose(fp);
 }

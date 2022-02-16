@@ -201,6 +201,30 @@ void scan(int x, int y, int z) {
 }
 
 
+char star_color(int c) {
+    if (0 <= c && c <= 7) {
+        return color_char[c];
+    }
+    return '?';
+}
+
+
+char star_size(int c) {
+    if (0 <= c && c <= 9) {
+        return size_char[c];
+    }
+    return '?';
+}
+
+
+char star_type(int c) {
+    if (0 <= c && c <= 4) {
+        return type_char[c];
+    }
+    return '?';
+}
+
+
 /* The following routine will check if coordinates x-y-z contain a star and,
  * if so, will set the appropriate bit in the "visited_by" variable for the star.
  * If the star exists, TRUE will be returned; otherwise, FALSE will be returned. */

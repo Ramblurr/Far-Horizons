@@ -95,6 +95,7 @@ void get_location_data(void) {
     free(binData);
 }
 
+
 // locationDataAsSExpr writes the current location data to a text file as an s-expression.
 void locationDataAsSExpr(FILE *fp) {
     fprintf(fp, "(locations");
@@ -104,6 +105,7 @@ void locationDataAsSExpr(FILE *fp) {
     }
     fprintf(fp, ")\n");
 }
+
 
 void save_location_data(void) {
     /* Open file 'locations.dat' for writing. */
@@ -140,6 +142,15 @@ void save_location_data(void) {
         }
         free(binData);
     }
+    fclose(fp);
+
+    fp = fopen("locations.txt", "wb");
+    if (fp == NULL) {
+        perror("save_location_data");
+        fprintf(stderr, "\n\tCannot create new version of file 'locations.txt'!\n");
+        exit(-1);
+    }
+    locationDataAsSExpr(fp);
     fclose(fp);
 }
 

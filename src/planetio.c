@@ -111,6 +111,7 @@ void get_planet_data(void) {
     free(planetData);
 }
 
+
 // planetDataAsSExpr writes the current planet_base array to a text file as an s-expression.
 void planetDataAsSExpr(FILE *fp) {
     fprintf(fp, "(planets");
@@ -118,12 +119,15 @@ void planetDataAsSExpr(FILE *fp) {
         planet_data_t *p = &planet_base[i];
         fprintf(fp,
                 "\n  (planet (id %5d) (diameter %3d) (gravity %3d) (temperature_class %3d) (pressure_class %3d) (special %2d) (gases (%2d %3d) (%2d %3d) (%2d %3d) (%2d %3d)) (mining_difficulty %3d %3d) (econ_efficiency %3d) (message %d))",
-                i + 1, p->diameter, p->gravity, p->temperature_class, p->pressure_class, p->special, p->gas[0],
-                p->gas_percent[0], p->gas[1], p->gas_percent[1], p->gas[2], p->gas_percent[2], p->gas[3],
-                p->gas_percent[3], p->mining_difficulty, p->md_increase, p->econ_efficiency, p->message);
+                i + 1,
+                p->diameter, p->gravity, p->temperature_class, p->pressure_class, p->special,
+                p->gas[0], p->gas_percent[0], p->gas[1], p->gas_percent[1], p->gas[2], p->gas_percent[2],
+                p->gas[3], p->gas_percent[3],
+                p->mining_difficulty, p->md_increase, p->econ_efficiency, p->message);
     }
     fprintf(fp, ")\n");
 }
+
 
 void save_planet_data(void) {
     FILE *fp;
@@ -176,4 +180,13 @@ void save_planet_data(void) {
     planet_data_modified = FALSE;
 
     free(planetData);
+
+    fp = fopen("planets.txt", "wb");
+    if (fp == NULL) {
+        perror("save_planets_data");
+        fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
+        exit(-1);
+    }
+    planetDataAsSExpr(fp);
+    fclose(fp);
 }

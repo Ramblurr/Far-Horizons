@@ -20,11 +20,14 @@
 #ifndef FAR_HORIZONS_STARIO_H
 #define FAR_HORIZONS_STARIO_H
 
+#include <stdio.h>
 #include "star.h"
 
 void get_star_data(void);
 
 void save_star_data(void);
+
+void starDataAsSexpr(FILE *fp);
 
 // globals. ugh.
 

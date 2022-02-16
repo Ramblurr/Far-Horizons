@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    save = combat(do_all_species, num_species, sp_num, sp_name, &loc[0]);
+    save = combat(default_summary, do_all_species, num_species, sp_num, sp_name, &loc[0]);
 
     if (save) {
         save_planet_data();

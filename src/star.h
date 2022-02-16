@@ -64,6 +64,12 @@ void closest_unvisited_star(struct ship_data *ship);
 
 void scan(int x, int y, int z);
 
+char star_color(int c);
+
+char star_size(int c);
+
+char star_type(int c);
+
 int star_visited(int x, int y, int z);
 
 #endif //FAR_HORIZONS_STAR_H

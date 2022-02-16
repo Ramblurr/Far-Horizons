@@ -19,6 +19,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "galaxy.h"
+#include "galaxyio.h"
 #include "star.h"
 #include "stario.h"
 
@@ -178,4 +180,39 @@ void save_star_data(void) {
     star_data_modified = FALSE;
 
     free(starData);
+
+    fp = fopen("stars.txt", "wb");
+    if (fp == NULL) {
+        perror("save_stars_data");
+        fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
+        exit(-1);
+    }
+    starDataAsSexpr(fp);
+    fclose(fp);
 }
+
+
+void starDataAsSexpr(FILE *fp) {
+    fprintf(fp, "(stars");
+    for (int i = 0; i < num_stars; i++) {
+        struct star_data *s = &star_base[i];
+        fprintf(fp, "\n  (star (id %4d) (x %3d) (y %3d) (z %3d) (type '%c') (color '%c') (size '%c')", i+1, s->x, s->y, s->z, star_type(s->type), star_color(s->color), star_size(s->size));
+        fprintf(fp, "\n        (planets", s->planet_index, s->num_planets);
+        for (int p = 0; p < s->num_planets; p++) {
+            fprintf(fp, " %4d", s->planet_index + p + 1);
+        }
+        fprintf(fp, ") (home_system %s)", s->home_system ? "true" : "false");
+        fprintf(fp, "\n        (wormhole (here %-5s) (exit_x %3d) (exit_y %3d) (exit_z %3d))", s->worm_here ? "true" : "false", s->worm_x, s->worm_y, s->worm_z);
+        fprintf(fp, "\n        (visited_by");
+        for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+            // write the species only if it has visited this system
+            if ((s->visited_by[spidx / 32] & (1 << (spidx % 32))) != 0) {
+                fprintf(fp, " %3d", spidx + 1);
+            }
+        }
+        fprintf(fp, ")");
+        fprintf(fp, "\n        (message %d))", s->message);
+    }
+    fprintf(fp, ")\n");
+}
+
