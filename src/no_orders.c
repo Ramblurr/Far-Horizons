@@ -140,7 +140,7 @@ void NoOrdersForSpecies(void) {
     }
 
     /* Copy message to log file. */
-    while (fgets(message_line, 131, message_file) != NULL) {
+    while (readln(message_line, 131, message_file) != NULL) {
         fputs(message_line, log_file);
     }
 

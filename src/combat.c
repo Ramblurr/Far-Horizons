@@ -1092,7 +1092,7 @@ int combat(int default_summary, int do_all_species, int num_species, int *sp_num
             }
 
             /* Copy temporary log to permanent species log. */
-            while (fgets(log_line, 256, temp_species_log) != NULL) {
+            while (readln(log_line, 256, temp_species_log) != NULL) {
                 fputs(log_line, species_log);
             }
 
@@ -1877,7 +1877,7 @@ void do_battle(struct battle_data *bat) {
         }
 
         /* Copy combat log to temporary species log. */
-        while (fgets(log_line, 256, combat_log) != NULL) {
+        while (readln(log_line, 256, combat_log) != NULL) {
             fputs(log_line, species_log);
         }
 

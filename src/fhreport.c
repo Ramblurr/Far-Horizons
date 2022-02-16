@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
                 fprintf(report_file, "\n\n\t\t\tEVENT LOG FOR TURN %d\n", turn_number - 1);
             }
 
-            while (fgets(log_line, 256, log_file) != NULL) {
+            while (readln(log_line, 256, log_file) != NULL) {
                 fputs(log_line, report_file);
             }
 

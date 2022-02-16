@@ -133,7 +133,7 @@ void log_message(char *message_filename) {
         return;
     }
     /* Copy message to log file. */
-    while (fgets(message_line, 256, message_file) != NULL) {
+    while (readln(message_line, 256, message_file) != NULL) {
         fputs(message_line, log_file);
     }
     fclose(message_file);

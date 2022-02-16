@@ -2874,7 +2874,7 @@ void do_MESSAGE_command(void) {
     unterminated_message = FALSE;
     while (1) {
         /* Read next line. */
-        input_line_pointer = fgets(input_line, 256, input_file);
+        input_line_pointer = readln(input_line, 256, input_file);
         if (input_line_pointer == NULL) {
             unterminated_message = TRUE;
             end_of_file = TRUE;

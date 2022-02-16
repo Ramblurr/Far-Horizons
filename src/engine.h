@@ -49,6 +49,8 @@ char *commas(long value);
 
 void gamemaster_abort_option(void);
 
+char *readln(char *dst, int len, FILE *fp);
+
 int rnd(unsigned int max);
 
 #endif //FAR_HORIZONS_ENGINE_H

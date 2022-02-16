@@ -1047,7 +1047,7 @@ void skip_junk(void) {
     again:
 
     /* Read next line. */
-    input_line_pointer = fgets(input_line, 256, input_file);
+    input_line_pointer = readln(input_line, 256, input_file);
     if (input_line_pointer == NULL) {
         end_of_file = TRUE;
         return;
@@ -1062,7 +1062,7 @@ void skip_junk(void) {
         if (strncmp(input_line, "From ", 5) == 0) {
             /* This is a mail header. */
             while (TRUE) {
-                input_line_pointer = fgets(input_line, 256, input_file);
+                input_line_pointer = readln(input_line, 256, input_file);
                 if (input_line_pointer == NULL) {
                     end_of_file = TRUE;        /* Weird. */
                     return;

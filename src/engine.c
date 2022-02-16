@@ -73,6 +73,7 @@ int agrep_score(char *correct_string, char *unknown_string) {
     return score;
 }
 
+
 /* This routine is intended to take a long argument and return a pointer to a string that has embedded commas to make the string more readable. */
 char *commas(long value) {
     static char result_plus_commas[33];
@@ -110,6 +111,7 @@ char *commas(long value) {
     return &result_plus_commas[j];
 }
 
+
 /* Give the gamemaster a chance to abort. */
 void gamemaster_abort_option(void) {
     char answer[16];
@@ -120,6 +122,33 @@ void gamemaster_abort_option(void) {
         exit(0);
     }
 }
+
+
+// readln is a helper for command parsing that coerces all line-endings to be just '\n'.
+char *readln(char *dst, int len, FILE *fp) {
+    static char buf[1024];
+    char *p;
+    int i;
+    p = fgets(buf, 1024, fp);
+    for (i = 0; i < 1024; i++) {
+        if (buf[i] == '\r') {
+            buf[i] = '\n';
+        }
+        if (buf[i] == '\n') {
+            i++;
+            break;
+        }
+    }
+    for (; i < 1024; i++) {
+        buf[i] = 0;
+    }
+    for (i = 0; i < len; i++) {
+        dst[i] = buf[i];
+    }
+    dst[len - 1] = 0;
+    return p;
+}
+
 
 // rnd returns a random int between 1 and max, inclusive.
 // It uses the so-called "Algorithm M" method, which is a combination
