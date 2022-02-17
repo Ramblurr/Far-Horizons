@@ -116,23 +116,84 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
 void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
     fprintf(fp, "{\n");
     fprintf(fp, "  \"species_no\": %d,\n", spNo);
-    fprintf(fp, "  \"num_namplas\": %d,\n", num_namplas);
-    fprintf(fp, "  \"namplas\": [\n");
+    fprintf(fp, "  \"namplas\": [");
     for (int i = 0; i < num_namplas; i++) {
-        struct nampla_data *nampla = &namplaData[i];
-        fprintf(fp, "    {\"id\": %d, \"name\": \"%s\"}", i + 1, nampla->name);
+        struct nampla_data *np = &namplaData[i];
+        fprintf(fp, "{\n");
+        fprintf(fp, "      \"id\": %d,\n", i + 1);
+        fprintf(fp, "      \"name\": \"%s\",\n", np->name);
+        fprintf(fp, "      \"planet\": {\"id\": %5d, \"x\": %3d, \"y\": %3d, \"z\": %3d, \"orbit\": %d},\n",
+                np->planet_index, np->x, np->y, np->z, np->pn);
+        fprintf(fp, "      \"status\":        %9d,\n", np->status);
+        fprintf(fp, "      \"hiding\":        %9s,\n", np->hiding ? "true" : "false");
+        fprintf(fp, "      \"hiding_val\":    %9d,\n", np->hiding);
+        fprintf(fp, "      \"hidden\":        %9s,\n", np->hidden ? "true" : "false");
+        fprintf(fp, "      \"hidden_val\":    %9d,\n", np->hidden);
+        fprintf(fp, "      \"ma_base\":       %9d,\n", np->ma_base);
+        fprintf(fp, "      \"mi_base\":       %9d,\n", np->mi_base);
+        fprintf(fp, "      \"pop_units\":     %9d,\n", np->pop_units);
+        fprintf(fp, "      \"shipyards\":     %9d,\n", np->shipyards);
+        fprintf(fp, "      \"siege_eff\":     %9d,\n", np->siege_eff);
+        fprintf(fp, "      \"special\":       %9d,\n", np->special);
+        fprintf(fp, "      \"use_on_ambush\": %9d,\n", np->use_on_ambush);
+        fprintf(fp, "      \"au\": {\"auto\": %6d, \"needed\": %6d, \"to_install\": %6d},\n",
+                np->auto_AUs, np->AUs_needed, np->AUs_to_install);
+        fprintf(fp, "      \"iu\": {\"auto\": %6d, \"needed\": %6d, \"to_install\": %6d},\n",
+                np->auto_IUs, np->IUs_needed, np->IUs_to_install);
+        const char *sep = "\n";
+        fprintf(fp, "      \"items\": [");
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (np->item_quantity[j] > 0) {
+                fprintf(fp, "%s        {\"code\": %2d, \"qty\": %6d}", sep, j, np->item_quantity[j]);
+                sep = ",\n";
+            }
+        }
+        if (*sep == ',') {
+            // not an empty list so put closing bracket on new line
+            fprintf(fp, "\n      ");
+        }
+        fprintf(fp, "]\n");
+        fprintf(fp, "    }");
         if (i + 1 < num_namplas) {
             fprintf(fp, ",");
         }
-        fprintf(fp, "\n");
     }
-    fprintf(fp, "  ]\n");
+    fprintf(fp, "]\n");
     fprintf(fp, "}\n");
 }
 
 
 void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
     fprintf(fp, "(namplas (species_no %3d) %4d", spNo, num_namplas);
+    for (int i = 0; i < num_namplas; i++) {
+        struct nampla_data *np = &namplaData[i];
+        fprintf(fp, "\n         (nampla (id %5d) (name \"%s\")", i + 1, np->name);
+        fprintf(fp, "\n                 (planet (id %5d) (x %3d) (y %3d) (z %3d) (orbit %d))", np->planet_index, np->x,
+                np->y, np->z, np->pn);
+        fprintf(fp, "\n                 (status        %9d)", np->status);
+        fprintf(fp, "\n                 (hiding        %-5s %3d)", np->hiding ? "true" : "false", np->hiding);
+        fprintf(fp, "\n                 (hidden        %-5s %3d)", np->hidden ? "true" : "false", np->hidden);
+        fprintf(fp, "\n                 (ma_base       %9d)", np->ma_base);
+        fprintf(fp, "\n                 (mi_base       %9d)", np->mi_base);
+        fprintf(fp, "\n                 (pop_units     %9d)", np->pop_units);
+        fprintf(fp, "\n                 (shipyards     %9d)", np->shipyards);
+        fprintf(fp, "\n                 (siege_eff     %9d)", np->siege_eff);
+        fprintf(fp, "\n                 (special       %9d)", np->special);
+        fprintf(fp, "\n                 (use_on_ambush %9d)", np->use_on_ambush);
+        fprintf(fp, "\n                 (au (auto %6d) (needed %6d) (to_install %6d))", np->auto_AUs, np->AUs_needed,
+                np->AUs_to_install);
+        fprintf(fp, "\n                 (iu (auto %6d) (needed %6d) (to_install %6d))", np->auto_IUs, np->IUs_needed,
+                np->IUs_to_install);
+        const char *sep = "";
+        fprintf(fp, "\n                 (items");
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (np->item_quantity[j] > 0) {
+                fprintf(fp, "%s (item (code %2d) (qty %6d))", sep, j, np->item_quantity[j]);
+                sep = "\n                       ";
+            }
+        }
+        fprintf(fp, "))");
+    }
     fprintf(fp, ")\n");
 }
 
