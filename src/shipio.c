@@ -153,17 +153,45 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
 void shipDataAsJson(int spNo, struct ship_data *shipData, int num_ships, FILE *fp) {
     fprintf(fp, "{\n");
     fprintf(fp, "  \"species_no\": %d,\n", spNo);
-    fprintf(fp, "  \"num_ships\": %d,\n", num_ships);
-    fprintf(fp, "  \"ships\": [\n");
+    fprintf(fp, "  \"ships\": [");
     for (int i = 0; i < num_ships; i++) {
-        struct ship_data *ship = &shipData[i];
-        fprintf(fp, "    {\"id\": %d, \"name\": \"%s\"}", i + 1, ship->name);
+        struct ship_data *sd = &shipData[i];
+        fprintf(fp, "{\n");
+        fprintf(fp, "      \"id\": %d,\n", i + 1);
+        fprintf(fp, "      \"name\": \"%s\",\n", sd->name);
+        fprintf(fp, "      \"location\": {\"x\": %d, \"y\": %d, \"z\": %d, \"orbit\": %d, \"status\": %d},\n",
+                sd->x, sd->y, sd->z, sd->pn, sd->status);
+        fprintf(fp, "      \"destination\": {\"x\": %d, \"y\": %d, \"z\": %d},\n",
+                sd->dest_x, sd->dest_y, sd->dest_z);
+        fprintf(fp, "      \"age\": %d,\n", sd->age);
+        fprintf(fp, "      \"arrived_via_wormhole\": %s,\n", sd->arrived_via_wormhole ? "true" : "false");
+        fprintf(fp, "      \"class\": %d,\n", sd->class);
+        fprintf(fp, "      \"just_jumped\": %s,\n", sd->just_jumped ? "true" : "false");
+        fprintf(fp, "      \"just_jumped_val\": %d,\n", sd->just_jumped);
+        fprintf(fp, "      \"loading_point\": %d,\n", sd->loading_point);
+        fprintf(fp, "      \"remaining_cost\": %d,\n", sd->remaining_cost);
+        fprintf(fp, "      \"tonnage\": %d,\n", sd->tonnage);
+        fprintf(fp, "      \"type\": %d,\n", sd->type);
+        fprintf(fp, "      \"unloading_point\": %d,\n", sd->unloading_point);
+        const char *sep = "\n";
+        fprintf(fp, "      \"cargo\": [");
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (sd->item_quantity[j] > 0) {
+                fprintf(fp, "%s        {\"code\": %2d, \"qty\": %6d}", sep, j, sd->item_quantity[j]);
+                sep = ",\n";
+            }
+        }
+        if (*sep == ',') {
+            // not an empty list so put closing bracket on new line
+            fprintf(fp, "\n      ");
+        }
+        fprintf(fp, "]\n");
+        fprintf(fp, "    }");
         if (i + 1 < num_ships) {
             fprintf(fp, ",");
         }
-        fprintf(fp, "\n");
     }
-    fprintf(fp, "  ]\n");
+    fprintf(fp, "]\n");
     fprintf(fp, "}\n");
 }
 
@@ -177,7 +205,6 @@ void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *
                 sd->x, sd->y, sd->z, sd->pn, sd->status);
         fprintf(fp, "\n        (destination (x %3d) (y %3d) (z %3d))",
                 sd->dest_x, sd->dest_y, sd->dest_z);
-        const char *sep = "";
         fprintf(fp, "\n        (age                  %9d)", sd->age);
         fprintf(fp, "\n        (arrived_via_wormhole %9s)", sd->arrived_via_wormhole ? "true" : "false");
         fprintf(fp, "\n        (class                %9d)", sd->class);
@@ -189,6 +216,7 @@ void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *
         fprintf(fp, "\n        (type                 %9d)", sd->type);
         fprintf(fp, "\n        (unloading_point      %9d)", sd->unloading_point);
         fprintf(fp, "\n        (cargo");
+        const char *sep = "";
         for (int j = 0; j < MAX_ITEMS; j++) {
             if (sd->item_quantity[j] > 0) {
                 fprintf(fp, "%s (item (code %2d) (qty %6d))", sep, j, sd->item_quantity[j]);
