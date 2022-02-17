@@ -159,6 +159,7 @@ int convertToJson(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
+                    shipDataAsJson(spNo, ship_data[species_index], sp->num_ships, fp);
                     fclose(fp);
                 }
             }
@@ -259,7 +260,7 @@ int convertToSExpr(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    shipDataAsSExpr(ship_data[species_index], sp->num_ships, fp);
+                    shipDataAsSExpr(spNo, ship_data[species_index], sp->num_ships, fp);
                     fclose(fp);
                 }
             }

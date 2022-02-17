@@ -114,7 +114,20 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
 
 
 void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
-    fprintf(fp, "{\n  \"species_no\": %d,\n  \"num_namplas\": %d\n}\n", spNo, num_namplas);
+    fprintf(fp, "{\n");
+    fprintf(fp, "  \"species_no\": %d,\n", spNo);
+    fprintf(fp, "  \"num_namplas\": %d,\n", num_namplas);
+    fprintf(fp, "  \"namplas\": [\n");
+    for (int i = 0; i < num_namplas; i++) {
+        struct nampla_data *nampla = &namplaData[i];
+        fprintf(fp, "    {\"id\": %d, \"name\": \"%s\"}", i + 1, nampla->name);
+        if (i + 1 < num_namplas) {
+            fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+    }
+    fprintf(fp, "  ]\n");
+    fprintf(fp, "}\n");
 }
 
 

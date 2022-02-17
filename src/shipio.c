@@ -150,7 +150,25 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
 }
 
 
-void shipDataAsSExpr(struct ship_data *shipData, int num_ships, FILE *fp) {
+void shipDataAsJson(int spNo, struct ship_data *shipData, int num_ships, FILE *fp) {
+    fprintf(fp, "{\n");
+    fprintf(fp, "  \"species_no\": %d,\n", spNo);
+    fprintf(fp, "  \"num_ships\": %d,\n", num_ships);
+    fprintf(fp, "  \"ships\": [\n");
+    for (int i = 0; i < num_ships; i++) {
+        struct ship_data *ship = &shipData[i];
+        fprintf(fp, "    {\"id\": %d, \"name\": \"%s\"}", i + 1, ship->name);
+        if (i + 1 < num_ships) {
+            fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+    }
+    fprintf(fp, "  ]\n");
+    fprintf(fp, "}\n");
+}
+
+
+void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *fp) {
     fprintf(fp, "(ships %5d", num_ships);
     for (int i = 0; i < num_ships; i++) {
         struct ship_data *ship = &shipData[i];
