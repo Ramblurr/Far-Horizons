@@ -48,7 +48,7 @@ void get_location_data(void) {
     // get number of records in the file
     num_locs = sb.st_size / sizeof(binary_data_t);
     if (sb.st_size != num_locs * sizeof(binary_data_t)) {
-        fprintf(stderr, "\nFile locations.dat contains extra bytes (%d > %d)!\n\n", sb.st_size,
+        fprintf(stderr, "\nFile locations.dat contains extra bytes (%ld > %d)!\n\n", sb.st_size,
                 num_locs * sizeof(binary_data_t));
         exit(-1);
     } else if (num_locs == 0) {

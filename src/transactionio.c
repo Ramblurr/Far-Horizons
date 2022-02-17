@@ -58,7 +58,7 @@ void get_transaction_data(void) {
     // get number of records in the file
     num_transactions = sb.st_size / sizeof(binary_data_t);
     if (sb.st_size != num_transactions * sizeof(binary_data_t)) {
-        fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%d > %d)!\n\n", sb.st_size,
+        fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %d)!\n\n", sb.st_size,
                 num_transactions * sizeof(binary_data_t));
         exit(-1);
     } else if (num_transactions == 0) {

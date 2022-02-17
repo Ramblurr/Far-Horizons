@@ -48,7 +48,7 @@ int check_population(struct nampla_data *nampla) {
     if (is_now_populated && !was_already_populated) {
         if (nampla->message) {
             /* There is a message that must be logged whenever this planet becomes populated for the first time. */
-            sprintf(filename, "message%ld.txt", nampla->message);
+            sprintf(filename, "message%d.txt", nampla->message);
             log_message(filename);
         }
     }

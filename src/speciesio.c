@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "engine.h"
 #include "galaxy.h"
@@ -299,8 +300,7 @@ void speciesDataAsJson(int spNo, species_data_t *sp, FILE *fp) {
     fprintf(fp, "\n  },\n");
     fprintf(fp, "  \"num_namplas\": %d,\n", sp->num_namplas);
     fprintf(fp, "  \"num_ships\": %d,\n", sp->num_ships);
-    fprintf(fp, "  \"fleet_maintenance\": {\"cost\": %d, \"percent\": %d},\n",
-            sp->num_ships, sp->fleet_cost, sp->fleet_percent_cost);
+    fprintf(fp, "  \"fleet_maintenance\": {\"cost\": %d, \"percent\": %d},\n", sp->fleet_cost, sp->fleet_percent_cost);
     fprintf(fp, "  \"banked_eu\": %d,\n", sp->econ_units);
     fprintf(fp, "  \"contacts\": [");
     const char *sep = "";

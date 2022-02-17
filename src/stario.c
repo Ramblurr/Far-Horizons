@@ -188,7 +188,7 @@ void starDataAsSexpr(FILE *fp) {
     for (int i = 0; i < num_stars; i++) {
         struct star_data *s = &star_base[i];
         fprintf(fp, "\n  (star (id %4d) (x %3d) (y %3d) (z %3d) (type '%c') (color '%c') (size '%c')", i+1, s->x, s->y, s->z, star_type(s->type), star_color(s->color), star_size(s->size));
-        fprintf(fp, "\n        (planets", s->planet_index, s->num_planets);
+        fprintf(fp, "\n        (planets");
         for (int p = 0; p < s->num_planets; p++) {
             fprintf(fp, " %4d", s->planet_index + p + 1);
         }
