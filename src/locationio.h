@@ -25,6 +25,8 @@
 
 void get_location_data(void);
 
+void locationDataAsJson(FILE *fp);
+
 void locationDataAsSExpr(FILE *fp);
 
 void save_location_data(void);

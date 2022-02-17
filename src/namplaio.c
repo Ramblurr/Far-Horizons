@@ -113,9 +113,13 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
 }
 
 
+void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
+    fprintf(fp, "{\n  \"species_no\": %d,\n  \"num_namplas\": %d\n}\n", spNo, num_namplas);
+}
 
-void namplaDataAsSExpr(struct nampla_data *namplaData, int num_namplas, FILE *fp) {
-    fprintf(fp, "(namplas %4d", num_namplas);
+
+void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
+    fprintf(fp, "(namplas (species_no %3d) %4d", spNo, num_namplas);
     fprintf(fp, ")\n");
 }
 
@@ -141,9 +145,9 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
         data->status = s->status;
         data->hiding = s->hiding;
         data->hidden = s->hidden;
-        data->planet_index = (int16_t)(s->planet_index);
-        data->siege_eff = (int16_t)(s->siege_eff);
-        data->shipyards = (int16_t)(s->shipyards);
+        data->planet_index = (int16_t) (s->planet_index);
+        data->siege_eff = (int16_t) (s->siege_eff);
+        data->shipyards = (int16_t) (s->shipyards);
         data->IUs_needed = s->IUs_needed;
         data->AUs_needed = s->AUs_needed;
         data->auto_IUs = s->auto_IUs;

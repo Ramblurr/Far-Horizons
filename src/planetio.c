@@ -112,6 +112,36 @@ void get_planet_data(void) {
 }
 
 
+// planetDataAsJson writes the current planet_base array to a text file as JSON.
+void planetDataAsJson(FILE *fp) {
+    const char *sep = "";
+    fprintf(fp, "[");
+    for (int i = 0; i < num_planets; i++) {
+        planet_data_t *p = &planet_base[i];
+        fprintf(fp, "%s\n  {\"id\": %d,", sep, i + 1);
+        fprintf(fp, "\n   \"diameter\": %d,", p->diameter);
+        fprintf(fp, "\n   \"gravity\": %d,", p->gravity);
+        fprintf(fp, "\n   \"temperature_class\": %d,", p->temperature_class);
+        fprintf(fp, "\n   \"pressure_class\": %d,", p->pressure_class);
+        fprintf(fp, "\n   \"special\": %d,", p->special);
+        fprintf(fp, "\n   \"gases\": [");
+        for (int j = 0; j < 4; j++) {
+            if (j != 0) {
+                fprintf(fp, ", ");
+            }
+            fprintf(fp, "{\":code\": %d, \":percent\": %d}", p->gas[j], p->gas_percent[j]);
+        }
+        fprintf(fp, "],");
+        fprintf(fp, "\n   \"mining_difficulty\": {\"base\": %d, \"increase\": %d},",
+                p->mining_difficulty,                p->md_increase);
+        fprintf(fp, "\n   \"econ_efficiency\": %d,", p->econ_efficiency);
+        fprintf(fp, "\n   \"message\": %d}", p->message);
+        sep = ",";
+    }
+    fprintf(fp, "\n]\n");
+}
+
+
 // planetDataAsSExpr writes the current planet_base array to a text file as an s-expression.
 void planetDataAsSExpr(FILE *fp) {
     fprintf(fp, "(planets");

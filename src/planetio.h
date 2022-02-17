@@ -24,6 +24,8 @@
 
 void get_planet_data(void);
 
+void planetDataAsJson(FILE *fp);
+
 void planetDataAsSExpr(FILE *fp);
 
 void save_planet_data(void);

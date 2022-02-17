@@ -35,6 +35,12 @@ typedef struct {
 static binary_data_t galaxyData;
 
 
+void galaxyDataAsJson(FILE *fp) {
+    fprintf(fp, "{\n  \"turn\": %d,\n  \"num_species\": %d,\n  \"d_num_species\": %d,\n  \"radius\": %d\n}\n",
+            galaxy.turn_number, galaxy.num_species, galaxy.d_num_species, galaxy.radius);
+}
+
+
 void galaxyDataAsSexpr(FILE *fp) {
     fprintf(fp, "(galaxy (turn %13d)\n        (num_species %6d)\n        (d_num_species %4d)\n        (radius %11d))\n",
             galaxy.turn_number, galaxy.num_species, galaxy.d_num_species, galaxy.radius);

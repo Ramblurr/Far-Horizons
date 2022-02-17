@@ -96,6 +96,19 @@ void get_location_data(void) {
 }
 
 
+// locationDataAsJson writes the current location data to a text file as JSON.
+void locationDataAsJson(FILE *fp) {
+    const char *sep = "";
+    fprintf(fp, "[");
+    for (int i = 0; i < num_locs; i++) {
+        sp_loc_data_t *p = &loc[i];
+        fprintf(fp, "%s\n  {\"x\": %3d, \"y\": %3d, \"z\": %3d, \"species\": %3d}", sep, p->x, p->y, p->z, p->s);
+        sep = ",";
+    }
+    fprintf(fp, "\n]\n");
+}
+
+
 // locationDataAsSExpr writes the current location data to a text file as an s-expression.
 void locationDataAsSExpr(FILE *fp) {
     fprintf(fp, "(locations");
