@@ -46,3 +46,10 @@ LICENSE
 All source code in this repository is licensed under the GPL v3.
 
 The original ANSI C source code and rules are Copyright 1999 by Richard A. Morneau.
+
+# Notes
+## Links
+* [PBM List](http://www.pbm.com/~lindahl/pbm_list/)
+* [PBeM Magazine](http://www.pbm.com/~lindahl/pbem_magazine.html)
+* [Galaxy Design](http://www.pbm.com/~lindahl/pbem_articles/galaxy.design)
+* [WarpWar Game](http://www.contrib.andrew.cmu.edu/usr/gc00/reviews/warpwar.html)
