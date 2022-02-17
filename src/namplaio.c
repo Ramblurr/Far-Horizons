@@ -164,7 +164,7 @@ void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas,
 
 
 void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
-    fprintf(fp, "(namplas (species_no %3d) %4d", spNo, num_namplas);
+    fprintf(fp, "(namplas (species_no %3d)", spNo);
     for (int i = 0; i < num_namplas; i++) {
         struct nampla_data *np = &namplaData[i];
         fprintf(fp, "\n         (nampla (id %5d) (name \"%s\")", i + 1, np->name);
