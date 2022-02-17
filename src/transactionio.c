@@ -170,15 +170,36 @@ void save_transaction_data(void) {
 }
 
 
+void transactionDataAsJson(FILE *fp) {
+    fprintf(fp, "[\n");
+    for (int i = 0; i < num_transactions; i++) {
+        trans_data_t *t = &transaction[i];
+        fprintf(fp,
+                "  {\"type\": %2d, \"donor\": %3d, \"recipient\": %3d, \"value\": %9d, \"x\": %3d, \"y\": %3d, \"z\": %3d, \"orbit\": %d, \"args\": [{\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}]}",
+                t->type, t->donor, t->recipient, t->value, t->x, t->y, t->z, t->pn, t->number1, t->name1, t->number2,
+                t->name2, t->number3, t->name3);
+        if (i + 1 < num_transactions) {
+            fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+
+    }
+    fprintf(fp, "]\n");
+}
+
+
 void transactionDataAsSExpr(FILE *fp) {
     fprintf(fp, "(transactions");
     for (int i = 0; i < num_transactions; i++) {
         trans_data_t *t = &transaction[i];
-        fprintf(fp,
-                "\n  (transaction (type %2d) (donor %3d) (recipient %3d) (value %9d) (x %3d) (y %3d) (z %3d) (orbit %d) (args (arg (number %9d) (name \"%s\")) (arg (number %9d) (name \"%s\")) (arg (number %9d) (name \"%s\")))",
-                t->type, t->donor, t->recipient, t->value, t->x, t->y, t->z, t->pn, t->number1, t->name1, t->number2,
-                t->name2, t->number3, t->name3);
-
+        fprintf(fp,"\n  (transaction (type       %9d)", t->type);
+        fprintf(fp,"\n               (donor      %9d)", t->donor);
+        fprintf(fp,"\n               (recipient  %9d)", t->recipient);
+        fprintf(fp,"\n               (value      %9d)", t->recipient);
+        fprintf(fp,"\n               (location   (x %3d) (y %3d) (z %3d) (orbit %d))", t->x, t->y, t->z, t->pn);
+        fprintf(fp,"\n               (args       (arg (number %9d) (name \"%s\"))", t->number1, t->name1);
+        fprintf(fp,"\n                           (arg (number %9d) (name \"%s\"))", t->number2, t->name2);
+        fprintf(fp,"\n                           (arg (number %9d) (name \"%s\"))))", t->number3, t->name3);
     }
     fprintf(fp, ")\n");
 }

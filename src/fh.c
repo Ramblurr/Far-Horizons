@@ -31,6 +31,7 @@
 #include "shipio.h"
 #include "shipvars.h"
 #include "enginevars.h"
+#include "transactionio.h"
 
 
 int exportCommand(int argc, char *argv[]);
@@ -101,7 +102,7 @@ int exportToJson(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "locations") == 0) {
             printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -173,6 +174,18 @@ int exportToJson(int argc, char *argv[]) {
                 fprintf(stderr, "\n\tCannot create new version of file 'stars.json'!\n");
                 return 2;
             }
+            fclose(fp);
+        } else if (strcmp(argv[i], "transactions") == 0) {
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            get_transaction_data();
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            FILE *fp = fopen("interspecies.json", "wb");
+            if (fp == NULL) {
+                perror("fh: export: sexpr:");
+                fprintf(stderr, "\n\tCannot create new version of file 'interspecies.json'!\n");
+                return 2;
+            }
+            transactionDataAsJson(fp);
             fclose(fp);
         } else {
             fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
@@ -275,6 +288,18 @@ int exportToSExpr(int argc, char *argv[]) {
                 return 2;
             }
             starDataAsSexpr(fp);
+            fclose(fp);
+        } else if (strcmp(argv[i], "transactions") == 0) {
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            get_transaction_data();
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            FILE *fp = fopen("interspecies.txt", "wb");
+            if (fp == NULL) {
+                perror("fh: export: sexpr:");
+                fprintf(stderr, "\n\tCannot create new version of file 'interspecies.txt'!\n");
+                return 2;
+            }
+            transactionDataAsSExpr(fp);
             fclose(fp);
         } else {
             fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
