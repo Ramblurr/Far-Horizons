@@ -33,11 +33,11 @@
 #include "enginevars.h"
 
 
-int convertCommand(int argc, char *argv[]);
+int exportCommand(int argc, char *argv[]);
 
-int convertToSExpr(int argc, char *argv[]);
+int exportToSExpr(int argc, char *argv[]);
 
-int convertToJson(int argc, char *argv[]);
+int exportToJson(int argc, char *argv[]);
 
 int logRandomCommand(int argc, char *argv[]);
 
@@ -46,13 +46,13 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
-            printf("  opt: --help  show this helpful text\n");
-            printf("  cmd: convert  convert binary .dat to json or s-expression\n");
-            printf("         args:  [json | sexpr] galaxy | stars | planets | species | locations | transactions\n");
+            printf("  opt: --help   show this helpful text\n");
+            printf("  cmd: export   convert binary .dat to json or s-expression\n");
+            printf("         args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd   display a list of random values for testing the PRNG\n");
             return 0;
-        } else if (strcmp(argv[i], "convert") == 0) {
-            return convertCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "export") == 0) {
+            return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
         } else {
@@ -65,14 +65,14 @@ int main(int argc, char *argv[]) {
 }
 
 
-int convertCommand(int argc, char *argv[]) {
+int exportCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     for (int i = 1; i < argc; i++) {
-        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
+        // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         if (strcmp(argv[i], "json") == 0) {
-            return convertToJson(argc - i, argv + i);
+            return exportToJson(argc - i, argv + i);
         } else if (strcmp(argv[i], "sexpr") == 0) {
-            return convertToSExpr(argc - i, argv + i);
+            return exportToSExpr(argc - i, argv + i);
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
             return 2;
@@ -82,50 +82,50 @@ int convertCommand(int argc, char *argv[]) {
 }
 
 
-int convertToJson(int argc, char *argv[]) {
+int exportToJson(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: convert: %s: loading    galaxy file...\n", cmdName);
+    printf("fh: export: %s: loading   galaxy file...\n", cmdName);
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.json", "wb");
             if (fp == NULL) {
-                perror("fh: convert: json:");
+                perror("fh: export: json:");
                 fprintf(stderr, "\n\tCannot create new version of file 'galaxy.json'!\n");
                 return 2;
             }
             galaxyDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.json", "wb");
             if (fp == NULL) {
-                perror("fh: convert: json:");
+                perror("fh: export: json:");
                 fprintf(stderr, "\n\tCannot create new version of file 'locations.json'!\n");
                 return 2;
             }
             locationDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_planet_data();
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.json", "wb");
             if (fp == NULL) {
-                perror("fh: convert: json");
+                perror("fh: export: json");
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.json'!\n");
                 return 2;
             }
             planetDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_species_data();
-            printf("fh: convert: %s: converting %s files...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
                 int spNo = species_index + 1;
                 if (data_in_memory[species_index]) {
@@ -135,7 +135,7 @@ int convertToJson(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.species.json", spNo);
                     FILE *fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: json:");
+                        perror("fh: export: json:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -145,7 +145,7 @@ int convertToJson(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.namplas.json", spNo);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: json:");
+                        perror("fh: export: json:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -155,7 +155,7 @@ int convertToJson(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.ships.json", spNo);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: json:");
+                        perror("fh: export: json:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -164,18 +164,18 @@ int convertToJson(int argc, char *argv[]) {
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_star_data();
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.json", "wb");
             if (fp == NULL) {
-                perror("fh: convert: json:");
+                perror("fh: export: json:");
                 fprintf(stderr, "\n\tCannot create new version of file 'stars.json'!\n");
                 return 2;
             }
             fclose(fp);
         } else {
-            fprintf(stderr, "fh: convert: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
             return 2;
         }
     }
@@ -183,50 +183,50 @@ int convertToJson(int argc, char *argv[]) {
 }
 
 
-int convertToSExpr(int argc, char *argv[]) {
+int exportToSExpr(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: convert: %s: loading    galaxy file...\n", cmdName);
+    printf("fh: export: %s: loading   galaxy file...\n", cmdName);
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.txt", "wb");
             if (fp == NULL) {
-                perror("fh: convert: sexpr:");
+                perror("fh: export: sexpr:");
                 fprintf(stderr, "\n\tCannot create new version of file 'galaxy.txt'!\n");
                 return 2;
             }
             galaxyDataAsSexpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.txt", "wb");
             if (fp == NULL) {
-                perror("fh: convert: sexpr:");
+                perror("fh: export: sexpr:");
                 fprintf(stderr, "\n\tCannot create new version of file 'locations.txt'!\n");
                 return 2;
             }
             locationDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_planet_data();
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.txt", "wb");
             if (fp == NULL) {
-                perror("fh: convert: sexpr:");
+                perror("fh: export: sexpr:");
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
                 return 2;
             }
             planetDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_species_data();
-            printf("fh: convert: %s: converting %s files...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
                 int spNo = species_index + 1;
                 if (data_in_memory[species_index]) {
@@ -236,7 +236,7 @@ int convertToSExpr(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.species.txt", spNo);
                     FILE *fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: sexpr:");
+                        perror("fh: export: sexpr:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -246,7 +246,7 @@ int convertToSExpr(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.namplas.txt", spNo);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: sexpr:");
+                        perror("fh: export: sexpr:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -256,7 +256,7 @@ int convertToSExpr(int argc, char *argv[]) {
                     sprintf(filename, "sp%02d.ships.txt", spNo);
                     fp = fopen(filename, "wb");
                     if (fp == NULL) {
-                        perror("fh: convert: sexpr:");
+                        perror("fh: export: sexpr:");
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
@@ -265,19 +265,19 @@ int convertToSExpr(int argc, char *argv[]) {
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: convert: %s: loading    %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
             get_star_data();
-            printf("fh: convert: %s: converting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.txt", "wb");
             if (fp == NULL) {
-                perror("fh: convert: sexpr:");
+                perror("fh: export: sexpr:");
                 fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
                 return 2;
             }
             starDataAsSexpr(fp);
             fclose(fp);
         } else {
-            fprintf(stderr, "fh: convert: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
             return 2;
         }
     }
