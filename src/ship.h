@@ -66,7 +66,8 @@ struct ship_data {
     char x, y, z, pn;               /* Current coordinates. */
     char status;                    /* Current status of ship. */
     char type;                      /* Ship type. */
-    char dest_x, dest_y;            /* Destination if ship was forced to jump from combat. */
+    char dest_x;                    /* Destination if ship was forced to jump from combat. */
+    char dest_y;                    /* Ditto. */
     char dest_z;                    /* Ditto. Also used by TELESCOPE command. */
     char just_jumped;               /* Set if ship jumped this turn. */
     char arrived_via_wormhole;      /* Ship arrived via wormhole in the PREVIOUS turn. */

@@ -169,10 +169,33 @@ void shipDataAsJson(int spNo, struct ship_data *shipData, int num_ships, FILE *f
 
 
 void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *fp) {
-    fprintf(fp, "(ships %5d", num_ships);
+    fprintf(fp, "(ships (species_no %3d)", spNo);
     for (int i = 0; i < num_ships; i++) {
-        struct ship_data *ship = &shipData[i];
-        fprintf(fp, "\n  (ship (id %6d) (name '%s')", i + 1, ship->name);
+        struct ship_data *sd = &shipData[i];
+        fprintf(fp, "\n  (ship (id %6d) (name \"%s\")", i + 1, sd->name);
+        fprintf(fp, "\n        (location    (x %3d) (y %3d) (z %3d) (orbit %d) (status %3d))",
+                sd->x, sd->y, sd->z, sd->pn, sd->status);
+        fprintf(fp, "\n        (destination (x %3d) (y %3d) (z %3d))",
+                sd->dest_x, sd->dest_y, sd->dest_z);
+        const char *sep = "";
+        fprintf(fp, "\n        (age                  %9d)", sd->age);
+        fprintf(fp, "\n        (arrived_via_wormhole %9s)", sd->arrived_via_wormhole ? "true" : "false");
+        fprintf(fp, "\n        (class                %9d)", sd->class);
+        fprintf(fp, "\n        (just_jumped          %9s)", sd->just_jumped ? "true" : "false");
+        fprintf(fp, "\n        (just_jumped_val      %9d)", sd->just_jumped);
+        fprintf(fp, "\n        (loading_point        %9d)", sd->loading_point);
+        fprintf(fp, "\n        (remaining_cost       %9d)", sd->remaining_cost);
+        fprintf(fp, "\n        (tonnage              %9d)", sd->tonnage);
+        fprintf(fp, "\n        (type                 %9d)", sd->type);
+        fprintf(fp, "\n        (unloading_point      %9d)", sd->unloading_point);
+        fprintf(fp, "\n        (cargo");
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (sd->item_quantity[j] > 0) {
+                fprintf(fp, "%s (item (code %2d) (qty %6d))", sep, j, sd->item_quantity[j]);
+                sep = "\n              ";
+            }
+        }
+        fprintf(fp, "))");
     }
     fprintf(fp, ")\n");
 }
