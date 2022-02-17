@@ -193,7 +193,7 @@ void scan(int x, int y, int z) {
     if (star->message) {
         /* There is a message that must be logged whenever this star
             system is scanned. */
-        sprintf(filename, "message%ld.txt\0", star->message);
+        sprintf(filename, "message%ld.txt", star->message);
         log_message(filename);
     }
 

@@ -1869,7 +1869,7 @@ void do_battle(struct battle_data *bat) {
         }
 
         /* Open a temporary species log file for appending. */
-        sprintf(filename, "sp%02d.temp.log\0", species_number);
+        sprintf(filename, "sp%02d.temp.log", species_number);
         species_log = fopen(filename, "a");
         if (species_log == NULL) {
             fprintf(stderr, "\n\tCannot open '%s' for appending!\n\n", filename);
@@ -2286,7 +2286,7 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
             attacking_ship = (struct ship_data *) act->fighting_unit[attacker_index];
             i = act->fighting_species_index[attacker_index];
             ignore_field_distorters = !field_distorted[i];
-            sprintf(attacker_name, "%s\0", ship_name(attacking_ship));
+            sprintf(attacker_name, "%s", ship_name(attacking_ship));
             ignore_field_distorters = FALSE;
 
             /* Check if ship can fight. */
@@ -2305,7 +2305,7 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
             }
         } else {
             attacking_nampla = (struct nampla_data *) act->fighting_unit[attacker_index];
-            sprintf(attacker_name, "PL %s\0", attacking_nampla->name);
+            sprintf(attacker_name, "PL %s", attacking_nampla->name);
             /* Check if planet still has defenses. */
             if (attacking_nampla->item_quantity[PD] == 0) { continue; }
         }
@@ -2380,11 +2380,11 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
         if (act->unit_type[defender_index] == SHIP) {
             defending_ship = (struct ship_data *) act->fighting_unit[defender_index];
             ignore_field_distorters = !field_distorted[j];
-            sprintf(defender_name, "%s\0", ship_name(defending_ship));
+            sprintf(defender_name, "%s", ship_name(defending_ship));
             ignore_field_distorters = FALSE;
         } else {
             defending_nampla = (struct nampla_data *) act->fighting_unit[defender_index];
-            sprintf(defender_name, "PL %s\0", defending_nampla->name);
+            sprintf(defender_name, "PL %s", defending_nampla->name);
         }
 
         /* Print round number. */

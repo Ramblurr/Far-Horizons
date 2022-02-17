@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         ship_base = ship_data[species_index];
 
         /* Open orders file for this species. */
-        sprintf(filename, "sp%02d.ord\0", species_number);
+        sprintf(filename, "sp%02d.ord", species_number);
         input_file = fopen(filename, "r");
         if (input_file == NULL) {
             if (do_all_species) {
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
             log_file = stdout;
         } else {
             /* Open log file for appending. */
-            sprintf(filename, "sp%02d.log\0", species_number);
+            sprintf(filename, "sp%02d.log", species_number);
             log_file = fopen(filename, "a");
             if (log_file == NULL) {
                 fprintf(stderr, "\n\tCannot open '%s' for appending!\n\n", filename);

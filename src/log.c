@@ -111,7 +111,7 @@ void log_int(int value) {
     if (logging_disabled) {
         return;
     }
-    sprintf(string, "%d\0", value);
+    sprintf(string, "%d", value);
     log_string(string);
 }
 
@@ -120,7 +120,7 @@ void log_long(long value) {
     if (logging_disabled) {
         return;
     }
-    sprintf(string, "%ld\0", value);
+    sprintf(string, "%ld", value);
     log_string(string);
 }
 

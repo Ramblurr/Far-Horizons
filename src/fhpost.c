@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
             log_file = stdout;
         } else {
             /* Open log file for appending. */
-            sprintf(filename, "sp%02d.log\0", species_number);
+            sprintf(filename, "sp%02d.log", species_number);
             log_file = fopen(filename, "a");
             if (log_file == NULL) {
                 fprintf(stderr, "\n\tCannot open '%s' for appending!\n\n", filename);

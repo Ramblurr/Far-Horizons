@@ -859,7 +859,7 @@ int main(int argc, char *argv[]) {
                 log_string(transaction[i].name1);
                 log_string(":\n\n");
 
-                sprintf(filename, "m%d.msg\0", (int) transaction[i].value);
+                sprintf(filename, "m%d.msg", (int) transaction[i].value);
 
                 log_message(filename);
 
@@ -933,7 +933,7 @@ int main(int argc, char *argv[]) {
             if (transaction[i].type == TECH_TRANSFER
                 && transaction[i].donor == species_number) {
                 /* Open log file for appending. */
-                sprintf(filename, "sp%02d.log\0", species_number);
+                sprintf(filename, "sp%02d.log", species_number);
                 log_file = fopen(filename, "a");
                 if (log_file == NULL) {
                     fprintf(stderr, "\n\tCannot open '%s' for appending!\n\n", filename);
