@@ -42,12 +42,15 @@ int exportToJson(int argc, char *argv[]);
 
 int logRandomCommand(int argc, char *argv[]);
 
+int turnCommand(int argc, char *argv[]);
+
 
 int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
             printf("  opt: --help   show this helpful text\n");
+            printf("  cmd: turn     display the current turn number\n");
             printf("  cmd: export   convert binary .dat to json or s-expression\n");
             printf("         args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd   display a list of random values for testing the PRNG\n");
@@ -56,6 +59,8 @@ int main(int argc, char *argv[]) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "turn") == 0) {
+            return turnCommand(argc - i, argv + i);
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
             return 2;
@@ -330,3 +335,20 @@ int logRandomCommand(int argc, char *argv[]) {
     return 0;
 }
 
+
+// turnCommand displays the current turn number
+int turnCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+
+    // check for valid command line
+    if (argc != 1) {
+        fprintf(stderr, "fh: %s: invalid option '%s'\n", argv[1]);
+        return 2;
+    }
+
+    // load the galaxy data and then print the current turn number
+    get_galaxy_data();
+    printf("%d\n", galaxy.turn_number);
+
+    return 0;
+}

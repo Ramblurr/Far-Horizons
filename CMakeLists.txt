@@ -46,10 +46,6 @@ add_executable(fh
         src/stario.h src/stario.c
         src/transactionio.h src/transactionio.c)
 
-add_executable(fhturn
-        src/fhturn.c
-        src/galaxyio.h src/galaxyio.c)
-
 add_executable(fhloc
         src/fhloc.c
         src/command.h src/command.c
