@@ -62,23 +62,23 @@
 #define    FORCED_JUMP         5
 
 struct ship_data {
-    char name[32];                  /* Name of ship. */
-    char x, y, z, pn;               /* Current coordinates. */
-    char status;                    /* Current status of ship. */
-    char type;                      /* Ship type. */
-    char dest_x;                    /* Destination if ship was forced to jump from combat. */
-    char dest_y;                    /* Ditto. */
-    char dest_z;                    /* Ditto. Also used by TELESCOPE command. */
-    char just_jumped;               /* Set if ship jumped this turn. */
-    char arrived_via_wormhole;      /* Ship arrived via wormhole in the PREVIOUS turn. */
-    short class;                    /* Ship class. */
-    short tonnage;                  /* Ship tonnage divided by 10,000. */
-    short item_quantity[MAX_ITEMS]; /* Quantity of each item carried. */
-    short age;                      /* Ship age. */
-    short remaining_cost;           /* The cost needed to complete the ship if still under construction. */
-    short loading_point;            /* Nampla index for planet where ship was last loaded with CUs. Zero = none. Use 9999 for home planet. */
-    short unloading_point;          /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
-    long special;                   /* Different for each application. */
+    char name[32];                 /* Name of ship. */
+    int x, y, z, pn;               /* Current coordinates. */
+    int status;                    /* Current status of ship. */
+    int type;                      /* Ship type. */
+    int dest_x;                    /* Destination if ship was forced to jump from combat. */
+    int dest_y;                    /* Ditto. */
+    int dest_z;                    /* Ditto. Also used by TELESCOPE command. */
+    int just_jumped;               /* Set if ship jumped this turn. */
+    int arrived_via_wormhole;      /* Ship arrived via wormhole in the PREVIOUS turn. */
+    int class;                     /* Ship class. */
+    int tonnage;                   /* Ship tonnage divided by 10,000. */
+    int item_quantity[MAX_ITEMS];  /* Quantity of each item carried. */
+    int age;                       /* Ship age. */
+    int remaining_cost;            /* The cost needed to complete the ship if still under construction. */
+    int loading_point;             /* Nampla index for planet where ship was last loaded with CUs. Zero = none. Use 9999 for home planet. */
+    int unloading_point;           /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
+    int special;                   /* Different for each application. */
 };
 
 void delete_ship(struct ship_data *ship);
