@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "turn") == 0) {
             return turnCommand(argc - i, argv + i);
         } else {
-            fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: unknown option '%s'\n", argv[i]);
             return 2;
         }
     }
@@ -80,7 +80,7 @@ int exportCommand(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "sexpr") == 0) {
             return exportToSExpr(argc - i, argv + i);
         } else {
-            fprintf(stderr, "fh: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: %s: unknown option '%s'\n", cmdName, argv[i]);
             return 2;
         }
     }
@@ -193,7 +193,7 @@ int exportToJson(int argc, char *argv[]) {
             transactionDataAsJson(fp);
             fclose(fp);
         } else {
-            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", cmdName, argv[i]);
             return 2;
         }
     }
@@ -307,7 +307,7 @@ int exportToSExpr(int argc, char *argv[]) {
             transactionDataAsSExpr(fp);
             fclose(fp);
         } else {
-            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "fh: export: %s: unknown option '%s'\n", cmdName, argv[i]);
             return 2;
         }
     }
@@ -342,7 +342,7 @@ int turnCommand(int argc, char *argv[]) {
 
     // check for valid command line
     if (argc != 1) {
-        fprintf(stderr, "fh: %s: invalid option '%s'\n", argv[1]);
+        fprintf(stderr, "fh: %s: invalid option '%s'\n", cmdName, argv[1]);
         return 2;
     }
 

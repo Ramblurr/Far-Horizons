@@ -539,8 +539,7 @@ void do_BUILD_command(int continuing_construction, int interspecies_construction
             } else {
                 if (nampla->pop_units > 0) {
                     fprintf(log_file, "! WARNING: %s", original_line);
-                    fprintf(log_file,
-                            "! Insufficient available population units. Substituting %ld for %ld.\n",
+                    fprintf(log_file, "! Insufficient available population units. Substituting %d for %ld.\n",
                             nampla->pop_units, num_items);
                     num_items = nampla->pop_units;
                 } else {
@@ -5332,8 +5331,8 @@ void do_TRANSFER_command(void) {
                 }
 
                 fprintf(log_file, "! WARNING: %s", original_line);
-                fprintf(log_file, "! Ship does not have %d units. Substituting %d for %d!\n", item_count, num_available,
-                        item_count);
+                fprintf(log_file, "! Ship does not have %d units. Substituting %ld for %d!\n",
+                        item_count, num_available, item_count);
                 item_count = 0;
                 goto check_ship_items;
             }
@@ -5408,8 +5407,8 @@ void do_TRANSFER_command(void) {
                 }
 
                 fprintf(log_file, "! WARNING: %s", original_line);
-                fprintf(log_file, "! Planet does not have %d units. Substituting %d for %d!\n", item_count,
-                        num_available, item_count);
+                fprintf(log_file, "! Planet does not have %d units. Substituting %ld for %d!\n",
+                        item_count, num_available, item_count);
                 item_count = 0;
                 goto check_planet_items;
             }
@@ -5500,7 +5499,7 @@ void do_TRANSFER_command(void) {
             fprintf(log_file, "! WARNING: %s", original_line);
             fprintf(log_file, "! %s does not have sufficient carrying capacity!",
                     ship_name(ship2));
-            fprintf(log_file, " Changed %d to 0.\n", original_count);
+            fprintf(log_file, " Changed %ld to 0.\n", original_count);
             original_count = 0;
             goto do_capacity;
         }
