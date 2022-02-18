@@ -53,3 +53,6 @@ The original ANSI C source code and rules are Copyright 1999 by Richard A. Morne
 * [PBeM Magazine](http://www.pbm.com/~lindahl/pbem_magazine.html)
 * [Galaxy Design](http://www.pbm.com/~lindahl/pbem_articles/galaxy.design)
 * [WarpWar Game](http://www.contrib.andrew.cmu.edu/usr/gc00/reviews/warpwar.html)
+
+## CMake
+* [Basics](https://hsf-training.github.io/hsf-training-cmake-webpage/02-building/index.html)
