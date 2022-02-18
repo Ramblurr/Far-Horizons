@@ -32,6 +32,8 @@
 #include "shipvars.h"
 #include "enginevars.h"
 #include "transactionio.h"
+#include "planetvars.h"
+#include "speciesvars.h"
 
 
 int exportCommand(int argc, char *argv[]);
@@ -40,23 +42,38 @@ int exportToSExpr(int argc, char *argv[]);
 
 int exportToJson(int argc, char *argv[]);
 
+int locationCommand(int argc, char *argv[]);
+
 int logRandomCommand(int argc, char *argv[]);
 
 int turnCommand(int argc, char *argv[]);
 
 
 int main(int argc, char *argv[]) {
+    test_mode = FALSE;
+    verbose_mode = FALSE;
+
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
-            printf("  opt: --help   show this helpful text\n");
-            printf("  cmd: turn     display the current turn number\n");
-            printf("  cmd: export   convert binary .dat to json or s-expression\n");
-            printf("         args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
-            printf("  cmd: logrnd   display a list of random values for testing the PRNG\n");
+            printf("  opt: --help     show this helpful text\n");
+            printf("  opt: -t         enable test mode\n");
+            printf("  opt: -v         enable verbose mode\n");
+            printf("  cmd: turn       display the current turn number\n");
+            printf("  cmd: locations  create locations data file and update economic efficiency\n");
+            printf("                  in planets data file\n");
+            printf("  cmd: export     convert binary .dat to json or s-expression\n");
+            printf("         args:    (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
+            printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
             return 0;
+        } else if (strcmp(argv[i], "-t") == 0) {
+            test_mode = TRUE;
+        } else if (strcmp(argv[i], "-v") == 0) {
+            verbose_mode = TRUE;
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "locations") == 0) {
+            return locationCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
@@ -311,6 +328,84 @@ int exportToSExpr(int argc, char *argv[]) {
             return 2;
         }
     }
+    return 0;
+}
+
+
+// locationCommand creates the location data file from the current data.
+// also updates the economic efficiency field in the planet data file.
+int locationCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+
+    // load data used to derive locations
+    printf("fh: %s: loading   galaxy   file...\n", cmdName);
+    get_galaxy_data();
+    printf("fh: %s: loading   planet   file...\n", cmdName);
+    get_planet_data();
+    printf("fh: %s: loading   species  file...\n", cmdName);
+    get_species_data();
+
+    // allocate memory for array "total_econ_base"
+    long *total_econ_base = (long *) calloc(num_planets, sizeof(long));
+    if (total_econ_base == NULL) {
+        fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
+        exit(-1);
+    }
+
+    // initialize total econ base for each planet
+    planet = planet_base;
+    for (int i = 0; i < num_planets; i++) {
+        total_econ_base[i] = 0;
+        planet++;
+    }
+
+    // get total economic base for each planet from nampla data.
+    for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
+        struct species_data *sp;
+        if (data_in_memory[species_number - 1] == FALSE) {
+            continue;
+        }
+        data_modified[species_number - 1] = TRUE;
+
+        species = &spec_data[species_number - 1];
+        nampla_base = namp_data[species_number - 1];
+
+        for (nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
+            nampla = nampla_base + nampla_index;
+            if (nampla->pn == 99) {
+                continue;
+            }
+            if ((nampla->status & HOME_PLANET) == 0) {
+                total_econ_base[nampla->planet_index] += nampla->mi_base + nampla->ma_base;
+            }
+        }
+    }
+
+    // update economic efficiencies of all planets.
+    planet = planet_base;
+    for (int i = 0; i < num_planets; i++) {
+        long diff = total_econ_base[i] - 2000;
+        if (diff <= 0) {
+            planet->econ_efficiency = 100;
+        } else {
+            planet->econ_efficiency = (100 * (diff / 20 + 2000)) / total_econ_base[i];
+        }
+        planet++;
+    }
+
+    // create new locations data
+    do_locations();
+
+    // save the results
+    printf("fh: %s: saving    planet   file...\n", cmdName);
+    save_planet_data();
+    printf("fh: %s: saving    location file...\n", cmdName);
+    save_location_data();
+
+    // clean up
+    free_species_data();
+    free(planet_base);
+
     return 0;
 }
 
