@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < n; i++) {
         rnd(10);
     }
+    fprintf(stderr, "fh: combat: last_random is %12lu\n", last_random);
 
     // initialize arrays?
     memset(sp_num, 0, sizeof(sp_num));

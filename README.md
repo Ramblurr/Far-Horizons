@@ -56,3 +56,8 @@ The original ANSI C source code and rules are Copyright 1999 by Richard A. Morne
 
 ## CMake
 * [Basics](https://hsf-training.github.io/hsf-training-cmake-webpage/02-building/index.html)
+
+    cmake -S . -B build
+    cmake -S . -B .
+    cmake --build .
+
