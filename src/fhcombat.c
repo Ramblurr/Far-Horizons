@@ -67,7 +67,6 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < n; i++) {
         rnd(10);
     }
-    fprintf(stderr, "fh: combat: last_random is %12lu\n", last_random);
 
     // initialize arrays?
     memset(sp_num, 0, sizeof(sp_num));
@@ -96,12 +95,9 @@ int main(int argc, char *argv[]) {
     num_species = 0;
     default_summary = FALSE;
     prompt_gm = FALSE;
+    strike_phase = FALSE; // assume combat mode
     test_mode = FALSE;
     verbose_mode = FALSE;
-
-    if (strstr(argv[0], "Strike") != NULL) {
-        strike_phase = TRUE;
-    }
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
@@ -112,6 +108,11 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
+            printf("fh: combat: last_random is %12lu\n", last_random);
+        } else if (strcmp(argv[i], "--combat") == 0) {
+            strike_phase = FALSE;
+        } else if (strcmp(argv[i], "--strike") == 0) {
+            strike_phase = TRUE;
         } else {
             n = atoi(argv[i]);
             if (0 < n && n <= galaxy.num_species) {
@@ -119,6 +120,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    printf("fh: combat: running %s mode\n", strike_phase ? "strike" : "combat");
 
     log_stdout = prompt_gm;
 
