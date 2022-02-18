@@ -73,6 +73,7 @@ add_executable(fhloc
         src/species.h src/species.c
         src/speciesio.h src/speciesio.c
         src/speciesvars.h src/speciesvars.c
+        src/star.h src/star.c
         src/stario.h src/stario.c
         src/starvars.h src/starvars.c)
 
