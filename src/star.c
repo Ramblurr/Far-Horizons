@@ -101,6 +101,57 @@ void closest_unvisited_star(struct ship_data *ship) {
 }
 
 
+// closest_unvisited_star_report is just slight different? why?
+void closest_unvisited_star_report(struct ship_data *ship, FILE *fp) {
+    int i, found, species_array_index, species_bit_number;
+    long shx, shy, shz, stx, sty, stz, closest_distance, temp_distance, species_bit_mask;
+    struct star_data *star, *closest_star;
+
+    /* Get array index and bit mask. */
+    species_array_index = (species_number - 1) / 32;
+    species_bit_number = (species_number - 1) % 32;
+    species_bit_mask = 1 << species_bit_number;
+
+    shx = ship->x;
+    shy = ship->y;
+    shz = ship->z;
+
+    x = 9999;
+    closest_distance = 999999;
+
+    found = FALSE;
+    for (i = 0; i < num_stars; i++) {
+        star = star_base + i;
+
+        /* Check if bit is already set. */
+        if (star->visited_by[species_array_index] & species_bit_mask) { continue; }
+
+        stx = star->x;
+        sty = star->y;
+        stz = star->z;
+
+        temp_distance = ((shx - stx) * (shx - stx)) + ((shy - sty) * (shy - sty)) + ((shz - stz) * (shz - stz));
+
+        if (temp_distance < closest_distance) {
+            x = stx;
+            y = sty;
+            z = stz;
+            closest_distance = temp_distance;
+            closest_star = star;
+            found = TRUE;
+        }
+    }
+
+    if (found) {
+        fprintf(fp, "%d %d %d", x, y, z);
+        closest_star->visited_by[species_array_index] |= species_bit_mask;
+        /* So that we don't send more than one ship to the same place. */
+    } else {
+        fprintf(fp, "???");
+    }
+}
+
+
 void scan(int x, int y, int z) {
     int i, j, k, n, found, num_gases, ls_needed;
     char filename[32];

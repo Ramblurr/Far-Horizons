@@ -111,8 +111,10 @@ int main(int argc, char *argv[]) {
             printf("fh: combat: last_random is %12lu\n", last_random);
         } else if (strcmp(argv[i], "--combat") == 0) {
             strike_phase = FALSE;
+            printf("fh: combat: running %s mode\n", strike_phase ? "strike" : "combat");
         } else if (strcmp(argv[i], "--strike") == 0) {
             strike_phase = TRUE;
+            printf("fh: combat: running %s mode\n", strike_phase ? "strike" : "combat");
         } else {
             n = atoi(argv[i]);
             if (0 < n && n <= galaxy.num_species) {
@@ -120,7 +122,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    printf("fh: combat: running %s mode\n", strike_phase ? "strike" : "combat");
 
     log_stdout = prompt_gm;
 

@@ -20,6 +20,7 @@
 #ifndef FAR_HORIZONS_STAR_H
 #define FAR_HORIZONS_STAR_H
 
+#include <stdio.h>
 #include "engine.h"
 #include "ship.h"
 
@@ -61,6 +62,8 @@ struct star_data {
 typedef struct star_data star_data_t;
 
 void closest_unvisited_star(struct ship_data *ship);
+
+void closest_unvisited_star_report(struct ship_data *ship, FILE *fp);
 
 void scan(int x, int y, int z);
 

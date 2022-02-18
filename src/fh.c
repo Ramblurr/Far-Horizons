@@ -46,6 +46,8 @@ int locationCommand(int argc, char *argv[]);
 
 int logRandomCommand(int argc, char *argv[]);
 
+int reportCommand(int argc, char *argv[]);
+
 int turnCommand(int argc, char *argv[]);
 
 
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]) {
             printf("  cmd: turn       display the current turn number\n");
             printf("  cmd: locations  create locations data file and update economic efficiency\n");
             printf("                  in planets data file\n");
+            printf("  cmd: report     create end of turn reports\n");
             printf("  cmd: export     convert binary .dat to json or s-expression\n");
             printf("         args:    (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
@@ -76,6 +79,8 @@ int main(int argc, char *argv[]) {
             return locationCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "report") == 0) {
+            return reportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
             return turnCommand(argc - i, argv + i);
         } else {
@@ -412,6 +417,8 @@ int locationCommand(int argc, char *argv[]) {
 
 // logRandomCommand generates random numbers using the historical default seed value.
 int logRandomCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+
     // delete any seed from the environment so that we're sure our value is used
     putenv("FH_SEED");
     // use the historical default seed value
