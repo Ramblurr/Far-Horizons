@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 #include "engine.h"
 #include "enginevars.h"
 
@@ -183,6 +184,7 @@ int rnd(unsigned int max) {
     if (seedState == 2) {
         last_random = _lastRandom;
     }
+    assert(last_random != 0);
 
     /* For congruential method, multiply previous value by the prime number 16417. */
     a = last_random;
