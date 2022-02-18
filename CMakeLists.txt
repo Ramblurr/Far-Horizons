@@ -244,6 +244,7 @@ add_executable(fhprod
         src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/ordervars.h src/ordervars.c
+        src/planet.h src/planet.c
         src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/production.h src/production.c
