@@ -108,7 +108,7 @@ void do_planet_report(struct nampla_data *nampla, struct ship_data *s_base, stru
     if (nampla->status & (MINING_COLONY | RESORT_COLONY)) {
         // do nothing
     } else {
-        fprintf(report_file, "\nAvailable population units = %ld\n", nampla->pop_units);
+        fprintf(report_file, "\nAvailable population units = %d\n", nampla->pop_units);
     }
 
     if (nampla->siege_eff != 0) {
@@ -186,8 +186,8 @@ void do_planet_report(struct nampla_data *nampla, struct ship_data *s_base, stru
     }
 
     if (nampla->item_quantity[RM] > 0) {
-        fprintf(report_file, "\n%ss (%s,C%d) carried over from last turn = %ld\n", item_name[RM], item_abbr[RM],
-                item_carry_capacity[RM], nampla->item_quantity[RM]);
+        fprintf(report_file, "\n%ss (%s,C%d) carried over from last turn = %d\n",
+                item_name[RM], item_abbr[RM], item_carry_capacity[RM], nampla->item_quantity[RM]);
     }
 
     /* Print what can be spent this turn. */
@@ -227,7 +227,7 @@ void do_planet_report(struct nampla_data *nampla, struct ship_data *s_base, stru
             fprintf(report_file, "   %ss (%s,C%d) = %d", item_name[i], item_abbr[i], item_carry_capacity[i],
                     nampla->item_quantity[i]);
             if (i == PD) {
-                fprintf(report_file, " (warship equivalence = %ld tons)", 50 * nampla->item_quantity[PD]);
+                fprintf(report_file, " (warship equivalence = %d tons)", 50 * nampla->item_quantity[PD]);
             }
             fprintf(report_file, "\n");
         }
@@ -533,8 +533,8 @@ int reportCommand(int argc, char *argv[]) {
         /* List fleet maintenance cost and its percentage of total production. */
         fleet_percent_cost = species->fleet_percent_cost;
 
-        fprintf(report_file, "\nFleet maintenance cost = %ld (%d.%02d%% of total production)\n", species->fleet_cost,
-                fleet_percent_cost / 100, fleet_percent_cost % 100);
+        fprintf(report_file, "\nFleet maintenance cost = %d (%d.%02d%% of total production)\n",
+                species->fleet_cost, fleet_percent_cost / 100, fleet_percent_cost % 100);
 
         if (fleet_percent_cost > 10000) { fleet_percent_cost = 10000; }
 
@@ -611,7 +611,7 @@ int reportCommand(int argc, char *argv[]) {
         }
         if (n > 0) { log_char('\n'); }
 
-        fprintf(report_file, "\nEconomic units = %ld\n", species->econ_units);
+        fprintf(report_file, "\nEconomic units = %d\n", species->econ_units);
 
         /* Initialize flag. */
         for (i = 0; i < species->num_ships; i++) {
@@ -874,7 +874,7 @@ int reportCommand(int argc, char *argv[]) {
                         if (alien_nampla->item_quantity[PD] == 1) {
                             fprintf(report_file, "      (There is 1 %s on the planet.)\n", item_name[PD]);
                         } else if (alien_nampla->item_quantity[PD] > 1) {
-                            fprintf(report_file, "      (There are %ld %ss on the planet.)\n",
+                            fprintf(report_file, "      (There are %d %ss on the planet.)\n",
                                     alien_nampla->item_quantity[PD], item_name[PD]);
                         }
 
@@ -1143,7 +1143,7 @@ int reportCommand(int argc, char *argv[]) {
 
         fprintf(report_file, "START PRODUCTION\n\n");
 
-        fprintf(report_file, ";   Economic units at start of turn = %ld\n\n", species->econ_units);
+        fprintf(report_file, ";   Economic units at start of turn = %d\n\n", species->econ_units);
 
         /* Generate a PRODUCTION order for each planet that can produce. */
         for (nampla_index = species->num_namplas - 1; nampla_index >= 0; nampla_index--) {
@@ -1158,17 +1158,17 @@ int reportCommand(int argc, char *argv[]) {
             if (nampla->status & MINING_COLONY) {
                 fprintf(report_file, "    ; The above PRODUCTION order is required for this mining colony, even\n");
                 fprintf(report_file, "    ;  if no other production orders are given for it. This mining colony\n");
-                fprintf(report_file, "    ;  will generate %ld economic units this turn.\n", nampla->use_on_ambush);
+                fprintf(report_file, "    ;  will generate %d economic units this turn.\n", nampla->use_on_ambush);
             } else if (nampla->status & RESORT_COLONY) {
                 fprintf(report_file, "    ; The above PRODUCTION order is required for this resort colony, even\n");
                 fprintf(report_file, "    ;  though no other production orders can be given for it.  This resort\n");
-                fprintf(report_file, "    ;  colony will generate %ld economic units this turn.\n",
+                fprintf(report_file, "    ;  colony will generate %d economic units this turn.\n",
                         nampla->use_on_ambush);
             } else {
                 fprintf(report_file, "    ; Place production orders here for planet %s", nampla->name);
                 fprintf(report_file, " (sector %d %d %d #%d).\n", nampla->x, nampla->y, nampla->z, nampla->pn);
-                fprintf(report_file, "    ;  Avail pop = %ld, shipyards = %d, to spend = %ld", nampla->pop_units,
-                        nampla->shipyards, nampla->use_on_ambush);
+                fprintf(report_file, "    ;  Avail pop = %d, shipyards = %d, to spend = %d",
+                        nampla->pop_units, nampla->shipyards, nampla->use_on_ambush);
 
                 n = nampla->use_on_ambush;
                 if (nampla->status & HOME_PLANET) {
@@ -1202,7 +1202,7 @@ int reportCommand(int argc, char *argv[]) {
             /* See if there are any RMs to recycle. */
             n = nampla->special / 5;
             if (n > 0) {
-                fprintf(report_file, "\tRecycle\t%d RM\n\n", 5 * n);
+                fprintf(report_file, "\tRecycle\t%ld RM\n\n", 5 * n);
             }
 
             /* Generate DEVELOP commands for ships arriving here because of

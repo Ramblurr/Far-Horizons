@@ -386,7 +386,7 @@ void NoOrdersForSpecies(void) {
         /* See if there are any RMs to recycle. */
         n = nampla->special / 5;
         if (n > 0) {
-            fprintf(orders_file, "\tRecycle\t%d RM\n\n", 5 * n);
+            fprintf(orders_file, "\tRecycle\t%ld RM\n\n", 5 * n);
         }
 
         /* Generate DEVELOP commands for ships arriving here because of AUTO command. */

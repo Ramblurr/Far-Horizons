@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
                 exit(-1);
             }
             fprintf(log_file, "\nProduction orders:\n");
-            fprintf(log_file, "\n  Number of economic units at start of production: %ld\n\n", species->econ_units);
+            fprintf(log_file, "\n  Number of economic units at start of production: %d\n\n", species->econ_units);
         }
 
         /* Initialize "done" arrays.
