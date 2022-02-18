@@ -2268,6 +2268,7 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
     /* Handle all shots. */
     header_printed = FALSE;
     combat_occurred = FALSE;
+    int infiniteShotsGuard = total_shots;
     while (total_shots > 0) {
         /* check to make sure we arent in infinite loop
          * that usually happens when there are shots remaining
@@ -2281,6 +2282,12 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
                 act->shots_left[i] = 0;
             }
         }
+        // second test to prevent infinite loop due to the shot counter not being decremented.
+        if (total_shots > infiniteShotsGuard) {
+            total_shots = infiniteShotsGuard;
+        }
+        infiniteShotsGuard--;
+
         /* Determine who fires next. */
         attacker_index = rnd(act->num_units_fighting) - 1;
         if (act->unit_type[attacker_index] == SHIP) {
