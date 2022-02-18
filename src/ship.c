@@ -170,6 +170,7 @@ char *ship_name(struct ship_data *ship) {
             break;
         default:
             sprintf(temp, "***???***");
+            fprintf(stderr, "\ndebug: ship ptr %p name '%s' status %12d\n", ship, ship->name, ship->status);
             fprintf(stderr, "\n\tWARNING!!!  Internal error in subroutine 'ship_name'\n\n");
     }
     strcat(full_ship_id, temp);
