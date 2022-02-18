@@ -61,6 +61,7 @@ add_executable(fhloc
         src/locationvars.h src/locationvars.c
         src/log.h src/log.c
         src/logvars.h src/logvars.c
+        src/ordervars.h src/ordervars.c
         src/nampla.h src/nampla.c
         src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
