@@ -48,6 +48,14 @@ int logRandomCommand(int argc, char *argv[]);
 
 int reportCommand(int argc, char *argv[]);
 
+int setCommand(int argc, char *argv[]);
+
+int setPlanet(int argc, char *argv[]);
+
+int setSpecies(int argc, char *argv[]);
+
+int setStar(int argc, char *argv[]);
+
 int turnCommand(int argc, char *argv[]);
 
 
@@ -68,6 +76,8 @@ int main(int argc, char *argv[]) {
             printf("  cmd: export     convert binary .dat to json or s-expression\n");
             printf("         args:    (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
+            printf("  cmd: set        update values for planet, species, or star\n");
+            printf("         args:    (planet | species | star ) values\n");
             return 0;
         } else if (strcmp(argv[i], "-t") == 0) {
             test_mode = TRUE;
@@ -81,6 +91,8 @@ int main(int argc, char *argv[]) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {
             return reportCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "set") == 0) {
+            return setCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
             return turnCommand(argc - i, argv + i);
         } else {
@@ -434,6 +446,43 @@ int logRandomCommand(int argc, char *argv[]) {
             printf("%9d %9d\n", i, r);
         }
     }
+    return 0;
+}
+
+
+int setCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    for (int i = 1; i < argc; i++) {
+        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
+        if (strcmp(argv[i], "planet") == 0) {
+            return setPlanet(argc - i, argv + i);
+        } else if (strcmp(argv[i], "species") == 0) {
+            return setSpecies(argc - i, argv + i);
+        } else if (strcmp(argv[i], "star") == 0) {
+            return setStar(argc - i, argv + i);
+        } else {
+            fprintf(stderr, "fh: %s: unknown option '%s'\n", cmdName, argv[i]);
+            return 2;
+        }
+    }
+    return 0;
+}
+
+
+int setPlanet(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    return 0;
+}
+
+
+int setSpecies(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    return 0;
+}
+
+
+int setStar(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
     return 0;
 }
 
