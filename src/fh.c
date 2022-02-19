@@ -54,6 +54,8 @@ int setPlanet(int argc, char *argv[]);
 
 int setSpecies(int argc, char *argv[]);
 
+int setSpeciesGovtType(int argc, char *argv[]);
+
 int setStar(int argc, char *argv[]);
 
 int turnCommand(int argc, char *argv[]);
@@ -477,6 +479,35 @@ int setPlanet(int argc, char *argv[]) {
 
 int setSpecies(int argc, char *argv[]) {
     const char *cmdName = argv[0];
+    for (int i = 1; i < argc; i++) {
+        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
+        if (strcmp(argv[i], "govt-type") == 0) {
+            return setSpeciesGovtType(argc - i, argv + i);
+        } else {
+            fprintf(stderr, "fh: set: %s: unknown option '%s'\n", cmdName, argv[i]);
+            return 2;
+        }
+    }
+    return 0;
+}
+
+
+int setSpeciesGovtType(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    const char *name = 0;
+    for (int i = 1; i < argc; i++) {
+        if (name == 0) {
+            name = argv[i];
+            continue;
+        }
+        fprintf(stderr, "fh: set: %s: unknown option '%s'\n", cmdName, argv[i]);
+        return 2;
+    }
+    if (name == 0 || !(0 < strlen(name) && strlen(name) < 32)) {
+        fprintf(stderr, "fh: usage: set species %s _string_value_\n", cmdName);
+        fprintf(stderr, "    where: _string_value_ is between 1 and 31 characters\n");
+        return 2;
+    }
     return 0;
 }
 
