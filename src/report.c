@@ -405,7 +405,6 @@ void print_ship(struct ship_data *ship, struct species_data *species, int specie
 int reportCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
 
-
     int i, j, k, ship_index, locations_fd, my_loc_index, its_loc_index;
     int industry, species_fd;
     int header_printed, alien_can_hide, sp_index;
@@ -463,7 +462,8 @@ int reportCommand(int argc, char *argv[]) {
         }
 
         species = &spec_data[species_number - 1];
-        printf("fh: %s: debug: species: no %d ptr %p name '%s'\n", cmdName, species_number, species, species->name);
+        fprintf(stderr, "fh: %s: debug: species: no %d ptr %p name '%s'\n",
+                cmdName, species_number, species, species->name);
         nampla_base = namp_data[species_number - 1];
         nampla1_base = nampla_base;
         ship_base = ship_data[species_number - 1];
