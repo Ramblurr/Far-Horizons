@@ -480,6 +480,7 @@ int setPlanet(int argc, char *argv[]) {
 
 
 int setSpecies(int argc, char *argv[]) {
+    species_data_t *sp = NULL;
     int spno = 0;
     int spidx = -1;
 
@@ -487,10 +488,8 @@ int setSpecies(int argc, char *argv[]) {
     get_species_data();
 
     for (int i = 1; i < argc; i++) {
-        const char *value = 0;
         fprintf(stderr, "fh: set species: argc %2d argv '%s'\n", i, argv[i]);
-        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-?") == 0 ||
-            strcmp(argv[i], "?") == 0) {
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-?") == 0) {
             fprintf(stderr, "fh: usage: set species spNo [field value]\n");
             fprintf(stderr, "    where: spNo is a valid species number (no leading zeroes)\n");
             fprintf(stderr, "    where: field is govt-type\n");
@@ -507,25 +506,88 @@ int setSpecies(int argc, char *argv[]) {
             }
             printf("fh: set species: species number is %3d\n", spno);
             spidx = spno - 1;
-        } else if (strcmp(argv[i], "govt-type") == 0) {
-            if (i + 1 < argc) {
-                value = argv[i + 1];
-                i++;
+            sp = spec_data + spidx;
+        } else if (strcmp(argv[i], "bi") == 0 || strcmp(argv[i], "gv") == 0 || strcmp(argv[i], "ls") == 0 ||
+                   strcmp(argv[i], "ma") == 0 || strcmp(argv[i], "mi") == 0 || strcmp(argv[i], "ml") == 0) {
+            const char *tech = argv[i];
+            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
+                fprintf(stderr, "error: missing tech level value\n");
+                return 2;
             }
-            if (value == 0 || !(0 < strlen(value) && strlen(value) < 32)) {
+            i++;
+            int value = atoi(argv[i]);
+            if (value < 0) {
+                fprintf(stderr, "error: invalid tech level value\n");
+                return 2;
+            }
+            int code;
+            if (strcmp(tech, "bi") == 0) {
+                code = BI;
+            } else if (strcmp(tech, "gv") == 0) {
+                code = GV;
+            } else if (strcmp(tech, "ls") == 0) {
+                code = LS;
+            } else if (strcmp(tech, "ma") == 0) {
+                code = MA;
+            } else if (strcmp(tech, "mi") == 0) {
+                code = MI;
+            } else {
+                code = ML;
+            }
+            printf("fh: set species: %s from %4d to %4d\n", tech, sp->tech_level[code], value);
+            sp->tech_level[code] = value;
+            data_modified[spidx] = TRUE;
+        } else if (strcmp(argv[i], "eu") == 0) {
+            const char *tech = argv[i];
+            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
+                fprintf(stderr, "error: missing economic units value\n");
+                return 2;
+            }
+            i++;
+            int value = atoi(argv[i]);
+            if (value < 0) {
+                fprintf(stderr, "error: invalid economic units value\n");
+                return 2;
+            }
+            printf("fh: set species: %s from %4d to %4d\n", tech, sp->econ_units, value);
+            sp->econ_units = value;
+            data_modified[spidx] = TRUE;
+        } else if (strcmp(argv[i], "govt-type") == 0) {
+            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
+                fprintf(stderr, "error: missing government type value\n");
+                return 2;
+            }
+            i++;
+            const char *value = argv[i + 1];
+            if (!(strlen(value) < 32)) {
                 fprintf(stderr, "error: invalid government type\n");
                 return 2;
             }
-            printf("fh: set species: govt-type from \"%s\" to \"%s\"\n", spec_data[spidx].govt_type, value);
-            memset(spec_data[spidx].govt_type, 0, 32);
-            strcpy(spec_data[spidx].govt_type, value);
+            printf("fh: set species: govt-type from \"%s\" to \"%s\"\n", sp->govt_type, value);
+            memset(sp->govt_type, 0, 32);
+            strcpy(sp->govt_type, value);
+            data_modified[spidx] = TRUE;
+        } else if (strcmp(argv[i], "hp") == 0) {
+            const char *tech = argv[i];
+            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
+                fprintf(stderr, "error: missing hp economic base value\n");
+                return 2;
+            }
+            i++;
+            int value = atoi(argv[i]);
+            if (value < 0) {
+                fprintf(stderr, "error: invalid hp economic base value\n");
+                return 2;
+            }
+            printf("fh: set species: %s from %4d to %4d\n", tech, sp->hp_original_base, value);
+            sp->hp_original_base = value;
             data_modified[spidx] = TRUE;
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", argv[i]);
             return 2;
         }
     }
-    if (spidx == -1 || data_modified[spidx] == FALSE) {
+    if (sp == NULL || data_modified[spidx] == FALSE) {
         printf("fh: set species: no changes to save\n");
     } else {
         printf("fh: set: saving    species  file...\n");
