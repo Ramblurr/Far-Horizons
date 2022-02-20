@@ -454,6 +454,8 @@ int logRandomCommand(int argc, char *argv[]) {
 
 int setCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
+    printf("fh: %s: loading   galaxy   file...\n", cmdName);
+    get_galaxy_data();
     for (int i = 1; i < argc; i++) {
         fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         if (strcmp(argv[i], "planet") == 0) {
@@ -478,35 +480,56 @@ int setPlanet(int argc, char *argv[]) {
 
 
 int setSpecies(int argc, char *argv[]) {
-    const char *cmdName = argv[0];
+    int spno = 0;
+    int spidx = -1;
+
+    printf("fh: set: loading   species  file...\n");
+    get_species_data();
+
     for (int i = 1; i < argc; i++) {
-        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
-        if (strcmp(argv[i], "govt-type") == 0) {
-            return setSpeciesGovtType(argc - i, argv + i);
+        const char *value = 0;
+        fprintf(stderr, "fh: set species: argc %2d argv '%s'\n", i, argv[i]);
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-?") == 0 ||
+            strcmp(argv[i], "?") == 0) {
+            fprintf(stderr, "fh: usage: set species spNo [field value]\n");
+            fprintf(stderr, "    where: spNo is a valid species number (no leading zeroes)\n");
+            fprintf(stderr, "    where: field is govt-type\n");
+            fprintf(stderr, "      and: value is between 1 and 31 characters\n");
+            return 2;
+        } else if (spno == 0) {
+            spno = atoi(argv[i]);
+            if (spno < 1 || spno > galaxy.num_species) {
+                fprintf(stderr, "error: invalid species number\n");
+                return 2;
+            } else if (!data_in_memory[spno]) {
+                fprintf(stderr, "error: unable to load species %d into memory\n", spno);
+                return 2;
+            }
+            printf("fh: set species: species number is %3d\n", spno);
+            spidx = spno - 1;
+        } else if (strcmp(argv[i], "govt-type") == 0) {
+            if (i + 1 < argc) {
+                value = argv[i + 1];
+                i++;
+            }
+            if (value == 0 || !(0 < strlen(value) && strlen(value) < 32)) {
+                fprintf(stderr, "error: invalid government type\n");
+                return 2;
+            }
+            printf("fh: set species: govt-type from \"%s\" to \"%s\"\n", spec_data[spidx].govt_type, value);
+            memset(spec_data[spidx].govt_type, 0, 32);
+            strcpy(spec_data[spidx].govt_type, value);
+            data_modified[spidx] = TRUE;
         } else {
-            fprintf(stderr, "fh: set: %s: unknown option '%s'\n", cmdName, argv[i]);
+            fprintf(stderr, "error: unknown option '%s'\n", argv[i]);
             return 2;
         }
     }
-    return 0;
-}
-
-
-int setSpeciesGovtType(int argc, char *argv[]) {
-    const char *cmdName = argv[0];
-    const char *name = 0;
-    for (int i = 1; i < argc; i++) {
-        if (name == 0) {
-            name = argv[i];
-            continue;
-        }
-        fprintf(stderr, "fh: set: %s: unknown option '%s'\n", cmdName, argv[i]);
-        return 2;
-    }
-    if (name == 0 || !(0 < strlen(name) && strlen(name) < 32)) {
-        fprintf(stderr, "fh: usage: set species %s _string_value_\n", cmdName);
-        fprintf(stderr, "    where: _string_value_ is between 1 and 31 characters\n");
-        return 2;
+    if (spidx == -1 || data_modified[spidx] == FALSE) {
+        printf("fh: set species: no changes to save\n");
+    } else {
+        printf("fh: set: saving    species  file...\n");
+        save_species_data();
     }
     return 0;
 }
