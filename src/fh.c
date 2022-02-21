@@ -558,7 +558,7 @@ int setSpecies(int argc, char *argv[]) {
                 return 2;
             }
             i++;
-            const char *value = argv[i + 1];
+            const char *value = argv[i];
             if (!(strlen(value) < 32)) {
                 fprintf(stderr, "error: invalid government type\n");
                 return 2;
