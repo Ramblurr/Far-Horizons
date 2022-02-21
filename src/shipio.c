@@ -139,7 +139,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
         sd->special = s->special;
     }
     /* Write ship data. */
-    if (numShips > 0 && fwrite(binData, sizeof(struct ship_data), numShips, fp) != numShips) {
+    if (numShips > 0 && fwrite(binData, sizeof(struct binary_data_t), numShips, fp) != numShips) {
         perror("save_ship_data");
         fprintf(stderr, "\nCannot write ship data to file!\n");
         fprintf(stderr, "\n\tattempted to write %d ship entries\n\n", numShips);
