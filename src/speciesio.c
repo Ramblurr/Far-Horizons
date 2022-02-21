@@ -202,6 +202,9 @@ void save_species_data(void) {
         memset(data, 0, sizeof(binary_data_t));
 
         // translate data
+        memcpy(data->name, sp->name, 32);
+        memcpy(data->govt_name, sp->govt_name, 32);
+        memcpy(data->govt_type, sp->govt_type, 32);
         data->x = sp->x;
         data->y = sp->y;
         data->z = sp->z;
