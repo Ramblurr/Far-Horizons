@@ -239,7 +239,7 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
         data->special = nampla->special;
     }
     /* Write nampla data. */
-    if (numNamplas > 0 && fwrite(binData, sizeof(struct binary_data_t), numNamplas, fp) != numNamplas) {
+    if (numNamplas > 0 && fwrite(binData, sizeof(binary_data_t), numNamplas, fp) != numNamplas) {
         perror("save_nampla_data");
         fprintf(stderr, "\nCannot write nampla data to file!\n");
         fprintf(stderr, "\n\tattempted to write %d nampla entries\n\n", numNamplas);
