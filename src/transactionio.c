@@ -59,8 +59,8 @@ void get_transaction_data(void) {
     // get number of records in the file
     num_transactions = sb.st_size / sizeof(binary_data_t);
     if (sb.st_size != num_transactions * sizeof(binary_data_t)) {
-        fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %d)!\n\n", sb.st_size,
-                num_transactions * sizeof(binary_data_t));
+        fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %ld)!\n\n",
+                sb.st_size, num_transactions * sizeof(binary_data_t));
         exit(-1);
     } else if (num_transactions == 0) {
         // nothing to do
@@ -193,14 +193,14 @@ void transactionDataAsSExpr(FILE *fp) {
     fprintf(fp, "(transactions");
     for (int i = 0; i < num_transactions; i++) {
         trans_data_t *t = &transaction[i];
-        fprintf(fp,"\n  (transaction (type       %9d)", t->type);
-        fprintf(fp,"\n               (donor      %9d)", t->donor);
-        fprintf(fp,"\n               (recipient  %9d)", t->recipient);
-        fprintf(fp,"\n               (value      %9d)", t->recipient);
-        fprintf(fp,"\n               (location   (x %3d) (y %3d) (z %3d) (orbit %d))", t->x, t->y, t->z, t->pn);
-        fprintf(fp,"\n               (args       (arg (number %9d) (name \"%s\"))", t->number1, t->name1);
-        fprintf(fp,"\n                           (arg (number %9d) (name \"%s\"))", t->number2, t->name2);
-        fprintf(fp,"\n                           (arg (number %9d) (name \"%s\"))))", t->number3, t->name3);
+        fprintf(fp, "\n  (transaction (type       %9d)", t->type);
+        fprintf(fp, "\n               (donor      %9d)", t->donor);
+        fprintf(fp, "\n               (recipient  %9d)", t->recipient);
+        fprintf(fp, "\n               (value      %9d)", t->recipient);
+        fprintf(fp, "\n               (location   (x %3d) (y %3d) (z %3d) (orbit %d))", t->x, t->y, t->z, t->pn);
+        fprintf(fp, "\n               (args       (arg (number %9d) (name \"%s\"))", t->number1, t->name1);
+        fprintf(fp, "\n                           (arg (number %9d) (name \"%s\"))", t->number2, t->name2);
+        fprintf(fp, "\n                           (arg (number %9d) (name \"%s\"))))", t->number3, t->name3);
     }
     fprintf(fp, ")\n");
 }

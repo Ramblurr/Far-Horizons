@@ -411,7 +411,7 @@ int reportCommand(int argc, char *argv[]) {
     int array_index, bit_number, we_have_colony_here, nampla_index;
     int we_have_planet_here, found, ls_needed, production_penalty;
     int temp_ignore_field_distorters;
-    char filename[32], log_line[256], temp1[16], temp2[128];
+    char filename[32], log_line[256], temp2[128];
     long n, nn, bit_mask;
     struct species_data *alien;
     struct nampla_data *nampla, *alien_nampla, *our_nampla, *temp_nampla;
@@ -839,16 +839,17 @@ int reportCommand(int argc, char *argv[]) {
 
                     industry = alien_nampla->mi_base + alien_nampla->ma_base;
 
+                    const char *temp1;
                     if (alien_nampla->status & MINING_COLONY) {
-                        sprintf(temp1, "%s", "Mining colony");
+                        temp1 = "Mining colony";
                     } else if (alien_nampla->status & RESORT_COLONY) {
-                        sprintf(temp1, "%s", "Resort colony");
+                        temp1 = "Resort colony";
                     } else if (alien_nampla->status & HOME_PLANET) {
-                        sprintf(temp1, "%s", "Home planet");
+                        temp1 = "Home planet";
                     } else if (industry > 0) {
-                        sprintf(temp1, "%s", "Colony planet");
+                        temp1 = "Colony planet";
                     } else {
-                        sprintf(temp1, "%s", "Uncolonized planet");
+                        temp1 = "Uncolonized planet";
                     }
 
                     sprintf(temp2, "  %s PL %s (pl #%d)", temp1, alien_nampla->name, alien_nampla->pn);
