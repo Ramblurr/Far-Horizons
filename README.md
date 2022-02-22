@@ -61,3 +61,4 @@ The original ANSI C source code and rules are Copyright 1999 by Richard A. Morne
     cmake -S . -B .
     cmake --build .
 
+Highly recommend installing `ninja-build` along with CMake.
