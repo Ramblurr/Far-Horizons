@@ -46,6 +46,7 @@ add_executable(fh
         src/shipio.h src/shipio.c
         src/shipvars.h src/shipvars.c
         src/scan.h src/scan.c
+        src/set.h src/set.c
         src/species.h src/species.c
         src/speciesio.h src/speciesio.c
         src/speciesvars.h src/speciesvars.c
