@@ -97,6 +97,8 @@ int statsCommand(int argc, char *argv[]) {
     long total_production;
     long total_tonnage;
 
+    long totalBankedEconUnits, minBankedEconUnits, maxBankedEconUnits, avgBankedEconUnits;
+
     int nampla_index = 0;
     int ship_index = 0;
 
@@ -107,9 +109,9 @@ int statsCommand(int argc, char *argv[]) {
     }
 
     /* Print header. */
-    printf("SP Species               Tech Levels        Total  Num Num  Num  Offen.  Defen.\n");
-    printf(" # Name             MI  MA  ML  GV  LS  BI  Prod.  Pls Shps Yrds  Power   Power\n");
-    printf("-------------------------------------------------------------------------------\n");
+    printf("SP Species               Tech Levels        Total  Num Num  Num  Offen.  Defen.  Econ\n");
+    printf(" # Name             MI  MA  ML  GV  LS  BI  Prod.  Pls Shps Yrds  Power   Power  Units\n");
+    printf("----------------------------------------------------------------------------------------\n");
 
     /* Main loop. For each species, take appropriate action. */
     for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
@@ -307,7 +309,21 @@ int statsCommand(int argc, char *argv[]) {
 
         printf("%5d", num_ships);
         printf("%5d", num_yards);
-        printf("%8ld%8ld\n", total_offensive_power, total_defensive_power);
+        printf("%8ld%8ld", total_offensive_power, total_defensive_power);
+
+        totalBankedEconUnits += species->econ_units;
+        if (species_number == 1) {
+            minBankedEconUnits = species->econ_units;
+            maxBankedEconUnits = species->econ_units;
+        } else {
+            if (minBankedEconUnits > species->econ_units) {
+                minBankedEconUnits = species->econ_units;
+            }
+            if (maxBankedEconUnits < species->econ_units) {
+                maxBankedEconUnits = species->econ_units;
+            }
+        }
+        printf("%9d\n", species->econ_units);
     }
 
     m = n_species / 2;
@@ -374,6 +390,10 @@ int statsCommand(int argc, char *argv[]) {
     avg_production = (all_production + m) / n_species;
     printf("Average total production per species = %ld (min = %ld, max = %ld)\n",
            avg_production, min_production, max_production);
+
+    avgBankedEconUnits = (totalBankedEconUnits + m) / n_species;
+    printf("\nAverage banked economic units per species = %ld (min = %ld, max = %ld)\n",
+           avgBankedEconUnits, minBankedEconUnits, maxBankedEconUnits);
 
     return 0;
 }
