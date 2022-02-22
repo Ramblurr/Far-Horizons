@@ -26,5 +26,8 @@ struct galaxy_data {
     int radius;        /* Galactic radius in parsecs. */
     int turn_number;   /* Current turn number. */
 };
+typedef struct galaxy_data galaxy_data_t;
+
+int createGalaxyCommand(int argc, char *argv[]);
 
 #endif //FAR_HORIZONS_GALAXY_H
