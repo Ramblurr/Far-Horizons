@@ -20,20 +20,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "enginevars.h"
 #include "galaxy.h"
 #include "galaxyio.h"
-#include "stario.h"
-#include "planetio.h"
 #include "locationio.h"
-#include "speciesio.h"
-#include "namplavars.h"
+#include "logvars.h"
+#include "planetio.h"
+#include "planetvars.h"
 #include "namplaio.h"
+#include "namplavars.h"
 #include "shipio.h"
 #include "shipvars.h"
-#include "enginevars.h"
-#include "transactionio.h"
-#include "planetvars.h"
+#include "speciesio.h"
 #include "speciesvars.h"
+#include "stario.h"
+#include "transactionio.h"
 
 
 int exportCommand(int argc, char *argv[]);
@@ -48,13 +49,15 @@ int logRandomCommand(int argc, char *argv[]);
 
 int reportCommand(int argc, char *argv[]);
 
+int scanCommand(int argc, char *argv[]);
+
+int scanNearCommand(int argc, char *argv[]);
+
 int setCommand(int argc, char *argv[]);
 
 int setPlanet(int argc, char *argv[]);
 
 int setSpecies(int argc, char *argv[]);
-
-int setSpeciesGovtType(int argc, char *argv[]);
 
 int setStar(int argc, char *argv[]);
 
@@ -76,8 +79,12 @@ int main(int argc, char *argv[]) {
             printf("                  in planets data file\n");
             printf("  cmd: report     create end of turn reports\n");
             printf("  cmd: export     convert binary .dat to json or s-expression\n");
-            printf("         args:    (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
+            printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
+            printf("  cmd: scan       display a species-specific scan for a location\n");
+            printf("           args:  _spNo_ _x_ _y_ _z_\n");
+            printf("  cmd: scan-near  display ships and colonies near a location\n");
+            printf("           args:  _x_ _y_ _z_ _radiusInParsecs_\n");
             printf("  cmd: set        update values for planet, species, or star\n");
             printf("         args:    (planet | species | star ) values\n");
             return 0;
@@ -93,6 +100,10 @@ int main(int argc, char *argv[]) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {
             return reportCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "scan") == 0) {
+            return scanCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "scan-near") == 0) {
+            return scanNearCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "set") == 0) {
             return setCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
@@ -126,12 +137,12 @@ int exportCommand(int argc, char *argv[]) {
 
 int exportToJson(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy file...\n", cmdName);
+    printf("fh: export: %s: loading   galaxy data...\n", cmdName);
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -141,9 +152,9 @@ int exportToJson(int argc, char *argv[]) {
             galaxyDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -153,9 +164,9 @@ int exportToJson(int argc, char *argv[]) {
             locationDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_planet_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json");
@@ -165,13 +176,13 @@ int exportToJson(int argc, char *argv[]) {
             planetDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_species_data();
             printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
-            for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-                int spNo = species_index + 1;
-                if (data_in_memory[species_index]) {
-                    struct species_data *sp = &spec_data[species_index];
+            for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+                int spNo = spidx + 1;
+                if (data_in_memory[spidx]) {
+                    struct species_data *sp = &spec_data[spidx];
                     char filename[32];
 
                     sprintf(filename, "sp%02d.species.json", spNo);
@@ -191,7 +202,7 @@ int exportToJson(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    namplaDataAsJson(spNo, namp_data[species_index], sp->num_namplas, fp);
+                    namplaDataAsJson(spNo, namp_data[spidx], sp->num_namplas, fp);
                     fclose(fp);
 
                     sprintf(filename, "sp%02d.ships.json", spNo);
@@ -201,14 +212,14 @@ int exportToJson(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    shipDataAsJson(spNo, ship_data[species_index], sp->num_ships, fp);
+                    shipDataAsJson(spNo, ship_data[spidx], sp->num_ships, fp);
                     fclose(fp);
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_star_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -217,9 +228,9 @@ int exportToJson(int argc, char *argv[]) {
             }
             fclose(fp);
         } else if (strcmp(argv[i], "transactions") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_transaction_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("interspecies.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -239,12 +250,12 @@ int exportToJson(int argc, char *argv[]) {
 
 int exportToSExpr(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy file...\n", cmdName);
+    printf("fh: export: %s: loading   galaxy data...\n", cmdName);
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.txt", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -254,9 +265,9 @@ int exportToSExpr(int argc, char *argv[]) {
             galaxyDataAsSexpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_location_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.txt", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -266,9 +277,9 @@ int exportToSExpr(int argc, char *argv[]) {
             locationDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_planet_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.txt", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -278,13 +289,13 @@ int exportToSExpr(int argc, char *argv[]) {
             planetDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_species_data();
             printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
-            for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-                int spNo = species_index + 1;
-                if (data_in_memory[species_index]) {
-                    struct species_data *sp = &spec_data[species_index];
+            for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+                int spNo = spidx + 1;
+                if (data_in_memory[spidx]) {
+                    struct species_data *sp = &spec_data[spidx];
                     char filename[32];
 
                     sprintf(filename, "sp%02d.species.txt", spNo);
@@ -304,7 +315,7 @@ int exportToSExpr(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    namplaDataAsSExpr(spNo, namp_data[species_index], sp->num_namplas, fp);
+                    namplaDataAsSExpr(spNo, namp_data[spidx], sp->num_namplas, fp);
                     fclose(fp);
 
                     sprintf(filename, "sp%02d.ships.txt", spNo);
@@ -314,14 +325,14 @@ int exportToSExpr(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    shipDataAsSExpr(spNo, ship_data[species_index], sp->num_ships, fp);
+                    shipDataAsSExpr(spNo, ship_data[spidx], sp->num_ships, fp);
                     fclose(fp);
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_star_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.txt", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -331,9 +342,9 @@ int exportToSExpr(int argc, char *argv[]) {
             starDataAsSexpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "transactions") == 0) {
-            printf("fh: export: %s: loading   %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_transaction_data();
-            printf("fh: export: %s: exporting %s file...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("interspecies.txt", "wb");
             if (fp == NULL) {
                 perror("fh: export: sexpr:");
@@ -357,11 +368,11 @@ int locationCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
 
     // load data used to derive locations
-    printf("fh: %s: loading   galaxy   file...\n", cmdName);
+    printf("fh: %s: loading   galaxy   data...\n", cmdName);
     get_galaxy_data();
-    printf("fh: %s: loading   planet   file...\n", cmdName);
+    printf("fh: %s: loading   planet   data...\n", cmdName);
     get_planet_data();
-    printf("fh: %s: loading   species  file...\n", cmdName);
+    printf("fh: %s: loading   species  data...\n", cmdName);
     get_species_data();
 
     // allocate memory for array "total_econ_base"
@@ -416,9 +427,9 @@ int locationCommand(int argc, char *argv[]) {
     do_locations();
 
     // save the results
-    printf("fh: %s: saving    planet   file...\n", cmdName);
+    printf("fh: %s: saving    planet   data...\n", cmdName);
     save_planet_data();
-    printf("fh: %s: saving    location file...\n", cmdName);
+    printf("fh: %s: saving    location data...\n", cmdName);
     save_location_data();
 
     // clean up
@@ -452,9 +463,207 @@ int logRandomCommand(int argc, char *argv[]) {
 }
 
 
+int scanCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    if (argc != 5) {
+        fprintf(stderr, "usage: fh scan speciesNumber x y z\n");
+        return 2;
+    }
+    int spno = atoi(argv[1]);
+    int spidx = spno - 1;
+    int x = atoi(argv[2]);
+    int y = atoi(argv[3]);
+    int z = atoi(argv[4]);
+
+    printf("fh: %s: loading   galaxy   data...\n", cmdName);
+    get_galaxy_data();
+    if (spno < 1 || spno > galaxy.num_species) {
+        fprintf(stderr, "error: invalid species number\n");
+    } else if (x < 0 || x > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid x coordinate\n");
+    } else if (y < 0 || y > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid y coordinate\n");
+    } else if (z < 0 || z > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid z coordinate\n");
+    }
+    printf("fh: %s: loading   star     data...\n", cmdName);
+    get_star_data();
+    printf("fh: %s: loading   planet   data...\n", cmdName);
+    get_planet_data();
+    printf("fh: %s: loading   species  data...\n", cmdName);
+    get_species_data();
+
+    printf("Scan for SP %s:\n", spec_data[spidx].name);
+
+    // set external globals for the scan command
+    ignore_field_distorters = TRUE;
+    log_file = stdout;
+    species_number = spno;
+    species_index = spidx;
+    species = &spec_data[species_index];
+    nampla_base = namp_data[species_index];
+
+    // display scan for the location
+    scan(x, y, z);
+
+    return 0;
+}
+
+
+int scanNearCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    if (argc != 5) {
+        fprintf(stderr, "usage: fh scan-near x y z radiusInParsecs\n");
+        return 2;
+    }
+    int x = atoi(argv[1]);
+    int y = atoi(argv[2]);
+    int z = atoi(argv[3]);
+    int radius = atoi(argv[4]);
+    int radiusSquared = radius * radius;
+
+    // external globals?
+    ignore_field_distorters = TRUE;
+    log_file = stdout;
+
+    printf("fh: %s: loading   galaxy   data...\n", cmdName);
+    get_galaxy_data();
+    if (x < 0 || x > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid x coordinate\n");
+    } else if (y < 0 || y > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid y coordinate\n");
+    } else if (z < 0 || z > 2 * galaxy.radius) {
+        fprintf(stderr, "error: invalid z coordinate\n");
+    } else if (radius < 0 || radius > galaxy.radius) {
+        fprintf(stderr, "error: invalid radius\n");
+    }
+    printf("fh: %s: loading   star     data...\n", cmdName);
+    get_star_data();
+    printf("fh: %s: loading   planet   data...\n", cmdName);
+    get_planet_data();
+    printf("fh: %s: loading   species  data...\n", cmdName);
+    get_species_data();
+
+    /* Display scan. */
+    printf("Ships and populated planets within %d parsecs of %d %d %d:\n", radius, x, y, z);
+
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if (!data_in_memory[spidx]) {
+            continue;
+        }
+        int species_printed = FALSE;
+        species_number = spidx + 1;
+        species = &spec_data[spidx];
+
+        /* Set dest_x for all ships to zero.
+         * We will use this to prevent multiple listings of a ship. */
+        for (int ship_index = 0; ship_index < species->num_ships; ship_index++) {
+            ship_data_t *sd = ship_data[spidx] + ship_index;
+            sd[ship_index].dest_x = 0;
+        }
+
+        /* Check all namplas for this species. */
+        for (int namplaIndex = 0; namplaIndex < species->num_namplas; namplaIndex++) {
+            nampla_data_t *nd = namp_data[spidx] + namplaIndex;
+            if ((nd->status & POPULATED) == 0) {
+                continue;
+            }
+            int delta_x = x - nd->x;
+            int delta_y = y - nd->y;
+            int delta_z = z - nd->z;
+            int distance_squared = (delta_x * delta_x) + (delta_y * delta_y) + (delta_z * delta_z);
+            if (distance_squared > radiusSquared) {
+                continue;
+            }
+            if (species_printed == FALSE) {
+                printf("  Species #%d, SP %s:\n", species_number, species->name);
+                species_printed = TRUE;
+            }
+            printf("    %2d %2d %2d #%d", nd->x, nd->y, nd->z, nd->pn);
+            if ((nd->status & HOME_PLANET) != 0) {
+                printf("  Home planet");
+            } else if ((nd->status & MINING_COLONY) != 0) {
+                printf("  Mining colony");
+            } else if ((nd->status & RESORT_COLONY) != 0) {
+                printf("  Resort colony");
+            } else {
+                printf("  Normal colony");
+            }
+            printf(" PL %s, EB = %d.%d, %d Yrds",
+                   nd->name,
+                   (nd->mi_base + nd->ma_base) / 10, (nd->mi_base + nd->ma_base) % 10,
+                   nd->shipyards);
+            for (int i = 0; i < MAX_ITEMS; i++) {
+                if (nd->item_quantity[i] > 0) {
+                    printf(", %d %s", nd->item_quantity[i], item_abbr[i]);
+                }
+            }
+            if (nd->hidden != FALSE) {
+                printf(", HIDING!");
+            }
+            printf("\n");
+
+            /* List ships at this colony. */
+            for (int ship_index = 0; ship_index < species->num_ships; ship_index++) {
+                ship_data_t *sd = ship_data[spidx] + ship_index;
+                if (sd->dest_x != 0) {
+                    /* Already listed. */
+                    continue;
+                } else if (sd->x != nd->x || sd->y != nd->y || sd->z != nd->z ||
+                           sd->pn != nd->pn) {
+                    // not at this colony
+                    continue;
+                }
+                printf("                 %s", ship_name(sd));
+                for (int i = 0; i < MAX_ITEMS; i++) {
+                    if (sd->item_quantity[i] > 0) {
+                        printf(", %d %s", sd->item_quantity[i], item_abbr[i]);
+                    }
+                }
+                printf("\n");
+                sd->dest_x = 99;  /* Do not list this ship again. */
+            }
+        }
+
+        for (int shipIndex = 0; shipIndex < species->num_ships; shipIndex++) {
+            ship_data_t *sd = ship_data[spidx] + shipIndex;
+            if (sd->pn == 99) {
+                // sometimes 99 means that the ship's slot is not used?
+                continue;
+            } else if (sd->dest_x != 0) {
+                /* Already listed above. */
+                continue;
+            }
+            int delta_x = x - sd->x;
+            int delta_y = y - sd->y;
+            int delta_z = z - sd->z;
+            int distance_squared = (delta_x * delta_x) + (delta_y * delta_y) + (delta_z * delta_z);
+            if (distance_squared > radiusSquared) {
+                continue;
+            }
+            if (!species_printed) {
+                printf("  Species #%d, SP %s:\n", species_number, species->name);
+                species_printed = TRUE;
+            }
+            printf("    %2d %2d %2d", sd->x, sd->y, sd->z);
+            printf("     %s", ship_name(sd));
+            for (int i = 0; i < MAX_ITEMS; i++) {
+                if (sd->item_quantity[i] > 0) {
+                    printf(", %d %s", sd->item_quantity[i], item_abbr[i]);
+                }
+            }
+            printf("\n");
+            sd->dest_x = 99;  /* Do not list this ship again. */
+        }
+    }
+
+    return 0;
+}
+
+
 int setCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: %s: loading   galaxy   file...\n", cmdName);
+    printf("fh: %s: loading   galaxy   data...\n", cmdName);
     get_galaxy_data();
     for (int i = 1; i < argc; i++) {
         fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
@@ -484,7 +693,7 @@ int setSpecies(int argc, char *argv[]) {
     int spno = 0;
     int spidx = -1;
 
-    printf("fh: set: loading   species  file...\n");
+    printf("fh: set: loading   species  data...\n");
     get_species_data();
 
     for (int i = 1; i < argc; i++) {
@@ -590,7 +799,7 @@ int setSpecies(int argc, char *argv[]) {
     if (sp == NULL || data_modified[spidx] == FALSE) {
         printf("fh: set species: no changes to save\n");
     } else {
-        printf("fh: set: saving    species  file...\n");
+        printf("fh: set: saving    species  data...\n");
         save_species_data();
     }
     return 0;

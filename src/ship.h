@@ -80,6 +80,7 @@ struct ship_data {
     int unloading_point;           /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
     int special;                   /* Different for each application. */
 };
+typedef struct ship_data ship_data_t;
 
 void delete_ship(struct ship_data *ship);
 
