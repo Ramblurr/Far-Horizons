@@ -29,6 +29,7 @@ add_executable(fh
         src/commandvars.h src/commandvars.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
+        src/export.h src/export.c
         src/galaxyio.h src/galaxyio.c
         src/item.h src/item.c
         src/list.h src/list.c
@@ -54,7 +55,8 @@ add_executable(fh
         src/star.h src/star.c
         src/stario.h src/stario.c
         src/stats.h src/stats.c
-        src/transactionio.h src/transactionio.c)
+        src/transactionio.h src/transactionio.c
+        src/turn.h src/turn.c)
 
 add_executable(fhorders
         src/fhorders.c

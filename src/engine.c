@@ -125,6 +125,29 @@ void gamemaster_abort_option(void) {
 }
 
 
+// logRandomCommand generates random numbers using the historical default seed value.
+int logRandomCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+
+    // delete any seed from the environment so that we're sure our value is used
+    putenv("FH_SEED");
+    // use the historical default seed value
+    last_random = defaultHistoricalSeedValue;
+    // then print out a nice set of random values
+    for (int i = 0; i < 1000000; i++) {
+        int r = rnd(1024 * 1024);
+        if (i < 10) {
+            printf("%9d %9d\n", i, r);
+        } else if (1000 < i && i < 1010) {
+            printf("%9d %9d\n", i, r);
+        } else if ((i % 85713) == 0) {
+            printf("%9d %9d\n", i, r);
+        }
+    }
+    return 0;
+}
+
+
 // readln is a helper for command parsing that coerces all line-endings to be just '\n'.
 char *readln(char *dst, int len, FILE *fp) {
     static char buf[1024];

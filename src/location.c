@@ -21,15 +21,18 @@
 #include <stdio.h>
 #include "galaxy.h"
 #include "galaxyio.h"
+#include "location.h"
+#include "locationio.h"
+#include "nampla.h"
+#include "namplavars.h"
+#include "planetio.h"
+#include "planetvars.h"
+#include "ship.h"
+#include "shipvars.h"
 #include "species.h"
 #include "speciesio.h"
 #include "speciesvars.h"
-#include "nampla.h"
-#include "namplavars.h"
-#include "ship.h"
-#include "shipvars.h"
-#include "location.h"
-#include "locationio.h"
+
 
 void add_location(int x, int y, int z) {
     for (int i = 0; i < num_locs; i++) {
@@ -50,6 +53,7 @@ void add_location(int x, int y, int z) {
     fprintf(stderr, "\n\n\tInternal error. Overflow of 'loc' arrays!\n\n");
     exit(-1);
 }
+
 
 /* This routine will create the "loc" array based on current species' data. */
 void do_locations(void) {
@@ -88,3 +92,80 @@ void do_locations(void) {
     }
 }
 
+
+// locationCommand creates the location data file from the current data.
+// also updates the economic efficiency field in the planet data file.
+int locationCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+
+    // load data used to derive locations
+    printf("fh: %s: loading   galaxy   data...\n", cmdName);
+    get_galaxy_data();
+    printf("fh: %s: loading   planet   data...\n", cmdName);
+    get_planet_data();
+    printf("fh: %s: loading   species  data...\n", cmdName);
+    get_species_data();
+
+    // allocate memory for array "total_econ_base"
+    long *total_econ_base = (long *) calloc(num_planets, sizeof(long));
+    if (total_econ_base == NULL) {
+        fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
+        exit(-1);
+    }
+
+    // initialize total econ base for each planet
+    planet = planet_base;
+    for (int i = 0; i < num_planets; i++) {
+        total_econ_base[i] = 0;
+        planet++;
+    }
+
+    // get total economic base for each planet from nampla data.
+    for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
+        struct species_data *sp;
+        if (data_in_memory[species_number - 1] == FALSE) {
+            continue;
+        }
+        data_modified[species_number - 1] = TRUE;
+
+        species = &spec_data[species_number - 1];
+        nampla_base = namp_data[species_number - 1];
+
+        for (nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
+            nampla = nampla_base + nampla_index;
+            if (nampla->pn == 99) {
+                continue;
+            }
+            if ((nampla->status & HOME_PLANET) == 0) {
+                total_econ_base[nampla->planet_index] += nampla->mi_base + nampla->ma_base;
+            }
+        }
+    }
+
+    // update economic efficiencies of all planets.
+    planet = planet_base;
+    for (int i = 0; i < num_planets; i++) {
+        long diff = total_econ_base[i] - 2000;
+        if (diff <= 0) {
+            planet->econ_efficiency = 100;
+        } else {
+            planet->econ_efficiency = (100 * (diff / 20 + 2000)) / total_econ_base[i];
+        }
+        planet++;
+    }
+
+    // create new locations data
+    do_locations();
+
+    // save the results
+    printf("fh: %s: saving    planet   data...\n", cmdName);
+    save_planet_data();
+    printf("fh: %s: saving    location data...\n", cmdName);
+    save_location_data();
+
+    // clean up
+    free_species_data();
+    free(planet_base);
+
+    return 0;
+}

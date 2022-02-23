@@ -17,25 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_LOCATION_H
-#define FAR_HORIZONS_LOCATION_H
+#ifndef FAR_HORIZONS_EXPORT_H
+#define FAR_HORIZONS_EXPORT_H
 
-#include <stdio.h>
+int exportCommand(int argc, char *argv[]);
 
-#define MAX_LOCATIONS    10000
-
-struct sp_loc_data {
-    int s;    /* Species number */
-    int x;
-    int y;
-    int z;
-};
-typedef struct sp_loc_data sp_loc_data_t;
-
-void add_location(int x, int y, int z);
-
-void do_locations(void);
-
-int locationCommand(int argc, char *argv[]);
-
-#endif //FAR_HORIZONS_LOCATION_H
+#endif //FAR_HORIZONS_EXPORT_H

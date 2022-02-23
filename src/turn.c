@@ -17,25 +17,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_LOCATION_H
-#define FAR_HORIZONS_LOCATION_H
-
 #include <stdio.h>
+#include "galaxy.h"
+#include "galaxyio.h"
+#include "turn.h"
 
-#define MAX_LOCATIONS    10000
 
-struct sp_loc_data {
-    int s;    /* Species number */
-    int x;
-    int y;
-    int z;
-};
-typedef struct sp_loc_data sp_loc_data_t;
+// turnCommand displays the current turn number
+int turnCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
 
-void add_location(int x, int y, int z);
+    // check for valid command line
+    if (argc != 1) {
+        fprintf(stderr, "fh: %s: invalid option '%s'\n", cmdName, argv[1]);
+        return 2;
+    }
 
-void do_locations(void);
+    // load the galaxy data and then print the current turn number
+    get_galaxy_data();
+    printf("%d\n", galaxy.turn_number);
 
-int locationCommand(int argc, char *argv[]);
-
-#endif //FAR_HORIZONS_LOCATION_H
+    return 0;
+}
