@@ -23,6 +23,7 @@
 #include "enginevars.h"
 #include "galaxy.h"
 #include "galaxyio.h"
+#include "list.h"
 #include "locationio.h"
 #include "planetio.h"
 #include "planetvars.h"
@@ -87,6 +88,8 @@ int main(int argc, char *argv[]) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "locations") == 0) {
             return locationCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "list") == 0) {
+            return listCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {

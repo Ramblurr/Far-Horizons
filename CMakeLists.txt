@@ -31,6 +31,7 @@ add_executable(fh
         src/enginevars.h src/enginevars.c
         src/galaxyio.h src/galaxyio.c
         src/item.h src/item.c
+        src/list.h src/list.c
         src/location.h src/location.c
         src/locationio.h src/locationio.c
         src/locationvars.h src/locationvars.c
