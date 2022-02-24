@@ -31,8 +31,8 @@
 #define    PB                  0    /* Picketboat. */
 #define    CT                  1    /* Corvette. */
 #define    ES                  2    /* Escort. */
-#define    DD                  3    /* Destroyer. */
-#define    FG                  4    /* Frigate. */
+#define    FF                  3    /* Frigate. (was FG, was 4) */
+#define    DD                  4    /* Destroyer. (was 3) */
 #define    CL                  5    /* Light Cruiser. */
 #define    CS                  6    /* Strike Cruiser. */
 #define    CA                  7    /* Heavy Cruiser. */

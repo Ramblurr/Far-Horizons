@@ -74,12 +74,12 @@ int main(int argc, char *argv[]) {
             return scanCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "scan-near") == 0) {
             return scanNearCommand(argc - i, argv + i);
-        } else if (strcmp(argv[i], "set") == 0) {
-            return updateCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "stats") == 0) {
             return statsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
             return turnCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "update") == 0) {
+            return updateCommand(argc - i, argv + i);
         } else {
             fprintf(stderr, "fh: unknown option '%s'\n", argv[i]);
             return 2;
