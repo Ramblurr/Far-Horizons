@@ -148,6 +148,7 @@ int listCommand(int argc, char *argv[]) {
                         }
                     }
                     // are there any aliens here? print something?
+                    printf("\n");
                 }
             }
         } else {
