@@ -35,13 +35,9 @@ int listCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
 
     // load data used to derive locations
-    printf("fh: %s: loading   galaxy   data...\n", cmdName);
     get_galaxy_data();
-    printf("fh: %s: loading   star     data...\n", cmdName);
     get_star_data();
-    printf("fh: %s: loading   planet   data...\n", cmdName);
     get_planet_data();
-    printf("fh: %s: loading   species  data...\n", cmdName);
     get_species_data();
 
     int spno = 0;
@@ -51,7 +47,6 @@ int listCommand(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         const char *opt = argv[i];
-        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, opt);
         if (spno == 0) {
             spno = atoi(opt);
             spidx = spno - 1;
@@ -104,14 +99,16 @@ int listCommand(int argc, char *argv[]) {
                         // is there a colony here? print the colony and inventory.
                         for (int npidx = 0; npidx < species->num_namplas; npidx++) {
                             nampla_data_t *colony = nampla_base + npidx;
-                            if (star->x != colony->x || star->y != colony->y || star->z != colony->z || pn != colony->pn) {
+                            if (star->x != colony->x || star->y != colony->y || star->z != colony->z ||
+                                pn != colony->pn) {
                                 continue;
                             }
                             printf("PL %s", colony->name);
                             printLead = TRUE;
                             for (int item = 0; item < MAX_ITEMS; item++) {
                                 if (colony->item_quantity[item] > 0) {
-                                    printf("\n\t                       %s %s %d", item_abbr[item], item_name[item], colony->item_quantity[item]);
+                                    printf("\n\t                       %s %s %d",
+                                           item_abbr[item], item_name[item], colony->item_quantity[item]);
                                 }
                             }
                         }
@@ -124,13 +121,33 @@ int listCommand(int argc, char *argv[]) {
                             printf("\n\t                    -- %s", ship_name(ship));
                             for (int item = 0; item < MAX_ITEMS; item++) {
                                 if (ship->item_quantity[item] > 0) {
-                                    printf("\n\t                       %s %s %d", item_abbr[item], item_name[item], ship->item_quantity[item]);
+                                    printf("\n\t                       %s %s %d",
+                                           item_abbr[item], item_name[item], ship->item_quantity[item]);
                                 }
                             }
                         }
-                        // are there any aliens here? print something?
                         printf("\n");
                     }
+                    // are there any ships in deep orbit? print the ship and inventory.
+                    int foundDeepOrbiters = FALSE;
+                    for (int shidx = 0; shidx < species->num_ships; shidx++) {
+                        ship_data_t *ship = ship_base + shidx;
+                        if (star->x != ship->x || star->y != ship->y || star->z != ship->z || ship->pn != 0) {
+                            continue;
+                        }
+                        if (foundDeepOrbiters == FALSE) {
+                            printf("\n\tShips in deep orbit -------------------------------");
+                            foundDeepOrbiters = TRUE;
+                        }
+                        printf("\n\t                    -- %s", ship_name(ship));
+                        for (int item = 0; item < MAX_ITEMS; item++) {
+                            if (ship->item_quantity[item] > 0) {
+                                printf("\n\t                       %s %s %d", item_abbr[item], item_name[item],
+                                       ship->item_quantity[item]);
+                            }
+                        }
+                    }
+                    // are there any aliens here? print something?
                 }
             }
         } else {
