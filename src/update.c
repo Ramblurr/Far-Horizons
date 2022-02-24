@@ -24,28 +24,28 @@
 #include "galaxyio.h"
 #include "species.h"
 #include "speciesio.h"
-#include "set.h"
+#include "update.h"
 
 
-int setPlanet(int argc, char *argv[]);
+int updatePlanet(int argc, char *argv[]);
 
-int setSpecies(int argc, char *argv[]);
+int updateSpecies(int argc, char *argv[]);
 
-int setStar(int argc, char *argv[]);
+int updateStar(int argc, char *argv[]);
 
 
-int setCommand(int argc, char *argv[]) {
+int updateCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     printf("fh: %s: loading   galaxy   data...\n", cmdName);
     get_galaxy_data();
     for (int i = 1; i < argc; i++) {
         fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         if (strcmp(argv[i], "planet") == 0) {
-            return setPlanet(argc - i, argv + i);
+            return updatePlanet(argc - i, argv + i);
         } else if (strcmp(argv[i], "species") == 0) {
-            return setSpecies(argc - i, argv + i);
+            return updateSpecies(argc - i, argv + i);
         } else if (strcmp(argv[i], "star") == 0) {
-            return setStar(argc - i, argv + i);
+            return updateStar(argc - i, argv + i);
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", cmdName, argv[i]);
             return 2;
@@ -55,24 +55,24 @@ int setCommand(int argc, char *argv[]) {
 }
 
 
-int setPlanet(int argc, char *argv[]) {
+int updatePlanet(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     return 0;
 }
 
 
-int setSpecies(int argc, char *argv[]) {
+int updateSpecies(int argc, char *argv[]) {
     species_data_t *sp = NULL;
     int spno = 0;
     int spidx = -1;
 
-    printf("fh: set: loading   species  data...\n");
+    printf("fh: update: loading   species  data...\n");
     get_species_data();
 
     for (int i = 1; i < argc; i++) {
-        fprintf(stderr, "fh: set species: argc %2d argv '%s'\n", i, argv[i]);
+        fprintf(stderr, "fh: update species: argc %2d argv '%s'\n", i, argv[i]);
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-?") == 0) {
-            fprintf(stderr, "fh: usage: set species spNo [field value]\n");
+            fprintf(stderr, "fh: usage: update species spNo [field value]\n");
             fprintf(stderr, "    where: spNo is a valid species number (no leading zeroes)\n");
             fprintf(stderr, "    where: field is govt-type\n");
             fprintf(stderr, "      and: value is between 1 and 31 characters\n");
@@ -86,7 +86,7 @@ int setSpecies(int argc, char *argv[]) {
                 fprintf(stderr, "error: unable to load species %d into memory\n", spno);
                 return 2;
             }
-            printf("fh: set species: species number is %3d\n", spno);
+            printf("fh: update species: species number is %3d\n", spno);
             spidx = spno - 1;
             sp = spec_data + spidx;
         } else if (strcmp(argv[i], "bi") == 0 || strcmp(argv[i], "gv") == 0 || strcmp(argv[i], "ls") == 0 ||
@@ -116,7 +116,7 @@ int setSpecies(int argc, char *argv[]) {
             } else {
                 code = ML;
             }
-            printf("fh: set species: %s from %4d to %4d\n", tech, sp->tech_level[code], value);
+            printf("fh: update species: %s from %4d to %4d\n", tech, sp->tech_level[code], value);
             sp->tech_level[code] = value;
             data_modified[spidx] = TRUE;
         } else if (strcmp(argv[i], "eu") == 0) {
@@ -131,7 +131,7 @@ int setSpecies(int argc, char *argv[]) {
                 fprintf(stderr, "error: invalid economic units value\n");
                 return 2;
             }
-            printf("fh: set species: %s from %4d to %4d\n", tech, sp->econ_units, value);
+            printf("fh: update species: %s from %4d to %4d\n", tech, sp->econ_units, value);
             sp->econ_units = value;
             data_modified[spidx] = TRUE;
         } else if (strcmp(argv[i], "govt-type") == 0) {
@@ -145,7 +145,7 @@ int setSpecies(int argc, char *argv[]) {
                 fprintf(stderr, "error: invalid government type\n");
                 return 2;
             }
-            printf("fh: set species: govt-type from \"%s\" to \"%s\"\n", sp->govt_type, value);
+            printf("fh: update species: govt-type from \"%s\" to \"%s\"\n", sp->govt_type, value);
             memset(sp->govt_type, 0, 32);
             strcpy(sp->govt_type, value);
             data_modified[spidx] = TRUE;
@@ -161,7 +161,7 @@ int setSpecies(int argc, char *argv[]) {
                 fprintf(stderr, "error: invalid hp economic base value\n");
                 return 2;
             }
-            printf("fh: set species: %s from %4d to %4d\n", tech, sp->hp_original_base, value);
+            printf("fh: update species: %s from %4d to %4d\n", tech, sp->hp_original_base, value);
             sp->hp_original_base = value;
             data_modified[spidx] = TRUE;
         } else {
@@ -170,16 +170,16 @@ int setSpecies(int argc, char *argv[]) {
         }
     }
     if (sp == NULL || data_modified[spidx] == FALSE) {
-        printf("fh: set species: no changes to save\n");
+        printf("fh: update species: no changes to save\n");
     } else {
-        printf("fh: set: saving    species  data...\n");
+        printf("fh: update: saving    species  data...\n");
         save_species_data();
     }
     return 0;
 }
 
 
-int setStar(int argc, char *argv[]) {
+int updateStar(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     return 0;
 }

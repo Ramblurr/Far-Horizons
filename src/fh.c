@@ -26,7 +26,7 @@
 #include "namplavars.h"
 #include "report.h"
 #include "scan.h"
-#include "set.h"
+#include "update.h"
 #include "stats.h"
 #include "turn.h"
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "scan-near") == 0) {
             return scanNearCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "set") == 0) {
-            return setCommand(argc - i, argv + i);
+            return updateCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "stats") == 0) {
             return statsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {

@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_SET_H
-#define FAR_HORIZONS_SET_H
+#ifndef FAR_HORIZONS_UPDATE_H
+#define FAR_HORIZONS_UPDATE_H
 
-int setCommand(int argc, char *argv[]);
+int updateCommand(int argc, char *argv[]);
 
-#endif //FAR_HORIZONS_SET_H
+#endif //FAR_HORIZONS_UPDATE_H
