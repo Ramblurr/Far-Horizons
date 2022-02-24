@@ -86,6 +86,12 @@ int updateShip(int argc, char *argv[]) {
             fprintf(stderr, "    where: shipName is a valid ship name (case sensitive, no type)\n");
             fprintf(stderr, "    where: field is age\n");
             fprintf(stderr, "      and: value is an integer between 1 and 50\n");
+            fprintf(stderr, "    where: opt is --class=ship_class\n");
+            fprintf(stderr, "      and: ship_class is an valid ship class (PB, DD, etc)\n");
+            fprintf(stderr, "    where: opt is --ftl\n");
+            fprintf(stderr, "    where: opt is --sub-light\n");
+            fprintf(stderr, "    where: opt is --tonnage value\n");
+            fprintf(stderr, "      and: value is an valid tonnage value\n");
             return 2;
         } else if (spno == 0) {
             spno = atoi(opt);
@@ -108,7 +114,7 @@ int updateShip(int argc, char *argv[]) {
                 }
             }
             if (ship == NULL) {
-                fprintf(stderr, "error: species %d has no ship named '%s'\n", opt);
+                fprintf(stderr, "error: species %d has no ship named '%s'\n", spno, opt);
                 return 2;
             }
         } else if (strcmp(opt, "--class=BC") == 0) {
