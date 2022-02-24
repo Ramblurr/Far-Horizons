@@ -79,7 +79,18 @@ int updateShip(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         fprintf(stderr, "fh: update ship: argc %2d argv '%s'\n", i, argv[i]);
-        const char *opt = argv[i];
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
             fprintf(stderr, "fh: usage: update ship spNo shipName [field value]\n");
             fprintf(stderr, "    where: spNo is a valid species number (no leading zeroes)\n");
@@ -89,6 +100,7 @@ int updateShip(int argc, char *argv[]) {
             fprintf(stderr, "    where: opt is --class=ship_class\n");
             fprintf(stderr, "      and: ship_class is an valid ship class (PB, DD, etc)\n");
             fprintf(stderr, "    where: opt is --ftl\n");
+            fprintf(stderr, "    where: opt is --name=new_name\n");
             fprintf(stderr, "    where: opt is --sub-light\n");
             fprintf(stderr, "    where: opt is --tonnage value\n");
             fprintf(stderr, "      and: value is an valid tonnage value\n");
@@ -117,145 +129,85 @@ int updateShip(int argc, char *argv[]) {
                 fprintf(stderr, "error: species %d has no ship named '%s'\n", spno, opt);
                 return 2;
             }
-        } else if (strcmp(opt, "--class=BC") == 0) {
-            printf("fh: update ship: species %d name '%s' class to BC\n", spno, ship->name);
-            ship->class = BC;
-            ship->tonnage = ship_tonnage[BC];
+        } else if (strcmp(opt, "--age") == 0 && val != NULL) {
+            int value = atoi(val);
+            if (value < 0 || value > 50) {
+                fprintf(stderr, "error: invalid age value '%s'\n", val);
+                return 2;
+            }
+            printf("fh: update ship: species %d name '%s' age from %4d to %4d\n", spno, ship->name, ship->age, value);
+            ship->age = value;
+            data_modified[spidx] = TRUE;
+        } else if (strcmp(opt, "--class") == 0 && val != NULL) {
+            if (strcmp(val, "BC") == 0) {
+                ship->class = BC;
+            } else if (strcmp(val, "BM") == 0) {
+                ship->class = BM;
+            } else if (strcmp(val, "BR") == 0) {
+                ship->class = BR;
+            } else if (strcmp(val, "BS") == 0) {
+                ship->class = BS;
+            } else if (strcmp(val, "BW") == 0) {
+                ship->class = BW;
+            } else if (strcmp(val, "CA") == 0) {
+                ship->class = CA;
+            } else if (strcmp(val, "CC") == 0) {
+                ship->class = CC;
+            } else if (strcmp(val, "CL") == 0) {
+                ship->class = CL;
+            } else if (strcmp(val, "CT") == 0) {
+                ship->class = CT;
+            } else if (strcmp(val, "DD") == 0) {
+                ship->class = DD;
+            } else if (strcmp(val, "DN") == 0) {
+                ship->class = DN;
+            } else if (strcmp(val, "ES") == 0) {
+                ship->class = ES;
+            } else if (strcmp(val, "FF") == 0) {
+                ship->class = FF;
+            } else if (strcmp(val, "PB") == 0) {
+                ship->class = PB;
+            } else if (strcmp(val, "SD") == 0) {
+                ship->class = SD;
+            } else if (strcmp(val, "TR") == 0) {
+                ship->class = TR;
+            } else {
+                fprintf(stderr, "error: unknown ship class '%s'\n", val);
+                return 2;
+            }
+            printf("fh: update ship: species %d name '%s' class to %s\n", spno, ship->name, val);
+            ship->tonnage = ship_tonnage[ship->class];
             ship->type = FTL;
             data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=BM") == 0) {
-            printf("fh: update ship: species %d name '%s' class to BM\n", spno, ship->name);
-            ship->class = BM;
-            ship->tonnage = ship_tonnage[BM];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=BR") == 0) {
-            printf("fh: update ship: species %d name '%s' class to BR\n", spno, ship->name);
-            ship->class = BR;
-            ship->tonnage = ship_tonnage[BR];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=BS") == 0) {
-            printf("fh: update ship: species %d name '%s' class to BS\n", spno, ship->name);
-            ship->class = BS;
-            ship->tonnage = ship_tonnage[BS];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=BW") == 0) {
-            printf("fh: update ship: species %d name '%s' class to BW\n", spno, ship->name);
-            ship->class = BW;
-            ship->tonnage = ship_tonnage[BW];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=CA") == 0) {
-            printf("fh: update ship: species %d name '%s' class to CA\n", spno, ship->name);
-            ship->class = CA;
-            ship->tonnage = ship_tonnage[CA];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=CC") == 0) {
-            printf("fh: update ship: species %d name '%s' class to CC\n", spno, ship->name);
-            ship->class = CC;
-            ship->tonnage = ship_tonnage[CC];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=CL") == 0) {
-            printf("fh: update ship: species %d name '%s' class to CL\n", spno, ship->name);
-            ship->class = CL;
-            ship->tonnage = ship_tonnage[CL];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=CT") == 0) {
-            printf("fh: update ship: species %d name '%s' class to CT\n", spno, ship->name);
-            ship->class = CT;
-            ship->tonnage = ship_tonnage[CT];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=DD") == 0) {
-            printf("fh: update ship: species %d name '%s' class to DD\n", spno, ship->name);
-            ship->class = DD;
-            ship->tonnage = ship_tonnage[DD];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=DN") == 0) {
-            printf("fh: update ship: species %d name '%s' class to DN\n", spno, ship->name);
-            ship->class = DN;
-            ship->tonnage = ship_tonnage[DN];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=ES") == 0) {
-            printf("fh: update ship: species %d name '%s' class to ES\n", spno, ship->name);
-            ship->class = ES;
-            ship->tonnage = ship_tonnage[ES];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=FF") == 0) {
-            printf("fh: update ship: species %d name '%s' class to FF\n", spno, ship->name);
-            ship->class = FF;
-            ship->tonnage = ship_tonnage[FF];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=PB") == 0) {
-            printf("fh: update ship: species %d name '%s' class to PB\n", spno, ship->name);
-            ship->class = PB;
-            ship->tonnage = ship_tonnage[PB];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=SD") == 0) {
-            printf("fh: update ship: species %d name '%s' class to SD\n", spno, ship->name);
-            ship->class = SD;
-            ship->tonnage = ship_tonnage[SD];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--class=TR") == 0) {
-            printf("fh: update ship: species %d name '%s' class to TR\n", spno, ship->name);
-            ship->class = TR;
-            ship->tonnage = ship_tonnage[TR];
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--ftl") == 0) {
-            printf("fh: update ship: species %d name '%s' force ftl\n", spno, ship->name);
-            ship->type = FTL;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--sub-light") == 0) {
-            printf("fh: update ship: species %d name '%s' force sub-light\n", spno, ship->name);
-            ship->type = SUB_LIGHT;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "--tonnage") == 0) {
+        } else if (strcmp(opt, "--ftl") == 0 && val != NULL) {
+            if (strcmp(val, "yes") == 0) {
+                printf("fh: update ship: species %d name '%s' to ftl\n", spno, ship->name);
+                ship->type = FTL;
+                data_modified[spidx] = TRUE;
+            } else if (strcmp(val, "no") == 0) {
+                printf("fh: update ship: species %d name '%s' to sub-light\n", spno, ship->name);
+                ship->type = SUB_LIGHT;
+                data_modified[spidx] = TRUE;
+            } else {
+                fprintf(stderr, "error: ftl value must be yes or no\n");
+                return 2;
+            }
+        } else if (strcmp(opt, "--tonnage") == 0 && val != NULL) {
             if (ship->class != TR) {
                 fprintf(stderr, "error: tonnage is valid only for transports\n");
                 return 2;
             }
-            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
-                fprintf(stderr, "error: missing tonnage value\n");
-                return 2;
-            }
-            i++;
-            int value = atoi(argv[i]);
+            int value = atoi(val);
             if (value < 1) {
-                fprintf(stderr, "error: invalid tonnage value\n");
+                fprintf(stderr, "error: invalid tonnage value '%s'\n", val);
                 return 2;
             } else if (value > 5 * sp->tech_level[MA]) {
-                fprintf(stderr, "error: invalid tonnage value (exceeds MA)\n");
+                fprintf(stderr, "error: invalid tonnage value '%s' (exceeds MA)\n", val);
                 return 2;
             }
             printf("fh: update ship: species %d name '%s' tonnage from %d to %d\n",
                    spno, ship->name, ship->tonnage, value);
             ship->tonnage = value;
-            data_modified[spidx] = TRUE;
-        } else if (strcmp(opt, "age") == 0) {
-            if (i + 1 == argc || argv[i + 1] == NULL || strlen(argv[i + 1]) == 0) {
-                fprintf(stderr, "error: missing age value\n");
-                return 2;
-            }
-            i++;
-            int value = atoi(argv[i]);
-            if (value < 0 || value > 50) {
-                fprintf(stderr, "error: invalid age value\n");
-                return 2;
-            }
-            printf("fh: update ship: species %d name '%s' age from %4d to %4d\n", spno, ship->name, ship->age, value);
-            ship->age = value;
             data_modified[spidx] = TRUE;
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", opt);
