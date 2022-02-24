@@ -192,6 +192,18 @@ int updateShip(int argc, char *argv[]) {
                 fprintf(stderr, "error: ftl value must be yes or no\n");
                 return 2;
             }
+        } else if (strcmp(opt, "--name") == 0 && val != NULL) {
+            if (strlen(val) < 5) {
+                fprintf(stderr, "error: ship name is too short\n");
+                return 2;
+            } else if (strlen(val) > 30) {
+                fprintf(stderr, "error: ship name is too long\n");
+                return 2;
+            }
+            printf("fh: update ship: species %d name '%s' to '%s'\n", spno, ship->name, val);
+            memset(ship->name, 0, 32);
+            strcpy(ship->name, val);
+            data_modified[spidx] = TRUE;
         } else if (strcmp(opt, "--tonnage") == 0 && val != NULL) {
             if (ship->class != TR) {
                 fprintf(stderr, "error: tonnage is valid only for transports\n");
