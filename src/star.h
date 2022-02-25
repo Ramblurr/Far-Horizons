@@ -75,4 +75,13 @@ char star_type(int c);
 
 int star_visited(int x, int y, int z);
 
+
+// globals. ugh.
+
+extern char color_char[];
+
+extern char size_char[];
+
+extern char type_char[];
+
 #endif //FAR_HORIZONS_STAR_H

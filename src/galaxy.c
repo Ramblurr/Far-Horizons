@@ -68,6 +68,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
             fprintf(stderr,
                     "fh: usage: create-galaxy --species=integer [--stars=integer] [--radius=integer] [--suggest-values]\n");
+            return 2;
         } else if (strcmp(opt, "--less-crowded") == 0) {
             lessCrowded = TRUE;
         } else if (strcmp(opt, "--radius") == 0 && val != NULL) {

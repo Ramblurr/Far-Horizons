@@ -35,13 +35,13 @@
 #include "ordervars.h"
 
 
-static char color_char[] = " OBAFGKM";
+char color_char[] = " OBAFGKM";
 
 static int print_LSN = TRUE;
 
-static char size_char[] = "0123456789";
+char size_char[] = "0123456789";
 
-static char type_char[] = " dD g";
+char type_char[] = " dD g";
 
 
 void closest_unvisited_star(struct ship_data *ship) {
