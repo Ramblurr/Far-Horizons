@@ -26,8 +26,7 @@ set(CMAKE_C_STANDARD 99)
 
 include(CheckLibraryExists)
 
-CHECK_LIBRARY_EXISTS(m sin "" HAVE_LIB_M)
-
+CHECK_LIBRARY_EXISTS(m sqrt "" HAVE_LIB_M)
 if (HAVE_LIB_M)
     set(USE_LIB_M m)
 endif (HAVE_LIB_M)
