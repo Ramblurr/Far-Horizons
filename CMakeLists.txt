@@ -24,6 +24,14 @@ include_directories(src)
 
 set(CMAKE_C_STANDARD 99)
 
+include(CheckLibraryExists)
+
+CHECK_LIBRARY_EXISTS(m sin "" HAVE_LIB_M)
+
+if (HAVE_LIB_M)
+    set(USE_LIB_M m)
+endif (HAVE_LIB_M)
+
 add_executable(fh
         src/fh.c src/fh.c
         src/commandvars.h src/commandvars.c
@@ -59,6 +67,7 @@ add_executable(fh
         src/transactionio.h src/transactionio.c
         src/turn.h src/turn.c
         src/update.h src/update.c)
+target_link_libraries(fh ${USE_LIB_M})
 
 add_executable(fhorders
         src/fhorders.c
