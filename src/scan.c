@@ -112,7 +112,7 @@ int scanNearCommand(int argc, char *argv[]) {
         }
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
             fprintf(stderr,
-                    "fh: usage: %s --x=integer --y=integer --z=integer --radius=integer\n");
+                    "fh: usage: %s --x=integer --y=integer --z=integer --radius=integer\n", cmdName);
             return 2;
         } else if (strcmp(opt, "--radius") == 0 && val != NULL) {
             radius = atoi(val);
