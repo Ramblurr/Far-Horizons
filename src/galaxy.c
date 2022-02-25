@@ -32,19 +32,14 @@ int createGalaxyCommand(int argc, char *argv[]) {
     int suggestValues = FALSE;
 
     long d;
-    long d_num_species = 0;
-    long desired_num_stars = 0;
-    long galactic_radius = 0;
-    long i;
-    long max_planets = 0;
+    int d_num_species = 0;
+    int desired_num_stars = 0;
+    int galactic_radius = 0;
+    int max_planets = 0;
     long n;
-    //long num_stars;
-    //long num_planets;
-    long num_wormholes = 0;
+    int num_wormholes = 0;
     struct planet_data *planet;
-    //struct planet_data *planet_base;
     struct star_data *star;
-    //struct star_data *star_base;
     long star_color;
     long star_here[MAX_DIAMETER][MAX_DIAMETER];
     long star_num_planets;
@@ -155,7 +150,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
     /* Seed random number generator. */
     last_random = time(NULL);
     n = rnd(100) + rnd(200) + rnd(300);
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         rnd(10);
     }
 
@@ -262,7 +257,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
              *  - degenerates and main sequence stars have 2 rolls
              *  - giants have 3 rolls. */
             star_num_planets = -2;
-            for (i = 1; i <= n; i++) {
+            for (int i = 1; i <= n; i++) {
                 star_num_planets += rnd(d);
             }
             /* Trim down if too many. */
@@ -278,7 +273,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
             star->planet_index = pl_index;
 
             /* Generate planets and write to file "planets.dat". */
-            star_data_t *current_star = star;
+            //star_data_t *current_star = star;
             generate_planets(planet, star_num_planets);
 
             star->home_system = FALSE;
@@ -301,7 +296,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
 
     /* Allocate natural wormholes. */
     num_wormholes = 0;
-    for (i = 0; i < num_stars; i++) {
+    for (int i = 0; i < num_stars; i++) {
         star = star_base + i;
         if (star->home_system) {
             continue;
