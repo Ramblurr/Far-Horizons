@@ -125,6 +125,36 @@ int listCommand(int argc, char *argv[]) {
                                            item_abbr[item], item_name[item], ship->item_quantity[item]);
                                 }
                             }
+                            if (ship->loading_point != 0) {
+                                nampla_data_t *colony = NULL;
+                                if (ship->loading_point == 9999) {
+                                    // use homeworld
+                                    colony = nampla_base + 0;
+                                } else if (0 < ship->loading_point && ship->loading_point < species->num_namplas) {
+                                    colony = nampla_base + ship->loading_point;
+                                }
+                                if (colony == NULL) {
+                                    printf("\n\t                       load   %5d  ***internal error***",
+                                           ship->loading_point);
+                                } else {
+                                    printf("\n\t                       load   PL %s", colony->name);
+                                }
+                            }
+                            if (ship->unloading_point != 0) {
+                                nampla_data_t *colony = NULL;
+                                if (ship->unloading_point == 9999) {
+                                    // use homeworld
+                                    colony = nampla_base + 0;
+                                } else if (0 < ship->unloading_point && ship->unloading_point < species->num_namplas) {
+                                    colony = nampla_base + ship->unloading_point;
+                                }
+                                if (colony == NULL) {
+                                    printf("\n\t                       unload %5d  ***internal error***",
+                                           ship->unloading_point);
+                                } else {
+                                    printf("\n\t                       unload PL %s", colony->name);
+                                }
+                            }
                         }
                         printf("\n");
                     }
