@@ -21,6 +21,7 @@
 #include <string.h>
 #include "enginevars.h"
 #include "export.h"
+#include "galaxy.h"
 #include "list.h"
 #include "location.h"
 #include "namplavars.h"
@@ -60,6 +61,8 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
+        } else if (strcmp(argv[i], "create-galaxy") == 0) {
+            return createGalaxyCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "locations") == 0) {

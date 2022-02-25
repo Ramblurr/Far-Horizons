@@ -30,6 +30,7 @@ add_executable(fh
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/export.h src/export.c
+        src/galaxy.h src/galaxy.c
         src/galaxyio.h src/galaxyio.c
         src/item.h src/item.c
         src/list.h src/list.c
@@ -41,6 +42,7 @@ add_executable(fh
         src/namplaio.h src/namplaio.c
         src/namplavars.h src/namplavars.c
         src/ordervars.h src/ordervars.c
+        src/planet.h src/planet.c
         src/planetio.h src/planetio.c
         src/planetvars.h src/planetvars.c
         src/report.h src/report.c

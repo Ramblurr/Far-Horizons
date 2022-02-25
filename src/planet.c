@@ -121,7 +121,6 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
     int g[10];
     int gas[10][5];
     int gas_percent[10][5];
-    int mining_dif;
     int mining_difficulty[10];
     int pressure_class[10];
     int temperature_class[10];
