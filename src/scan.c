@@ -136,7 +136,7 @@ int scanNearCommand(int argc, char *argv[]) {
     ignore_field_distorters = TRUE;
     log_file = stdout;
 
-    printf("fh: %s: loading   galaxy   data...\n", cmdName);
+    //printf("fh: %s: loading   galaxy   data...\n", cmdName);
     get_galaxy_data();
     if (x < 0 || x > 2 * galaxy.radius) {
         fprintf(stderr, "error: invalid x coordinate\n");
@@ -147,11 +147,11 @@ int scanNearCommand(int argc, char *argv[]) {
     } else if (radius < 0 || radius > galaxy.radius) {
         fprintf(stderr, "error: invalid radius\n");
     }
-    printf("fh: %s: loading   star     data...\n", cmdName);
+    //printf("fh: %s: loading   star     data...\n", cmdName);
     get_star_data();
-    printf("fh: %s: loading   planet   data...\n", cmdName);
+    //printf("fh: %s: loading   planet   data...\n", cmdName);
     get_planet_data();
-    printf("fh: %s: loading   species  data...\n", cmdName);
+    //printf("fh: %s: loading   species  data...\n", cmdName);
     get_species_data();
 
     /* Display scan. */
