@@ -108,7 +108,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
     if (suggestValues == TRUE) {
         printf(" info: for %d species, a %sgalaxy needs about %d star systems.\n",
                d_num_species, lessCrowded == FALSE ? "" : "less crowded ", numStars);
-        printf(" info: for %d stars, the galaxy should have a radius of about %d parsecs.\n",
+        printf(" info: for %d stars, the galaxy should have a radius of about %ld parsecs.\n",
                desired_num_stars, radius);
         return 0;
     }
@@ -135,15 +135,15 @@ int createGalaxyCommand(int argc, char *argv[]) {
     long chance_of_star = galactic_volume / desired_num_stars;
     if (chance_of_star < 50) {
         fprintf(stderr, "error: galactic radius is too small for %d stars\n", desired_num_stars);
-        fprintf(stderr, "       galactic_volume   == %6d\n", galactic_volume);
+        fprintf(stderr, "       galactic_volume   == %6ld\n", galactic_volume);
         fprintf(stderr, "       desired_num_stars == %6d\n", desired_num_stars);
-        fprintf(stderr, "       chance_of_star    == %6d\n", chance_of_star);
+        fprintf(stderr, "       chance_of_star    == %6ld\n", chance_of_star);
         return 2;
     } else if (chance_of_star > 3200) {
         fprintf(stderr, "error: galactic radius is too large for %d stars\n", desired_num_stars);
-        fprintf(stderr, "       galactic_volume   == %6d\n", galactic_volume);
+        fprintf(stderr, "       galactic_volume   == %6ld\n", galactic_volume);
         fprintf(stderr, "       desired_num_stars == %6d\n", desired_num_stars);
-        fprintf(stderr, "       chance_of_star    == %6d\n", chance_of_star);
+        fprintf(stderr, "       chance_of_star    == %6ld\n", chance_of_star);
         return 2;
     }
 
