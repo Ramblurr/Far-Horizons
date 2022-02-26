@@ -17,10 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <stdlib.h>
 #include <string.h>
 #include "engine.h"
 #include "planet.h"
+#include "planetio.h"
 #include "speciesvars.h"
+
+
+int LSN(struct planet_data *current_planet, struct planet_data *home_planet);
+
+
+// todo: moved createHomePlanetsCommand to bottom because CLion IDE is confused by
+//       static and thinks that loops are infinite. but moving it let the IDE see
+//       that it was updated in generate_planets. huh.
+static int potential_home_system = FALSE;
 
 
 void fix_gases(struct planet_data *pl) {
@@ -108,7 +119,7 @@ void fix_gases(struct planet_data *pl) {
 
 
 // generate_planets creates planets and inserts them into the planet_data array.
-void generate_planets(struct planet_data *first_planet, int num_planets) {
+void generate_planets(struct planet_data *first_planet, int num_planets, int earth_like, int makeMiningEasier) {
     /* Values for the planets of Earth's solar system will be used as starting values.
      * Diameters are in thousands of kilometers.
      * The zeroth element of each array is a placeholder and is not used.
@@ -117,13 +128,20 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
     static int start_diameter[10] = {0, 5, 12, 13, 7, 20, 143, 121, 51, 49};
     static int start_temp_class[10] = {0, 29, 27, 11, 9, 8, 6, 5, 5, 3};
 
-    int diameter[10];
-    int g[10];
+    int diameter[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int g[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     int gas[10][5];
+    memset(gas, 0, sizeof(gas));
     int gas_percent[10][5];
-    int mining_difficulty[10];
-    int pressure_class[10];
-    int temperature_class[10];
+    memset(gas_percent, 0, sizeof(gas_percent));
+    int mining_difficulty[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int pressure_class[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int special[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int temperature_class[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    /* Set flag to indicate if this star system requires an earth-like planet.
+     * If so, we will zero this flag after we use it. */
+    int make_earth = earth_like;
 
     /* Main loop. Generate one planet at a time. */
     for (int planet_number = 1; planet_number <= num_planets; planet_number++) {
@@ -197,10 +215,11 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
         }
         int n_rolls = rnd(3) + rnd(3) + rnd(3);
         for (int i = 1; i <= n_rolls; i++) {
+            int roll = rnd(die_size);
             if (rnd(100) > 50) {
-                tc = tc + rnd(die_size);
+                tc = tc + roll;
             } else {
-                tc = tc - rnd(die_size);
+                tc = tc - roll;
             }
         }
 
@@ -233,6 +252,60 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
         }
         temperature_class[planet_number] = tc;
 
+        /* Check if this planet should be earth-like.
+         * If so, replace all the above with earth-like characteristics. */
+        special[planet_number] = 0;
+        if (make_earth != FALSE && (tc <= 11)) {
+            make_earth = FALSE;    /* Once only. */
+
+            /* Initialize 3rd & 4th gases in case they are not used below. */
+            gas[planet_number][3] = 0;
+            gas_percent[planet_number][3] = 0;
+            gas[planet_number][4] = 0;
+            gas_percent[planet_number][4] = 0;
+
+            diameter[planet_number] = 11 + rnd(3);
+            g[planet_number] = 93 + rnd(11) + rnd(11) + rnd(5);
+            temperature_class[planet_number] = 9 + rnd(3);
+            pressure_class[planet_number] = 8 + rnd(3);
+            mining_difficulty[planet_number] = 208 + rnd(11) + rnd(11);
+            special[planet_number] = 1;    /* Maybe ideal home planet. */
+
+            int i = 1;
+            int total_percent = 0;
+
+            /* Give it a shot of ammonia. */
+            if (rnd(3) == 1) {
+                int pct = rnd(30);
+                gas[planet_number][i] = NH3;
+                gas_percent[planet_number][i] = pct;
+                total_percent += pct;
+                i++;
+            }
+            int nitro = i++;    /* Save index for nitrogen. */
+
+            /* Give it a shot of carbon dioxide. */
+            if (rnd(3) == 1) {
+                int pct = rnd(30);
+                gas[planet_number][i] = CO2;
+                gas_percent[planet_number][i] = pct;
+                total_percent += pct;
+                i++;
+            }
+
+            /* Now do oxygen. */
+            int pct = rnd(20) + 10;
+            gas[planet_number][i] = O2;
+            gas_percent[planet_number][i] = pct;
+            total_percent += pct;
+
+            /* Give the rest to nitrogen. */
+            gas[planet_number][nitro] = N2;
+            gas_percent[planet_number][nitro] = 100 - total_percent;
+
+            continue;
+        }
+
         /* Pressure class depends primarily on gravity.
          * Calculate an approximate value and randomize it. */
         int pc = g[planet_number] / 10;
@@ -242,13 +315,14 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
         }
         n_rolls = rnd(3) + rnd(3) + rnd(3);
         for (int i = 1; i <= n_rolls; i++) {
+            int roll = rnd(die_size);
             if (rnd(100) > 50) {
-                pc = pc + rnd(die_size);
+                pc = pc + roll;
             } else {
-                pc = pc - rnd(die_size);
+                pc = pc - roll;
             }
         }
-        if (gas_giant) {
+        if (gas_giant != FALSE) {
             for (; pc < 11;) {
                 pc += rnd(3);
             }
@@ -311,7 +385,8 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
                         gas_percent[planet_number][num_gases_found] = rnd(20);
                     } else {
                         /* Not Helium. */
-                        if (rnd(3) == 3) {
+                        int roll = rnd(3);
+                        if (roll == 3) {
                             continue;
                         }
                         num_gases_found++;
@@ -338,24 +413,32 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
         }
 
         /* Get mining difficulty.
-         * Basically, mining difficulty is proportional to planetary diameter
-         * with randomization and an occasional big surprise.
-         * Actual values will range between 0.80 and 10.00.
-         * Again, the actual value will be multiplied by 100
-         * to allow use of integer arithmetic. */
+         * Mining difficulty is proportional to planetary diameter with randomization and an occasional big surprise. */
         int mining_dif = 0;
-        for (; mining_dif < 40 || mining_dif > 500;) {
-            mining_dif = (rnd(3) + rnd(3) + rnd(3) - rnd(4)) * rnd(dia) + rnd(30) + rnd(30);
-        }
+        if (makeMiningEasier == FALSE) {
+            /* Actual values will range between 0.80 and 10.00.
+             * The actual value will be scaled by 100 to allow use of integer arithmetic. */
+            for (; mining_dif < 40 || mining_dif > 500;) {
+                mining_dif = (rnd(3) + rnd(3) + rnd(3) - rnd(4)) * rnd(dia) + rnd(30) + rnd(30);
+            }
+            /* Fudge factor. */
+            mining_dif *= 11;
+            mining_dif /= 5;
+        } else {
+            /* Actual values will range between 0.30 and 10.00.
+             * The actual value will be scaled by 100 to allow use of integer arithmetic. */
+            for (; mining_dif < 30 || mining_dif > 1000;) {
+                mining_dif = (rnd(3) + rnd(3) + rnd(3) - rnd(4)) * rnd(dia) + rnd(20) + rnd(20);
+            }
 
-        /* Fudge factor. */
-        mining_dif *= 11;
-        mining_dif /= 5;
+        }
 
         mining_difficulty[planet_number] = mining_dif;
     }
 
     /* Copy planet data to structure. */
+    potential_home_system = FALSE;
+    planet_data_t *home_planet = NULL;
     for (int i = 1; i <= num_planets; i++) {
         int planetidx = i - 1;
         planet_data_t *current_planet = first_planet + planetidx;
@@ -368,11 +451,105 @@ void generate_planets(struct planet_data *first_planet, int num_planets) {
         current_planet->mining_difficulty = mining_difficulty[i];
         current_planet->temperature_class = temperature_class[i];
         current_planet->pressure_class = pressure_class[i];
-        current_planet->special = 0;
+        current_planet->special = special[i];
+        if (special[i] == 1) {
+            home_planet = current_planet;
+            potential_home_system = TRUE;
+        }
 
         for (int n = 0; n < 4; n++) {
             current_planet->gas[n] = gas[i][n + 1];
             current_planet->gas_percent[n] = gas_percent[i][n + 1];
         }
     }
+
+    /* If this is a potential home system, make sure it passes certain tests. */
+    if (potential_home_system != FALSE) {
+        planet_data_t *current_planet = first_planet;
+        int potential = 0;
+        for (int i = 1; i <= num_planets; i++) {
+            potential += 20000 / ((3 + LSN(current_planet, home_planet)) * (50 + current_planet->mining_difficulty));
+            current_planet++;
+        }
+        if (!(potential > 53 && potential < 57)) {
+            potential_home_system = FALSE;
+        }
+    }
+}
+
+
+/* This routine provides an approximate LSN for a planet.
+ * It assumes that oxygen is required and any gas that does
+ * not appear on the home planet is poisonous. */
+int LSN(struct planet_data *current_planet, struct planet_data *home_planet) {
+    int tc = current_planet->temperature_class - home_planet->temperature_class;
+    if (tc < 0) {
+        tc = -tc;
+    }
+    int ls_needed = 2 * tc;        /* Temperature class. */
+
+    int pc = current_planet->pressure_class - home_planet->pressure_class;
+    if (pc < 0) {
+        pc = -pc;
+    }
+    ls_needed += 2 * pc;        /* Pressure class. */
+
+    /* Check gases. Assume oxygen is not present. */
+    ls_needed += 2;
+    for (int g = 0; g < 4; g++) {
+        /* Check gases on planet. */
+        if (current_planet->gas[g] == 0) {
+            continue;
+        }
+        if (current_planet->gas[g] == O2) {
+            ls_needed -= 2;
+        }
+        int poison = TRUE;
+        for (int k = 0; k < 4; k++) {
+            /* Compare with home planet. */
+            if (current_planet->gas[g] == home_planet->gas[k]) {
+                poison = FALSE;
+                break;
+            }
+        }
+        if (poison != FALSE) {
+            ls_needed += 2;
+        }
+    }
+
+    return ls_needed;
+}
+
+
+int createHomePlanetsCommand(int argc, char *argv[]) {
+    char filename[128];
+    int earth_like = TRUE;
+    int makeMiningEasier = TRUE;
+    for (int num_planets = 3; num_planets < 10; num_planets++) {
+        sprintf(filename, "homesystem%d.dat", num_planets);
+        printf("Now doing file '%s'...\n", filename);
+
+        /* Allocate enough memory for all planets. */
+        planet_base = (struct planet_data *) calloc(num_planets, sizeof(struct planet_data));
+        if (planet_base == NULL) {
+            perror("createHomePlanetsCommand");
+            fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
+            return 2;
+        }
+
+        for (potential_home_system = FALSE; potential_home_system == FALSE;) {
+            generate_planets(planet_base, num_planets, earth_like, makeMiningEasier);
+        }
+        savePlanetData(planet_base, num_planets, filename);
+        sprintf(filename, "homesystem%d.txt", num_planets);
+        FILE *fp = fopen(filename, "wb");
+        if (fp == NULL) {
+            perror("createHomePlanetsCommand");
+            fprintf(stderr, "error: unable to create '%s'\n", filename);
+            return 2;
+        }
+        planetDataAsSExpr(num_planets, planet_base, fp);
+        fclose(fp);
+    }
+    return 0;
 }

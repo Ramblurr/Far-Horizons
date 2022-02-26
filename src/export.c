@@ -93,7 +93,7 @@ int exportToJson(int argc, char *argv[]) {
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.json'!\n");
                 return 2;
             }
-            planetDataAsJson(fp);
+            planetDataAsJson(num_planets, planet_base, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
@@ -206,7 +206,7 @@ int exportToSExpr(int argc, char *argv[]) {
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
                 return 2;
             }
-            planetDataAsSExpr(fp);
+            planetDataAsSExpr(num_planets, planet_base, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);

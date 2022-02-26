@@ -24,11 +24,13 @@
 
 void get_planet_data(void);
 
-void planetDataAsJson(FILE *fp);
+void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp);
 
-void planetDataAsSExpr(FILE *fp);
+void planetDataAsSExpr(int numPlanets, planet_data_t *planetBase, FILE *fp);
 
 void save_planet_data(void);
+
+void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename);
 
 // globals. ugh.
 

@@ -274,7 +274,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
 
             /* Generate planets and write to file "planets.dat". */
             //star_data_t *current_star = star;
-            generate_planets(planet, star_num_planets);
+            generate_planets(planet, star_num_planets, FALSE, FALSE);
 
             star->home_system = FALSE;
             star->worm_here = FALSE;
@@ -378,7 +378,7 @@ int createGalaxyCommand(int argc, char *argv[]) {
         fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
         return 2;
     }
-    planetDataAsSExpr(fp);
+    planetDataAsSExpr(num_planets, planet_base, fp);
     fclose(fp);
 
     free(star_base);

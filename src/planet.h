@@ -57,9 +57,12 @@ struct planet_data {
 };
 typedef struct planet_data planet_data_t;
 
+
+int createHomePlanetsCommand(int argc, char *argv[]);
+
 void fix_gases(struct planet_data *pl);
 
 // generate_planets creates planets and inserts them into the planet_data array.
-void generate_planets(struct planet_data *first_planet, int num_planets);
+void generate_planets(struct planet_data *first_planet, int num_planets, int earth_like, int makeMiningEasier);
 
 #endif //FAR_HORIZONS_PLANET_H

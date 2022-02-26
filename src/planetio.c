@@ -113,11 +113,11 @@ void get_planet_data(void) {
 
 
 // planetDataAsJson writes the current planet_base array to a text file as JSON.
-void planetDataAsJson(FILE *fp) {
+void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp) {
     const char *sep = "";
     fprintf(fp, "[");
-    for (int i = 0; i < num_planets; i++) {
-        planet_data_t *p = &planet_base[i];
+    for (int i = 0; i < numPlanets; i++) {
+        planet_data_t *p = &planetBase[i];
         fprintf(fp, "%s\n  {\"id\": %d,", sep, i + 1);
         fprintf(fp, "\n   \"diameter\": %d,", p->diameter);
         fprintf(fp, "\n   \"gravity\": %d,", p->gravity);
@@ -143,10 +143,10 @@ void planetDataAsJson(FILE *fp) {
 
 
 // planetDataAsSExpr writes the current planet_base array to a text file as an s-expression.
-void planetDataAsSExpr(FILE *fp) {
+void planetDataAsSExpr(int numPlanets, planet_data_t *planetBase, FILE *fp) {
     fprintf(fp, "(planets");
-    for (int i = 0; i < num_planets; i++) {
-        planet_data_t *p = &planet_base[i];
+    for (int i = 0; i < numPlanets; i++) {
+        planet_data_t *p = &planetBase[i];
         fprintf(fp,
                 "\n  (planet (id %5d) (diameter %3d) (gravity %3d) (temperature_class %3d) (pressure_class %3d) (special %2d) (gases (%2d %3d) (%2d %3d) (%2d %3d) (%2d %3d)) (mining_difficulty %3d %3d) (econ_efficiency %3d) (message %d))",
                 i + 1,
@@ -209,5 +209,55 @@ void save_planet_data(void) {
 
     planet_data_modified = FALSE;
 
+    free(planetData);
+}
+
+
+void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename) {
+    int32_t numRecords = numPlanets;
+    binary_data_t *planetData = (binary_data_t *) calloc(numRecords, sizeof(binary_data_t));
+    if (planetData == NULL) {
+        fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
+        fprintf(stderr, "       attempted to allocate %d planet records\n", numRecords);
+        exit(2);
+    }
+    for (int i = 0; i < numPlanets; i++) {
+        struct planet_data *p = &planetBase[i];
+        binary_data_t *pd = &planetData[i];
+        pd->temperature_class = p->temperature_class;
+        pd->pressure_class = p->pressure_class;
+        pd->special = p->special;
+        for (int g = 0; g < 4; g++) {
+            p->gas[g] = p->gas[g];
+            p->gas_percent[g] = p->gas_percent[g];
+        }
+        pd->diameter = p->diameter;
+        pd->gravity = p->gravity;
+        pd->mining_difficulty = p->mining_difficulty;
+        pd->econ_efficiency = p->econ_efficiency;
+        pd->md_increase = p->md_increase;
+        pd->message = p->message;
+    }
+
+    /* Open planet file for writing. */
+    FILE *fp = fopen(filename, "wb");
+    if (fp == NULL) {
+        perror("savePlanetData");
+        fprintf(stderr, "error: cannot create file '%s'!\n", filename);
+        exit(2);
+    }
+    /* Write header data. */
+    if (fwrite(&numRecords, sizeof(numRecords), 1, fp) != 1) {
+        perror("savePlanetData");
+        fprintf(stderr, "error: cannot write numPlanets to file '%s'!\n", filename);
+        exit(2);
+    }
+    /* Write planet data to disk. */
+    if (fwrite(planetData, sizeof(binary_data_t), numRecords, fp) != numRecords) {
+        perror("savePlanetData");
+        fprintf(stderr, "error: cannot write planet data to file '%s'!\n", filename);
+        exit(2);
+    }
+    fclose(fp);
     free(planetData);
 }
