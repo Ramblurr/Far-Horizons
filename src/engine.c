@@ -222,6 +222,7 @@ int rnd(unsigned int max) {
     shift_result ^= a;
 
     last_random = cong_result ^ shift_result;
+    _lastRandom = last_random;
 
     a = last_random & 0x0000FFFF;
 
