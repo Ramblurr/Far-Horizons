@@ -104,7 +104,7 @@ the `--suggest-values` flag to display suggested values based on the number of s
 The `--less-crowded` flag increases the number of stars by about 50%.
 (It has no effect if you specify the number of stars yourself.)
 
-Increasing the number of stars tends to slow the pace of the game since it will take longer for species to enounter each
+Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter each
 other.
 
 NB: `fh create-galaxy` replaces `NewGalaxy`.
