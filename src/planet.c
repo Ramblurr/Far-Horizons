@@ -28,10 +28,41 @@
 int LSN(struct planet_data *current_planet, struct planet_data *home_planet);
 
 
-// todo: moved createHomePlanetsCommand to bottom because CLion IDE is confused by
-//       static and thinks that loops are infinite. but moving it let the IDE see
-//       that it was updated in generate_planets. huh.
-static int potential_home_system = FALSE;
+int potential_home_system = FALSE;
+
+
+int createHomeSystemsCommand(int argc, char *argv[]) {
+    char filename[128];
+    int earth_like = TRUE;
+    int makeMiningEasier = TRUE;
+    for (int num_planets = 3; num_planets < 10; num_planets++) {
+        sprintf(filename, "homesystem%d.dat", num_planets);
+        printf("Now doing file '%s'...\n", filename);
+
+        /* Allocate enough memory for all planets. */
+        planet_base = (struct planet_data *) calloc(num_planets, sizeof(struct planet_data));
+        if (planet_base == NULL) {
+            perror("createHomeSystemsCommand");
+            fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
+            return 2;
+        }
+
+        for (potential_home_system = FALSE; potential_home_system == FALSE;) {
+            generate_planets(planet_base, num_planets, earth_like, makeMiningEasier);
+        }
+        savePlanetData(planet_base, num_planets, filename);
+        sprintf(filename, "homesystem%d.txt", num_planets);
+        FILE *fp = fopen(filename, "wb");
+        if (fp == NULL) {
+            perror("createHomeSystemsCommand");
+            fprintf(stderr, "error: unable to create '%s'\n", filename);
+            return 2;
+        }
+        planetDataAsSExpr(num_planets, planet_base, fp);
+        fclose(fp);
+    }
+    return 0;
+}
 
 
 void fix_gases(struct planet_data *pl) {
@@ -518,38 +549,4 @@ int LSN(struct planet_data *current_planet, struct planet_data *home_planet) {
     }
 
     return ls_needed;
-}
-
-
-int createHomePlanetsCommand(int argc, char *argv[]) {
-    char filename[128];
-    int earth_like = TRUE;
-    int makeMiningEasier = TRUE;
-    for (int num_planets = 3; num_planets < 10; num_planets++) {
-        sprintf(filename, "homesystem%d.dat", num_planets);
-        printf("Now doing file '%s'...\n", filename);
-
-        /* Allocate enough memory for all planets. */
-        planet_base = (struct planet_data *) calloc(num_planets, sizeof(struct planet_data));
-        if (planet_base == NULL) {
-            perror("createHomePlanetsCommand");
-            fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
-            return 2;
-        }
-
-        for (potential_home_system = FALSE; potential_home_system == FALSE;) {
-            generate_planets(planet_base, num_planets, earth_like, makeMiningEasier);
-        }
-        savePlanetData(planet_base, num_planets, filename);
-        sprintf(filename, "homesystem%d.txt", num_planets);
-        FILE *fp = fopen(filename, "wb");
-        if (fp == NULL) {
-            perror("createHomePlanetsCommand");
-            fprintf(stderr, "error: unable to create '%s'\n", filename);
-            return 2;
-        }
-        planetDataAsSExpr(num_planets, planet_base, fp);
-        fclose(fp);
-    }
-    return 0;
 }

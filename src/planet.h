@@ -58,7 +58,7 @@ struct planet_data {
 typedef struct planet_data planet_data_t;
 
 
-int createHomePlanetsCommand(int argc, char *argv[]);
+int createHomeSystemsCommand(int argc, char *argv[]);
 
 void fix_gases(struct planet_data *pl);
 

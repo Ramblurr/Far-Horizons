@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "create-galaxy") == 0) {
             return createGalaxyCommand(argc - i, argv + i);
-        } else if (strcmp(argv[i], "create-home-planets") == 0) {
-            return createHomePlanetsCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "create-home-systems") == 0) {
+            return createHomeSystemsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "locations") == 0) {
