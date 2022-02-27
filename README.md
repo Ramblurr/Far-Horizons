@@ -25,12 +25,36 @@ You can also build a PDF and HTML versions of these if you have
 BUILDING
 --------
 
-Compiling is easy:
+Compiling is never easy, but if you're on the `main` branch, it should be something like:
 
-    $ cd src/
-    $ ./make.all
+    ~/src/Far-Horizons$ git remote -v
+      origin  git@github.com:mdhender/Far-Horizons.git (fetch)
+      origin  git@github.com:mdhender/Far-Horizons.git (push)
+    
+    ~/src/Far-Horizons$ cmake --version
+      cmake version 3.5.1
+    
+    ~/src/Far-Horizons$ cd build
+    
+    ~/src/Far-Horizons/build$ cmake ..
+      -- The C compiler identification is GNU 5.4.0
+      -- Check for working C compiler: /usr/bin/cc
+      -- Check for working C compiler: /usr/bin/cc -- works
+      -- Detecting C compiler ABI info
+      -- Detecting C compiler ABI info - done
+      -- Detecting C compile features
+      -- Detecting C compile features - done
+      -- Looking for sqrt in m
+      -- Looking for sqrt in m - found
+      -- Configuring done
+      -- Generating done
+      -- Build files have been written to: /home/mdhender/src/Far-Horizons/build
+    
+    ~/src/Far-Horizons/build$ cd ..
+    
+    ~/src/Far-Horizons$ cmake --build build
 
-All the resulting binaries are in bin/
+All the resulting binaries are in `build/`.
 
 GAME MASTERING
 --------------
