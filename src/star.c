@@ -152,6 +152,25 @@ void closest_unvisited_star_report(struct ship_data *ship, FILE *fp) {
 }
 
 
+// hasHomeSystemNeighbor returns TRUE if the star has a neighbor within the given radius that is a home system.
+int hasHomeSystemNeighbor(star_data_t *star, int radius) {
+    int radiusSquared = radius * radius;
+    for (int i = 0; i < num_stars; i++) {
+        star_data_t *star2 = star_base + i;
+        if (star2->home_system == FALSE) {
+            continue;
+        }
+        int dx = star->x - star2->x;
+        int dy = star->y - star2->y;
+        int dz = star->z - star2->z;
+        if (dx * dx + dy * dy + dz * dz <= radiusSquared) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+
 void scan(int x, int y, int z) {
     int i, j, k, n, found, num_gases, ls_needed;
     char filename[32];

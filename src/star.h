@@ -65,6 +65,9 @@ void closest_unvisited_star(struct ship_data *ship);
 
 void closest_unvisited_star_report(struct ship_data *ship, FILE *fp);
 
+// hasHomeSystemNeighbor returns TRUE if the star has a neighbor within the given radius that is a home system.
+int hasHomeSystemNeighbor(star_data_t *star, int radius);
+
 void scan(int x, int y, int z);
 
 char star_color(int c);
