@@ -27,7 +27,6 @@
 #include "shipvars.h"
 
 
-
 int alien_is_visible(int x, int y, int z, int species_number, int alien_number) {
     int i, j;
     struct species_data *species, *alien;
@@ -120,31 +119,52 @@ void free_species_data(void) {
 
 /* Get life support tech level needed. */
 int life_support_needed(struct species_data *species, struct planet_data *home, struct planet_data *colony) {
-    int j, k, ls_needed;
-    int i = colony->temperature_class - home->temperature_class;
-    if (i < 0) { i = -i; }
-    ls_needed = 3 * i;        /* Temperature class. */
-    i = colony->pressure_class - home->pressure_class;
-    if (i < 0) { i = -i; }
-    ls_needed += 3 * i;        /* Pressure class. */
-    /* Check gases. Assume required gas is NOT present. */
-    ls_needed += 3;
-    /* Check gases on planet. */
-    for (j = 0; j < 4; j++) {
-        if (colony->gas_percent[j] == 0) { continue; }
-        /* Compare with poisonous gases. */
-        for (i = 0; i < 6; i++) {
-            if (species->poison_gas[i] == colony->gas[j]) {
-                ls_needed += 3;
-            }
-        }
-        if (colony->gas[j] == species->required_gas) {
-            if (colony->gas_percent[j] >= species->required_gas_min
-                && colony->gas_percent[j] <= species->required_gas_max) {
-                ls_needed -= 3;
+    // temperature class requires 3 points of LS per point of difference
+    int tc = colony->temperature_class - home->temperature_class;
+    if (tc < 0) {
+        tc = -tc;
+    }
+
+    // pressure class requires 3 points of LS per point of difference
+    int pc = colony->pressure_class - home->pressure_class;
+    if (pc < 0) {
+        pc = -pc;
+    }
+
+    /* Assuming required gas is NOT present. */
+    int hasRequiredGas = FALSE;
+
+    /* Check for poison gases on planet. */
+    int poisonGases = 0;
+    for (int j = 0; j < 4; j++) {
+        // check if the slot has gas
+        if (colony->gas_percent[j] != 0) {
+            // check if required gas is present
+            if (colony->gas[j] == species->required_gas) {
+                // and in the right amount
+                if (species->required_gas_min <= colony->gas_percent[j]
+                    && colony->gas_percent[j] <= species->required_gas_max) {
+                    hasRequiredGas = TRUE;
+                }
+            } else {
+                // check if it is a poisonous gas
+                for (int i = 0; i < 6; i++) {
+                    if (colony->gas[j] == species->poison_gas[i]) {
+                        poisonGases++;
+                        break;
+                    }
+                }
             }
         }
     }
+
+    // each point of difference and each poisonous gas requires 3 points of life support
+    int ls_needed = 3 * (tc + pc + poisonGases);
+    // add 3 more if the required gas is not present in the right amounts
+    if (hasRequiredGas == FALSE) {
+        ls_needed += 3;
+    }
+
     return ls_needed;
 }
 
