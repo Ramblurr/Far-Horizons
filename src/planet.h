@@ -27,19 +27,19 @@
 #define NUM_EXTRA_PLANETS    100
 
 /* Gases in planetary atmospheres. */
-#define    H2    1    /* Hydrogen */
+#define    H2     1    /* Hydrogen */
 #define    CH4    2    /* Methane */
-#define    HE    3    /* Helium */
+#define    HE     3    /* Helium */
 #define    NH3    4    /* Ammonia */
-#define    N2    5    /* Nitrogen */
+#define    N2     5    /* Nitrogen */
 #define    CO2    6    /* Carbon Dioxide */
-#define    O2    7    /* Oxygen */
+#define    O2     7    /* Oxygen */
 #define    HCL    8    /* Hydrogen Chloride */
 #define    CL2    9    /* Chlorine */
 #define    F2    10    /* Fluorine */
-#define    H2O    11    /* Steam */
-#define    SO2    12    /* Sulfur Dioxide */
-#define    H2S    13    /* Hydrogen Sulfide */
+#define    H2O   11    /* Steam */
+#define    SO2   12    /* Sulfur Dioxide */
+#define    H2S   13    /* Hydrogen Sulfide */
 
 
 struct planet_data {
@@ -54,6 +54,7 @@ struct planet_data {
     int econ_efficiency;    /* Economic efficiency. Always 100 for a home planet. */
     int md_increase;        /* Increase in mining difficulty. */
     int message;            /* Message associated with this planet, if any. */
+    int isValid;            // FALSE if the record is invalid
 };
 typedef struct planet_data planet_data_t;
 
