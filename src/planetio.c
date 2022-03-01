@@ -112,6 +112,75 @@ void get_planet_data(void) {
 }
 
 
+// getPlanetData returns the planet data
+planet_data_t *getPlanetData(int extraRecords, const char *filename) {
+    // open binary input file
+    FILE *fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        perror("getPlanetData");
+        fprintf(stderr, "\n\tCannot open file '%s'!\n", filename);
+        exit(-1);
+    }
+
+    // read header data, which is just the number of records in the file
+    int32_t numRecords;
+    if (fread(&numRecords, sizeof(numRecords), 1, fp) != 1) {
+        fprintf(stderr, "\n\tCannot read num_planets in file '%s'!\n\n", filename);
+        exit(-1);
+    }
+
+    // allocate enough memory for all records
+    binary_data_t *rawRecords = (binary_data_t *) calloc(numRecords, sizeof(binary_data_t));
+    if (rawRecords == NULL) {
+        fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n", filename);
+        exit(-1);
+    }
+
+    // read all records into memory
+    if (fread(rawRecords, sizeof(binary_data_t), numRecords, fp) != numRecords) {
+        fprintf(stderr, "\nCannot read planet file '%s' into memory!\n\n", filename);
+        exit(-1);
+    }
+    fclose(fp);
+
+    // allocate memory for the translated records plus extra records plus the sentinel record
+    if (extraRecords < 0) {
+        extraRecords = 0;
+    }
+    planet_data_t *planetBase = (planet_data_t *) calloc(numRecords + extraRecords + 1, sizeof(planet_data_t));
+    if (planet_base == NULL) {
+        perror("get_planet_data");
+        fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n\n", filename);
+        fprintf(stderr, "\n\tattempted to allocate %d + %d planet entries\n\n", num_planets, extraRecords);
+        exit(-1);
+    }
+
+    // translate from the raw input record into the application record
+    for (int i = 0; i < numRecords; i++) {
+        struct planet_data *p = &planetBase[i];
+        binary_data_t *pd = &rawRecords[i];
+        p->temperature_class = pd->temperature_class;
+        p->pressure_class = pd->pressure_class;
+        p->special = pd->special;
+        for (int g = 0; g < 4; g++) {
+            p->gas[g] = pd->gas[g];
+            p->gas_percent[g] = pd->gas_percent[g];
+        }
+        p->diameter = pd->diameter;
+        p->gravity = pd->gravity;
+        p->mining_difficulty = pd->mining_difficulty;
+        p->econ_efficiency = pd->econ_efficiency;
+        p->md_increase = pd->md_increase;
+        p->message = pd->message;
+        p->isValid = FALSE;
+    }
+
+    free(rawRecords);
+
+    return planetBase;
+}
+
+
 // planetDataAsJson writes the current planet_base array to a text file as JSON.
 void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp) {
     const char *sep = "";
@@ -133,7 +202,7 @@ void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp) {
         }
         fprintf(fp, "],");
         fprintf(fp, "\n   \"mining_difficulty\": {\"base\": %d, \"increase\": %d},",
-                p->mining_difficulty,                p->md_increase);
+                p->mining_difficulty, p->md_increase);
         fprintf(fp, "\n   \"econ_efficiency\": %d,", p->econ_efficiency);
         fprintf(fp, "\n   \"message\": %d}", p->message);
         sep = ",";
@@ -148,12 +217,17 @@ void planetDataAsSExpr(int numPlanets, planet_data_t *planetBase, FILE *fp) {
     for (int i = 0; i < numPlanets; i++) {
         planet_data_t *p = &planetBase[i];
         fprintf(fp,
-                "\n  (planet (id %5d) (diameter %3d) (gravity %3d) (temperature_class %3d) (pressure_class %3d) (special %2d) (gases (%2d %3d) (%2d %3d) (%2d %3d) (%2d %3d)) (mining_difficulty %3d %3d) (econ_efficiency %3d) (message %d))",
+                "\n  (planet (id %5d) (diameter %3d) (gravity %2d.%02d) (temperature_class %3d) (pressure_class %3d) (special %2d) (gases (%2d %3d) (%2d %3d) (%2d %3d) (%2d %3d)) (mining_difficulty %3d.%02d %3d) (econ_efficiency %3d) (message %d))",
                 i + 1,
-                p->diameter, p->gravity, p->temperature_class, p->pressure_class, p->special,
-                p->gas[0], p->gas_percent[0], p->gas[1], p->gas_percent[1], p->gas[2], p->gas_percent[2],
+                p->diameter,
+                p->gravity / 100, p->gravity % 100,
+                p->temperature_class, p->pressure_class, p->special,
+                p->gas[0], p->gas_percent[0],
+                p->gas[1], p->gas_percent[1],
+                p->gas[2], p->gas_percent[2],
                 p->gas[3], p->gas_percent[3],
-                p->mining_difficulty, p->md_increase, p->econ_efficiency, p->message);
+                p->mining_difficulty / 100, p->mining_difficulty % 100,
+                p->md_increase, p->econ_efficiency, p->message);
     }
     fprintf(fp, ")\n");
 }
@@ -175,8 +249,8 @@ void save_planet_data(void) {
         pd->pressure_class = p->pressure_class;
         pd->special = p->special;
         for (int g = 0; g < 4; g++) {
-            p->gas[g] = p->gas[g];
-            p->gas_percent[g] = p->gas_percent[g];
+            pd->gas[g] = p->gas[g];
+            pd->gas_percent[g] = p->gas_percent[g];
         }
         pd->diameter = p->diameter;
         pd->gravity = p->gravity;
@@ -228,8 +302,8 @@ void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filen
         pd->pressure_class = p->pressure_class;
         pd->special = p->special;
         for (int g = 0; g < 4; g++) {
-            p->gas[g] = p->gas[g];
-            p->gas_percent[g] = p->gas_percent[g];
+            pd->gas[g] = p->gas[g];
+            pd->gas_percent[g] = p->gas_percent[g];
         }
         pd->diameter = p->diameter;
         pd->gravity = p->gravity;

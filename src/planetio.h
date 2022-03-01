@@ -24,6 +24,8 @@
 
 void get_planet_data(void);
 
+planet_data_t *getPlanetData(int extraRecords, const char *filename);
+
 void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp);
 
 void planetDataAsSExpr(int numPlanets, planet_data_t *planetBase, FILE *fp);
