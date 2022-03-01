@@ -178,6 +178,8 @@ The original ANSI C source code and rules are Copyright (c) 1999 by Richard A. M
 
 # Notes
 
+* [LtanHonor's Gmail Updates](https://github.com/LtanHonor/Far-Horizons/blob/develop/tools/turn_send.py)
+
 ## CMake
 
 There's a helpful page on CMake at
