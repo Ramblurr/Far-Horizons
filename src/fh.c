@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "create.h"
 #include "enginevars.h"
 #include "export.h"
 #include "galaxy.h"
@@ -61,8 +62,8 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
-        } else if (strcmp(argv[i], "create-galaxy") == 0) {
-            return createGalaxyCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "create") == 0) {
+            return createCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "create-home-systems") == 0) {
             return createHomeSystemsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {

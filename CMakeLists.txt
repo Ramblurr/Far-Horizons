@@ -34,6 +34,7 @@ endif (HAVE_LIB_M)
 add_executable(fh
         src/fh.c src/fh.c
         src/commandvars.h src/commandvars.c
+        src/create.h src/create.c
         src/engine.h src/engine.c
         src/enginevars.h src/enginevars.c
         src/export.h src/export.c
@@ -66,6 +67,7 @@ add_executable(fh
         src/transactionio.h src/transactionio.c
         src/turn.h src/turn.c
         src/update.h src/update.c)
+
 target_link_libraries(fh ${USE_LIB_M})
 
 add_executable(fhorders

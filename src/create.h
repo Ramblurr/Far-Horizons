@@ -17,17 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_GALAXY_H
-#define FAR_HORIZONS_GALAXY_H
+#ifndef FAR_HORIZONS_CREATE_H
+#define FAR_HORIZONS_CREATE_H
 
-struct galaxy_data {
-    int d_num_species; /* Design number of species in galaxy. */
-    int num_species;   /* Actual number of species allocated. */
-    int radius;        /* Galactic radius in parsecs. */
-    int turn_number;   /* Current turn number. */
-};
-typedef struct galaxy_data galaxy_data_t;
+int createCommand(int argc, char *argv[]);
 
-int createGalaxy(int radius, int desiredNumStars, int desiredNumSpecies);
-
-#endif //FAR_HORIZONS_GALAXY_H
+#endif //FAR_HORIZONS_CREATE_H
