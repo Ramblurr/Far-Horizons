@@ -137,6 +137,7 @@ The command accepts the following options:
 
 * --radius=integer, optional, default 10, minimum distance between home systems
 * --system=integer,integer,integer, optional, use the system located at x,y,z
+* --force, optional, overrides the check for radius and existing home system
 
 If the `--radius` option is given, this command searches for find a system that has at least 3 planets, is not already a
 home system, and is at least the minimum distance from any other home system. If it cannot, it reports an error and
@@ -154,7 +155,7 @@ planets in the system). The values for the planets are adjusted by small random 
 
 If there are no problems, the `planets.dat` file is updated with the new data.
 
-NB: `?` replaces `MakeHomeSystemAuto`.
+NB: `fh update home-system` replaces `MakeHomeSystem` and `MakeHomeSystemAuto`.
 
 ## Add Species
 
