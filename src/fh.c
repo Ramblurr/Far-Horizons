@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
             printf("                  in planets data file\n");
             printf("  cmd: report     create end of turn reports\n");
             printf("  cmd: stats      display statistics\n");
+            printf("  cmd: create     create a new galaxy, home system templates\n");
             printf("  cmd: export     convert binary .dat to json or s-expression\n");
             printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
             printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
@@ -64,8 +65,6 @@ int main(int argc, char *argv[]) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "create") == 0) {
             return createCommand(argc - i, argv + i);
-        } else if (strcmp(argv[i], "create-home-systems") == 0) {
-            return createHomeSystemsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "locations") == 0) {

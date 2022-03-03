@@ -28,6 +28,8 @@
 
 int createGalaxyCommand(int argc, char *argv[]);
 
+int createHomeSystemTemplatesCommand(int argc, char *argv[]);
+
 int createSpeciesCommand(int argc, char *argv[]);
 
 
@@ -37,7 +39,7 @@ int createCommand(int argc, char *argv[]) {
     get_star_data();
     get_planet_data();
     for (int i = 1; i < argc; i++) {
-        fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
+        // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         char *opt = argv[i];
         char *val = NULL;
         for (val = opt; *val != 0; val++) {
@@ -51,11 +53,12 @@ int createCommand(int argc, char *argv[]) {
             val = NULL;
         }
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
-            fprintf(stderr,
-                    "fh: usage: create (species)\n");
+            fprintf(stderr, "fh: usage: create (galaxy | home-system-templates | species)\n");
             return 2;
         } else if (strcmp(opt, "galaxy") == 0) {
             return createGalaxyCommand(argc - i, argv + i);
+        } else if (strcmp(opt, "home-system-templates") == 0) {
+            return createHomeSystemTemplatesCommand(argc - i, argv + i);
         } else if (strcmp(opt, "species") == 0) {
             return createSpeciesCommand(argc - i, argv + i);
         } else {
@@ -163,6 +166,34 @@ int createGalaxyCommand(int argc, char *argv[]) {
 }
 
 
+int createHomeSystemTemplatesCommand(int argc, char *argv[]) {
+    for (int i = 1; i < argc; i++) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr,
+                    "fh: usage: create home-system-templates...\n");
+            return 2;
+        } else {
+            fprintf(stderr, "error: unknown option '%s'\n", opt);
+            return 2;
+        }
+    }
+
+    return createHomeSystemTemplates();
+}
+
+
 int createSpeciesCommand(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
@@ -187,5 +218,5 @@ int createSpeciesCommand(int argc, char *argv[]) {
         }
     }
 
-    return 2;
+    return 0;
 }
