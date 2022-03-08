@@ -23,11 +23,15 @@
 #include <stdio.h>
 #include "star.h"
 
+
 void get_star_data(void);
 
 void save_star_data(void);
 
-void starDataAsSexpr(FILE *fp);
+void saveStarData(star_data_t *starBase, int numStars, FILE *fp);
+
+void starDataAsSExpr(star_data_t *starBase, int numStars, FILE *fp);
+
 
 // globals. ugh.
 

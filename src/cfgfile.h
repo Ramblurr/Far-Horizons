@@ -17,27 +17,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_PLANETIO_H
-#define FAR_HORIZONS_PLANETIO_H
+#ifndef FAR_HORIZONS_CFGFILE_H
+#define FAR_HORIZONS_CFGFILE_H
 
-#include "planet.h"
+typedef struct species_cfg {
+    struct species_cfg *next;
+    char *email;
+    char *govtname;
+    char *govttype;
+    char *homeworld;
+    char *name;
+    int ml;
+    int gv;
+    int ls;
+    int bi;
+} species_cfg_t;
 
-void get_planet_data(void);
 
-planet_data_t *getPlanetData(int extraRecords, const char *filename);
+species_cfg_t *CfgSpeciesFree(species_cfg_t *c);
 
-void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp);
+species_cfg_t *CfgSpeciesFromFile(const char *name);
 
-void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp);
-
-void save_planet_data(void);
-
-void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename);
-
-// globals. ugh.
-
-extern int num_planets;
-extern struct planet_data *planet_base;
-extern int planet_data_modified;
-
-#endif //FAR_HORIZONS_PLANETIO_H
+#endif //FAR_HORIZONS_CFGFILE_H

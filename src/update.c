@@ -85,9 +85,20 @@ int updateCommand(int argc, char *argv[]) {
 }
 
 
+// updateHomeSystem changes the type of a planet in an existing star system to HOME_PLANET
+// and then replaces the existing planets in the system with ones from the related homesystem
+// template.
+// by default, this function chooses a system at random from the set of systems that:
+//    are at least some minimum distance from other home systems
+//    do not already contain a home planet
+// the user may specify the minimum distance and/or the locations of a system to use.
+// if a system is specified, the use may pass in a flag to ignore the minimum distance
+// check described above. this is useful if the gamemaster intends to force species to
+// be close neighbors.
+// there is no way to force multiple planets in a system to be home planets.
 int updateHomeSystem(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    int choseRandomly = TRUE;
+    int chooseRandomly = TRUE;
     int force = FALSE;
     int radius = 10;
     int x = 0;
@@ -127,7 +138,7 @@ int updateHomeSystem(int argc, char *argv[]) {
         } else if (strcmp(opt, "--system") == 0 && val != NULL) {
             for (; *val != 0 && *val != ','; val++) {
                 if (!isdigit(*val)) {
-                    fprintf(stderr, "error: system coordinated must be numeric\n");
+                    fprintf(stderr, "error: system coordinates must be numeric\n");
                     return 2;
                 }
                 x = x * 10 + *val - '0';
@@ -139,7 +150,7 @@ int updateHomeSystem(int argc, char *argv[]) {
             val++;
             for (; *val != 0 && *val != ','; val++) {
                 if (!isdigit(*val)) {
-                    fprintf(stderr, "error: system coordinated must be numeric\n");
+                    fprintf(stderr, "error: system coordinates must be numeric\n");
                     return 2;
                 }
                 y = y * 10 + *val - '0';
@@ -151,25 +162,23 @@ int updateHomeSystem(int argc, char *argv[]) {
             val++;
             for (; *val != 0; val++) {
                 if (!isdigit(*val)) {
-                    fprintf(stderr, "error: system coordinated must be numeric\n");
+                    fprintf(stderr, "error: system coordinates must be numeric\n");
                     return 2;
                 }
                 z = z * 10 + *val - '0';
             }
-            choseRandomly = FALSE;
+            chooseRandomly = FALSE;
         } else {
             fprintf(stderr, "fh: %s: unknown option '%s'\n", cmdName, opt);
             return 2;
         }
     }
 
-    int staridx = 0;
     star_data_t *star = NULL;
-    if (choseRandomly == FALSE) {
+    if (chooseRandomly == FALSE) {
         for (int i = 0; i < num_stars; i++) {
             star_data_t *star2 = star_base + i;
             if (star2->x == x && star2->y == y && star2->z == z) {
-                staridx = i;
                 star = star2;
                 break;
             }
@@ -181,162 +190,44 @@ int updateHomeSystem(int argc, char *argv[]) {
             fprintf(stderr, "error: system at %d %d %d has only %d planets!\n", x, y, z, star->num_planets);
         } else if (hasHomeSystemNeighbor(star, radius) != FALSE) {
             if (force == FALSE) {
-                fprintf(stderr, "error: system at %d %d %d has home system neighbor within %d parsecs\n", x, y, z,
-                        radius);
+                fprintf(stderr, "error: system at %d %d %d has home system neighbor within %d parsecs\n",
+                        x, y, z, radius);
                 return 2;
             }
             printf(" warn: system at %d %d %d has home system neighbor within %d parsecs\n", x, y, z, radius);
         }
         printf(" info: given  system %3d %3d %3d\n", star->x, star->y, star->z);
     } else {
-        star_data_t **systems = calloc(num_stars, sizeof(star_data_t *));
-        if (systems == NULL) {
-            perror("updateHomeSystem");
-            exit(2);
-        }
-        int sidx = 0;
-        for (int i = 0; i < num_stars; i++) {
-            star_data_t *star = star_base + i;
-            if (star->num_planets >= 3 && star->home_system == FALSE && star->worm_here == FALSE) {
-                systems[sidx] = star;
-                sidx++;
-            }
-        }
-        if (sidx == 0) {
-            fprintf(stderr, "error: internal error: all systems are ineligible!\n");
-            return 2;
-        }
-        // pick one at random by shuffling the list, then iterating through it until we find a match.
-        // Fisher and Yates shuffle, updated
-        // -- To shuffle an array A of n elements (indices 0..n-1):
-        //    for i from n−1 downto 1 do
-        //        j ← random integer such that 0 ≤ j ≤ i
-        //        swap(A[i], A[j])
-        for (int i = sidx - 1; i > 0; i--) {
-            // rnd(i)         returns 1 ≤ x ≤ i
-            // rnd(i + 1)     returns 1 ≤ x ≤ i+1
-            // rnd(i + 1) - 1 returns 0 ≤ x ≤ i
-            int j = rnd(i + 1) - 1;
-            star_data_t *tmp = systems[j];
-            systems[j] = systems[i];
-            systems[i] = tmp;
-        }
-        star = NULL;
-        for (int i = 0; i < sidx && star == NULL; i++) {
-            star_data_t *star2 = systems[i];
-            if (hasHomeSystemNeighbor(systems[i], radius)) {
-                continue;
-            }
-            star = systems[i];
-        }
+        star = findHomeSystemCandidate(radius);
         if (star == NULL) {
-            fprintf(stderr, "error: no systems meet the criteria for radius of %d!\n", radius);
+            fprintf(stderr, "error: no systems meet the criteria for home systems!\n");
             return 2;
         }
         printf(" info: random system %3d %3d %3d\n", star->x, star->y, star->z);
-        free(systems);
     }
-    printf(" info: updating system id %4d at %3d %3d %3d planet index %4d\n", staridx + 1, star->x, star->y, star->z,
-           star->planet_index);
-    if (star == NULL) {
-        fprintf(stderr, "error: internal error, star is NULL\n");
+
+    if (changeSystemToHomeSystem(star) != 0) {
+        fprintf(stderr, "error: updateHomeSystem: failed to update the system\n");
         return 2;
     }
-
-    // load the home system template
-    char filename[128];
-    sprintf(filename, "homesystem%d.dat", star->num_planets);
-    printf(" info: loading template '%s'\n", filename);
-    planet_data_t *homeSystem = getPlanetData(0, filename);
-    if (homeSystem == NULL) {
-        fprintf(stderr, "error: unable to load template '%s'\n", filename);
-        return 2;
-    }
-    printf(" info: loaded template from '%s'\n", filename);
-
-    // make minor random modifications to the template
-    for (int pn = 0; pn < star->num_planets; pn++) {
-        planet_data_t *planet = homeSystem + pn;
-        if (planet->special == 1) {
-            printf(" info: home system %3d %3d %3d orbit %d id %4d\n", star->x, star->y, star->z, pn + 1,
-                   star->planet_index + pn + 1);
-        }
-        if (planet->temperature_class > 12) {
-            planet->temperature_class -= rnd(3) - 1;
-        } else if (planet->temperature_class > 0) {
-            planet->temperature_class += rnd(3) - 1;
-        }
-        if (planet->pressure_class > 12) {
-            planet->pressure_class -= rnd(3) - 1;
-        } else if (planet->pressure_class > 0) {
-            planet->pressure_class += rnd(3) - 1;
-        }
-        if (planet->gas[2] > 0) {
-            int roll = rnd(25) + 10;
-            if (planet->gas_percent[2] > 50) {
-                planet->gas_percent[1] += roll;
-                planet->gas_percent[2] -= roll;
-            } else if (planet->gas_percent[1] > 50) {
-                planet->gas_percent[1] -= roll;
-                planet->gas_percent[2] += roll;
-            }
-        }
-        if (planet->diameter > 12) {
-            planet->diameter -= rnd(3) - 1;
-        } else if (planet->diameter > 0) {
-            planet->diameter += rnd(3) - 1;
-        }
-        if (planet->gravity > 100) {
-            planet->gravity -= rnd(10);
-        } else if (planet->gravity > 0) {
-            planet->gravity += rnd(10);
-        }
-        if (planet->mining_difficulty > 100) {
-            planet->mining_difficulty -= rnd(10);
-        } else if (planet->mining_difficulty > 0) {
-            planet->mining_difficulty += rnd(10);
-        }
-    }
-
-    // copy from the template into the system's planet data
-    for (int pn = 0; pn < star->num_planets; pn++) {
-        planet_data_t *p = planet_base + star->planet_index + pn;
-        planet_data_t *pd = homeSystem + pn;
-        p->temperature_class = pd->temperature_class;
-        p->pressure_class = pd->pressure_class;
-        p->special = pd->special;
-        for (int g = 0; g < 4; g++) {
-            p->gas[g] = pd->gas[g];
-            p->gas_percent[g] = pd->gas_percent[g];
-        }
-        p->diameter = pd->diameter;
-        p->gravity = pd->gravity;
-        p->mining_difficulty = pd->mining_difficulty;
-        p->econ_efficiency = pd->econ_efficiency;
-        p->md_increase = pd->md_increase;
-        p->message = pd->message;
-        p->isValid = pd->isValid;
-    }
-
-    star->home_system = TRUE;
 
     // save the updated data
     save_star_data();
     FILE *fp = fopen("stars.hs.txt", "wb");
     if (fp == NULL) {
-        perror("updateHomeSystem");
-        return 2;
+        perror("changeSystemToHomeSystem:");
+        exit(2);
     }
-    starDataAsSexpr(fp);
+    starDataAsSExpr(star_base, num_stars, fp);
     fclose(fp);
 
     save_planet_data();
     fp = fopen("planets.hs.txt", "wb");
     if (fp == NULL) {
-        perror("updateHomeSystem");
-        return 2;
+        perror("changeSystemToHomeSystem:");
+        exit(2);
     }
-    planetDataAsSExpr(num_planets, planet_base, fp);
+    planetDataAsSExpr(planet_base, num_planets, fp);
     fclose(fp);
 
     return 0;

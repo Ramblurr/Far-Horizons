@@ -25,6 +25,7 @@
 #include "shipio.h"
 #include "item.h"
 
+
 typedef struct {
     uint8_t name[32];                   /* Name of ship. */
     uint8_t x, y, z, pn;                /* Current coordinates. */

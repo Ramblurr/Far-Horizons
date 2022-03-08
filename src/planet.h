@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "star.h"
 
 /* In case gamemaster creates new star systems with Edit program. */
 #define NUM_EXTRA_PLANETS    100
@@ -40,23 +41,6 @@
 #define    H2O   11    /* Steam */
 #define    SO2   12    /* Sulfur Dioxide */
 #define    H2S   13    /* Hydrogen Sulfide */
-
-
-struct planet_data {
-    int temperature_class;  /* Temperature class, 1-30. */
-    int pressure_class;     /* Pressure class, 0-29. */
-    int special;            /* 0 = not special, 1 = ideal home planet, 2 = ideal colony planet, 3 = radioactive hellhole. */
-    int gas[4];             /* Gas in atmosphere. Zero if none. */
-    int gas_percent[4];     /* Percentage of gas in atmosphere. */
-    int diameter;           /* Diameter in thousands of kilometers. */
-    int gravity;            /* Surface gravity. Multiple of Earth gravity times 100. */
-    int mining_difficulty;  /* Mining difficulty times 100. */
-    int econ_efficiency;    /* Economic efficiency. Always 100 for a home planet. */
-    int md_increase;        /* Increase in mining difficulty. */
-    int message;            /* Message associated with this planet, if any. */
-    int isValid;            // FALSE if the record is invalid
-};
-typedef struct planet_data planet_data_t;
 
 
 int createHomeSystemTemplates();

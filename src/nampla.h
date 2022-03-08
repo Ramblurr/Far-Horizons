@@ -20,7 +20,7 @@
 #ifndef FAR_HORIZONS_NAMPLA_H
 #define FAR_HORIZONS_NAMPLA_H
 
-#include "item.h"
+#include "engine.h"
 
 // Additional memory must be allocated for routines that name planets.
 // This is the default 'extras', which may be changed, if necessary, by the main program.
@@ -34,30 +34,6 @@
 #define RESORT_COLONY      32
 #define DISBANDED_COLONY   64
 
-struct nampla_data {
-    char name[32];                 /* Name of planet. */
-    int x, y, z, pn;               /* Coordinates. */
-    int status;                    /* Status of planet. */
-    int hiding;                    /* HIDE order given. */
-    int hidden;                    /* Colony is hidden. */
-    int planet_index;              /* Index (starting at zero) into the file "planets.dat" of this planet. */
-    int siege_eff;                 /* Siege effectiveness - a percentage between 0 and 99. */
-    int shipyards;                 /* Number of shipyards on planet. */
-    int IUs_needed;                /* Incoming ship with only CUs on board. */
-    int AUs_needed;                /* Incoming ship with only CUs on board. */
-    int auto_IUs;                  /* Number of IUs to be automatically installed. */
-    int auto_AUs;                  /* Number of AUs to be automatically installed. */
-    int IUs_to_install;            /* Colonial mining units to be installed. */
-    int AUs_to_install;            /* Colonial manufacturing units to be installed. */
-    int mi_base;                   /* Mining base times 10. */
-    int ma_base;                   /* Manufacturing base times 10. */
-    int pop_units;                 /* Number of available population units. */
-    int item_quantity[MAX_ITEMS];  /* Quantity of each item available. */
-    int use_on_ambush;             /* Amount to use on ambush. */
-    int message;                   /* Message associated with this planet, if any. */
-    int special;                   /* Different for each application. */
-};
-typedef struct nampla_data nampla_data_t;
 
 int check_population(struct nampla_data *nampla);
 

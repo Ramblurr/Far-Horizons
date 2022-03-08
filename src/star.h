@@ -42,28 +42,16 @@
 #define ORANGE       6
 #define RED          7
 
-struct star_data {
-    int x;             /* Coordinates. */
-    int y;
-    int z;
-    int type;          /* Dwarf, degenerate, main sequence or giant. */
-    int color;         /* Star color. Blue, blue-white, etc. */
-    int size;          /* Star size, from 0 thru 9 inclusive. */
-    int num_planets;   /* Number of usable planets in star system. */
-    int home_system;   /* TRUE if this is a good potential home system. */
-    int worm_here;     /* TRUE if wormhole entry/exit. */
-    int worm_x;        /* Coordinates of wormhole's exit. */
-    int worm_y;
-    int worm_z;
-    int planet_index; /* Index (starting at zero) into the file "planets.dat" of the first planet in the star system. */
-    int message;       /* Message associated with this star system, if any. */
-    uint32_t visited_by[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been here. */
-};
-typedef struct star_data star_data_t;
+
+int changeSystemToHomeSystem(star_data_t *star);
 
 void closest_unvisited_star(struct ship_data *ship);
 
 void closest_unvisited_star_report(struct ship_data *ship, FILE *fp);
+
+double distanceBetween(star_data_t *s1, star_data_t *s2);
+
+star_data_t *findHomeSystemCandidate(int radius);
 
 // hasHomeSystemNeighbor returns TRUE if the star has a neighbor within the given radius that is a home system.
 int hasHomeSystemNeighbor(star_data_t *star, int radius);

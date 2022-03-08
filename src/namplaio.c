@@ -21,9 +21,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "item.h"
 #include "nampla.h"
 #include "namplaio.h"
-#include "item.h"
+#include "planetio.h"
 
 typedef struct {
     uint8_t name[32];                   /* Name of planet. */
@@ -105,6 +106,10 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
         nampla->use_on_ambush = data->use_on_ambush;
         nampla->message = data->message;
         nampla->special = data->special;
+
+        // mdhender: added fields to help clean up code
+        nampla->planet = planet_base + nampla->planet_index;
+        nampla->system = nampla->planet->system;
     }
     /* release the binary data memory we allocated */
     free(binData);

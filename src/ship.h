@@ -20,8 +20,7 @@
 #ifndef FAR_HORIZONS_SHIP_H
 #define FAR_HORIZONS_SHIP_H
 
-#include "species.h"
-#include "item.h"
+#include "engine.h"
 
 // Additional memory must be allocated for routines that build ships.
 // This is the default 'extras', which may be changed, if necessary, by the main program.
@@ -61,26 +60,6 @@
 #define    JUMPED_IN_COMBAT    4
 #define    FORCED_JUMP         5
 
-struct ship_data {
-    char name[32];                 /* Name of ship. */
-    int x, y, z, pn;               /* Current coordinates. */
-    int status;                    /* Current status of ship. */
-    int type;                      /* Ship type. */
-    int dest_x;                    /* Destination if ship was forced to jump from combat. */
-    int dest_y;                    /* Ditto. */
-    int dest_z;                    /* Ditto. Also used by TELESCOPE command. */
-    int just_jumped;               /* Set if ship jumped this turn. */
-    int arrived_via_wormhole;      /* Ship arrived via wormhole in the PREVIOUS turn. */
-    int class;                     /* Ship class. */
-    int tonnage;                   /* Ship tonnage divided by 10,000. */
-    int item_quantity[MAX_ITEMS];  /* Quantity of each item carried. */
-    int age;                       /* Ship age. */
-    int remaining_cost;            /* The cost needed to complete the ship if still under construction. */
-    int loading_point;             /* Nampla index for planet where ship was last loaded with CUs. Zero = none. Use 9999 for home planet. */
-    int unloading_point;           /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
-    int special;                   /* Different for each application. */
-};
-typedef struct ship_data ship_data_t;
 
 void delete_ship(struct ship_data *ship);
 

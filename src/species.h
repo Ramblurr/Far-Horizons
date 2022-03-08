@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "engine.h"
-#include "planet.h"
+
 
 /* Tech level ids. */
 #define MI 0 /* Mining tech level. */
@@ -33,32 +33,6 @@
 #define LS 4 /* Life Support tech level. */
 #define BI 5 /* Biology tech level. */
 
-struct species_data {
-    char name[32];                       /* Name of species. */
-    char govt_name[32];                  /* Name of government. */
-    char govt_type[32];                  /* Type of government. */
-    int x, y, z, pn;                     /* Coordinates of home planet. */
-    int required_gas;                    /* Gas required by species. */
-    int required_gas_min;                /* Minimum needed percentage. */
-    int required_gas_max;                /* Maximum allowed percentage. */
-    int neutral_gas[6];                  /* Gases neutral to species. */
-    int poison_gas[6];                   /* Gases poisonous to species. */
-    int auto_orders;                     /* AUTO command was issued. */
-    int tech_level[6];                   /* Actual tech levels. */
-    int init_tech_level[6];              /* Tech levels at start of turn. */
-    int tech_knowledge[6];               /* Unapplied tech level knowledge. */
-    int num_namplas;                     /* Number of named planets, including home planet and colonies. */
-    int num_ships;                       /* Number of ships. */
-    int tech_eps[6];                     /* Experience points for tech levels. */
-    int hp_original_base;                /* If non-zero, home planet was bombed either by bombardment or germ warfare and has not yet fully recovered. Value is total economic base before bombing. */
-    int econ_units;                      /* Number of economic units. */
-    int fleet_cost;                      /* Total fleet maintenance cost. */
-    int fleet_percent_cost;              /* Fleet maintenance cost as a percentage times one hundred. */
-    uint32_t contact[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been met. */
-    uint32_t ally[NUM_CONTACT_WORDS];    /* A bit is set if corresponding species is considered an ally. */
-    uint32_t enemy[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species is considered an enemy. */
-};
-typedef struct species_data species_data_t;
 
 int alien_is_visible(int x, int y, int z, int species_number, int alien_number);
 

@@ -58,7 +58,7 @@ int createHomeSystemTemplates() {
             fprintf(stderr, "error: unable to create template '%s'\n", filename);
             return 2;
         }
-        planetDataAsSExpr(num_planets, planet_base, fp);
+        planetDataAsSExpr(planet_base, num_planets, fp);
         fclose(fp);
     }
     return 0;

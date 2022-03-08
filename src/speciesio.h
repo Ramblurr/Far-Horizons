@@ -23,13 +23,17 @@
 #include <stdio.h>
 #include "species.h"
 
+
 void get_species_data(void);
 
 void save_species_data(void);
 
-void speciesDataAsJson(int spNo, species_data_t *sp, FILE *fp);
+void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *ships, FILE *fp);
 
-void speciesDataAsSExpr(int spNo, species_data_t *sp, FILE *fp);
+void speciesDataAsJson(species_data_t *sp, FILE *fp);
+
+void speciesDataAsSExpr(species_data_t *sp, FILE *fp);
+
 
 // globals. ugh.
 

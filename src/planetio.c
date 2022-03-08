@@ -21,7 +21,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "engine.h"
+#include "planet.h"
 #include "planetio.h"
+#include "stario.h"
 
 int num_planets;
 
@@ -105,7 +107,22 @@ void get_planet_data(void) {
         p->econ_efficiency = pd->econ_efficiency;
         p->md_increase = pd->md_increase;
         p->message = pd->message;
+
+        // mdhender: added fields to help clean up code
+        p->id = i + 1;
+        p->index = i;
     }
+
+    // mdhender: added fields to help clean up code
+    for (int sn = 0; sn < num_stars; sn++) {
+        star_data_t *star = star_base + sn;
+        for (int pn = 0; pn < star->num_planets; pn++) {
+            struct planet_data *p = &planet_base[star->planet_index + pn];
+            p->system = star;
+            p->orbit = pn + 1;
+        }
+    }
+
     planet_data_modified = FALSE;
 
     free(planetData);
@@ -212,7 +229,7 @@ void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp) {
 
 
 // planetDataAsSExpr writes the current planet_base array to a text file as an s-expression.
-void planetDataAsSExpr(int numPlanets, planet_data_t *planetBase, FILE *fp) {
+void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
     fprintf(fp, "(planets");
     for (int i = 0; i < numPlanets; i++) {
         planet_data_t *p = &planetBase[i];
@@ -335,3 +352,4 @@ void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filen
     fclose(fp);
     free(planetData);
 }
+

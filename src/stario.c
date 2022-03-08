@@ -116,6 +116,9 @@ void get_star_data(void) {
         for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
             s->visited_by[j] = data->visited_by[j];
         }
+        // mdhender: added to help clean up code
+        s->id = i + 1;
+        s->index = i;
     }
     star_data_modified = FALSE;
 
@@ -124,18 +127,39 @@ void get_star_data(void) {
 
 
 void save_star_data(void) {
-    FILE *fp;
-    int32_t numStars = num_stars;
+    // open star file for writing
+    FILE *fp = fopen("stars.dat", "wb");
+    if (fp == NULL) {
+        perror("save_star_data");
+        fprintf(stderr, "\n\tCannot create file 'stars.dat'!\n");
+        exit(-1);
+    }
+    saveStarData(star_base, num_stars, fp);
+    fclose(fp);
+
+    star_data_modified = FALSE;
+}
+
+
+//     star_data_t *starBase = star_base;
+//     int32_t numStars = num_stars;
+// caller should update `star_data_modified = FALSE` if they care to.
+void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
+    if (fp == NULL) {
+        fprintf(stderr, "error: saveStarData: internal error: passed null file pointer\n");
+        exit(2);
+    }
     binary_data_t *starData = (binary_data_t *) calloc(numStars, sizeof(binary_data_t));
     if (starData == NULL) {
-        fprintf(stderr, "\nCannot allocate enough memory for star file!\n");
-        fprintf(stderr, "\n\tattempted to allocate %d star entries\n\n", numStars);
-        exit(-1);
+        perror("saveStarData:");
+        fprintf(stderr, "error: cannot allocate enough memory to convert stars data\n");
+        fprintf(stderr, "       attempted to allocate %d star entries\n", numStars);
+        exit(2);
     }
 
     // translate the data
-    for (int i = 0; i < num_stars; i++) {
-        struct star_data *s = &star_base[i];
+    for (int i = 0; i < numStars; i++) {
+        struct star_data *s = &starBase[i];
         binary_data_t *data = &starData[i];
         data->x = s->x;
         data->y = s->y;
@@ -156,44 +180,41 @@ void save_star_data(void) {
         }
     }
 
-    /* Open star file for writing. */
-    fp = fopen("stars.dat", "wb");
-    if (fp == NULL) {
-        perror("save_star_data");
-        fprintf(stderr, "\n\tCannot create file 'stars.dat'!\n");
-        exit(-1);
+    // write header data
+    int32_t numOfElements = numStars;
+    if (fwrite(&numOfElements, sizeof(numOfElements), 1, fp) != 1) {
+        perror("saveStarData:");
+        fprintf(stderr, "error: cannot write stars header to file\n");
+        exit(2);
     }
-    /* Write header data. */
-    if (fwrite(&numStars, sizeof(numStars), 1, fp) != 1) {
-        perror("save_star_data");
-        fprintf(stderr, "\n\tCannot write num_stars to file 'stars.dat'!\n\n");
-        exit(-1);
+    // write records
+    if (fwrite(starData, sizeof(binary_data_t), numOfElements, fp) != numOfElements) {
+        perror("saveStarData:");
+        fprintf(stderr, "error: cannot write stars data to file\n");
+        exit(2);
     }
-    /* Write star data to disk. */
-    if (fwrite(starData, sizeof(binary_data_t), numStars, fp) != numStars) {
-        perror("save_star_data");
-        fprintf(stderr, "\nCannot write star data to disk!\n\n");
-        exit(-1);
-    }
-    fclose(fp);
 
-    star_data_modified = FALSE;
+    // we no longer do this; the caller is responsible
+    // star_data_modified = FALSE;
 
     free(starData);
 }
 
 
-void starDataAsSexpr(FILE *fp) {
+void starDataAsSExpr(star_data_t *starBase, int numStars, FILE *fp) {
     fprintf(fp, "(stars");
-    for (int i = 0; i < num_stars; i++) {
-        struct star_data *s = &star_base[i];
-        fprintf(fp, "\n  (star (id %4d) (x %3d) (y %3d) (z %3d) (type '%c') (color '%c') (size '%c')", i+1, s->x, s->y, s->z, star_type(s->type), star_color(s->color), star_size(s->size));
+    for (int i = 0; i < numStars; i++) {
+        struct star_data *s = &starBase[i];
+        fprintf(fp, "\n  (star (id %4d) (x %3d) (y %3d) (z %3d) (type '%c') (color '%c') (size '%c')",
+                i + 1, s->x, s->y, s->z,
+                star_type(s->type), star_color(s->color), star_size(s->size));
         fprintf(fp, "\n        (planets");
         for (int p = 0; p < s->num_planets; p++) {
             fprintf(fp, " %4d", s->planet_index + p + 1);
         }
         fprintf(fp, ") (home_system %s)", s->home_system ? "true" : "false");
-        fprintf(fp, "\n        (wormhole (here %-5s) (exit_x %3d) (exit_y %3d) (exit_z %3d))", s->worm_here ? "true" : "false", s->worm_x, s->worm_y, s->worm_z);
+        fprintf(fp, "\n        (wormhole (here %-5s) (exit_x %3d) (exit_y %3d) (exit_z %3d))",
+                s->worm_here ? "true" : "false", s->worm_x, s->worm_y, s->worm_z);
         fprintf(fp, "\n        (visited_by");
         for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
             // write the species only if it has visited this system

@@ -176,97 +176,100 @@ void get_species_data(void) {
         num_new_namplas[species_index] = 0;
         num_new_ships[species_index] = 0;
 
+        // mdhender: added fields to help clean up code
+        sp->homeColony = &namp_data[species_index][0];
+        sp->homeSystem = sp->homeColony->system;
+
         fclose(fp);
     }
 
     free(data);
 }
 
+
 // save_species_data will write all data that has been modified
 void save_species_data(void) {
-    FILE *fp;
-    char filename[16];
-
-    // allocate memory to translate the data
-    binary_data_t *data = (binary_data_t *) calloc(sizeof(binary_data_t), 1);
-    if (data == NULL) {
-        perror("save_species_data");
-        fprintf(stderr, "\nCannot allocate enough memory for species file!\n\n");
-        exit(-1);
-    }
-
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        struct species_data *sp = &spec_data[species_index];
-
-        // clear out the translation buffer
-        memset(data, 0, sizeof(binary_data_t));
-
-        // translate data
-        memcpy(data->name, sp->name, 32);
-        memcpy(data->govt_name, sp->govt_name, 32);
-        memcpy(data->govt_type, sp->govt_type, 32);
-        data->x = sp->x;
-        data->y = sp->y;
-        data->z = sp->z;
-        data->pn = sp->pn;
-        data->required_gas = sp->required_gas;
-        data->required_gas_min = sp->required_gas_min;
-        data->required_gas_max = sp->required_gas_max;
-        for (int g = 0; g < 6; g++) {
-            data->neutral_gas[g] = sp->neutral_gas[g];
-            data->poison_gas[g] = sp->poison_gas[g];
-        }
-        data->auto_orders = sp->auto_orders;
-        for (int j = 0; j < 6; j++) {
-            data->tech_level[j] = sp->tech_level[j];
-            data->init_tech_level[j] = sp->init_tech_level[j];
-            data->tech_knowledge[j] = sp->tech_knowledge[j];
-            data->tech_eps[j] = sp->tech_eps[j];
-        }
-        data->num_namplas = sp->num_namplas;
-        data->num_ships = sp->num_ships;
-        data->hp_original_base = sp->hp_original_base;
-        data->econ_units = sp->econ_units;
-        data->fleet_cost = sp->fleet_cost;
-        data->fleet_percent_cost = sp->fleet_percent_cost;
-        for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
-            data->contact[j] = sp->contact[j];
-            data->ally[j] = sp->ally[j];
-            data->enemy[j] = sp->enemy[j];
-        }
-
-        if (data_modified[species_index]) {
+        if (data_in_memory[species_index] != FALSE && data_modified[species_index] != FALSE) {
             // get the filename for the species
+            char filename[128];
             sprintf(filename, "sp%02d.dat", species_index + 1);
 
             /* Open the species data file. */
-            fp = fopen(filename, "wb");
+            FILE *fp = fopen(filename, "wb");
             if (fp == NULL) {
                 perror("save_species_data");
                 fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                 exit(-1);
             }
-
-            /* Write species data. */
-            if (fwrite(data, sizeof(binary_data_t), 1, fp) != 1) {
-                perror("save_species_data");
-                fprintf(stderr, "\n\tCannot write species record to file '%s'!\n\n", filename);
-                exit(-1);
-            }
-
-            /* Write nampla data. */
-            save_nampla_data(namp_data[species_index], sp->num_namplas, fp);
-
-            /* Write ship data. */
-            save_ship_data(ship_data[species_index], sp->num_ships, fp);
-
+            // save the species, colonies, and ship data
+            saveSpeciesData(&spec_data[species_index], namp_data[species_index], ship_data[species_index], fp);
+            // be kind and signal that it's been saved
             data_modified[species_index] = FALSE;
-
+            // closing the file is always nice
             fclose(fp);
         }
     }
+}
 
-    free(data);
+
+void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *ships, FILE *fp) {
+    // use a buffer on the stack to translate the data
+    binary_data_t spData;
+    memset(&spData, 0, sizeof(binary_data_t));
+
+    // translate data
+    memcpy(spData.name, sp->name, 32);
+    memcpy(spData.govt_name, sp->govt_name, 32);
+    memcpy(spData.govt_type, sp->govt_type, 32);
+    spData.x = sp->x;
+    spData.y = sp->y;
+    spData.z = sp->z;
+    spData.pn = sp->pn;
+    spData.required_gas = sp->required_gas;
+    spData.required_gas_min = sp->required_gas_min;
+    spData.required_gas_max = sp->required_gas_max;
+    for (int g = 0; g < 6; g++) {
+        spData.neutral_gas[g] = sp->neutral_gas[g];
+        spData.poison_gas[g] = sp->poison_gas[g];
+    }
+    spData.auto_orders = sp->auto_orders;
+    for (int j = 0; j < 6; j++) {
+        spData.tech_level[j] = sp->tech_level[j];
+        spData.init_tech_level[j] = sp->init_tech_level[j];
+        spData.tech_knowledge[j] = sp->tech_knowledge[j];
+        spData.tech_eps[j] = sp->tech_eps[j];
+    }
+    spData.num_namplas = sp->num_namplas;
+    spData.num_ships = sp->num_ships;
+    spData.hp_original_base = sp->hp_original_base;
+    spData.econ_units = sp->econ_units;
+    spData.fleet_cost = sp->fleet_cost;
+    spData.fleet_percent_cost = sp->fleet_percent_cost;
+    for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
+        spData.contact[j] = sp->contact[j];
+        spData.ally[j] = sp->ally[j];
+        spData.enemy[j] = sp->enemy[j];
+    }
+
+    // save the translated data
+    if (fwrite(&spData, sizeof(binary_data_t), 1, fp) != 1) {
+        perror("saveSpeciesData:");
+        fprintf(stderr, "error: cannot write species record to file\n");
+        exit(2);
+    }
+    // save colonies data
+    save_nampla_data(colonies, sp->num_namplas, fp);
+    // save ships data
+    save_ship_data(ships, sp->num_ships, fp);
+
+    char filename[128];
+    sprintf(filename, "species%03d.txt", sp->id);
+    fp = fopen(filename, "wb");
+    if (fp != NULL) {
+        speciesDataAsSExpr(sp, fp);
+        fclose(fp);
+    }
 }
 
 
@@ -274,9 +277,10 @@ static const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};
 
 
 // speciesDataAsJson writes the current species data to a text file as JSON.
-void speciesDataAsJson(int spNo, species_data_t *sp, FILE *fp) {
+void speciesDataAsJson(species_data_t *sp, FILE *fp) {
     fprintf(fp, "{\n");
-    fprintf(fp, "  \"sp_no\": %d,\n", spNo);
+    fprintf(fp, "  \"id\": %d,\n", sp->id);
+    fprintf(fp, "  \"sp_no\": %d,\n", sp->id);
     fprintf(fp, "  \"name\": \"%s\",\n", sp->name);
     fprintf(fp, "  \"auto\": %s,\n", sp->auto_orders ? "true" : "false");
     fprintf(fp, "  \"government\": {\"name\": \"%s\", \"type\": \"%s\"},\n",
@@ -336,18 +340,20 @@ void speciesDataAsJson(int spNo, species_data_t *sp, FILE *fp) {
 
 
 // speciesDataAsSExpr writes the current species data to a text file as an s-expression.
-void speciesDataAsSExpr(int spNo, species_data_t *sp, FILE *fp) {
-    fprintf(fp, "(species (id %3d) (name '%s') (auto %s)", spNo, sp->name, sp->auto_orders ? "true" : "false");
+void speciesDataAsSExpr(species_data_t *sp, FILE *fp) {
+    fprintf(fp, "(species (id %3d) (name '%s') (auto %s)", sp->id, sp->name, sp->auto_orders ? "true" : "false");
     fprintf(fp, "\n         (government (name '%s') (type '%s'))", sp->govt_name, sp->govt_type);
-    fprintf(fp, "\n         (homeworld (x %3d) (y %3d) (z %3d) (orbit %d) (hp_base %d))", sp->x, sp->y, sp->z, sp->pn,
-            sp->hp_original_base);
+    fprintf(fp, "\n         (homeworld (x %3d) (y %3d) (z %3d) (orbit %d) (hp_base %d))",
+            sp->x, sp->y, sp->z, sp->pn, sp->hp_original_base);
     fprintf(fp, "\n         (atmosphere");
-    fprintf(fp, "\n           (required (gas %2d) (min %3d) (max %3d))", sp->required_gas, sp->required_gas_min,
-            sp->required_gas_max);
-    fprintf(fp, "\n           (neutral %2d %2d %2d %2d %2d %2d)", sp->neutral_gas[0], sp->neutral_gas[1],
-            sp->neutral_gas[2], sp->neutral_gas[3], sp->neutral_gas[4], sp->neutral_gas[5]);
-    fprintf(fp, "\n           (poison  %2d %2d %2d %2d %2d %2d)", sp->poison_gas[0], sp->poison_gas[1],
-            sp->poison_gas[2], sp->poison_gas[3], sp->poison_gas[4], sp->poison_gas[5]);
+    fprintf(fp, "\n           (required (gas %2d) (min %3d) (max %3d))",
+            sp->required_gas, sp->required_gas_min, sp->required_gas_max);
+    fprintf(fp, "\n           (neutral %2d %2d %2d %2d %2d %2d)",
+            sp->neutral_gas[0], sp->neutral_gas[1], sp->neutral_gas[2],
+            sp->neutral_gas[3], sp->neutral_gas[4], sp->neutral_gas[5]);
+    fprintf(fp, "\n           (poison  %2d %2d %2d %2d %2d %2d)",
+            sp->poison_gas[0], sp->poison_gas[1], sp->poison_gas[2],
+            sp->poison_gas[3], sp->poison_gas[4], sp->poison_gas[5]);
     fprintf(fp, ")");
     fprintf(fp, "\n         (technology");
     for (int i = 0; i < 6; i++) {
@@ -355,8 +361,8 @@ void speciesDataAsSExpr(int spNo, species_data_t *sp, FILE *fp) {
                 tech_level_names[i], sp->tech_level[i], sp->tech_knowledge[i], sp->init_tech_level[i], sp->tech_eps[i]);
     }
     fprintf(fp, ")");
-    fprintf(fp, "\n         (fleet (num_ships %5d) (maintenance (cost %9d) (percent %6d)))", sp->num_ships,
-            sp->fleet_cost, sp->fleet_percent_cost);
+    fprintf(fp, "\n         (fleet (num_ships %5d) (maintenance (cost %9d) (percent %6d)))",
+            sp->num_ships, sp->fleet_cost, sp->fleet_percent_cost);
     fprintf(fp, "\n         (num_namplas %7d)", sp->num_namplas);
     fprintf(fp, "\n         (banked_eu %9d)", sp->econ_units);
     fprintf(fp, "\n         (contacts");

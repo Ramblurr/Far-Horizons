@@ -112,7 +112,7 @@ int exportToJson(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    speciesDataAsJson(spNo, sp, fp);
+                    speciesDataAsJson(sp, fp);
                     fclose(fp);
 
                     sprintf(filename, "sp%02d.namplas.json", spNo);
@@ -206,7 +206,7 @@ int exportToSExpr(int argc, char *argv[]) {
                 fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
                 return 2;
             }
-            planetDataAsSExpr(num_planets, planet_base, fp);
+            planetDataAsSExpr(planet_base, num_planets, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
@@ -225,7 +225,7 @@ int exportToSExpr(int argc, char *argv[]) {
                         fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
                         return 2;
                     }
-                    speciesDataAsSExpr(spNo, sp, fp);
+                    speciesDataAsSExpr(sp, fp);
                     fclose(fp);
 
                     sprintf(filename, "sp%02d.namplas.txt", spNo);
@@ -259,7 +259,7 @@ int exportToSExpr(int argc, char *argv[]) {
                 fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
                 return 2;
             }
-            starDataAsSexpr(fp);
+            starDataAsSExpr(star_base, num_stars, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "transactions") == 0) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);

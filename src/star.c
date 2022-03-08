@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "star.h"
 #include "stario.h"
 #include "planet.h"
@@ -42,6 +43,99 @@ static int print_LSN = TRUE;
 char size_char[] = "0123456789";
 
 char type_char[] = " dD g";
+
+
+// changeSystemToHomeSystem replaces the planets in a system with ones
+// from the related homesystem template. the template flags one of the
+// planets in the system as a home planet.
+int changeSystemToHomeSystem(star_data_t *star) {
+    if (star == NULL) {
+        fprintf(stderr, "error: changeSystemToHomeSystem: internal error, star is NULL\n");
+        exit(2);
+    }
+
+    printf(" info: updating system id %4d at %3d %3d %3d planet index %4d\n",
+           star->id, star->x, star->y, star->z, star->planet_index);
+
+    // load the home system template
+    char filename[128];
+    sprintf(filename, "homesystem%d.dat", star->num_planets);
+    printf(" info: loading template '%s'\n", filename);
+    planet_data_t *templateSystem = getPlanetData(0, filename);
+    if (templateSystem == NULL) {
+        fprintf(stderr, "error: changeSystemToHomeSystem: unable to load template '%s'\n", filename);
+        exit(2);
+    }
+    printf(" info: loaded template from '%s'\n", filename);
+
+    // make minor random modifications to the template
+    for (int pn = 0; pn < star->num_planets; pn++) {
+        planet_data_t *planet = templateSystem + pn;
+        if (planet->special == 1) {
+            printf(" info: randomizing home world: orbit %d\n", pn + 1);
+        } else {
+            printf(" info: randomizing planet    : orbit %d\n", pn + 1);
+        }
+        if (planet->temperature_class > 12) {
+            planet->temperature_class -= rnd(3) - 1;
+        } else if (planet->temperature_class > 0) {
+            planet->temperature_class += rnd(3) - 1;
+        }
+        if (planet->pressure_class > 12) {
+            planet->pressure_class -= rnd(3) - 1;
+        } else if (planet->pressure_class > 0) {
+            planet->pressure_class += rnd(3) - 1;
+        }
+        if (planet->gas[2] > 0) {
+            int roll = rnd(25) + 10;
+            if (planet->gas_percent[2] > 50) {
+                planet->gas_percent[1] += roll;
+                planet->gas_percent[2] -= roll;
+            } else if (planet->gas_percent[1] > 50) {
+                planet->gas_percent[1] -= roll;
+                planet->gas_percent[2] += roll;
+            }
+        }
+        if (planet->diameter > 12) {
+            planet->diameter -= rnd(3) - 1;
+        } else if (planet->diameter > 0) {
+            planet->diameter += rnd(3) - 1;
+        }
+        if (planet->gravity > 100) {
+            planet->gravity -= rnd(10);
+        } else if (planet->gravity > 0) {
+            planet->gravity += rnd(10);
+        }
+        if (planet->mining_difficulty > 100) {
+            planet->mining_difficulty -= rnd(10);
+        } else if (planet->mining_difficulty > 0) {
+            planet->mining_difficulty += rnd(10);
+        }
+    }
+
+    // copy from the template into the system's planet data
+    for (int pn = 0; pn < star->num_planets; pn++) {
+        planet_data_t *p = planet_base + star->planet_index + pn;
+        planet_data_t *pd = templateSystem + pn;
+        p->temperature_class = pd->temperature_class;
+        p->pressure_class = pd->pressure_class;
+        p->special = pd->special;
+        for (int g = 0; g < 4; g++) {
+            p->gas[g] = pd->gas[g];
+            p->gas_percent[g] = pd->gas_percent[g];
+        }
+        p->diameter = pd->diameter;
+        p->gravity = pd->gravity;
+        p->mining_difficulty = pd->mining_difficulty;
+        p->econ_efficiency = pd->econ_efficiency;
+        p->md_increase = pd->md_increase;
+        p->message = pd->message;
+        p->isValid = pd->isValid;
+    }
+    star->home_system = TRUE;
+
+    return 0;
+}
 
 
 void closest_unvisited_star(struct ship_data *ship) {
@@ -149,6 +243,65 @@ void closest_unvisited_star_report(struct ship_data *ship, FILE *fp) {
     } else {
         fprintf(fp, "???");
     }
+}
+
+
+double distanceBetween(star_data_t *s1, star_data_t *s2) {
+    double dX = s1->x - s2->x;
+    double dY = s1->y - s2->y;
+    double dZ = s1->z - s2->z;
+    return sqrt(dX * dX + dY * dY + dZ * dZ);
+}
+
+// findHomeSystemCandidate returns a randomly picked system that has at least 3 planets,
+// is not currently a home system, is not a worm_hole endpoint, and is at least the
+// minimum distance from any existing home system. it returns NULL if there are no such systems.
+star_data_t *findHomeSystemCandidate(int radius) {
+    star_data_t **candidates = calloc(num_stars + 1, sizeof(star_data_t *));
+    if (candidates == NULL) {
+        perror("findHomeSystemCandidate:");
+        exit(2);
+    }
+    int sidx = 0;
+    for (int i = 0; i < num_stars; i++) {
+        star_data_t *candidate = star_base + i;
+        if (candidate->num_planets >= 3 && candidate->home_system == FALSE && candidate->worm_here == FALSE) {
+            candidates[sidx++] = candidate;
+        }
+    }
+    if (sidx == 0) {
+        // fprintf(stderr, "error: findHomeSystemCandidate: no candidates meet the criteria for home system!\n");
+        free(candidates);
+        return NULL;
+    }
+    // pick one at random by shuffling the list, then iterating through it until we find a match.
+    // Fisher and Yates shuffle, updated
+    // -- To shuffle an array A of n elements (indices 0..n-1):
+    //    for i from n−1 downto 1 do
+    //        j ← random integer such that 0 ≤ j ≤ i
+    //        swap(A[i], A[j])
+    for (int i = sidx - 1; i > 0; i--) {
+        // rnd(i)         returns 1 ≤ x ≤ i
+        // rnd(i + 1)     returns 1 ≤ x ≤ i+1
+        // rnd(i + 1) - 1 returns 0 ≤ x ≤ i
+        int j = rnd(i + 1) - 1;
+        star_data_t *tmp = candidates[j];
+        candidates[j] = candidates[i];
+        candidates[i] = tmp;
+    }
+
+    // return the first system from the list of candidates that meets the minimum distance criteria.
+    for (int i = 0; candidates[i] != NULL; i++) {
+        if (hasHomeSystemNeighbor(candidates[i], radius) == FALSE) {
+            star_data_t *candidate = candidates[i];
+            free(candidates);
+            return candidate;
+        }
+    }
+    // fprintf(stderr, "error: findHomeSystemCandidate: no candidates meet the criteria for radius of %d!\n", radius);
+
+    free(candidates);
+    return NULL;
 }
 
 

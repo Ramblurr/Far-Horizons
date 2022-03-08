@@ -276,7 +276,7 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
         fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
         return 2;
     }
-    starDataAsSexpr(fp);
+    starDataAsSExpr(star_base, num_stars, fp);
     fclose(fp);
 
     save_planet_data();
@@ -286,7 +286,7 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
         fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
         return 2;
     }
-    planetDataAsSExpr(num_planets, planet_base, fp);
+    planetDataAsSExpr(planet_base, num_planets, fp);
     fclose(fp);
 
     free(star_base);
