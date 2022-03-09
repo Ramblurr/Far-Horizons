@@ -21,35 +21,35 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include "command.h"
+#include "commandvars.h"
+#include "dev_log.h"
+#include "do.h"
 #include "enginevars.h"
 #include "galaxy.h"
 #include "galaxyio.h"
-#include "star.h"
-#include "stario.h"
-#include "starvars.h"
+#include "intercept.h"
+#include "jumpvars.h"
+#include "locationvars.h"
+#include "log.h"
+#include "logvars.h"
+#include "money.h"
+#include "nampla.h"
+#include "namplavars.h"
+#include "productionvars.h"
 #include "planet.h"
 #include "planetio.h"
 #include "planetvars.h"
+#include "ship.h"
+#include "shipvars.h"
 #include "species.h"
 #include "speciesio.h"
 #include "speciesvars.h"
-#include "nampla.h"
-#include "namplavars.h"
-#include "ship.h"
-#include "shipvars.h"
-#include "locationvars.h"
+#include "star.h"
+#include "stario.h"
+#include "starvars.h"
 #include "transaction.h"
 #include "transactionio.h"
-#include "log.h"
-#include "logvars.h"
-#include "command.h"
-#include "commandvars.h"
-#include "do.h"
-#include "jumpvars.h"
-#include "productionvars.h"
-#include "money.h"
-#include "dev_log.h"
-#include "intercept.h"
 
 
 void do_AMBUSH_command(void) {
@@ -4422,7 +4422,7 @@ void do_SCAN_command(void) {
         fprintf(log_file, "\nA scan will be done by %s.\n\n", ship_name(ship));
     } else {
         fprintf(log_file, "\nScan done by %s:\n\n", ship_name(ship));
-        scan(x, y, z);
+        scan(x, y, z, TRUE);
     }
     fprintf(log_file, "\n");
 }

@@ -119,6 +119,11 @@ void free_species_data(void) {
 
 /* Get life support tech level needed. */
 int life_support_needed(struct species_data *species, struct planet_data *home, struct planet_data *colony) {
+    // todo: mdhender: hack
+    if (species == NULL || home == NULL || colony == NULL) {
+        return 99;
+    }
+
     // temperature class requires 3 points of LS per point of difference
     int tc = colony->temperature_class - home->temperature_class;
     if (tc < 0) {

@@ -20,25 +20,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "star.h"
-#include "stario.h"
-#include "planet.h"
-#include "planetio.h"
-#include "planetvars.h"
-#include "species.h"
-#include "speciesvars.h"
-#include "nampla.h"
-#include "namplavars.h"
-#include "ship.h"
 #include "locationvars.h"
 #include "log.h"
 #include "logvars.h"
+#include "nampla.h"
+#include "namplavars.h"
 #include "ordervars.h"
+#include "planetio.h"
+#include "planetvars.h"
+#include "star.h"
+#include "stario.h"
+#include "starvars.h"
+#include "species.h"
+#include "speciesvars.h"
 
 
 char color_char[] = " OBAFGKM";
-
-static int print_LSN = TRUE;
 
 char size_char[] = "0123456789";
 
@@ -324,7 +321,7 @@ int hasHomeSystemNeighbor(star_data_t *star, int radius) {
 }
 
 
-void scan(int x, int y, int z) {
+void scan(int x, int y, int z, int printLSN) {
     int i, j, k, n, found, num_gases, ls_needed;
     char filename[32];
     struct star_data *star;
@@ -339,25 +336,21 @@ void scan(int x, int y, int z) {
             found = TRUE;
             break;
         }
-        ++star;
+        star++;
     }
 
     if (!found) {
-        fprintf(log_file,
-                "Scan Report: There is no star system at x = %d, y = %d, z = %d.\n",
-                x, y, z);
+        fprintf(log_file, "Scan Report: There is no star system at x = %d, y = %d, z = %d.\n", x, y, z);
         return;
     }
 
     /* Print data for star, */
     fprintf(log_file, "Coordinates:\tx = %d\ty = %d\tz = %d", x, y, z);
     fprintf(log_file, "\tstellar type = %c%c%c", type_char[star->type], color_char[star->color], size_char[star->size]);
-
     fprintf(log_file, "   %d planets.\n\n", star->num_planets);
 
     if (star->worm_here) {
-        fprintf(log_file,
-                "This star system is the terminus of a natural wormhole.\n\n");
+        fprintf(log_file, "This star system is the terminus of a natural wormhole.\n\n");
     }
 
     /* Print header. */
@@ -373,15 +366,15 @@ void scan(int x, int y, int z) {
     }
 
     /* Print data for each planet. */
-    planet = planet_base + (long) star->planet_index;
-    if (print_LSN) {
+    planet = planet_base + star->planet_index;
+    if (printLSN != FALSE) {
         home_nampla = nampla_base;
-        home_planet = planet_base + (long) home_nampla->planet_index;
+        home_planet = planet_base + home_nampla->planet_index;
     }
 
     for (i = 1; i <= star->num_planets; i++) {
         /* Get life support tech level needed. */
-        if (print_LSN) {
+        if (printLSN != FALSE) {
             ls_needed = life_support_needed(species, home_planet, planet);
         } else {
             ls_needed = 99;
@@ -390,37 +383,35 @@ void scan(int x, int y, int z) {
         fprintf(log_file, "  %d  %3d  %d.%02d  %2d    %2d    %d.%02d %4d  ",
                 i,
                 planet->diameter,
-                planet->gravity / 100,
-                planet->gravity % 100,
+                planet->gravity / 100, planet->gravity % 100,
                 planet->temperature_class,
                 planet->pressure_class,
-                planet->mining_difficulty / 100,
-                planet->mining_difficulty % 100,
+                planet->mining_difficulty / 100, planet->mining_difficulty % 100,
                 ls_needed);
 
         num_gases = 0;
         for (n = 0; n < 4; n++) {
             if (planet->gas_percent[n] > 0) {
-                if (num_gases > 0) { fprintf(log_file, ","); }
+                if (num_gases > 0) {
+                    fprintf(log_file, ",");
+                }
                 fprintf(log_file, "%s(%d%%)", gas_string[planet->gas[n]], planet->gas_percent[n]);
-                ++num_gases;
+                num_gases++;
             }
         }
-
-        if (num_gases == 0) { fprintf(log_file, "No atmosphere"); }
-
+        if (num_gases == 0) {
+            fprintf(log_file, "No atmosphere");
+        }
         fprintf(log_file, "\n");
-        ++planet;
+
+        planet++;
     }
 
     if (star->message) {
-        /* There is a message that must be logged whenever this star
-            system is scanned. */
+        /* There is a message that must be logged whenever this star system is scanned. */
         sprintf(filename, "message%d.txt", star->message);
         log_message(filename);
     }
-
-    return;
 }
 
 

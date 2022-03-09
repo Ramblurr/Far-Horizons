@@ -64,6 +64,7 @@ add_executable(fh
         src/speciesvars.c src/speciesvars.h
         src/star.c src/star.h
         src/stario.c src/stario.h
+        src/starvars.c src/starvars.h
         src/stats.c src/stats.h
         src/transactionio.c src/transactionio.h
         src/turn.c src/turn.h

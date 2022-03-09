@@ -24,6 +24,7 @@
 #include "create.h"
 #include "galaxy.h"
 #include "galaxyio.h"
+#include "logvars.h"
 #include "nampla.h"
 #include "namplavars.h"
 #include "planetio.h"
@@ -31,6 +32,7 @@
 #include "speciesio.h"
 #include "speciesvars.h"
 #include "stario.h"
+#include "starvars.h"
 
 
 int createGalaxyCommand(int argc, char *argv[]);
@@ -554,6 +556,23 @@ int createSpeciesCommand(int argc, char *argv[]) {
 
         data_in_memory[species_index] = TRUE;
         data_modified[species_index] = TRUE;
+
+        /* Create log file for first turn. Write home star system data to it. */
+        char filename[128];
+        sprintf(filename, "sp%02d.log", species_number);
+        log_file = fopen(filename, "w");
+        if (log_file == NULL) {
+            perror("createSpeciesCommand:");
+            fprintf(stderr, "error: cannot open '%s' for writing!\n\n", filename);
+            exit(2);
+        }
+
+        fprintf(log_file, "\nScan of home star system for SP %s:\n\n", sp->name);
+        species = sp; // species is required by the scan() function
+        nampla_base = home_nampla; // nampla_base is required by the scan() function
+        scan(home_nampla->x, home_nampla->y, home_nampla->z, TRUE);
+
+        fclose(log_file);
     }
 
     // save the updated data

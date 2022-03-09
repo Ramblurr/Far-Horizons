@@ -22,6 +22,7 @@
 
 #include "star.h"
 
+
 // globals. ugh.
 
 extern struct star_data *star;

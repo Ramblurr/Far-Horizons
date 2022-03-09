@@ -56,7 +56,7 @@ star_data_t *findHomeSystemCandidate(int radius);
 // hasHomeSystemNeighbor returns TRUE if the star has a neighbor within the given radius that is a home system.
 int hasHomeSystemNeighbor(star_data_t *star, int radius);
 
-void scan(int x, int y, int z);
+void scan(int x, int y, int z, int printLSN);
 
 char star_color(int c);
 

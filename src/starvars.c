@@ -19,5 +19,6 @@
 
 #include "starvars.h"
 
+
 struct star_data *star;
 

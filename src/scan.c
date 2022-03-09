@@ -81,7 +81,7 @@ int scanCommand(int argc, char *argv[]) {
     nampla_base = namp_data[species_index];
 
     // display scan for the location
-    scan(x, y, z);
+    scan(x, y, z, TRUE);
 
     return 0;
 }
