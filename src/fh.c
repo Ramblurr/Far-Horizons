@@ -22,15 +22,14 @@
 #include "create.h"
 #include "enginevars.h"
 #include "export.h"
-#include "galaxy.h"
 #include "list.h"
 #include "location.h"
 #include "namplavars.h"
 #include "report.h"
 #include "scan.h"
-#include "update.h"
 #include "stats.h"
 #include "turn.h"
+#include "update.h"
 
 
 int main(int argc, char *argv[]) {
@@ -41,6 +40,7 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
             printf("  opt: --help     show this helpful text\n");
+            printf("  opt: --version  display version and exit\n");
             printf("  opt: -t         enable test mode\n");
             printf("  opt: -v         enable verbose mode\n");
             printf("  cmd: turn       display the current turn number\n");
@@ -63,6 +63,9 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
+        } else if (strcmp(argv[i], "--version") == 0) {
+            printf("7.5.5\n");
+            return 0;
         } else if (strcmp(argv[i], "create") == 0) {
             return createCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {
