@@ -104,6 +104,8 @@ add_executable(fhorders
         src/stario.c src/stario.h
         src/starvars.c src/starvars.h)
 
+target_link_libraries(fhorders ${USE_LIB_M})
+
 add_executable(fhcombat
         src/fhcombat.c
         src/combat.c src/combat.h
@@ -139,6 +141,8 @@ add_executable(fhcombat
         src/starvars.c src/starvars.h
         src/transaction.h src/transaction.c
         src/transactionio.c src/transactionio.h)
+
+target_link_libraries(fhcombat ${USE_LIB_M})
 
 add_executable(fhpredep
         src/fhpredep.c
@@ -179,6 +183,8 @@ add_executable(fhpredep
         src/transaction.h src/transaction.c
         src/transactionio.c src/transactionio.h)
 
+target_link_libraries(fhpredep ${USE_LIB_M})
+
 add_executable(fhjump
         src/fhjump.c
         src/command.c src/command.h
@@ -218,6 +224,8 @@ add_executable(fhjump
         src/transaction.h src/transaction.c
         src/transactionio.c src/transactionio.h)
 
+target_link_libraries(fhjump ${USE_LIB_M})
+
 add_executable(fhprod
         src/fhprod.c
         src/command.c src/command.h
@@ -253,6 +261,8 @@ add_executable(fhprod
         src/stario.c src/stario.h
         src/starvars.c src/starvars.h
         src/transactionio.c src/transactionio.h)
+
+target_link_libraries(fhprod ${USE_LIB_M})
 
 add_executable(fhpost
         src/fhpost.c
@@ -290,6 +300,8 @@ add_executable(fhpost
         src/starvars.c src/starvars.h
         src/transactionio.c src/transactionio.h)
 
+target_link_libraries(fhpost ${USE_LIB_M})
+
 add_executable(fhfinish
         src/fhfinish.c
         src/commandvars.c src/commandvars.h
@@ -313,3 +325,5 @@ add_executable(fhfinish
         src/speciesio.c src/speciesio.h
         src/speciesvars.c src/speciesvars.h
         src/transactionio.c src/transactionio.h)
+
+target_link_libraries(fhfinish ${USE_LIB_M})
