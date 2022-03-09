@@ -324,6 +324,7 @@ add_executable(fhfinish
         src/species.c src/species.h
         src/speciesio.c src/speciesio.h
         src/speciesvars.c src/speciesvars.h
+        src/starvars.c src/starvars.h
         src/transactionio.c src/transactionio.h)
 
 target_link_libraries(fhfinish ${USE_LIB_M})
