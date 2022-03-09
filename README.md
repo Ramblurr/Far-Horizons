@@ -81,6 +81,41 @@ Compiling is never easy. Please feel free to reach out to the GitHub site if you
 
 The game has scripts to help initialize and run a game. See [tools/README.md](tools/README.md).
 
+## Running by Hand
+
+### Example: Creating a New Galaxy
+```bash
+mkdir gamma
+cp examples/farhorizons.cfg gamma/
+cp examples/noorders.txt gamma/
+cp examples/species.cfg gamma/
+cd gamma
+FH_SEED=$RANDOM ../build/fh create galaxy --less-crowded --species=18
+FH_SEED=$RANDOM ../build/fh create home-system-templates
+FH_SEED=$RANDOM ../build/fh create species --config=species.cfg
+FH_SEED=$RANDOM ../build/fhfinish
+FH_SEED=$RANDOM ../build/fh report
+FH_SEED=$RANDOM ../build/fh stats
+```
+
+### Example: Running a Turn
+
+```bash
+FH_SEED=$RANDOM ../build/fh turn
+FH_SEED=$RANDOM ../build/fhorders
+FH_SEED=$RANDOM ../build/fh locations
+FH_SEED=$RANDOM ../build/fhcombat
+FH_SEED=$RANDOM ../build/fhpredep
+FH_SEED=$RANDOM ../build/fhjump
+FH_SEED=$RANDOM ../build/fhprod
+FH_SEED=$RANDOM ../build/fhpost
+FH_SEED=$RANDOM ../build/fh locations
+FH_SEED=$RANDOM ../build/fhcombat --strike
+FH_SEED=$RANDOM ../build/fhfinish
+FH_SEED=$RANDOM ../build/fh report
+FH_SEED=$RANDOM ../build/fh stats
+```
+
 ## Create Galaxy
 
 The `fh create-galaxy` command initializes a new game by creating three files:
