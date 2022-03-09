@@ -194,7 +194,7 @@ add_executable(fhjump
         src/engine.c src/engine.h
         src/enginevars.c src/enginevars.h
         src/galaxy.c src/galaxy.h
-        src/galaxyio.h
+        src/galaxyio.c src/galaxyio.h
         src/galaxyvars.c src/galaxyvars.h
         src/intercept.c src/intercept.h
         src/item.c src/item.h
@@ -234,7 +234,7 @@ add_executable(fhprod
         src/do.c src/do.h
         src/engine.c src/engine.h
         src/enginevars.c src/enginevars.h
-        src/galaxyio.h
+        src/galaxyio.c src/galaxyio.h
         src/intercept.c src/intercept.h
         src/item.c src/item.h
         src/jumpvars.c src/jumpvars.h
