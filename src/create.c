@@ -44,9 +44,6 @@ int createSpeciesCommand(int argc, char *argv[]);
 
 int createCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    get_galaxy_data();
-    get_star_data();
-    get_planet_data();
     for (int i = 1; i < argc; i++) {
         // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         char *opt = argv[i];
