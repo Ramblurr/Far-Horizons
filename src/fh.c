@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "create.h"
 #include "enginevars.h"
 #include "export.h"
@@ -33,6 +34,8 @@
 
 
 int main(int argc, char *argv[]) {
+    assert(sizeof(int) > 2); // we can not deal with 16-bit integers at the moment
+
     test_mode = FALSE;
     verbose_mode = FALSE;
 
