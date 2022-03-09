@@ -317,6 +317,7 @@ add_executable(fhfinish
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
+        src/ordervars.c src/ordervars.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
         src/ship.c src/ship.h
