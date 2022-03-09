@@ -311,6 +311,7 @@ add_executable(fhfinish
         src/item.c src/item.h
         src/location.c src/location.h
         src/locationio.c src/locationio.h
+        src/locationvars.c src/locationvars.h
         src/log.c src/log.h
         src/logvars.c src/logvars.h
         src/nampla.c src/nampla.h
