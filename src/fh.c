@@ -71,8 +71,8 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "inspect") == 0) {
-            printf("inspect: sizeof(int)  == %5d\n", sizeof(int));
-            printf("inspect: sizeof(long) == %5d\n", sizeof(long));
+            printf("inspect: sizeof(int)  == %5ld\n", (long unsigned int)sizeof(int));
+            printf("inspect: sizeof(long) == %5ld\n", (long unsigned int)sizeof(long));
             return 0;
         } else if (strcmp(argv[i], "locations") == 0) {
             return locationCommand(argc - i, argv + i);
