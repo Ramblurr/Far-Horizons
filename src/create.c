@@ -228,7 +228,7 @@ int createSpeciesCommand(int argc, char *argv[]) {
         } else if (strcmp(opt, "--radius") == 0 && val != NULL) {
             radius = atoi(val);
             if (radius < 1) {
-                fprintf(stderr, "error: invalid radius '%s'\n", radius);
+                fprintf(stderr, "error: invalid radius '%s'\n", val);
                 return 2;
             }
         } else {

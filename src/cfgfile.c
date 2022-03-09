@@ -159,7 +159,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 val = atoi(kv.value);
                 if (val < 1 || 15 < val) {
-                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key, kv.value);
+                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key);
                     exit(2);
                 }
             }
@@ -205,7 +205,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 val = atoi(kv.value);
                 if (val < 1 || 15 < val) {
-                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key, kv.value);
+                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key);
                     exit(2);
                 }
             }
@@ -227,7 +227,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 val = atoi(kv.value);
                 if (val < 1 || 15 < val) {
-                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key, kv.value);
+                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key);
                     exit(2);
                 }
             }
@@ -237,7 +237,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 val = atoi(kv.value);
                 if (val < 1 || 15 < val) {
-                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key, kv.value);
+                    fprintf(stderr, "error: %d: key %s: value must be between 1 and 15\n", line, kv.key);
                     exit(2);
                 }
             }
