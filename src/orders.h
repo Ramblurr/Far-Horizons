@@ -17,13 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_ORDERVARS_H
-#define FAR_HORIZONS_ORDERVARS_H
+#ifndef FAR_HORIZONS_ORDERS_H
+#define FAR_HORIZONS_ORDERS_H
 
-#include <stdio.h>
+int createOrders(int advanced, int reminder);
 
-// globals. ugh.
+void NoOrdersForSpecies(void);
 
-extern FILE *orders_file;
-
-#endif //FAR_HORIZONS_ORDERVARS_H
+#endif //FAR_HORIZONS_ORDERS_H

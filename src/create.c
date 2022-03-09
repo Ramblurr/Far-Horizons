@@ -27,13 +27,15 @@
 #include "logvars.h"
 #include "nampla.h"
 #include "namplavars.h"
+#include "orders.h"
 #include "planetio.h"
 #include "planetvars.h"
 #include "speciesio.h"
 #include "speciesvars.h"
 #include "stario.h"
-#include "starvars.h"
 
+
+int createOrdersCommand(int argc, char *argv[]);
 
 int createGalaxyCommand(int argc, char *argv[]);
 
@@ -65,6 +67,8 @@ int createCommand(int argc, char *argv[]) {
             return createGalaxyCommand(argc - i, argv + i);
         } else if (strcmp(opt, "home-system-templates") == 0) {
             return createHomeSystemTemplatesCommand(argc - i, argv + i);
+        } else if (strcmp(opt, "orders") == 0) {
+            return createOrdersCommand(argc - i, argv + i);
         } else if (strcmp(opt, "species") == 0) {
             return createSpeciesCommand(argc - i, argv + i);
         } else {
@@ -197,6 +201,46 @@ int createHomeSystemTemplatesCommand(int argc, char *argv[]) {
     }
 
     return createHomeSystemTemplates();
+}
+
+
+int createOrdersCommand(int argc, char *argv[]) {
+    int advanced = FALSE;
+    int reminder = FALSE;
+
+    for (int i = 1; i < argc; i++) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "fh: usage: create orders opt\n");
+            fprintf(stderr, "           creates orders files for species that have not yet submitted theirs\n");
+            fprintf(stderr, "      opt: --add-reminder    insert a reminder into the orders\n");
+            fprintf(stderr, "         : --auto            generate a better set of orders\n");
+            fprintf(stderr, "         : --default         generate the minimal set of orders   [default]\n");
+            return 2;
+        } else if (strcmp(opt, "--add-reminder") == 0 && val == NULL) {
+            reminder = TRUE;
+        } else if (strcmp(opt, "--auto") == 0 && val == NULL) {
+            advanced = TRUE;
+        } else if (strcmp(opt, "--default") == 0 && val == NULL) {
+            advanced = FALSE;
+        } else {
+            fprintf(stderr, "error: unknown option '%s'\n", opt);
+            return 2;
+        }
+    }
+
+    return createOrders(advanced, reminder);
 }
 
 

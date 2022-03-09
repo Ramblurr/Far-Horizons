@@ -20,16 +20,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include "enginevars.h"
-#include "species.h"
-#include "speciesvars.h"
 #include "nampla.h"
 #include "namplavars.h"
+#include "ordersvars.h"
 #include "ship.h"
 #include "shipvars.h"
-#include "command.h"
-#include "commandvars.h"
+#include "species.h"
+#include "speciesvars.h"
 
 
 /* Look-up table for ship defensive/offensive power uses ship->tonnage as an index.
@@ -48,7 +45,6 @@ static short ship_power[101] = {
         19507, 19796, 20086, 20377, 20668, 20960, 21253, 21547, 21841, 22136,
         22431, 22727, 23024, 23321, 23619, 23918, 24217, 24517, 24818, 25119
 };
-
 
 
 void delete_ship(struct ship_data *ship) {
@@ -94,6 +90,46 @@ long power(short tonnage) {
     return result = 1149L * (power(t1) + power(t2)) / 1000L;
 }
 
+
+void printMishapChanceToOrders(struct ship_data *ship, int destx, int desty, int destz) {
+    int mishap_GV;
+    int mishap_age;
+    long stx;
+    long sty;
+    long stz;
+    long mishap_chance;
+    long success_chance;
+    long temp_distance;
+
+    if (destx == -1) {
+        fprintf(orders_file, "Mishap chance = ???");
+        return;
+    }
+
+    stx = destx;
+    sty = desty;
+    stz = destz;
+    temp_distance = ((stx - ship->x) * (stx - ship->x))
+                    + ((sty - ship->y) * (sty - ship->y))
+                    + ((stz - ship->z) * (stz - ship->z));
+
+    mishap_age = ship->age;
+    mishap_GV = species->tech_level[GV];
+    if (mishap_GV > 0) {
+        mishap_chance = 100 * temp_distance / mishap_GV;
+    } else {
+        mishap_chance = 10000;
+    }
+    if (mishap_age > 0 && mishap_chance < 10000) {
+        success_chance = 10000L - mishap_chance;
+        success_chance -= (2L * (long) mishap_age * success_chance) / 100L;
+        mishap_chance = 10000L - success_chance;
+    }
+    if (mishap_chance > 10000) {
+        mishap_chance = 10000;
+    }
+    fprintf(orders_file, "mishap chance = %ld.%02ld%%", mishap_chance / 100L, mishap_chance % 100L);
+}
 
 
 /* This routine will return a pointer to a string containing a complete

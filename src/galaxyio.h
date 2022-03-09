@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 
+
 void galaxyDataAsJson(FILE *fp);
 
 void galaxyDataAsSexpr(FILE *fp);
@@ -29,6 +30,7 @@ void galaxyDataAsSexpr(FILE *fp);
 void get_galaxy_data(void);
 
 void save_galaxy_data(void);
+
 
 // globals. ugh.
 

@@ -20,13 +20,8 @@
 #ifndef FAR_HORIZONS_GALAXY_H
 #define FAR_HORIZONS_GALAXY_H
 
-struct galaxy_data {
-    int d_num_species; /* Design number of species in galaxy. */
-    int num_species;   /* Actual number of species allocated. */
-    int radius;        /* Galactic radius in parsecs. */
-    int turn_number;   /* Current turn number. */
-};
-typedef struct galaxy_data galaxy_data_t;
+#include "engine.h"
+
 
 int createGalaxy(int radius, int desiredNumStars, int desiredNumSpecies);
 

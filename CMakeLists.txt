@@ -50,7 +50,8 @@ add_executable(fh
         src/logvars.c src/logvars.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/orders.c src/orders.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -72,40 +73,6 @@ add_executable(fh
 
 target_link_libraries(fh ${USE_LIB_M})
 
-add_executable(fhorders
-        src/fhorders.c
-        src/command.c src/command.h
-        src/commandvars.c src/commandvars.h
-        src/engine.c src/engine.h
-        src/enginevars.c src/enginevars.h
-        src/galaxyio.c src/galaxyio.h
-        src/item.c src/item.h
-        src/jumpvars.c src/jumpvars.h
-        src/location.c src/location.h
-        src/locationio.c src/locationio.h
-        src/locationvars.c src/locationvars.h
-        src/log.c src/log.h
-        src/logvars.c src/logvars.h
-        src/nampla.c src/nampla.h
-        src/namplaio.c src/namplaio.h
-        src/namplavars.c src/namplavars.h
-        src/no_orders.c src/no_orders.h
-        src/ordervars.c src/ordervars.h
-        src/planet.c src/planet.h
-        src/planetio.c src/planetio.h
-        src/planetvars.c src/planetvars.h
-        src/ship.c src/ship.h
-        src/shipio.c src/shipio.h
-        src/shipvars.c src/shipvars.h
-        src/species.c src/species.h
-        src/speciesio.c src/speciesio.h
-        src/speciesvars.c src/speciesvars.h
-        src/star.c src/star.h
-        src/stario.c src/stario.h
-        src/starvars.c src/starvars.h)
-
-target_link_libraries(fhorders ${USE_LIB_M})
-
 add_executable(fhcombat
         src/fhcombat.c
         src/combat.c src/combat.h
@@ -126,7 +93,7 @@ add_executable(fhcombat
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -165,7 +132,7 @@ add_executable(fhpredep
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -207,7 +174,7 @@ add_executable(fhjump
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -245,7 +212,7 @@ add_executable(fhprod
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -283,7 +250,7 @@ add_executable(fhpost
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
@@ -317,7 +284,7 @@ add_executable(fhfinish
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
         src/namplavars.c src/namplavars.h
-        src/ordervars.c src/ordervars.h
+        src/ordersvars.c src/ordersvars.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
         src/ship.c src/ship.h

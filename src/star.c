@@ -25,7 +25,7 @@
 #include "logvars.h"
 #include "nampla.h"
 #include "namplavars.h"
-#include "ordervars.h"
+#include "ordersvars.h"
 #include "planetio.h"
 #include "planetvars.h"
 #include "star.h"

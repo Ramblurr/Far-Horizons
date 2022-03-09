@@ -17,57 +17,66 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <sys/stat.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include "star.h"
-#include "planet.h"
-#include "species.h"
+#include "engine.h"
+#include "galaxyio.h"
+#include "locationio.h"
 #include "nampla.h"
+#include "orders.h"
+#include "ordersvars.h"
+#include "planetio.h"
+#include "planetvars.h"
 #include "ship.h"
-#include "location.h"
-#include "no_orders.h"
-#include "ordervars.h"
+#include "shipvars.h"
+#include "speciesio.h"
+#include "speciesvars.h"
+#include "stario.h"
+#include "namplavars.h"
+#include "locationvars.h"
+
+
+// createOrders creates an orders file for every species that does
+// not currently have one.
+// `advanced` and `reminder` are not currently used.
+int createOrders(int advanced, int reminder) {
+    /* Get all necessary data. */
+    get_galaxy_data();
+    get_star_data();
+    get_planet_data();
+    get_species_data();
+    get_location_data();
+
+    truncate_name = TRUE;
+
+    /* Major loop. Check each species in the game. */
+    for (species_index = 0; species_index < galaxy.num_species; species_index++) {
+        species_number = species_index + 1;
+
+        // check if this species is still in the game
+        if (data_in_memory[species_index] == FALSE) {
+            fprintf(stderr, " warn: createOrders: species %2d is not in memory\n", species_number);
+            continue;
+        }
+
+        // check if we have an orders file for this species
+        char filename[32];
+        sprintf(filename, "sp%02d.ord", species_number);
+        struct stat sb;
+        if (stat(filename, &sb) == 0) {
+            // file exists
+            continue;
+        }
+
+        // no file, so do our thing, whatever that is
+        NoOrdersForSpecies();
+    }
+
+    return 0;
+}
+
 
 void NoOrdersForSpecies(void) {
-    // from engine.c
-    extern unsigned long last_random;
-
-    // from galaxy.c
-    extern struct galaxy_data galaxy;
-
-    // from star.c
-    extern int x;
-    extern int y;
-    extern int z;
-    extern int num_stars;
-    extern struct star_data *star_base;
-
-    // from planet.c
-    extern struct planet_data *planet_base;
-    extern struct planet_data *planet;
-    extern struct planet_data *home_planet;
-
-    // from species.c
-    extern int species_number;
-    extern int species_index;
-    extern int data_in_memory[MAX_SPECIES];
-    extern struct species_data spec_data[MAX_SPECIES];
-    extern struct species_data *species;
-
-    // from nampla.c
-    extern struct nampla_data *namp_data[MAX_SPECIES];
-    extern struct nampla_data *nampla_base;
-
-    // from ship.c
-    extern struct ship_data *ship_data[MAX_SPECIES];
-    extern struct ship_data *ship_base;
-    extern char ship_type[3][2];
-    extern int truncate_name;
-
-    // from location.c
-    extern int num_locs;
-    extern struct sp_loc_data loc[MAX_LOCATIONS];
-
     int i;
     int j;
     int k;
@@ -128,7 +137,7 @@ void NoOrdersForSpecies(void) {
     message_file = fopen(filename, "r");
     if (message_file == NULL) {
         fprintf(stderr, "\n\tCannot open '%s' for reading!\n\n", filename);
-        exit(-1);
+        exit(2);;
     }
 
     /* Open log file. */
@@ -136,7 +145,7 @@ void NoOrdersForSpecies(void) {
     log_file = fopen(filename, "a");
     if (log_file == NULL) {
         fprintf(stderr, "\n\tCannot open '%s' for appending!\n\n", filename);
-        exit(-1);
+        exit(2);;
     }
 
     /* Copy message to log file. */
@@ -152,7 +161,7 @@ void NoOrdersForSpecies(void) {
     orders_file = fopen(filename, "w");
     if (orders_file == NULL) {
         fprintf(stderr, "\n\tCannot open '%s' for writing!\n\n", filename);
-        exit(-1);
+        exit(2);;
     }
 
     /* Issue PRE-DEPARTURE orders. */
@@ -291,7 +300,7 @@ void NoOrdersForSpecies(void) {
             }
             temp_nampla = nampla_base + j;
             fprintf(orders_file, "\tJump\t%s, PL %s\t; ", ship_name(ship), temp_nampla->name);
-            print_mishap_chance(ship, temp_nampla->x, temp_nampla->y, temp_nampla->z);
+            printMishapChanceToOrders(ship, temp_nampla->x, temp_nampla->y, temp_nampla->z);
             fprintf(orders_file, "\n\n");
             ship->just_jumped = TRUE;
             continue;
@@ -308,7 +317,7 @@ void NoOrdersForSpecies(void) {
                 continue;
             }
             fprintf(orders_file, "\tJump\t%s, PL %s\t; ", ship_name(ship), temp_nampla->name);
-            print_mishap_chance(ship, temp_nampla->x, temp_nampla->y, temp_nampla->z);
+            printMishapChanceToOrders(ship, temp_nampla->x, temp_nampla->y, temp_nampla->z);
             fprintf(orders_file, "\n\n");
             ship->just_jumped = TRUE;
         }
@@ -333,7 +342,7 @@ void NoOrdersForSpecies(void) {
             fprintf(orders_file, "\tJump\tTR1 %s, ", ship->name);
             closest_unvisited_star(ship);
             fprintf(orders_file, "\n\t\t\t; Age %d, now at %d %d %d, ", ship->age, ship->x, ship->y, ship->z);
-            print_mishap_chance(ship, x, y, z);
+            printMishapChanceToOrders(ship, x, y, z);
             ship->dest_x = x;
             ship->dest_y = y;
             ship->dest_z = z;
@@ -546,53 +555,4 @@ void NoOrdersForSpecies(void) {
     /* Clean up for this species. */
     fclose(orders_file);
 
-}
-
-void print_mishap_chance(struct ship_data *ship, int destx, int desty, int destz) {
-    // from species.c
-    extern struct species_data *species;
-
-    // from star.c
-    extern int num_stars;
-    extern struct star_data *star_base;
-    extern int x;
-    extern int y;
-    extern int z;
-
-    int mishap_GV;
-    int mishap_age;
-    long stx;
-    long sty;
-    long stz;
-    long mishap_chance;
-    long success_chance;
-    long temp_distance;
-
-    if (destx == -1) {
-        fprintf(orders_file, "Mishap chance = ???");
-        return;
-    }
-
-    stx = destx;
-    sty = desty;
-    stz = destz;
-    temp_distance = ((stx - ship->x) * (stx - ship->x)) + ((sty - ship->y) * (sty - ship->y)) +
-                    ((stz - ship->z) * (stz - ship->z));
-
-    mishap_age = ship->age;
-    mishap_GV = species->tech_level[GV];
-    if (mishap_GV > 0) {
-        mishap_chance = 100 * temp_distance / mishap_GV;
-    } else {
-        mishap_chance = 10000;
-    }
-    if (mishap_age > 0 && mishap_chance < 10000) {
-        success_chance = 10000L - mishap_chance;
-        success_chance -= (2L * (long) mishap_age * success_chance) / 100L;
-        mishap_chance = 10000L - success_chance;
-    }
-    if (mishap_chance > 10000) {
-        mishap_chance = 10000;
-    }
-    fprintf(orders_file, "mishap chance = %ld.%02ld%%", mishap_chance / 100L, mishap_chance % 100L);
 }

@@ -67,6 +67,8 @@ int disbanded_ship(struct ship_data *ship);
 
 long power(short tonnage);
 
+void printMishapChanceToOrders(struct ship_data *ship, int destx, int desty, int destz);
+
 char *ship_name(struct ship_data *ship);
 
 #endif //FAR_HORIZONS_SHIP_H

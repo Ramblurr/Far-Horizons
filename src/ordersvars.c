@@ -17,13 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_NO_ORDERS_H
-#define FAR_HORIZONS_NO_ORDERS_H
+#include "ordersvars.h"
 
-#include "ship.h"
+FILE *orders_file;
 
-void NoOrdersForSpecies(void);
-
-void print_mishap_chance(struct ship_data *ship, int destx, int desty, int destz);
-
-#endif //FAR_HORIZONS_NO_ORDERS_H

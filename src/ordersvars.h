@@ -17,7 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ordervars.h"
+#ifndef FAR_HORIZONS_ORDERSVARS_H
+#define FAR_HORIZONS_ORDERSVARS_H
 
-FILE *orders_file;
+#include <stdio.h>
 
+
+// globals. ugh.
+
+extern FILE *orders_file;
+
+#endif //FAR_HORIZONS_ORDERSVARS_H

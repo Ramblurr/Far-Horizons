@@ -49,6 +49,15 @@
 #define NUM_CONTACT_WORDS    ((MAX_SPECIES - 1) / 32) + 1
 
 
+struct galaxy_data {
+    int d_num_species; /* Design number of species in galaxy. */
+    int num_species;   /* Actual number of species allocated. */
+    int radius;        /* Galactic radius in parsecs. */
+    int turn_number;   /* Current turn number. */
+};
+typedef struct galaxy_data galaxy_data_t;
+
+
 struct star_data {
     int id;            // unique identifier for this system
     int index;         // index of this system in star_base array
