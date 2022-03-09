@@ -324,6 +324,7 @@ add_executable(fhfinish
         src/species.c src/species.h
         src/speciesio.c src/speciesio.h
         src/speciesvars.c src/speciesvars.h
+        src/star.c src/star.h
         src/stario.c src/stario.h
         src/starvars.c src/starvars.h
         src/transactionio.c src/transactionio.h)
