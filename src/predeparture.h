@@ -22,4 +22,6 @@
 
 void do_predeparture_orders(void);
 
+int preDepartureCommand(int argc, char *argv[]);
+
 #endif //FAR_HORIZONS_PREDEPARTURE_H
