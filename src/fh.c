@@ -23,6 +23,7 @@
 #include "create.h"
 #include "enginevars.h"
 #include "export.h"
+#include "finish.h"
 #include "list.h"
 #include "location.h"
 #include "namplavars.h"
@@ -74,6 +75,8 @@ int main(int argc, char *argv[]) {
             return createCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {
             return exportCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "finish") == 0) {
+            return finishCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "inspect") == 0) {
             printf("inspect: sizeof(int)  == %5ld\n", (long unsigned int)sizeof(int));
             printf("inspect: sizeof(long) == %5ld\n", (long unsigned int)sizeof(long));

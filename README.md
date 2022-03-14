@@ -105,7 +105,7 @@ FH_SEED=$RANDOM ../build/fh turn
 FH_SEED=$RANDOM ../build/fhorders
 FH_SEED=$RANDOM ../build/fh locations
 FH_SEED=$RANDOM ../build/fhcombat
-FH_SEED=$RANDOM ../build/fhpredep
+FH_SEED=$RANDOM ../build/fh pre-departure
 FH_SEED=$RANDOM ../build/fhjump
 FH_SEED=$RANDOM ../build/fhprod
 FH_SEED=$RANDOM ../build/fhpost
@@ -196,13 +196,17 @@ NB: `fh update home-system` replaces `MakeHomeSystem` and `MakeHomeSystemAuto`.
 
 NB: `?` replaces `AddSpeciesAuto`.
 
+## Process Pre-Departure commands
+
+NB: `fh pre-departure` replaces `?`.
+
 ## Finish Turn
 
-NB: `?` replaces `Finish`.
+NB: `fh finish` replaces `Finish`.
 
 ## Generate Turn Reports
 
-NB: `?` replaces `Report`.
+NB: `fh report` replaces `Report`.
 
 # License
 

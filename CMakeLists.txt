@@ -42,6 +42,7 @@ add_executable(fh
         src/engine.c src/engine.h
         src/enginevars.c src/enginevars.h
         src/export.c src/export.h
+        src/finish.c src/finish.h
         src/galaxy.c src/galaxy.h
         src/galaxyio.c src/galaxyio.h
         src/intercept.c src/intercept.h
@@ -237,33 +238,3 @@ add_executable(fhpost
 
 target_link_libraries(fhpost ${USE_LIB_M})
 
-add_executable(fhfinish
-        src/fhfinish.c
-        src/commandvars.c src/commandvars.h
-        src/engine.c src/engine.h
-        src/enginevars.c src/enginevars.h
-        src/galaxyio.c src/galaxyio.h
-        src/item.c src/item.h
-        src/location.c src/location.h
-        src/locationio.c src/locationio.h
-        src/locationvars.c src/locationvars.h
-        src/log.c src/log.h
-        src/logvars.c src/logvars.h
-        src/nampla.c src/nampla.h
-        src/namplaio.c src/namplaio.h
-        src/namplavars.c src/namplavars.h
-        src/ordersvars.c src/ordersvars.h
-        src/planetio.c src/planetio.h
-        src/planetvars.c src/planetvars.h
-        src/ship.c src/ship.h
-        src/shipio.c src/shipio.h
-        src/shipvars.c src/shipvars.h
-        src/species.c src/species.h
-        src/speciesio.c src/speciesio.h
-        src/speciesvars.c src/speciesvars.h
-        src/star.c src/star.h
-        src/stario.c src/stario.h
-        src/starvars.c src/starvars.h
-        src/transactionio.c src/transactionio.h)
-
-target_link_libraries(fhfinish ${USE_LIB_M})

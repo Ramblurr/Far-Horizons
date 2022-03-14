@@ -17,36 +17,69 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/* This program should be run immediately before running the Report program;
- * i.e. immediately after the last run of AddSpecies in the very first turn, or
- * immediately after running PostArrival on all subsequent turns.
- * This program will create the file 'locations.dat' (via the do_locations subroutine),
- * update populations, handle interspecies transactions, and do some other housekeeping chores. */
-
+#include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include <sys/stat.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include "engine.h"
-#include "enginevars.h"
-#include "galaxy.h"
-#include "galaxyio.h"
-#include "planetio.h"
-#include "planetvars.h"
-#include "speciesio.h"
-#include "speciesvars.h"
-#include "namplavars.h"
-#include "shipvars.h"
-#include "item.h"
-#include "locationio.h"
-#include "transactionio.h"
 #include "commandvars.h"
-#include "logvars.h"
+#include "enginevars.h"
+#include "finish.h"
+#include "galaxyio.h"
 #include "log.h"
+#include "logvars.h"
+#include "namplavars.h"
+#include "planetio.h"
+#include "speciesio.h"
+#include "transactionio.h"
+#include "locationio.h"
+#include "planetvars.h"
+#include "shipvars.h"
+#include "speciesvars.h"
 
 
-int main(int argc, char *argv[]) {
-    int i, j, n, rec, don, nampla_index, ship_index, ls_needed;
+int finishCommand(int argc, char *argv[]) {
+    int dryRun = FALSE;
+
+    /* Check arguments.
+     * If an argument is -t, then set test mode. */
+    for (int i = 1; i < argc; i++) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "usage: finish [--dry-run | --test]\n");
+            fprintf(stderr, "       this program calculates the final values for population, the results\n");
+            fprintf(stderr, "       of inter-species transactions, and miscellaneous housekeeping chores.\n");
+            fprintf(stderr, " note: this program should be run immediately before running the report\n");
+            fprintf(stderr, "       program; i.e. immediately after the last run of AddSpecies in the\n");
+            fprintf(stderr, "       very first turn, or immediately after running PostArrival on all\n");
+            fprintf(stderr, "       subsequent turns.\n");
+            return 2;
+        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+            verbose_mode = TRUE;
+        } else if (strcmp(opt, "--dry-run") == 0 && val == NULL) {
+            dryRun = TRUE;
+        } else if (strcmp(opt, "--test") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else {
+            fprintf(stderr, "error: unknown option '%s'\n", opt);
+            return 2;
+        }
+    }
+
+    int nampla_index, ship_index, ls_needed;
     int ls_actual, tech, turn_number, percent_increase, old_tech_level;
     int new_tech_level, experience_points, their_level, my_level;
     int new_level, orders_received, contact_bit_number;
@@ -64,19 +97,6 @@ int main(int argc, char *argv[]) {
     struct species_data *donor_species;
     struct nampla_data *home_nampla;
 
-    /* Check for options, if any. */
-    test_mode = FALSE;
-    verbose_mode = FALSE;
-    for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-t") == 0) { test_mode = TRUE; }
-        if (strcmp(argv[i], "-v") == 0) { verbose_mode = TRUE; }
-    }
-
-    /* Seed random number generator. */
-    last_random = time(NULL);
-    n = 907;
-    for (i = 0; i < n; i++) { rnd(100); }
-
     /* Get commonly used data. */
     get_galaxy_data();
     get_planet_data();
@@ -89,7 +109,7 @@ int main(int argc, char *argv[]) {
     total_econ_base = (long *) calloc(total, sizeof(long));
     if (total_econ_base == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
-        exit(-1);
+        exit(2);
     }
 
     /* Handle turn number. */
@@ -99,21 +119,21 @@ int main(int argc, char *argv[]) {
 
     /* Do mining difficulty increases and initialize total economic base for each planet. */
     planet = planet_base;
-    for (i = 0; i < num_planets; i++) {
+    for (int i = 0; i < num_planets; i++) {
         planet->mining_difficulty += planet->md_increase;
         planet->md_increase = 0;
-
         total_econ_base[i] = 0;
-
-        ++planet;
+        planet++;
     }
 
     /* Main loop. For each species, take appropriate action. */
-    if (verbose_mode) { printf("\nFinishing up for all species...\n"); }
+    if (verbose_mode) {
+        printf("\nFinishing up for all species...\n");
+    }
     for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
-        struct stat sb;
-
-        if (!data_in_memory[species_number - 1]) { continue; }
+        if (!data_in_memory[species_number - 1]) {
+            continue;
+        }
 
         data_modified[species_number - 1] = TRUE;
 
@@ -125,6 +145,7 @@ int main(int argc, char *argv[]) {
         if (turn_number == 1) {
             orders_received = TRUE;
         } else {
+            struct stat sb;
             sprintf(filename, "sp%02d.ord", species_number);
             if (stat(filename, &sb) != 0) {
                 orders_received = FALSE;
@@ -152,12 +173,16 @@ int main(int argc, char *argv[]) {
         log_stdout = FALSE;
         header_printed = FALSE;
 
-        if (turn_number == 1) { goto check_for_message; }
+        if (turn_number == 1) {
+            goto check_for_message;
+        }
 
         /* Check if any ships of this species experienced mishaps. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == SHIP_MISHAP && transaction[i].number1 == species_number) {
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  !!! ");
                 log_string(transaction[i].name1);
                 if (transaction[i].value < 3) {
@@ -183,7 +208,7 @@ int main(int argc, char *argv[]) {
         home_nampla = nampla_base;
         nampla = nampla_base - 1;
         for (nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
-            ++nampla;
+            nampla++;
 
             if ((nampla->status & DISBANDED_COLONY) == 0) { continue; }
 
@@ -202,7 +227,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 /* Transfer cargo to planet. */
-                for (i = 0; i < MAX_ITEMS; i++) {
+                for (int i = 0; i < MAX_ITEMS; i++) {
                     nampla->item_quantity[i] += ship->item_quantity[i];
                 }
 
@@ -230,7 +255,7 @@ int main(int argc, char *argv[]) {
             }
 
             /* Salvage items on the planet. */
-            for (i = 0; i < MAX_ITEMS; i++) {
+            for (int i = 0; i < MAX_ITEMS; i++) {
                 if (i == RM) {
                     salvage_value = nampla->item_quantity[RM] / 10;
                 } else if (nampla->item_quantity[i] > 0) {
@@ -266,7 +291,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species is the recipient of a transfer of economic units from another species. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].recipient == species_number &&
                 (transaction[i].type == EU_TRANSFER || transaction[i].type == SIEGE_EU_TRANSFER ||
                  transaction[i].type == LOOTING_EU_TRANSFER)) {
@@ -296,7 +321,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if any jump portals of this species were used by aliens. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == ALIEN_JUMP_PORTAL_USAGE && transaction[i].number1 == species_number) {
                 if (!header_printed) { print_header(); }
                 log_string("  ");
@@ -310,7 +335,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if any starbases of this species detected the use of gravitic telescopes by aliens. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == TELESCOPE_DETECTION && transaction[i].number1 == species_number) {
                 if (!header_printed) { print_header(); }
                 log_string("! ");
@@ -326,13 +351,15 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species is the recipient of a tech transfer from another species. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == TECH_TRANSFER && transaction[i].recipient == species_number) {
-                rec = transaction[i].recipient - 1;
-                don = transaction[i].donor - 1;
+                int rec = transaction[i].recipient - 1;
+                int don = transaction[i].donor - 1;
 
                 /* Try to transfer technology. */
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  ");
                 tech = transaction[i].value;
                 log_string(tech_name[tech]);
@@ -391,14 +418,15 @@ int main(int argc, char *argv[]) {
             new_tech_level = old_tech_level;
 
             experience_points = species->tech_eps[tech];
-            if (experience_points == 0) { goto check_random; }
+            if (experience_points == 0) {
+                goto check_random;
+            }
 
             /* Determine increase as if there were NO randomness in the process. */
-            i = experience_points;
-            j = old_tech_level;
-            while (i >= j * j) {
+            int i = experience_points;
+            int j = old_tech_level;
+            for (; i >= j * j; j++) {
                 i -= j * j;
-                ++j;
             }
 
             /* When extremely large amounts are spent on research, tech level increases are sometimes excessive.  Set a limit. */
@@ -409,21 +437,20 @@ int main(int argc, char *argv[]) {
             }
 
             /* Allocate half of the calculated increase NON-RANDOMLY. */
-            n = (j - old_tech_level) / 2;
-            for (i = 0; i < n; i++) {
+            for (int i = 0; i < (j - old_tech_level) / 2; i++) {
                 experience_points -= new_tech_level * new_tech_level;
-                ++new_tech_level;
+                new_tech_level++;
             }
 
             /* Allocate the rest randomly. */
-            while (experience_points >= new_tech_level) {
+            for (; experience_points >= new_tech_level;) {
                 experience_points -= new_tech_level;
-                n = new_tech_level;
+                int n = new_tech_level;
 
-                /* The chance of success is 1 in n. At this point, n is always at least 1. */
-
-                i = rnd(16 * n);
-                if (i >= 8 * n && i <= 8 * n + 15) {
+                /* The chance of success is 1 in new_tech_level.
+                 * At this point, the new tech level is always at least 1. */
+                int roll = rnd(16 * n);
+                if (roll >= 8 * n && roll <= 8 * n + 15) {
                     new_tech_level = n + 1;
                 }
             }
@@ -434,7 +461,9 @@ int main(int argc, char *argv[]) {
             check_random:
 
             /* See if any random increase occurred. Odds are 1 in 6. */
-            if (old_tech_level > 0 && rnd(6) == 6) { ++new_tech_level; }
+            if (old_tech_level > 0 && rnd(6) == 6) {
+                new_tech_level++;
+            }
 
             if (new_tech_level > max_tech_level) {
                 new_tech_level = max_tech_level;
@@ -442,7 +471,9 @@ int main(int argc, char *argv[]) {
 
             /* Report result only if tech level went up. */
             if (new_tech_level > old_tech_level) {
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  ");
                 log_string(tech_name[tech]);
                 log_string(" tech level rose from ");
@@ -468,23 +499,26 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species is the recipient of a knowledge transfer from another species. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == KNOWLEDGE_TRANSFER && transaction[i].recipient == species_number) {
-                rec = transaction[i].recipient - 1;
-                don = transaction[i].donor - 1;
+                int rec = transaction[i].recipient - 1;
+                int don = transaction[i].donor - 1;
 
                 /* Try to transfer technology. */
                 tech = transaction[i].value;
                 their_level = transaction[i].number3;
                 my_level = species->tech_level[tech];
-                n = species->tech_knowledge[tech];
-                if (n > my_level) { my_level = n; }
-
-                if (their_level <= my_level) { continue; }
-
+                int n = species->tech_knowledge[tech];
+                if (n > my_level) {
+                    my_level = n;
+                }
+                if (their_level <= my_level) {
+                    continue;
+                }
                 species->tech_knowledge[tech] = their_level;
-
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  SP ");
                 log_string(transaction[i].name1);
                 log_string(" transferred knowledge of ");
@@ -500,9 +534,10 @@ int main(int argc, char *argv[]) {
         home_planet = planet_base + (long) home_nampla->planet_index;
         nampla = nampla_base - 1;
         for (nampla_index = 0; nampla_index < species->num_namplas; nampla_index++) {
-            ++nampla;
-
-            if (nampla->pn == 99) { continue; }
+            nampla++;
+            if (nampla->pn == 99) {
+                continue;
+            }
 
             /* Get planet pointer. */
             planet = planet_base + (long) nampla->planet_index;
@@ -527,7 +562,7 @@ int main(int argc, char *argv[]) {
 
             /* Check if another species on the same planet has become
             assimilated. */
-            for (i = 0; i < num_transactions; i++) {
+            for (int i = 0; i < num_transactions; i++) {
                 if (transaction[i].type == ASSIMILATION && transaction[i].value == species_number &&
                     transaction[i].x == nampla->x && transaction[i].y == nampla->y && transaction[i].z == nampla->z &&
                     transaction[i].pn == nampla->pn) {
@@ -573,7 +608,6 @@ int main(int argc, char *argv[]) {
             if (nampla->status & HOME_PLANET) {
                 if (nampla->status & POPULATED) {
                     nampla->pop_units = HP_AVAILABLE_POP;
-
                     if (species->hp_original_base != 0) {
                         /* HP was bombed. */
                         if (eb >= species->hp_original_base) {
@@ -590,12 +624,13 @@ int main(int argc, char *argv[]) {
 
                 /* Basic percent increase is 10*(1 - ls_needed/ls_actual). */
                 ls_actual = species->tech_level[LS];
-                percent_increase =
-                        10 * (100 - ((100 * ls_needed) / ls_actual));
+                percent_increase = 10 * (100 - ((100 * ls_needed) / ls_actual));
 
-                if (percent_increase < 0)    /* Colony wiped out! */
-                {
-                    if (!header_printed) { print_header(); }
+                if (percent_increase < 0) {
+                    /* Colony wiped out! */
+                    if (!header_printed) {
+                        print_header();
+                    }
 
                     log_string("  !!! Life support tech level was too low to support colony on PL ");
                     log_string(nampla->name);
@@ -755,9 +790,11 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species has a populated planet that another species tried to land on. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == LANDING_REQUEST && transaction[i].number1 == species_number) {
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  ");
                 log_string(transaction[i].name2);
                 log_string(" owned by SP ");
@@ -774,10 +811,12 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species is the recipient of interspecies construction. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == INTERSPECIES_CONSTRUCTION && transaction[i].recipient == species_number) {
                 /* Simply log the result. */
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  ");
                 if (transaction[i].value == 1) {
                     log_long(transaction[i].number1);
@@ -802,10 +841,12 @@ int main(int argc, char *argv[]) {
         }
 
         /* Check if this species is besieging another species and detects forbidden construction, landings, etc. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == DETECTION_DURING_SIEGE && transaction[i].number3 == species_number) {
                 /* Log what was detected and/or destroyed. */
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("  ");
                 log_string("During the siege of ");
                 log_string(transaction[i].name3);
@@ -852,17 +893,16 @@ int main(int argc, char *argv[]) {
         check_for_message:
 
         /* Check if this species is the recipient of a message from another species. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == MESSAGE_TO_SPECIES && transaction[i].number2 == species_number) {
-                if (!header_printed) { print_header(); }
+                if (!header_printed) {
+                    print_header();
+                }
                 log_string("\n  You received the following message from SP ");
                 log_string(transaction[i].name1);
                 log_string(":\n\n");
-
                 sprintf(filename, "m%d.msg", (int) transaction[i].value);
-
                 log_message(filename);
-
                 log_string("\n  *** End of Message ***\n\n");
             }
         }
@@ -873,7 +913,7 @@ int main(int argc, char *argv[]) {
 
     /* Calculate economic efficiency for each planet. */
     planet = planet_base;
-    for (i = 0; i < num_planets; i++) {
+    for (int i = 0; i < num_planets; i++) {
         total = total_econ_base[i];
         diff = total - 2000;
 
@@ -906,20 +946,20 @@ int main(int argc, char *argv[]) {
 
         /* Update contact mask in species data if this species has met a
             new alien. */
-        for (i = 0; i < num_locs; i++) {
-            if (loc[i].s != species_number) { continue; }
+        for (int i = 0; i < num_locs; i++) {
+            if (loc[i].s != species_number) {
+                continue;
+            }
 
-            for (j = 0; j < num_locs; j++) {
-                if (loc[j].s == species_number) { continue; }
-                if (loc[j].x != loc[i].x) { continue; }
-                if (loc[j].y != loc[i].y) { continue; }
-                if (loc[j].z != loc[i].z) { continue; }
+            for (int j = 0; j < num_locs; j++) {
+                if (loc[j].s == species_number || loc[j].x != loc[i].x || loc[j].y != loc[i].y ||
+                    loc[j].z != loc[i].z) {
+                    continue;
+                }
 
-                /* We are in contact with an alien. Make sure it is not
-                    hidden from us. */
+                /* We are in contact with an alien. Make sure it is not hidden from us. */
                 alien_number = loc[j].s;
-                if (alien_is_visible(loc[j].x, loc[j].y, loc[j].z,
-                                     species_number, alien_number)) {
+                if (alien_is_visible(loc[j].x, loc[j].y, loc[j].z, species_number, alien_number)) {
                     contact_word_number = (loc[j].s - 1) / 32;
                     contact_bit_number = (loc[j].s - 1) % 32;
                     contact_mask = 1 << contact_bit_number;
@@ -929,7 +969,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Report results of tech transfers to donor species. */
-        for (i = 0; i < num_transactions; i++) {
+        for (int i = 0; i < num_transactions; i++) {
             if (transaction[i].type == TECH_TRANSFER
                 && transaction[i].donor == species_number) {
                 /* Open log file for appending. */
@@ -970,11 +1010,12 @@ int main(int argc, char *argv[]) {
         /* Calculate fleet maintenance cost and its percentage of total production. */
         fleet_maintenance_cost = 0;
         ship = ship_base - 1;
-        for (i = 0; i < species->num_ships; i++) {
-            ++ship;
-
-            if (ship->pn == 99) { continue; }
-
+        for (int i = 0; i < species->num_ships; i++) {
+            ship++;
+            if (ship->pn == 99) {
+                continue;
+            }
+            int n = 0;
             if (ship->class == TR) {
                 n = 4 * (int) ship->tonnage;
             } else if (ship->class == BA) {
@@ -982,26 +1023,24 @@ int main(int argc, char *argv[]) {
             } else {
                 n = 20 * (int) ship->tonnage;
             }
-
             if (ship->type == SUB_LIGHT) {
                 n -= (25 * n) / 100;
             }
-
             fleet_maintenance_cost += n;
         }
 
         /* Subtract military discount. */
-        i = (int) species->tech_level[ML] / 2;
-        fleet_maintenance_cost -= (i * fleet_maintenance_cost) / 100;
+        fleet_maintenance_cost -= ((species->tech_level[ML] / 2) * fleet_maintenance_cost) / 100;
 
         /* Calculate total production. */
         total_species_production = 0;
         nampla = nampla_base - 1;
-        for (i = 0; i < species->num_namplas; i++) {
-            ++nampla;
+        for (int i = 0; i < species->num_namplas; i++) {
+            nampla++;
 
-            if (nampla->pn == 99) { continue; }
-            if (nampla->status & DISBANDED_COLONY) { continue; }
+            if (nampla->pn == 99 || nampla->status & DISBANDED_COLONY) {
+                continue;
+            }
 
             planet = planet_base + (long) nampla->planet_index;
 
@@ -1064,5 +1103,6 @@ int main(int argc, char *argv[]) {
     free_species_data();
     free(planet_base);
     free(total_econ_base);
-    exit(0);
+
+    return 0;
 }
