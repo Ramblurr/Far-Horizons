@@ -72,8 +72,6 @@ typedef struct {
 
 // get_species_data will read in data files for all species
 void get_species_data(void) {
-    fprintf(stderr, "get_species_data: enter\n");
-
     // allocate memory to load the data into memory
     binary_data_t *data = (binary_data_t *) calloc(sizeof(binary_data_t), 1);
     if (data == NULL) {
@@ -83,9 +81,7 @@ void get_species_data(void) {
     }
 
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
-        fprintf(stderr, "get_species_data: spec_data[%d] == %p\n", species_index, sp);
 
         // clear out any existing species data
         memset(&spec_data[species_index], 0, sizeof(struct species_data));
@@ -104,19 +100,15 @@ void get_species_data(void) {
     }
 
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
-        fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
-        fprintf(stderr, "get_species_data: spec_data[%d] == %p\n", species_index, sp);
 
         // get the filename for the species
         char filename[128];
         sprintf(filename, "sp%02d.dat", species_index + 1);
-        fprintf(stderr, "get_species_data: filename = '%s'\n", filename);
 
         // see if it exists
         struct stat sb;
         if (stat(filename, &sb) != 0) {
-            fprintf(stderr, "get_species_data: extinct = true\n");
             sp->pn = 0;    /* Extinct! */
             continue;
         }
