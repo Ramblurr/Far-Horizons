@@ -82,6 +82,10 @@ int exportToJson(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     printf("fh: export: %s: loading   galaxy data...\n", cmdName);
     get_galaxy_data();
+    printf("fh: export: %s: loading   star   data...\n", cmdName);
+    get_star_data();
+    printf("fh: export: %s: loading   planet data...\n", cmdName);
+    get_planet_data();
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "galaxy") == 0) {
@@ -107,8 +111,6 @@ int exportToJson(int argc, char *argv[]) {
             locationDataAsJson(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
-            get_planet_data();
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.json", "wb");
             if (fp == NULL) {
@@ -160,8 +162,6 @@ int exportToJson(int argc, char *argv[]) {
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
-            get_star_data();
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.json", "wb");
             if (fp == NULL) {
@@ -176,7 +176,7 @@ int exportToJson(int argc, char *argv[]) {
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("interspecies.json", "wb");
             if (fp == NULL) {
-                perror("fh: export: sexpr:");
+                perror("fh: export: json:");
                 fprintf(stderr, "\n\tCannot create new version of file 'interspecies.json'!\n");
                 return 2;
             }
@@ -195,6 +195,10 @@ int exportToSExpr(int argc, char *argv[]) {
     const char *cmdName = argv[0];
     printf("fh: export: %s: loading   galaxy data...\n", cmdName);
     get_galaxy_data();
+    printf("fh: export: %s: loading   star   data...\n", cmdName);
+    get_star_data();
+    printf("fh: export: %s: loading   planet data...\n", cmdName);
+    get_planet_data();
 
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
@@ -242,8 +246,6 @@ int exportToSExpr(int argc, char *argv[]) {
             locationDataAsSExpr(fp);
             fclose(fp);
         } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
-            get_planet_data();
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("planets.txt", "wb");
             if (fp == NULL) {
@@ -254,9 +256,9 @@ int exportToSExpr(int argc, char *argv[]) {
             planetDataAsSExpr(planet_base, num_planets, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            fprintf(stderr, "fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
+            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_species_data();
-            fprintf(stderr, "fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
                 int spNo = spidx + 1;
                 if (data_in_memory[spidx]) {
@@ -295,8 +297,6 @@ int exportToSExpr(int argc, char *argv[]) {
                 }
             }
         } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
-            get_star_data();
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("stars.txt", "wb");
             if (fp == NULL) {
