@@ -462,8 +462,6 @@ int reportCommand(int argc, char *argv[]) {
         }
 
         species = &spec_data[species_number - 1];
-        fprintf(stderr, "fh: %s: debug: species: no %d ptr %p name '%s'\n",
-                cmdName, species_number, species, species->name);
         nampla_base = namp_data[species_number - 1];
         nampla1_base = nampla_base;
         ship_base = ship_data[species_number - 1];
