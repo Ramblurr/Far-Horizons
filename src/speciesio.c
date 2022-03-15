@@ -72,19 +72,18 @@ typedef struct {
 
 // get_species_data will read in data files for all species
 void get_species_data(void) {
-    FILE *fp;
-    struct stat sb;
-    char filename[16];
+    fprintf(stderr, "get_species_data: enter\n");
 
     // allocate memory to load the data into memory
     binary_data_t *data = (binary_data_t *) calloc(sizeof(binary_data_t), 1);
     if (data == NULL) {
         perror("get_species_data");
         fprintf(stderr, "\nCannot allocate enough memory for species file!\n\n");
-        exit(-1);
+        exit(2);
     }
 
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
+        fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
 
         // clear out any existing species data
@@ -104,19 +103,23 @@ void get_species_data(void) {
     }
 
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
+        fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
 
         // get the filename for the species
+        char filename[128];
         sprintf(filename, "sp%02d.dat", species_index + 1);
+        fprintf(stderr, "get_species_data: filename = '%s'\n", species_index);
 
         // see if it exists
+        struct stat sb;
         if (stat(filename, &sb) != 0) {
             sp->pn = 0;    /* Extinct! */
             continue;
         }
 
         /* Open the species data file. */
-        fp = fopen(filename, "rb");
+        FILE *fp = fopen(filename, "rb");
         if (fp == NULL) {
             perror("get_species_data");
             continue;
@@ -129,7 +132,7 @@ void get_species_data(void) {
         if (fread(data, sizeof(binary_data_t), 1, fp) != 1) {
             perror("get_species_data");
             fprintf(stderr, "\nCannot read species record in file '%s'!\n\n", filename);
-            exit(-1);
+            exit(2);
         }
 
         // translate data
@@ -200,7 +203,7 @@ void save_species_data(void) {
             if (fp == NULL) {
                 perror("save_species_data");
                 fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", filename);
-                exit(-1);
+                exit(2);
             }
             // save the species, colonies, and ship data
             saveSpeciesData(&spec_data[species_index], namp_data[species_index], ship_data[species_index], fp);

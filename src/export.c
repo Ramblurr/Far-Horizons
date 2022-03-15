@@ -254,7 +254,7 @@ int exportToSExpr(int argc, char *argv[]) {
             planetDataAsSExpr(planet_base, num_planets, fp);
             fclose(fp);
         } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
+            fprintf(stderr, "fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_species_data();
             fprintf(stderr, "fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
