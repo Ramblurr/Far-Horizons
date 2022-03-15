@@ -85,6 +85,7 @@ void get_species_data(void) {
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
         fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
+        fprintf(stderr, "get_species_data: spec_data[%d] == %p\n", species_index, sp);
 
         // clear out any existing species data
         memset(&spec_data[species_index], 0, sizeof(struct species_data));
@@ -105,15 +106,17 @@ void get_species_data(void) {
     for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
         fprintf(stderr, "get_species_data: species_index = %d\n", species_index);
         struct species_data *sp = &spec_data[species_index];
+        fprintf(stderr, "get_species_data: spec_data[%d] == %p\n", species_index, sp);
 
         // get the filename for the species
         char filename[128];
         sprintf(filename, "sp%02d.dat", species_index + 1);
-        fprintf(stderr, "get_species_data: filename = '%s'\n", species_index);
+        fprintf(stderr, "get_species_data: filename = '%s'\n", filename);
 
         // see if it exists
         struct stat sb;
         if (stat(filename, &sb) != 0) {
+            fprintf(stderr, "get_species_data: extinct = true\n");
             sp->pn = 0;    /* Extinct! */
             continue;
         }
@@ -126,7 +129,7 @@ void get_species_data(void) {
         }
 
         // clear out the translation buffer
-        memset(sp, 0, sizeof(binary_data_t));
+        memset(data, 0, sizeof(binary_data_t));
 
         /* Read in species data. */
         if (fread(data, sizeof(binary_data_t), 1, fp) != 1) {
