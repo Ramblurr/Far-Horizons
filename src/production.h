@@ -22,4 +22,6 @@
 
 void do_production_orders(void);
 
+int productionCommand(int argc, char *argv[]);
+
 #endif //FAR_HORIZONS_PRODUCTION_H

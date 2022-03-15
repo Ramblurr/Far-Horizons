@@ -107,11 +107,11 @@ FH_SEED=$RANDOM ../build/fh locations
 FH_SEED=$RANDOM ../build/fhcombat
 FH_SEED=$RANDOM ../build/fh pre-departure
 FH_SEED=$RANDOM ../build/fhjump
-FH_SEED=$RANDOM ../build/fhprod
+FH_SEED=$RANDOM ../build/fh production
 FH_SEED=$RANDOM ../build/fhpost
 FH_SEED=$RANDOM ../build/fh locations
 FH_SEED=$RANDOM ../build/fhcombat --strike
-FH_SEED=$RANDOM ../build/fhfinish
+FH_SEED=$RANDOM ../build/fh finish
 FH_SEED=$RANDOM ../build/fh report
 FH_SEED=$RANDOM ../build/fh stats
 ```
@@ -196,9 +196,13 @@ NB: `fh update home-system` replaces `MakeHomeSystem` and `MakeHomeSystemAuto`.
 
 NB: `?` replaces `AddSpeciesAuto`.
 
-## Process Pre-Departure commands
+## Process Pre-Departure Commands
 
-NB: `fh pre-departure` replaces `?`.
+NB: `fh pre-departure` replaces `PreDep`.
+
+## Process Production Commands
+
+NB: `fh production` replaces `Production`.
 
 ## Finish Turn
 

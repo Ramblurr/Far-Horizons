@@ -28,6 +28,7 @@
 #include "location.h"
 #include "namplavars.h"
 #include "predeparture.h"
+#include "production.h"
 #include "report.h"
 #include "scan.h"
 #include "stats.h"
@@ -89,6 +90,8 @@ int main(int argc, char *argv[]) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "pre-departure") == 0) {
             return preDepartureCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "production") == 0) {
+            return productionCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {
             return reportCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "scan") == 0) {
