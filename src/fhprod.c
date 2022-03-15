@@ -53,6 +53,8 @@ int main(int argc, char *argv[]) {
 
     /* Get commonly used data. */
     get_galaxy_data();
+    get_star_data();
+    get_planet_data();
     get_transaction_data();
     ignore_field_distorters = TRUE;
 
