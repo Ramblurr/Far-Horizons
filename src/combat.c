@@ -117,7 +117,8 @@ void battle_error(int species_number) {
 }
 
 // combat returns TRUE if planet, species, and transaction data should be saved
-int combat(int default_summary, int do_all_species, int num_species, int *sp_num, char **sp_name, sp_loc_data_t *locations_base) {
+int combat(int default_summary, int do_all_species, int num_species, int *sp_num, char **sp_name,
+           sp_loc_data_t *locations_base) {
     int save = TRUE;
     int i;
     int j;
@@ -2268,7 +2269,7 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
     /* Handle all shots. */
     header_printed = FALSE;
     combat_occurred = FALSE;
-    int infiniteShotsGuard = total_shots;
+    //int infiniteShotsGuard = total_shots;
     while (total_shots > 0) {
         /* check to make sure we arent in infinite loop
          * that usually happens when there are shots remaining
@@ -2282,11 +2283,11 @@ int do_round(char option, int round_number, struct battle_data *bat, struct acti
                 act->shots_left[i] = 0;
             }
         }
-        // second test to prevent infinite loop due to the shot counter not being decremented.
-        if (total_shots > infiniteShotsGuard) {
-            total_shots = infiniteShotsGuard;
-        }
-        infiniteShotsGuard--;
+        //// second test to prevent infinite loop due to the shot counter not being decremented.
+        //if (total_shots > infiniteShotsGuard) {
+        //    total_shots = infiniteShotsGuard;
+        //}
+        //infiniteShotsGuard--;
 
         /* Determine who fires next. */
         attacker_index = rnd(act->num_units_fighting) - 1;
