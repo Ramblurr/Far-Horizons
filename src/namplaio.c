@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "item.h"
 #include "nampla.h"
 #include "namplaio.h"
@@ -59,6 +60,8 @@ typedef struct {
 
 /* load named planet data from file and create empty slots for future use */
 struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) {
+    assert(planet_base != NULL);
+
     /* Allocate enough memory for all namplas. */
     binary_data_t *binData = (binary_data_t *) calloc(numNamplas + extraNamplas, sizeof(binary_data_t));
     if (binData == NULL) {
