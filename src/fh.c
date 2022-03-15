@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.5.5\n");
+            printf("7.5.6\n");
             return 0;
         } else if (strcmp(argv[i], "create") == 0) {
             return createCommand(argc - i, argv + i);
