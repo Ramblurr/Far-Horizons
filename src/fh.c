@@ -27,6 +27,7 @@
 #include "list.h"
 #include "location.h"
 #include "namplavars.h"
+#include "postarrival.h"
 #include "predeparture.h"
 #include "production.h"
 #include "report.h"
@@ -52,6 +53,9 @@ int main(int argc, char *argv[]) {
             printf("  cmd: turn       display the current turn number\n");
             printf("  cmd: locations  create locations data file and update economic efficiency\n");
             printf("                  in planets data file\n");
+            printf("  cmd: pre-departure    run pre-departure commands\n");
+            printf("  cmd: production       run production commands\n");
+            printf("  cmd: post-arrival     run post-arrival commands\n");
             printf("  cmd: report     create end of turn reports\n");
             printf("  cmd: stats      display statistics\n");
             printf("  cmd: create     create a new galaxy, home system templates\n");
@@ -90,6 +94,8 @@ int main(int argc, char *argv[]) {
             return logRandomCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "pre-departure") == 0) {
             return preDepartureCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "post-arrival") == 0) {
+            return postArrivalCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "production") == 0) {
             return productionCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {

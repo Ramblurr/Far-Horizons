@@ -22,4 +22,7 @@
 
 void do_postarrival_orders(void);
 
+int postArrivalCommand(int argc, char *argv[]);
+
+
 #endif //FAR_HORIZONS_POSTARRIVAL_H

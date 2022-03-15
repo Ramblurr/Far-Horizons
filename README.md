@@ -204,6 +204,10 @@ NB: `fh pre-departure` replaces `PreDep`.
 
 NB: `fh production` replaces `Production`.
 
+## Process Post-Arrival Commands
+
+NB: `fh post-arrival` replaces `PostArrival`.
+
 ## Finish Turn
 
 NB: `fh finish` replaces `Finish`.

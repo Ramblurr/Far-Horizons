@@ -63,6 +63,7 @@ add_executable(fh
         src/planet.c src/planet.h
         src/planetio.c src/planetio.h
         src/planetvars.c src/planetvars.h
+        src/postarrival.c src/postarrival.c
         src/predeparture.c src/predeparture.h
         src/production.c src/production.h
         src/productionvars.c src/productionvars.h
@@ -162,42 +163,3 @@ add_executable(fhjump
         src/transactionio.c src/transactionio.h)
 
 target_link_libraries(fhjump ${USE_LIB_M})
-
-add_executable(fhpost
-        src/fhpost.c
-        src/command.c src/command.h
-        src/commandvars.c src/commandvars.h
-        src/dev_log.c src/dev_log.h
-        src/do.c src/do.h
-        src/engine.c src/engine.h
-        src/enginevars.c src/enginevars.h
-        src/galaxyio.c src/galaxyio.h
-        src/intercept.c src/intercept.h
-        src/item.c src/item.h
-        src/jumpvars.c src/jumpvars.h
-        src/locationvars.c src/locationvars.h
-        src/log.c src/log.h
-        src/logvars.c src/logvars.h
-        src/money.c src/money.h
-        src/nampla.c src/nampla.h
-        src/namplaio.c src/namplaio.h
-        src/namplavars.c src/namplavars.h
-        src/ordersvars.c src/ordersvars.h
-        src/planet.c src/planet.h
-        src/planetio.c src/planetio.h
-        src/planetvars.c src/planetvars.h
-        src/postarrival.h src/postarrival.c
-        src/productionvars.c src/productionvars.h
-        src/ship.c src/ship.h
-        src/shipio.c src/shipio.h
-        src/shipvars.c src/shipvars.h
-        src/species.c src/species.h
-        src/speciesio.c src/speciesio.h
-        src/speciesvars.c src/speciesvars.h
-        src/star.c src/star.h
-        src/stario.c src/stario.h
-        src/starvars.c src/starvars.h
-        src/transactionio.c src/transactionio.h)
-
-target_link_libraries(fhpost ${USE_LIB_M})
-
