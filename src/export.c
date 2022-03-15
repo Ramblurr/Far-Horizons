@@ -31,6 +31,7 @@
 #include "shipvars.h"
 #include "stario.h"
 #include "transactionio.h"
+#include "enginevars.h"
 
 
 int exportToSExpr(int argc, char *argv[]);
@@ -39,18 +40,40 @@ int exportToJson(int argc, char *argv[]);
 
 
 int exportCommand(int argc, char *argv[]) {
-    const char *cmdName = argv[0];
     for (int i = 1; i < argc; i++) {
         // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
-        if (strcmp(argv[i], "json") == 0) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "usage: export (json | sexpr) options...\n");
+            return 2;
+        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+            verbose_mode = TRUE;
+        } else if (strcmp(opt, "--test") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "json") == 0 && val == NULL) {
             return exportToJson(argc - i, argv + i);
-        } else if (strcmp(argv[i], "sexpr") == 0) {
+        } else if (strcmp(opt, "sexpr") == 0 && val == NULL) {
             return exportToSExpr(argc - i, argv + i);
         } else {
-            fprintf(stderr, "fh: %s: unknown option '%s'\n", cmdName, argv[i]);
+            fprintf(stderr, "fh: export: unknown option '%s'\n", opt);
             return 2;
         }
     }
+
     return 0;
 }
 
@@ -174,7 +197,29 @@ int exportToSExpr(int argc, char *argv[]) {
     get_galaxy_data();
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "galaxy") == 0) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "usage: export (json | sexpr) options...\n");
+            return 2;
+        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+            verbose_mode = TRUE;
+        } else if (strcmp(opt, "--test") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(argv[i], "galaxy") == 0) {
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("galaxy.txt", "wb");
             if (fp == NULL) {
@@ -211,7 +256,7 @@ int exportToSExpr(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "species") == 0) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
             get_species_data();
-            printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
+            fprintf(stderr, "fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
                 int spNo = spidx + 1;
                 if (data_in_memory[spidx]) {
