@@ -1109,6 +1109,127 @@ int combat(int default_summary, int do_all_species, int num_species, int *sp_num
     return save;
 }
 
+
+int combatCommand(int argc, char *argv[]) {
+    int default_summary = FALSE;
+    int do_all_species = TRUE;
+    int num_species = 0;
+    struct species_data *sp = NULL;
+    char *sp_name[MAX_SPECIES];
+
+    int sp_num[MAX_SPECIES];
+    memset(sp_num, 0, sizeof(sp_num));
+
+    prompt_gm = FALSE;
+    strike_phase = FALSE; // assume combat mode
+
+    /* Get commonly used data. */
+    get_galaxy_data();
+    get_planet_data();
+    get_transaction_data();
+    get_location_data();
+
+    /* Allocate memory for battle data. */
+    battle_base = (struct battle_data *) calloc(MAX_BATTLES, sizeof(struct battle_data));
+    if (battle_base == NULL) {
+        perror("combatCommand:");
+        fprintf(stderr, "\nCannot allocate enough memory for battle data!\n\n");
+        exit(2);
+    }
+
+    /* Check arguments.
+     * If an argument is -s, then set SUMMARY mode for everyone.
+     * The default is for players to receive a detailed report of the battles.
+     * If an argument is -p, then prompt the GM before saving results;
+     * otherwise, operate quietly; i.e, do not prompt GM before saving results
+     * and do not display anything except errors.
+     * Any additional arguments must be species numbers.
+     * If no species numbers are specified, then do all species. */
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-s") == 0) {
+            default_summary = TRUE;
+        } else if (strcmp(argv[i], "-p") == 0) {
+            prompt_gm = TRUE;
+        } else if (strcmp(argv[i], "-t") == 0) {
+            test_mode = TRUE;
+        } else if (strcmp(argv[i], "-v") == 0) {
+            verbose_mode = TRUE;
+            printf(" info: combat: last_random is %12lu\n", last_random);
+        } else if (strcmp(argv[i], "--combat") == 0) {
+            strike_phase = FALSE;
+        } else if (strcmp(argv[i], "--strike") == 0) {
+            strike_phase = TRUE;
+        } else {
+            int n = atoi(argv[i]);
+            if (0 < n && n <= galaxy.num_species) {
+                sp_num[num_species] = n;
+                num_species++;
+            }
+        }
+    }
+
+    printf(" info: combat: running %s mode\n", strike_phase ? "strike" : "combat");
+
+    log_stdout = prompt_gm;
+
+    if (num_species == 0) {
+        do_all_species = TRUE;
+        num_species = galaxy.num_species;
+        for (int i = 0; i < num_species; i++) {
+            sp_num[i] = i + 1;
+        }
+    } else {
+        do_all_species = FALSE;
+        // sort the species to get consistency on output
+        for (int i = 0; i < num_species; i++) {
+            for (int j = i + 1; j < num_species; j++) {
+                if (sp_num[j] < sp_num[i]) {
+                    int tmp = sp_num[i];
+                    sp_num[i] = sp_num[j];
+                    sp_num[j] = tmp;
+                }
+            }
+        }
+    }
+
+    if (default_summary && prompt_gm) {
+        printf("\nSUMMARY mode is in effect for all species.\n\n");
+    }
+
+    /* Read in species data and make an uppercase copy of each name for comparison purposes later. Also do some initializations. */
+    get_species_data();
+
+    for (int sp_index = 0; sp_index < galaxy.num_species; sp_index++) {
+        sp_name[sp_index] = calloc(1, 32);
+        if (!data_in_memory[sp_index]) {
+            /* No longer in game. */
+            continue;
+        }
+        sp = &spec_data[sp_index];
+        ship_base = ship_data[sp_index];
+        /* Convert name to upper case. */
+        for (int i = 0; i < 31; i++) {
+            sp_name[sp_index][i] = toupper(sp->name[i]);
+        }
+        for (int i = 0; i < sp->num_ships; i++) {
+            ship = ship_base + i;
+            ship->special = 0;
+        }
+    }
+
+    int save = combat(default_summary, do_all_species, num_species, sp_num, sp_name, &loc[0]);
+    if (save) {
+        save_planet_data();
+        save_species_data();
+        save_transaction_data();
+    }
+
+    free_species_data();
+
+    return 0;
+}
+
+
 void consolidate_option(char option, char location) {
     /* Only attack options go in list. */
     if (option < DEEP_SPACE_FIGHT) {

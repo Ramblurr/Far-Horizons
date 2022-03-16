@@ -196,6 +196,10 @@ NB: `fh update home-system` replaces `MakeHomeSystem` and `MakeHomeSystemAuto`.
 
 NB: `?` replaces `AddSpeciesAuto`.
 
+## Process Combat Commands
+
+NB: `fh combat` replaces `Combat`.
+
 ## Process Pre-Departure Commands
 
 NB: `fh pre-departure` replaces `PreDep`.
@@ -211,6 +215,10 @@ NB: `fh production` replaces `Production`.
 ## Process Post-Arrival Commands
 
 NB: `fh post-arrival` replaces `PostArrival`.
+
+## Process Strike Commands
+
+NB: `fh combat --strike` replaces `Strike`.
 
 ## Finish Turn
 
