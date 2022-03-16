@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "?") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0) {
             printf("usage: fh [option...] command [argument...]\n");
-            printf("  opt: --help     show this helpful text\n");
+            printf("  opt: --help     show this helpful text and exit\n");
             printf("  opt: --version  display version and exit\n");
             printf("  opt: -t         enable test mode\n");
             printf("  opt: -v         enable verbose mode\n");
@@ -56,8 +56,8 @@ int main(int argc, char *argv[]) {
             printf("  cmd: locations  create locations data file and update\n");
             printf("                  economic efficiency in planets data file\n");
             printf("  cmd: combat     run combat commands\n");
-            printf("            opt:  --combat   run combat\n");
-            printf("               :  --combat   run strikes\n");
+            printf("            opt:  --combat   run combat    (default)\n");
+            printf("               :  --strike   run strikes\n");
             printf("  cmd: pre-departure\n");
             printf("                  run pre-departure commands\n");
             printf("  cmd: jump       run jump commands\n");
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.8.2\n");
+            printf("7.8.3\n");
             return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
