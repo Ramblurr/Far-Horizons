@@ -52,18 +52,21 @@ int main(int argc, char *argv[]) {
             printf("  opt: --version  display version and exit\n");
             printf("  opt: -t         enable test mode\n");
             printf("  opt: -v         enable verbose mode\n");
-            printf("  cmd: turn            display the current turn number\n");
-            printf("  cmd: locations       create locations data file and update\n");
-            printf("                       economic efficiency in planets data file\n");
-            printf("  cmd: combat          run combat commands\n");
-            printf("                       opt: --combat   run combat\n");
-            printf("                          : --combat   run strikes\n");
-            printf("  cmd: pre-departure   run pre-departure commands\n");
-            printf("  cmd: jump            run jump commands\n");
-            printf("  cmd: production      run production commands\n");
-            printf("  cmd: post-arrival    run post-arrival commands\n");
-            printf("  cmd: report          create end of turn reports\n");
-            printf("  cmd: stats           display statistics\n");
+            printf("  cmd: turn       display the current turn number\n");
+            printf("  cmd: locations  create locations data file and update\n");
+            printf("                  economic efficiency in planets data file\n");
+            printf("  cmd: combat     run combat commands\n");
+            printf("            opt:  --combat   run combat\n");
+            printf("               :  --combat   run strikes\n");
+            printf("  cmd: pre-departure\n");
+            printf("                  run pre-departure commands\n");
+            printf("  cmd: jump       run jump commands\n");
+            printf("  cmd: production\n");
+            printf("                  run production commands\n");
+            printf("  cmd: post-arrival\n");
+            printf("                  run post-arrival commands\n");
+            printf("  cmd: report     create end of turn reports\n");
+            printf("  cmd: stats      display statistics\n");
             printf("  cmd: create     create a new galaxy, home system templates\n");
             printf("  cmd: export     convert binary .dat to json or s-expression\n");
             printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
@@ -80,7 +83,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.8.1\n");
+            printf("7.8.2\n");
             return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
@@ -91,8 +94,8 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "finish") == 0) {
             return finishCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "inspect") == 0) {
-            printf("inspect: sizeof(int)  == %5ld\n", (long unsigned int)sizeof(int));
-            printf("inspect: sizeof(long) == %5ld\n", (long unsigned int)sizeof(long));
+            printf("inspect: sizeof(int)  == %5ld\n", (long unsigned int) sizeof(int));
+            printf("inspect: sizeof(long) == %5ld\n", (long unsigned int) sizeof(long));
             return 0;
         } else if (strcmp(argv[i], "jump") == 0) {
             return jumpCommand(argc - i, argv + i);
