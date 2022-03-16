@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
             printf("                  run production commands\n");
             printf("  cmd: post-arrival\n");
             printf("                  run post-arrival commands\n");
+            printf("  cmd: finish     run end of turn logic\n");
             printf("  cmd: report     create end of turn reports\n");
             printf("  cmd: stats      display statistics\n");
             printf("  cmd: create     create a new galaxy, home system templates\n");
