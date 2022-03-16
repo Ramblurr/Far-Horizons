@@ -22,4 +22,6 @@
 
 void do_jump_orders(void);
 
+int jumpCommand(int argc, char *argv[]);
+
 #endif //FAR_HORIZONS_JUMP_H

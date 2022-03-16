@@ -168,8 +168,8 @@ int productionCommand(int argc, char *argv[]) {
     int sp_num[MAX_SPECIES];
     memset(sp_num, 0, sizeof(sp_num));
 
-    num_species = 0;
     first_pass = FALSE;
+    ignore_field_distorters = TRUE;
 
     /* Get commonly used data. */
     get_galaxy_data();
@@ -233,13 +233,6 @@ int productionCommand(int argc, char *argv[]) {
             return 2;
         }
     }
-
-    /* Get commonly used data. */
-    get_galaxy_data();
-    get_star_data();
-    get_planet_data();
-    get_transaction_data();
-    ignore_field_distorters = TRUE;
 
     if (num_species == 0) {
         do_all_species = TRUE;

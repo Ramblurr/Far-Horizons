@@ -93,7 +93,7 @@ cd gamma
 FH_SEED=$RANDOM ../build/fh create galaxy --less-crowded --species=18
 FH_SEED=$RANDOM ../build/fh create home-system-templates
 FH_SEED=$RANDOM ../build/fh create species --config=species.cfg
-FH_SEED=$RANDOM ../build/fhfinish
+FH_SEED=$RANDOM ../build/fh finish
 FH_SEED=$RANDOM ../build/fh report
 FH_SEED=$RANDOM ../build/fh stats
 ```
@@ -106,9 +106,9 @@ FH_SEED=$RANDOM ../build/fhorders
 FH_SEED=$RANDOM ../build/fh locations
 FH_SEED=$RANDOM ../build/fhcombat
 FH_SEED=$RANDOM ../build/fh pre-departure
-FH_SEED=$RANDOM ../build/fhjump
+FH_SEED=$RANDOM ../build/fh jump
 FH_SEED=$RANDOM ../build/fh production
-FH_SEED=$RANDOM ../build/fhpost
+FH_SEED=$RANDOM ../build/fh post-arrival
 FH_SEED=$RANDOM ../build/fh locations
 FH_SEED=$RANDOM ../build/fhcombat --strike
 FH_SEED=$RANDOM ../build/fh finish
@@ -126,7 +126,7 @@ The `fh create-galaxy` command initializes a new game by creating three files:
 
 The command accepts the following options:
 
-* --species=integer, required, defines the number of
+* --species=integer, required, defines the number of species
 * --stars=integer, optional
 * --radius=integer, optional
 * --less-crowded, optional
@@ -199,6 +199,10 @@ NB: `?` replaces `AddSpeciesAuto`.
 ## Process Pre-Departure Commands
 
 NB: `fh pre-departure` replaces `PreDep`.
+
+## Process Jump Commands
+
+NB: `fh jump` replaces `Jump`.
 
 ## Process Production Commands
 

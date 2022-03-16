@@ -24,6 +24,7 @@
 #include "enginevars.h"
 #include "export.h"
 #include "finish.h"
+#include "jump.h"
 #include "list.h"
 #include "location.h"
 #include "namplavars.h"
@@ -86,6 +87,8 @@ int main(int argc, char *argv[]) {
             printf("inspect: sizeof(int)  == %5ld\n", (long unsigned int)sizeof(int));
             printf("inspect: sizeof(long) == %5ld\n", (long unsigned int)sizeof(long));
             return 0;
+        } else if (strcmp(argv[i], "jump") == 0) {
+            return jumpCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "locations") == 0) {
             return locationCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "list") == 0) {
