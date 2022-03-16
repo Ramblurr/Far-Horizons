@@ -34,12 +34,10 @@
 #include "production.h"
 #include "report.h"
 #include "scan.h"
+#include "show.h"
 #include "stats.h"
 #include "turn.h"
 #include "update.h"
-
-
-int showHelp(void);
 
 
 int main(int argc, char *argv[]) {
@@ -60,7 +58,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.8.4\n");
+            printf("7.9.0\n");
             return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
@@ -94,6 +92,8 @@ int main(int argc, char *argv[]) {
             return scanCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "scan-near") == 0) {
             return scanNearCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "show") == 0) {
+            return showCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "stats") == 0) {
             return statsCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "turn") == 0) {
@@ -110,38 +110,3 @@ int main(int argc, char *argv[]) {
 }
 
 
-int showHelp(void) {
-    printf("usage: fh [option...] command [argument...]\n");
-    printf("  opt: --help     show this helpful text and exit\n");
-    printf("  opt: --version  display version and exit\n");
-    printf("  opt: -t         enable test mode\n");
-    printf("  opt: -v         enable verbose mode\n");
-    printf("  cmd: turn       display the current turn number\n");
-    printf("  cmd: locations  create locations data file and update\n");
-    printf("                  economic efficiency in planets data file\n");
-    printf("  cmd: combat     run combat commands\n");
-    printf("            opt:  --combat   run combat    (default)\n");
-    printf("               :  --strike   run strikes\n");
-    printf("  cmd: pre-departure\n");
-    printf("                  run pre-departure commands\n");
-    printf("  cmd: jump       run jump commands\n");
-    printf("  cmd: production\n");
-    printf("                  run production commands\n");
-    printf("  cmd: post-arrival\n");
-    printf("                  run post-arrival commands\n");
-    printf("  cmd: finish     run end of turn logic\n");
-    printf("  cmd: report     create end of turn reports\n");
-    printf("  cmd: stats      display statistics\n");
-    printf("  cmd: create     create a new galaxy, home system templates\n");
-    printf("  cmd: export     convert binary .dat to json or s-expression\n");
-    printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
-    printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
-    printf("  cmd: scan       display a species-specific scan for a location\n");
-    printf("           args:  _spNo_ _x_ _y_ _z_\n");
-    printf("  cmd: scan-near  display ships and colonies near a location\n");
-    printf("           args:  _x_ _y_ _z_ _radiusInParsecs_\n");
-    printf("  cmd: set        update values for planet, species, or star\n");
-    printf("         args:    (planet | species | star ) values\n");
-
-    return 0;
-}

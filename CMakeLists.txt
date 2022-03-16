@@ -83,6 +83,6 @@ add_executable(fh
         src/stats.c src/stats.h
         src/transactionio.c src/transactionio.h
         src/turn.c src/turn.h
-        src/update.c src/update.h)
+        src/update.c src/update.h src/show.c src/show.h)
 
 target_link_libraries(fh ${USE_LIB_M})

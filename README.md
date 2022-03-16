@@ -91,6 +91,7 @@ cp examples/noorders.txt gamma/
 cp examples/species.cfg gamma/
 cd gamma
 FH_SEED=$RANDOM ../build/fh create galaxy --less-crowded --species=18
+FH_SEED=$RANDOM ../build/fh show galaxy
 FH_SEED=$RANDOM ../build/fh create home-system-templates
 FH_SEED=$RANDOM ../build/fh create species --config=species.cfg
 FH_SEED=$RANDOM ../build/fh finish
@@ -143,6 +144,14 @@ Increasing the number of stars tends to slow the pace of the game since it will 
 other.
 
 NB: `fh create-galaxy` replaces `NewGalaxy`.
+
+## Show Galaxy
+
+The `fh show galaxy` command displays a very crude ASCII map of the galaxy.
+
+The map shows the locations of ideal home worlds, colonies, and other star systems.
+
+NB: `fh show galaxy` replaces `ShowGalaxy`.
 
 ## Create Home System Templates
 
