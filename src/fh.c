@@ -34,6 +34,7 @@
 #include "production.h"
 #include "report.h"
 #include "scan.h"
+#include "sexpr.h"
 #include "show.h"
 #include "stats.h"
 #include "turn.h"
@@ -92,6 +93,8 @@ int main(int argc, char *argv[]) {
             return scanCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "scan-near") == 0) {
             return scanNearCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "sexpr") == 0) {
+            return sexprCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "show") == 0) {
             return showCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "stats") == 0) {

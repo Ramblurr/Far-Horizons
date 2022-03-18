@@ -48,6 +48,7 @@ add_executable(fh
         src/galaxyio.c src/galaxyio.h
         src/intercept.c src/intercept.h
         src/item.c src/item.h
+        src/json.c src/json.h
         src/jump.c src/jump.h
         src/jumpvars.c src/jumpvars.h
         src/list.c src/list.h
@@ -74,15 +75,17 @@ add_executable(fh
         src/shipio.c src/shipio.h
         src/shipvars.c src/shipvars.h
         src/scan.c src/scan.h
+        src/sexpr.c src/sexpr.h
         src/species.c src/species.h
         src/speciesio.c src/speciesio.h
         src/speciesvars.c src/speciesvars.h
+        src/show.c src/show.h
         src/star.c src/star.h
         src/stario.c src/stario.h
         src/starvars.c src/starvars.h
         src/stats.c src/stats.h
         src/transactionio.c src/transactionio.h
         src/turn.c src/turn.h
-        src/update.c src/update.h src/show.c src/show.h)
+        src/update.c src/update.h)
 
 target_link_libraries(fh ${USE_LIB_M})
