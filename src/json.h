@@ -91,26 +91,4 @@ int json_is_string(json_value_t *j);
 int json_is_undefined(json_value_t *j);
 
 
-typedef enum {
-    unknown,
-    beginlist, endlist,
-    beginmap, endmap,
-    boolean, null, number, string,
-    colon, comma,
-    eof
-} json_symbol_t;
-
-
-typedef struct json_parser {
-    FILE *fp;
-    int line;
-    json_symbol_t sym;
-    char buffer[64];
-    char prior[64]; // prior symbol
-    char errmsg[128];
-} json_parser_t;
-
-
-json_value_t *json_read_value(json_parser_t *p);
-
 #endif //FAR_HORIZONS_JSON_H

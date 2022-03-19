@@ -218,18 +218,18 @@ int exportToJson(int argc, char *argv[]) {
 
     if (globalMode) {
         printf("export: json --global\n");
-        json_parser_t *p = calloc(1, sizeof(json_parser_t));
-        if (p == NULL) {
+        FILE *fp = fopen("game.json", "r");
+        if (fp == NULL) {
             perror("exportToJson:");
             exit(2);
         }
-        p->fp = fopen("game.json", "r");
-        if (p->fp == NULL) {
-            perror("exportToJson:");
+        json_value_t *j = json_read(fp);
+        fclose(fp);
+        if (j == NULL) {
+            fprintf(stderr, "exportToJson: j is NULL\n");
             exit(2);
         }
-        p->line = 1;
-        json_read_value(p);
+        json_write(j, stdout);
     }
 
     return 0;

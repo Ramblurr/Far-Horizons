@@ -35,20 +35,62 @@
 #define JSON_TYPE_STRING    64
 
 
-void json__print(int indent, json_value_t *j, FILE *fp);
+// read https://en.wikipedia.org/wiki/Recursive_descent_parser for background on parsing.
+
+typedef enum {
+    unknown,
+    beginlist, endlist,
+    beginmap, endmap,
+    boolean, null, number, string,
+    colon, comma,
+    eof
+} json_symbol_t;
+
+
+typedef struct json_parser {
+    FILE *fp;
+    int line;
+    json_symbol_t sym;
+    char buffer[64];
+    char prior[64]; // prior symbol
+    char errmsg[128];
+} json_parser_t;
+
+
+static int jp__accept(json_parser_t *p, json_symbol_t s);
+
+static void jp__error(json_parser_t *p, const char *fmt, ...);
+
+static int jp__expect(json_parser_t *p, json_symbol_t s);
+
+static void jp__nextsym(json_parser_t *p);
+
+static char *jp__stringer(json_symbol_t s);
+
+static json_value_t *jp__value(json_parser_t *p);
+
+static void json__print(int indent, const char *name, json_value_t *value, FILE *fp);
 
 
 json_value_t *json_read(FILE *fp) {
-    return NULL;
+    json_parser_t p;
+    memset(&p, 0, sizeof(p));
+    p.fp = fp;
+    p.line = 1;
+
+    jp__nextsym(&p);
+    json_value_t *value = jp__value(&p);
+    jp__expect(&p, eof);
+
+    return value;
 }
 
 
-int json_write(json_value_t *j, FILE *fp) {
-    json__print(0, j, fp);
+int json_write(json_value_t *value, FILE *fp) {
+    json__print(0, "", value, fp);
     fprintf(fp, "\n");
     return 0;
 }
-
 
 
 // json_add adds a named value to a map.
@@ -119,7 +161,7 @@ json_value_t *json_append(json_value_t *j, json_value_t *value) {
 
     json_node_t *t = calloc(1, sizeof(json_node_t));
     if (t == NULL) {
-        perror("json_add:");
+        perror("json_append:");
         exit(2);
     }
     t->value = value;
@@ -281,75 +323,84 @@ int json_is_undefined(json_value_t *j) {
 }
 
 
-void json__print(int indent, json_value_t *j, FILE *fp) {
+void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
     for (int i = indent; i > 0; i--) {
         fprintf(fp, " ");
     }
-    if (j == NULL) {
+    if (name != NULL && *name) {
+        fprintf(fp, "\"%s\": ", name);
+    }
+    if (value == NULL) {
         fprintf(fp, "undefined");
     } else {
-        switch (j->flag) {
+        switch (value->flag) {
             case JSON_TYPE_UNDEFINED:
                 fprintf(fp, "undefined");
                 break;
             case JSON_TYPE_BOOL:
-                if (j->u.b) {
+                if (value->u.b) {
                     fprintf(fp, "true");
                 } else {
                     fprintf(fp, "false");
                 }
                 break;
             case JSON_TYPE_ERROR:
-                fprintf(fp, "error(%s)", j->u.s);
+                fprintf(fp, "error(%s)", value->u.s);
                 break;
             case JSON_TYPE_LIST:
-                if (j->u.a.root == NULL) {
+                if (value->u.a.root == NULL) {
                     fprintf(fp, "[]");
-                } else if (j->u.a.root->next == NULL && json_is_atom(j->u.a.root->value)) {
+                } else if (value->u.a.root->next == NULL && json_is_atom(value->u.a.root->value)) {
                     fprintf(fp, "[");
-                    json__print(0, j->u.a.root->value, fp);
+                    json__print(0, value->u.a.root->key, value->u.a.root->value, fp);
                     fprintf(fp, "]");
                 } else {
                     fprintf(fp, "[\n");
-                    for (json_node_t *n = j->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 2, n->value, fp);
+                    for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
+                        json__print(indent + 2, n->key, n->value, fp);
                         if (n->next != NULL) {
                             fprintf(fp, ",\n");
                         } else {
                             fprintf(fp, "\n");
                         }
+                    }
+                    for (int i = indent; i > 0; i--) {
+                        fprintf(fp, " ");
                     }
                     fprintf(fp, "]");
                 }
                 break;
             case JSON_TYPE_MAP:
-                if (j->u.a.root == NULL) {
+                if (value->u.a.root == NULL) {
                     fprintf(fp, "{}");
-                } else if (j->u.a.root->next == NULL && json_is_atom(j->u.a.root->value)) {
+                } else if (value->u.a.root->next == NULL && json_is_atom(value->u.a.root->value)) {
                     fprintf(fp, "{");
-                    json__print(0, j->u.a.root->value, fp);
+                    json__print(0, value->u.a.root->key, value->u.a.root->value, fp);
                     fprintf(fp, "}");
                 } else {
                     fprintf(fp, "{\n");
-                    for (json_node_t *n = j->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 2, n->value, fp);
+                    for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
+                        json__print(indent + 2, n->key, n->value, fp);
                         if (n->next != NULL) {
                             fprintf(fp, ",\n");
                         } else {
                             fprintf(fp, "\n");
                         }
                     }
+                    for (int i = indent; i > 0; i--) {
+                        fprintf(fp, " ");
+                    }
                     fprintf(fp, "}");
                 }
                 break;
             case JSON_TYPE_NUMBER:
-                fprintf(fp, "%d", j->u.n);
+                fprintf(fp, "%d", value->u.n);
                 break;
             case JSON_TYPE_NULL:
                 fprintf(fp, "null");
                 break;
             case JSON_TYPE_STRING:
-                fprintf(fp, "\"%s\"", j->u.s);
+                fprintf(fp, "\"%s\"", value->u.s);
                 break;
             default:
                 fprintf(fp, "undefined");
@@ -359,47 +410,24 @@ void json__print(int indent, json_value_t *j, FILE *fp) {
 }
 
 
-// read https://en.wikipedia.org/wiki/Recursive_descent_parser for background on parsing.
-
-static int accept(json_parser_t *p, json_symbol_t s);
-
-static void error(json_parser_t *p, const char *fmt, ...);
-
-static int expect(json_parser_t *p, json_symbol_t s);
-
-static void nextsym(json_parser_t *p);
-
-static char *symStringer(json_symbol_t s);
-
-static json_value_t *value(json_parser_t *p);
-
-
-json_value_t *json_read_value(json_parser_t *p) {
-    nextsym(p);
-    json_value_t *t = value(p);
-    expect(p, eof);
-    return t;
-}
-
-
-// accept returns 0 (false) if the current symbol is not `s`.
+// jp__accept returns 0 (false) if the current symbol is not `s`.
 // if it is, the parser advances to the next symbol, and we return 1 (true).
-int accept(json_parser_t *p, json_symbol_t s) {
+int jp__accept(json_parser_t *p, json_symbol_t s) {
     if (p->sym == s) {
-        if (p->sym == string) {
-            printf("accept: accepted %-13s \"%s\"\n", symStringer(s), p->buffer);
-        } else {
-            printf("accept: accepted %-13s '%s'\n", symStringer(s), p->buffer);
-        }
-        nextsym(p);
+        //if (p->sym == string) {
+        //    printf("accept: accepted %-13s \"%s\"\n", jp__stringer(s), p->buffer);
+        //} else {
+        //    printf("accept: accepted %-13s '%s'\n", jp__stringer(s), p->buffer);
+        //}
+        jp__nextsym(p);
         return 1;
     }
-    //printf("accept: not accepted %s (%s)\n", symStringer(s), p->buffer);
+    //printf("accept: not accepted %s (%s)\n", jp__stringer(s), p->buffer);
     return 0;
 }
 
 
-void error(json_parser_t *p, const char *fmt, ...) {
+void jp__error(json_parser_t *p, const char *fmt, ...) {
     fflush(stdout);
 
     fprintf(stderr, "%d: ", p->line);
@@ -415,16 +443,16 @@ void error(json_parser_t *p, const char *fmt, ...) {
 
 // expect throws and error if the current symbol is not `s`.
 // if it is, the parser advances to the next symbol, and we return 1 (true).
-int expect(json_parser_t *p, json_symbol_t s) {
-    if (accept(p, s)) {
+int jp__expect(json_parser_t *p, json_symbol_t s) {
+    if (jp__accept(p, s)) {
         return 1;
     }
-    error(p, "expect: expected %s: got %s", symStringer(s), symStringer(p->sym));
+    jp__error(p, "expected %s: got %s", jp__stringer(s), jp__stringer(p->sym));
     return 0;
 }
 
 
-void nextsym(json_parser_t *p) {
+void jp__nextsym(json_parser_t *p) {
     // save the current symbol
     strcpy(p->prior, p->buffer);
     p->errmsg[0] = 0;
@@ -511,7 +539,8 @@ void nextsym(json_parser_t *p) {
             }
             *buf = 0;
             if (ch == EOF) {
-                error(p, "%d: unterminated string", p->line);
+                p->sym = unknown;
+                jp__error(p, "%d: unterminated string", p->line);
             }
             break;
         default:
@@ -538,49 +567,61 @@ void nextsym(json_parser_t *p) {
 }
 
 
-json_value_t *value(json_parser_t *p) {
+json_value_t *jp__value(json_parser_t *p) {
     json_value_t *j = NULL;
     char name[64];
 
-    if (accept(p, boolean)) {
+    if (jp__accept(p, boolean)) {
         j = json_boolean(p->prior[0] == 't');
-    } else if (accept(p, null)) {
+    } else if (jp__accept(p, null)) {
         j = json_null();
-    } else if (accept(p, number)) {
+    } else if (jp__accept(p, number)) {
         j = json_number(atoi(p->prior));
-    } else if (accept(p, string)) {
+    } else if (jp__accept(p, string)) {
         j = json_string(p->prior);
-    } else if (accept(p, beginlist)) {
+    } else if (jp__accept(p, beginlist)) {
         j = json_list();
         if (p->sym != endlist) {
             do {
-                json_append(j, value(p));
-            } while (accept(p, comma));
+                json_append(j, jp__value(p));
+            } while (jp__accept(p, comma));
         }
-        if (!accept(p, endlist)) {
-            error(p, "%d: unterminated list", p->line);
+        if (!jp__accept(p, endlist)) {
+            json_append(j, json_error("%d: unterminated list", p->line));
+            // consume the remainder of the file
+            while (!jp__accept(p, eof)) {
+                jp__nextsym(p);
+            }
         }
-    } else if (accept(p, beginmap)) {
+    } else if (jp__accept(p, beginmap)) {
         j = json_map();
         if (p->sym == string) {
             do {
-                expect(p, string);
+                jp__expect(p, string);
                 strcpy(name, p->prior);
-                expect(p, colon);
-                json_add(j, name, value(p));
-            } while (accept(p, comma));
+                jp__expect(p, colon);
+                json_add(j, name, jp__value(p));
+            } while (jp__accept(p, comma));
         }
-        if (!accept(p, endmap)) {
-            error(p, "%d: unterminated map", p->line);
+        if (!jp__accept(p, endmap)) {
+            json_add(j, "error", json_error("%d: unterminated map", p->line));
+            // consume the remainder of the file
+            while (!jp__accept(p, eof)) {
+                jp__nextsym(p);
+            }
         }
     } else {
-        error(p, "%d: unexpected symbol '%s' (%s)\n", p->line, p->buffer, symStringer(p->sym));
+        j = json_error("%d: unexpected symbol '%s' (%s)", p->line, p->buffer, jp__stringer(p->sym));
+        // consume the remainder of the file
+        while (!jp__accept(p, eof)) {
+            jp__nextsym(p);
+        }
     }
     return j;
 }
 
 
-char *symStringer(json_symbol_t s) {
+char *jp__stringer(json_symbol_t s) {
     switch (s) {
         case beginlist:
             return "beginlist";
