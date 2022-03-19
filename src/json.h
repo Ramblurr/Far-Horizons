@@ -27,76 +27,90 @@
 typedef struct json_value {
     uint8_t flag;
     union {
-        struct json_array *a;  // array
-        int b;                 // boolean (0 == false, 1 == true)
-        int i;                 // number (integer)
-        double n;              // number (real)
-        struct json_object *o; // object
-        char *s;               // string (nul terminated!)
+        struct {
+            struct json_node *root;
+            struct json_node *tail;
+        } a;     // linked list for lists and maps
+        int b;   // boolean (0 == false, 1 == true)
+        int n;   // number (integer)
+        char *s; // string (nul terminated!)
     } u;
 } json_value_t;
 
 
-typedef struct json_array {
-    struct json_array *next;
-    struct json_value *v;
-} json_array_t;
-
-
-typedef struct json_kvp {
-    char *k;              // key, string (nul terminated!)
-    struct json_value *v; // value
-} json_kvp_t;
-
-
-typedef struct json_object {
-    json_kvp_t **kv;
-} json_object_t;
+typedef struct json_node {
+    char *key; // always NULL for list nodes
+    json_value_t *value;
+    struct json_node *next; // for chaining
+} json_node_t;
 
 
 json_value_t *json_read(FILE *fp);
 
-json_value_t *json_new_array(void);
+int json_write(json_value_t *j, FILE *fp);
 
-json_value_t *json_new_object(void);
+json_value_t *json_boolean(int v);
 
+json_value_t *json_error(const char *fmt, ...);
+
+json_value_t *json_list(void);
+
+json_value_t *json_map(void);
+
+json_value_t *json_null(void);
+
+json_value_t *json_number(int v);
+
+json_value_t *json_string(char *v);
+
+json_value_t *json_undefined(void);
+
+// add a named value to a map
+json_value_t *json_add(json_value_t *j, const char *name, json_value_t *v);
+
+// add a value to the end of a list
 json_value_t *json_append(json_value_t *j, json_value_t *v);
 
-json_value_t *json_box_bool(int v);
-
-json_value_t *json_box_integer(int v);
-
-json_kvp_t *json_box_kvp(char *key, json_value_t *value);
-
-json_value_t *json_box_null(void);
-
-json_value_t *json_box_number(double v);
-
-json_value_t *json_box_string(char *v);
-
-json_value_t *json_box_undefined(void);
-
-int json_is_array(json_value_t *j);
 
 int json_is_atom(json_value_t *j);
 
 int json_is_bool(json_value_t *j);
 
-int json_is_integer(json_value_t *j);
+int json_is_error(json_value_t *j);
 
 int json_is_list(json_value_t *j);
 
-int json_is_number(json_value_t *j);
+int json_is_map(json_value_t *j);
 
 int json_is_null(json_value_t *j);
 
-int json_is_object(json_value_t *j);
+int json_is_number(json_value_t *j);
 
 int json_is_string(json_value_t *j);
 
 int json_is_undefined(json_value_t *j);
 
-int json_write(json_value_t *j, FILE *fp);
 
+typedef enum {
+    unknown,
+    beginlist, endlist,
+    beginmap, endmap,
+    boolean, null, number, string,
+    colon, comma,
+    eof
+} json_symbol_t;
+
+
+typedef struct json_parser {
+    FILE *fp;
+    int line;
+    json_symbol_t sym;
+    char buffer[64];
+    char prior[64]; // prior symbol
+    char errmsg[128];
+} json_parser_t;
+
+
+json_value_t *json_read_value(json_parser_t *p);
 
 #endif //FAR_HORIZONS_JSON_H

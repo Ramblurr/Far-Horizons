@@ -42,19 +42,6 @@ static binary_data_t galaxyData;
 void galaxyDataAsJson(FILE *fp) {
     fprintf(fp, "{\n  \"turn\": %d,\n  \"num_species\": %d,\n  \"d_num_species\": %d,\n  \"radius\": %d\n}\n",
             galaxy.turn_number, galaxy.num_species, galaxy.d_num_species, galaxy.radius);
-
-//    json_value_t *j = json_new_object();
-    json_write(json_box_bool(0), stdout);
-    json_write(json_box_integer(1), stdout);
-    json_write(json_box_null(), stdout);
-    json_write(json_box_number(0.9), stdout);
-    json_write(json_box_string("stringer"), stdout);
-    json_write(json_box_undefined(), stdout);
-    json_write(json_new_array(), stdout);
-    json_write(json_append(NULL, json_box_string("whammo 42")), stdout);
-    json_write(json_append(json_append(NULL, json_box_bool(1)), json_append(NULL, json_box_string("whammo 42"))), stdout);
-    json_write(json_append(json_append(NULL, json_box_bool(1)), json_box_integer(42)), stdout);
-    json_write(json_new_object(), stdout);
 }
 
 

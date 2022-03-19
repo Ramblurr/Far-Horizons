@@ -17,21 +17,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "enginevars.h"
 #include "export.h"
 #include "galaxy.h"
 #include "galaxyio.h"
 #include "locationio.h"
-#include "planetio.h"
-#include "speciesio.h"
 #include "namplaio.h"
 #include "namplavars.h"
+#include "planetio.h"
 #include "shipio.h"
 #include "shipvars.h"
+#include "speciesio.h"
 #include "stario.h"
 #include "transactionio.h"
-#include "enginevars.h"
+#include "json.h"
 
 
 int exportToSExpr(int argc, char *argv[]);
@@ -87,9 +89,35 @@ int exportToJson(int argc, char *argv[]) {
     printf("fh: export: %s: loading   planet data...\n", cmdName);
     get_planet_data();
 
+    int globalMode = TRUE;
+
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "galaxy") == 0) {
-            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "usage: export json --global\n");
+            return 2;
+        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+            verbose_mode = TRUE;
+        } else if (strcmp(opt, "--global") == 0 && val == NULL) {
+            globalMode = TRUE;
+        } else if (strcmp(opt, "--no-global") == 0 && val == NULL) {
+            globalMode = FALSE;
+        } else if (strcmp(opt, "galaxy") == 0 && val == NULL) {
+            printf("fh: export: %s: exporting %s data...\n", cmdName, opt);
             FILE *fp = fopen("galaxy.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -98,8 +126,8 @@ int exportToJson(int argc, char *argv[]) {
             }
             galaxyDataAsJson(fp);
             fclose(fp);
-        } else if (strcmp(argv[i], "locations") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
+        } else if (strcmp(opt, "locations") == 0 && val == NULL) {
+            printf("fh: export: %s: loading   %s data...\n", cmdName, opt);
             get_location_data();
             printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
             FILE *fp = fopen("locations.json", "wb");
@@ -110,8 +138,8 @@ int exportToJson(int argc, char *argv[]) {
             }
             locationDataAsJson(fp);
             fclose(fp);
-        } else if (strcmp(argv[i], "planets") == 0) {
-            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
+        } else if (strcmp(opt, "planets") == 0 && val == NULL) {
+            printf("fh: export: %s: exporting %s data...\n", cmdName, opt);
             FILE *fp = fopen("planets.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json");
@@ -120,8 +148,8 @@ int exportToJson(int argc, char *argv[]) {
             }
             planetDataAsJson(num_planets, planet_base, fp);
             fclose(fp);
-        } else if (strcmp(argv[i], "species") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
+        } else if (strcmp(opt, "species") == 0 && val == NULL) {
+            printf("fh: export: %s: loading   %s data...\n", cmdName, opt);
             get_species_data();
             printf("fh: export: %s: exporting %s files...\n", cmdName, argv[i]);
             for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
@@ -161,8 +189,8 @@ int exportToJson(int argc, char *argv[]) {
                     fclose(fp);
                 }
             }
-        } else if (strcmp(argv[i], "stars") == 0) {
-            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
+        } else if (strcmp(opt, "stars") == 0 && val == NULL) {
+            printf("fh: export: %s: exporting %s data...\n", cmdName, opt);
             FILE *fp = fopen("stars.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -170,10 +198,10 @@ int exportToJson(int argc, char *argv[]) {
                 return 2;
             }
             fclose(fp);
-        } else if (strcmp(argv[i], "transactions") == 0) {
-            printf("fh: export: %s: loading   %s data...\n", cmdName, argv[i]);
+        } else if (strcmp(opt, "transactions") == 0 && val == NULL) {
+            printf("fh: export: %s: loading   %s data...\n", cmdName, opt);
             get_transaction_data();
-            printf("fh: export: %s: exporting %s data...\n", cmdName, argv[i]);
+            printf("fh: export: %s: exporting %s data...\n", cmdName, opt);
             FILE *fp = fopen("interspecies.json", "wb");
             if (fp == NULL) {
                 perror("fh: export: json:");
@@ -187,6 +215,23 @@ int exportToJson(int argc, char *argv[]) {
             return 2;
         }
     }
+
+    if (globalMode) {
+        printf("export: json --global\n");
+        json_parser_t *p = calloc(1, sizeof(json_parser_t));
+        if (p == NULL) {
+            perror("exportToJson:");
+            exit(2);
+        }
+        p->fp = fopen("game.json", "r");
+        if (p->fp == NULL) {
+            perror("exportToJson:");
+            exit(2);
+        }
+        p->line = 1;
+        json_read_value(p);
+    }
+
     return 0;
 }
 
