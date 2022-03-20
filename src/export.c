@@ -34,6 +34,7 @@
 #include "stario.h"
 #include "transactionio.h"
 #include "json.h"
+#include "data.h"
 
 
 int exportToSExpr(int argc, char *argv[]);
@@ -82,14 +83,14 @@ int exportCommand(int argc, char *argv[]) {
 
 int exportToJson(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy data...\n", cmdName);
+    printf("fh: export: %s: loading   galaxy  data...\n", cmdName);
     get_galaxy_data();
-    printf("fh: export: %s: loading   star   data...\n", cmdName);
+    printf("fh: export: %s: loading   star    data...\n", cmdName);
     get_star_data();
-    printf("fh: export: %s: loading   planet data...\n", cmdName);
+    printf("fh: export: %s: loading   planet  data...\n", cmdName);
     get_planet_data();
-
-    int globalMode = TRUE;
+    printf("fh: export: %s: loading   species data...\n", cmdName);
+    get_species_data();
 
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
@@ -106,16 +107,12 @@ int exportToJson(int argc, char *argv[]) {
         }
 
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
-            fprintf(stderr, "usage: export json --global\n");
+            fprintf(stderr, "usage: export json globals\n");
             return 2;
         } else if (strcmp(opt, "-t") == 0 && val == NULL) {
             test_mode = TRUE;
         } else if (strcmp(opt, "-v") == 0 && val == NULL) {
             verbose_mode = TRUE;
-        } else if (strcmp(opt, "--global") == 0 && val == NULL) {
-            globalMode = TRUE;
-        } else if (strcmp(opt, "--no-global") == 0 && val == NULL) {
-            globalMode = FALSE;
         } else if (strcmp(opt, "galaxy") == 0 && val == NULL) {
             printf("fh: export: %s: exporting %s data...\n", cmdName, opt);
             FILE *fp = fopen("galaxy.json", "wb");
@@ -125,6 +122,15 @@ int exportToJson(int argc, char *argv[]) {
                 return 2;
             }
             galaxyDataAsJson(fp);
+            fclose(fp);
+        } else if (strcmp(opt, "globals") == 0 && val == NULL) {
+            FILE *fp = fopen("export.json", "w");
+            if (fp == NULL) {
+                perror("fh: export: globals");
+                fprintf(stderr, "\n\tCannot create new version of file 'export.json'!\n");
+                return 2;
+            }
+            exportData(fp);
             fclose(fp);
         } else if (strcmp(opt, "locations") == 0 && val == NULL) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, opt);
@@ -216,21 +222,35 @@ int exportToJson(int argc, char *argv[]) {
         }
     }
 
-    if (globalMode) {
-        printf("export: json --global\n");
-        FILE *fp = fopen("game.json", "r");
-        if (fp == NULL) {
-            perror("exportToJson:");
-            exit(2);
-        }
-        json_value_t *j = json_read(fp);
-        fclose(fp);
-        if (j == NULL) {
-            fprintf(stderr, "exportToJson: j is NULL\n");
-            exit(2);
-        }
-        json_write(j, stdout);
-    }
+//    if (globalMode) {
+//        printf("fh: export: exporting global data...\n");
+//
+////        printf("export: json --global\n");
+////        FILE *fp = fopen("game.json", "r");
+////        if (fp == NULL) {
+////            perror("exportToJson:");
+////            exit(2);
+////        }
+////        json_value_t *j = json_read(fp);
+////        if (j == NULL) {
+////            fprintf(stderr, "exportToJson: j is NULL\n");
+////            exit(2);
+////        }
+////        fclose(fp);
+//
+//        FILE *fp = fopen("export.json", "w");
+////        json_write(j, fp);
+////        fclose(fp);
+////
+////        FILE *fp = fopen("galaxy.json", "wb");
+//        if (fp == NULL) {
+//            perror("fh: export: global:");
+//            fprintf(stderr, "\n\tCannot create new version of file 'export.json'!\n");
+//            return 2;
+//        }
+//        galaxyDataAsJson(fp);
+//        fclose(fp);
+//    }
 
     return 0;
 }

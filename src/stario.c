@@ -119,7 +119,24 @@ void get_star_data(void) {
         // mdhender: added to help clean up code
         s->id = i + 1;
         s->index = i;
+        s->wormholeExit = NULL;
     }
+
+    // link wormholes
+    for (int i = 0; i < num_stars; i++) {
+        struct star_data *s = &star_base[i];
+        if (s->worm_here && s->wormholeExit == NULL) {
+            for (int w = 0; w < num_stars; w++) {
+                struct star_data *p = &star_base[w];
+                if (p->x == s->worm_x && p->y == s->worm_y && p->z == s->worm_z) {
+                    s->wormholeExit = p;
+                    p->wormholeExit = s;
+                    break;
+                }
+            }
+        }
+    }
+
     star_data_modified = FALSE;
 
     free(starData);

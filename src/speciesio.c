@@ -175,6 +175,8 @@ void get_species_data(void) {
         num_new_ships[species_index] = 0;
 
         // mdhender: added fields to help clean up code
+        sp->id = species_index + 1;
+        sp->index = species_index;
         sp->homeColony = &namp_data[species_index][0];
         sp->homeSystem = sp->homeColony->system;
 

@@ -132,10 +132,24 @@ void printMishapChanceToOrders(struct ship_data *ship, int destx, int desty, int
 }
 
 
+char *shipDisplayName(ship_data_t *ship) {
+    static char fullShipName[64];
+
+    if (ship->class == TR) {
+        sprintf(fullShipName, "%s%d%s %s",
+                ship_abbr[ship->class], ship->tonnage, ship_type[ship->type], ship->name);
+    } else {
+        sprintf(fullShipName, "%s%s %s",
+                ship_abbr[ship->class], ship_type[ship->type], ship->name);
+    }
+    return fullShipName;
+}
+
+
 /* This routine will return a pointer to a string containing a complete
- * ship name, including its orbital/landed status and age. If global
- * variable "truncate_name" is TRUE, then orbital/landed status and age
- * will not be included. */
+ * ship name, including its orbital/landed status and age.
+ * If global variable "truncate_name" is TRUE,
+ * then orbital/landed status and age will not be included. */
 char *ship_name(struct ship_data *ship) {
     int effective_age;
     int status;

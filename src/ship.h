@@ -69,6 +69,8 @@ long power(short tonnage);
 
 void printMishapChanceToOrders(struct ship_data *ship, int destx, int desty, int destz);
 
+char *shipDisplayName(ship_data_t *ship);
+
 char *ship_name(struct ship_data *ship);
 
 #endif //FAR_HORIZONS_SHIP_H

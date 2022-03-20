@@ -73,6 +73,7 @@ struct star_data {
     int worm_x;        /* Coordinates of wormhole's exit. */
     int worm_y;
     int worm_z;
+    struct star_data *wormholeExit;
     int planet_index; /* Index (starting at zero) into the file "planets.dat" of the first planet in the star system. */
     int message;       /* Message associated with this star system, if any. */
     uint32_t visited_by[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been here. */
@@ -102,6 +103,7 @@ typedef struct planet_data planet_data_t;
 
 
 struct nampla_data {
+    int id;                        // unique identifier for this named planet
     char name[32];                 /* Name of planet. */
     int x, y, z, pn;               /* Coordinates. */
     int status;                    /* Status of planet. */
@@ -130,6 +132,7 @@ typedef struct nampla_data nampla_data_t;
 
 
 struct ship_data {
+    int id;                        // unique identifier for this ship
     char name[32];                 /* Name of ship. */
     int x, y, z, pn;               /* Current coordinates. */
     int status;                    /* Current status of ship. */

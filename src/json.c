@@ -325,10 +325,10 @@ int json_is_undefined(json_value_t *j) {
 
 void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
     for (int i = indent; i > 0; i--) {
-        fprintf(fp, " ");
+        fprintf(fp, "\t");
     }
     if (name != NULL && *name) {
-        fprintf(fp, "\"%s\": ", name);
+        fprintf(fp, "\"%s\":", name);
     }
     if (value == NULL) {
         fprintf(fp, "undefined");
@@ -357,7 +357,7 @@ void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
                 } else {
                     fprintf(fp, "[\n");
                     for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 2, n->key, n->value, fp);
+                        json__print(indent + 1, n->key, n->value, fp);
                         if (n->next != NULL) {
                             fprintf(fp, ",\n");
                         } else {
@@ -365,7 +365,7 @@ void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
                         }
                     }
                     for (int i = indent; i > 0; i--) {
-                        fprintf(fp, " ");
+                        fprintf(fp, "\t");
                     }
                     fprintf(fp, "]");
                 }
@@ -380,7 +380,7 @@ void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
                 } else {
                     fprintf(fp, "{\n");
                     for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 2, n->key, n->value, fp);
+                        json__print(indent + 1, n->key, n->value, fp);
                         if (n->next != NULL) {
                             fprintf(fp, ",\n");
                         } else {
@@ -388,7 +388,7 @@ void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
                         }
                     }
                     for (int i = indent; i > 0; i--) {
-                        fprintf(fp, " ");
+                        fprintf(fp, "\t");
                     }
                     fprintf(fp, "}");
                 }

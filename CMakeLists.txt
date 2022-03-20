@@ -38,6 +38,7 @@ add_executable(fh
         src/command.c src/command.h
         src/commandvars.c src/commandvars.h
         src/create.c src/create.h
+        src/data.c src/data.h
         src/dev_log.c src/dev_log.h
         src/do.c src/do.h
         src/engine.c src/engine.h
