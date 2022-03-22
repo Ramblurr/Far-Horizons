@@ -4445,7 +4445,7 @@ void do_SEND_command(void) {
         return;
     }
     item_count = value;
-    fprintf(log_file, "!!! Order: SEND %d/%d EU\n", value, species->econ_units);
+    fprintf(log_file, "!!! Order: SEND %ld/%d EU\n", value, species->econ_units);
 
     num_available = species->econ_units;
     if (item_count == 0) {
