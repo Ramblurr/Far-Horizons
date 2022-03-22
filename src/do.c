@@ -4478,7 +4478,7 @@ void do_SEND_command(void) {
         fprintf(log_file, "!!! Invalid species name in SEND command.\n");
         return;
     }
-    fprintf(log_file, "!!! Order: SEND %d/%d SP%02d %s\n",
+    fprintf(log_file, "!!! Order: SEND %ld/%d SP%02d %s\n",
             num_available, species->econ_units, g_spec_number, g_spec_name);
 
     /* Check if we've met this species and make sure it is not an enemy. */
