@@ -887,7 +887,7 @@ int get_ship(void) {
 
 
 /* This routine will get a species name and return TRUE if found and if it is valid.
- * It will also set global values "g_species_number" and "g_species_name".
+ * It will also set global values "g_spec_number" and "g_spec_name".
  * The algorithm employed allows minor spelling errors, as well as accidental deletion of the SP abbreviation. */
 int get_species_name(void) {
     int i, n, species_index, best_score, best_species_index, next_best_score, first_try, minimum_score, name_length;
