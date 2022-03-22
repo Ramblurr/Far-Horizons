@@ -4445,10 +4445,18 @@ void do_SEND_command(void) {
         return;
     }
     item_count = value;
+    fprintf(log_file, "!!! Order: SEND %d/%d EU\n", value, species->econ_units);
 
     num_available = species->econ_units;
-    if (item_count == 0) { item_count = num_available; }
-    if (item_count == 0) { return; }
+    if (item_count == 0) {
+        item_count = num_available;
+    }
+    if (item_count == 0) {
+        fprintf(log_file, "!!! Order ignored:\n");
+        fprintf(log_file, "!!! %s", input_line);
+        fprintf(log_file, "!!! You do not have any EUs available!\n");
+        return;
+    }
     if (num_available < item_count) {
         if (num_available == 0) {
             fprintf(log_file, "!!! Order ignored:\n");
@@ -4470,6 +4478,8 @@ void do_SEND_command(void) {
         fprintf(log_file, "!!! Invalid species name in SEND command.\n");
         return;
     }
+    fprintf(log_file, "!!! Order: SEND %d/%d SP%02d %s\n",
+            num_available, species->econ_units, g_spec_number, g_spec_name);
 
     /* Check if we've met this species and make sure it is not an enemy. */
     contact_word_number = (g_spec_number - 1) / 32;
@@ -4502,7 +4512,9 @@ void do_SEND_command(void) {
     log_string(".\n");
     species->econ_units -= item_count;
 
-    if (first_pass) { return; }
+    if (first_pass) {
+        return;
+    }
 
     /* Define this transaction. */
     if (num_transactions == MAX_TRANSACTIONS) {
