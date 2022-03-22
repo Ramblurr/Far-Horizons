@@ -148,8 +148,10 @@ int preDepartureCommand(int argc, char *argv[]) {
 
     /* Get commonly used data. */
     get_galaxy_data();
-    get_transaction_data();
+    get_star_data();
+    get_planet_data();
     get_species_data();
+    get_transaction_data();
 
     // set important globals
     ignore_field_distorters = TRUE;
