@@ -4531,6 +4531,10 @@ void do_SEND_command(void) {
     strcpy(transaction[n].name2, g_spec_name);
 
     /* Make the transfer to the alien. */
+    fprintf(log_file, "!!! Order: SENT %ld/%d SP%02d %s %d/%d\n",
+            num_available, species->econ_units, g_spec_number, g_spec_name,
+            spec_data[g_spec_number - 1].econ_units,
+            spec_data[g_spec_number - 1].econ_units + item_count);
     spec_data[g_spec_number - 1].econ_units += item_count;
     data_modified[g_spec_number - 1] = TRUE;
 }
