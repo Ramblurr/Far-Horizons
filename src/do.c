@@ -4537,6 +4537,7 @@ void do_SEND_command(void) {
             spec_data[g_spec_number - 1].econ_units + item_count);
     spec_data[g_spec_number - 1].econ_units += item_count;
     data_modified[g_spec_number - 1] = TRUE;
+    fprintf(stderr, "debug: preDepartureSpecies: __%02d data_modified %s\n", g_spec_number, data_modified[g_spec_number - 1] ? "true" : "false");
 }
 
 
