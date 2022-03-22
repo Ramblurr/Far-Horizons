@@ -4445,7 +4445,6 @@ void do_SEND_command(void) {
         return;
     }
     item_count = value;
-    fprintf(log_file, "!!! Order: SEND %ld/%d EU\n", value, species->econ_units);
 
     num_available = species->econ_units;
     if (item_count == 0) {
@@ -4531,13 +4530,8 @@ void do_SEND_command(void) {
     strcpy(transaction[n].name2, g_spec_name);
 
     /* Make the transfer to the alien. */
-    fprintf(log_file, "!!! Order: SENT %ld/%d SP%02d %s %d/%ld\n",
-            num_available, species->econ_units, g_spec_number, g_spec_name,
-            spec_data[g_spec_number - 1].econ_units,
-            spec_data[g_spec_number - 1].econ_units + item_count);
     spec_data[g_spec_number - 1].econ_units += item_count;
     data_modified[g_spec_number - 1] = TRUE;
-    fprintf(stderr, "debug: preDepartureSpecies: __%02d data_modified %s\n", g_spec_number, data_modified[g_spec_number - 1] ? "true" : "false");
 }
 
 

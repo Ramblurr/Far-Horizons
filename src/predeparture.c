@@ -362,14 +362,8 @@ int preDepartureSpecies(int spNo, int do_all_species, int first_pass) {
         log_string("\nPre-departure orders:\n");
     }
 
-    fprintf(stderr, "debug: preDepartureSpecies: SP%02d data_modified %s\n", species_index + 1,
-            data_modified[species_index] ? "true" : "false");
     /* Handle predeparture orders for this species. */
     do_predeparture_orders();
-    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", species_index + 1,
-            data_modified[species_index] ? "true" : "false");
-    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", 15,
-            data_modified[15 - 1] ? "true" : "false");
 
     data_modified[species_index] = TRUE;
 
