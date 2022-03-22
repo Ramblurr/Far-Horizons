@@ -149,6 +149,7 @@ int preDepartureCommand(int argc, char *argv[]) {
     /* Get commonly used data. */
     get_galaxy_data();
     get_transaction_data();
+    get_species_data();
 
     // set important globals
     ignore_field_distorters = TRUE;
@@ -353,6 +354,7 @@ int preDepartureSpecies(int spNo, int do_all_species, int first_pass) {
     /* Handle predeparture orders for this species. */
     do_predeparture_orders();
     fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", species_index + 1, data_modified[species_index] ? "true" : "false");
+    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", 16, data_modified[16 - 1] ? "true" : "false");
 
     data_modified[species_index] = TRUE;
 
