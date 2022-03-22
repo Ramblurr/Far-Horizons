@@ -40,6 +40,7 @@
 
 
 int preDeparturePass(int sp_num[], int do_all_species, int first_pass);
+
 int preDepartureSpecies(int spNo, int do_all_species, int first_pass);
 
 
@@ -150,7 +151,6 @@ int preDepartureCommand(int argc, char *argv[]) {
     get_galaxy_data();
     get_star_data();
     get_planet_data();
-    get_species_data();
     get_transaction_data();
 
     // set important globals
@@ -229,6 +229,16 @@ int preDepartureCommand(int argc, char *argv[]) {
         preDeparturePass(sp_num, do_all_species, TRUE);
     }
     preDeparturePass(sp_num, do_all_species, FALSE);
+
+    // save any updates
+    if (star_data_modified) {
+        save_star_data();
+    }
+    if (planet_data_modified) {
+        save_planet_data();
+    }
+    save_species_data();
+    save_transaction_data();
 
     return 0;
 }
@@ -352,11 +362,14 @@ int preDepartureSpecies(int spNo, int do_all_species, int first_pass) {
         log_string("\nPre-departure orders:\n");
     }
 
-    fprintf(stderr, "debug: preDepartureSpecies: SP%02d data_modified %s\n", species_index + 1, data_modified[species_index] ? "true" : "false");
+    fprintf(stderr, "debug: preDepartureSpecies: SP%02d data_modified %s\n", species_index + 1,
+            data_modified[species_index] ? "true" : "false");
     /* Handle predeparture orders for this species. */
     do_predeparture_orders();
-    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", species_index + 1, data_modified[species_index] ? "true" : "false");
-    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", 15, data_modified[15 - 1] ? "true" : "false");
+    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", species_index + 1,
+            data_modified[species_index] ? "true" : "false");
+    fprintf(stderr, "debug: preDepartureSpecies: ..%02d data_modified %s\n", 15,
+            data_modified[15 - 1] ? "true" : "false");
 
     data_modified[species_index] = TRUE;
 
