@@ -365,6 +365,18 @@ int updateShip(int argc, char *argv[]) {
                 fprintf(stderr, "error: ftl value must be yes or no\n");
                 return 2;
             }
+        } else if (strcmp(opt, "--item") == 0 && val != NULL) {
+            int newQuantity = 0;
+            if (strcmp(val, "FS") == 0) {
+                newQuantity = ++(ship->item_quantity[FS]);
+            } else if (strcmp(val, "GW") == 0) {
+                newQuantity = ++(ship->item_quantity[GW]);
+            } else {
+                fprintf(stderr, "error: unknown inventory item '%s'\n", val);
+                return 2;
+            }
+            printf("fh: update ship: species %d name '%s' inventory %s to %d\n", spno, ship->name, val, newQuantity);
+            data_modified[spidx] = TRUE;
         } else if (strcmp(opt, "--name") == 0 && val != NULL) {
             if (strlen(val) < 5) {
                 fprintf(stderr, "error: ship name is too short\n");
