@@ -381,6 +381,30 @@ int updateShip(int argc, char *argv[]) {
                 newQuantity = ++(ship->item_quantity[GU5]);
             } else if (strcmp(val, "GU6") == 0) {
                 newQuantity = ++(ship->item_quantity[GU6]);
+            } else if (strcmp(val, "GU7") == 0) {
+                newQuantity = ++(ship->item_quantity[GU7]);
+            } else if (strcmp(val, "GU8") == 0) {
+                newQuantity = ++(ship->item_quantity[GU8);
+            } else if (strcmp(val, "GU9") == 0) {
+                newQuantity = ++(ship->item_quantity[GU9]);
+            } else if (strcmp(val, "SG1") == 0) {
+                newQuantity = ++(ship->item_quantity[SG1]);
+            } else if (strcmp(val, "SG2") == 0) {
+                newQuantity = ++(ship->item_quantity[SG2]);
+            } else if (strcmp(val, "SG3") == 0) {
+                newQuantity = ++(ship->item_quantity[SG3]);
+            } else if (strcmp(val, "SG4") == 0) {
+                newQuantity = ++(ship->item_quantity[SG4]);
+            } else if (strcmp(val, "SG5") == 0) {
+                newQuantity = ++(ship->item_quantity[SG5]);
+            } else if (strcmp(val, "SG6") == 0) {
+                newQuantity = ++(ship->item_quantity[SG6]);
+            } else if (strcmp(val, "SG7") == 0) {
+                newQuantity = ++(ship->item_quantity[SG7]);
+            } else if (strcmp(val, "SG8") == 0) {
+                newQuantity = ++(ship->item_quantity[SG8]);
+            } else if (strcmp(val, "SG9") == 0) {
+                newQuantity = ++(ship->item_quantity[SG9]);
             } else if (strcmp(val, "GW") == 0) {
                 newQuantity = ++(ship->item_quantity[GW]);
             } else {
