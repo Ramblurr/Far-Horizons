@@ -384,7 +384,7 @@ int updateShip(int argc, char *argv[]) {
             } else if (strcmp(val, "GU7") == 0) {
                 newQuantity = ++(ship->item_quantity[GU7]);
             } else if (strcmp(val, "GU8") == 0) {
-                newQuantity = ++(ship->item_quantity[GU8);
+                newQuantity = ++(ship->item_quantity[GU8]);
             } else if (strcmp(val, "GU9") == 0) {
                 newQuantity = ++(ship->item_quantity[GU9]);
             } else if (strcmp(val, "SG1") == 0) {
