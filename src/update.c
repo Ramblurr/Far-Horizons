@@ -369,6 +369,18 @@ int updateShip(int argc, char *argv[]) {
             int newQuantity = 0;
             if (strcmp(val, "FS") == 0) {
                 newQuantity = ++(ship->item_quantity[FS]);
+            } else if (strcmp(val, "GU1") == 0) {
+                newQuantity = ++(ship->item_quantity[GU1]);
+            } else if (strcmp(val, "GU2") == 0) {
+                newQuantity = ++(ship->item_quantity[GU2]);
+            } else if (strcmp(val, "GU3") == 0) {
+                newQuantity = ++(ship->item_quantity[GU3]);
+            } else if (strcmp(val, "GU4") == 0) {
+                newQuantity = ++(ship->item_quantity[GU4]);
+            } else if (strcmp(val, "GU5") == 0) {
+                newQuantity = ++(ship->item_quantity[GU5]);
+            } else if (strcmp(val, "GU6") == 0) {
+                newQuantity = ++(ship->item_quantity[GU6]);
             } else if (strcmp(val, "GW") == 0) {
                 newQuantity = ++(ship->item_quantity[GW]);
             } else {
