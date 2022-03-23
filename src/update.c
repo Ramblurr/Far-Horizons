@@ -389,6 +389,10 @@ int updateShip(int argc, char *argv[]) {
             memset(ship->name, 0, 32);
             strcpy(ship->name, val);
             data_modified[spidx] = TRUE;
+        } else if (strcmp(opt, "--reset-inventory") == 0 && val != NULL) {
+            for (int item = 0; item < MAX_ITEMS; item++) {
+                ship->item_quantity[item] = 0;
+            }
         } else if (strcmp(opt, "--tonnage") == 0 && val != NULL) {
             if (ship->class != TR) {
                 fprintf(stderr, "error: tonnage is valid only for transports\n");
