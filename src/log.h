@@ -28,6 +28,8 @@ void log_long(long value);
 
 void log_message(char *message_filename);
 
+void log_printf(char *fmt, ...);
+
 void log_string(char *string);
 
 void print_header(void);

@@ -19,16 +19,20 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include "engine.h"
 #include "log.h"
 #include "logvars.h"
+
 
 static int log_indentation = 0;
 static char log_line[128];
 static int log_position = 0;
 static int log_start_of_line = TRUE;
 
+
 /* The following routines will post an item to standard output and to an externally defined log file and summary file. */
+
 
 void log_char(char c) {
     int i, temp_position;
@@ -106,23 +110,20 @@ void log_char(char c) {
     }
 }
 
+
 void log_int(int value) {
-    char string[16];
-    if (logging_disabled) {
-        return;
+    if (!logging_disabled) {
+        log_printf("%d", value);
     }
-    sprintf(string, "%d", value);
-    log_string(string);
 }
 
+
 void log_long(long value) {
-    char string[16];
-    if (logging_disabled) {
-        return;
+    if (!logging_disabled) {
+        log_printf("%ld", value);
     }
-    sprintf(string, "%ld", value);
-    log_string(string);
 }
+
 
 void log_message(char *message_filename) {
     char message_line[256];
@@ -140,22 +141,33 @@ void log_message(char *message_filename) {
 }
 
 
-void log_string(char *string) {
-    int i, length;
-    if (logging_disabled) {
-        return;
-    }
+void log_printf(char *fmt, ...) {
+    static char buffer[4096];
+    if (!logging_disabled) {
+        va_list arg_ptr;
+        va_start(arg_ptr, fmt);
+        vsnprintf(buffer, 4096, fmt, arg_ptr);
+        va_end(arg_ptr);
 
-    length = strlen(string);
-    for (i = 0; i < length; i++) {
-        log_char(string[i]);
+        for (char *s = buffer; *s; s++) {
+            log_char(*s);
+        }
+    }
+}
+
+
+void log_string(char *string) {
+    if (!logging_disabled) {
+        for (char *s = string; *s; s++) {
+            log_char(*s);
+        }
     }
 }
 
 
 void print_header(void) {
-    log_string("\nOther events:\n");
+    if (!logging_disabled) {
+        log_string("\nOther events:\n");
+    }
     header_printed = TRUE;
 }
-
-
