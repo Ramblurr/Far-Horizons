@@ -29,6 +29,7 @@
 #include "shipvars.h"
 #include "speciesio.h"
 #include "stario.h"
+#include "planetvars.h"
 
 
 typedef struct global_cluster {
@@ -56,8 +57,11 @@ typedef struct global_data {
 } global_data_t;
 
 typedef struct global_gas {
-    char code;
-    int percentage;
+    char code[4];
+    int atmos_pct;
+    int min_pct;
+    int max_pct;
+    int required;
 } global_gas_t;
 
 typedef struct global_item {
@@ -70,7 +74,7 @@ typedef struct global_planet {
     int orbit;
     int diameter;
     int econ_efficiency;
-    struct global_gas gas[4];
+    struct global_gas *gases[5];
     int gravity;
     int idealHomePlanet;
     int idealColonyPlanet;
@@ -108,8 +112,17 @@ typedef struct global_species {
     char name[32];
     char govt_name[32];
     char govt_type[32];
+    int auto_orders;
+    int econ_units;
+    int hp_original_base;
+    global_gas_t *required_gases[2];
+    global_gas_t *neutral_gases[7];
+    global_gas_t *poison_gases[7];
     struct global_colony **colonies;
     struct global_ship **ships;
+    int contacts[MAX_SPECIES + 1];
+    int allies[MAX_SPECIES + 1];
+    int enemies[MAX_SPECIES + 1];
 } global_species_t;
 
 typedef struct global_system {
@@ -191,6 +204,15 @@ int exportData(FILE *fp) {
             p->orbit = planet->orbit;
             p->diameter = planet->diameter;
             p->econ_efficiency = planet->econ_efficiency;
+            int index = 0;
+            for (int g = 0; g < 4; g++) {
+                if (planet->gas[g] != 0) {
+                    p->gases[index] = calloc(1, sizeof(global_gas_t));
+                    strcpy(p->gases[index]->code, gas_string[planet->gas[g]]);
+                    p->gases[index]->atmos_pct = planet->gas_percent[g];
+                    index++;
+                }
+            }
             p->gravity = planet->gravity;
             p->idealHomePlanet = planet->special == 1;
             p->idealColonyPlanet = planet->special == 2;
@@ -209,6 +231,48 @@ int exportData(FILE *fp) {
         species_data_t *species = spec_data + i;
         s->id = species->id;
         strcpy(s->name, species->name);
+        strcpy(s->govt_name, species->govt_name);
+        strcpy(s->govt_type, species->govt_type);
+        s->auto_orders = species->auto_orders;
+        s->econ_units = species->econ_units;
+        s->hp_original_base = species->hp_original_base;
+
+        s->required_gases[0] = calloc(1, sizeof(global_gas_t));
+        sprintf(s->required_gases[0]->code, gas_string[species->required_gas]);
+        s->required_gases[0]->max_pct = species->required_gas_max;
+        s->required_gases[0]->min_pct = species->required_gas_min;
+        int index = 0;
+        for (int g = 0; g < 6; g++) {
+            if (species->neutral_gas[g] == 0) {
+                break;
+            }
+            s->neutral_gases[index] = calloc(1, sizeof(global_gas_t));
+            sprintf(s->neutral_gases[index]->code, gas_string[species->neutral_gas[g]]);
+            index++;
+        }
+        index = 0;
+        for (int g = 0; g < 6; g++) {
+            if (species->poison_gas[g] == 0) {
+                break;
+            }
+            s->poison_gases[index] = calloc(1, sizeof(global_gas_t));
+            sprintf(s->poison_gases[index]->code, gas_string[species->poison_gas[g]]);
+            index++;
+        }
+
+        for (int b = 0; b < galaxy.num_species; b++) {
+            if (b != i) {
+                if ((species->ally[b / 32] & (1 << (b % 32))) != 0) {
+                    s->allies[b + 1] = TRUE;
+                }
+                if ((species->contact[b / 32] & (1 << (b % 32))) != 0) {
+                    s->contacts[b + 1] = TRUE;
+                }
+                if ((species->enemy[b / 32] & (1 << (b % 32))) != 0) {
+                    s->enemies[b + 1] = TRUE;
+                }
+            }
+        }
 
         s->colonies = calloc(species->num_namplas + 1, sizeof(global_colony_t *));
         for (int n = 0; n < species->num_namplas; n++) {
@@ -369,6 +433,34 @@ json_value_t *marshalCoords(int x, int y, int z) {
 }
 
 
+json_value_t *marshalGas(global_gas_t *g) {
+    json_value_t *j = json_map();
+    json_add(j, "code", json_string(g->code));
+    if (g->atmos_pct) {
+        json_add(j, "atmos_pct", json_number(g->atmos_pct));
+    }
+    if (g->min_pct || g->max_pct) {
+        json_add(j, "min_pct", json_number(g->min_pct));
+        json_add(j, "max_pct", json_number(g->max_pct));
+    }
+    if (g->required) {
+        json_add(j, "required", json_boolean(1));
+    }
+    return j;
+}
+
+
+json_value_t *marshalGases(global_gas_t **g) {
+    json_value_t *j = json_list();
+    if (g != NULL) {
+        for (; *g; g++) {
+            json_append(j, marshalGas(*g));
+        }
+    }
+    return j;
+}
+
+
 json_value_t *marshalGlobals(global_data_t *g) {
     json_value_t *j = json_map();
     json_add(j, "turn", json_number(g->turn));
@@ -395,6 +487,7 @@ json_value_t *marshalPlanet(global_planet_t *p) {
     json_add(j, "orbit", json_number(p->orbit));
     json_add(j, "diameter", json_number(p->diameter));
     json_add(j, "econ_efficiency", json_number(p->econ_efficiency));
+    json_add(j, "gases", marshalGases(p->gases));
     json_add(j, "gravity", json_number(p->gravity));
     if (p->idealHomePlanet) {
         json_add(j, "ideal_home_planet", json_boolean(1));
@@ -505,6 +598,57 @@ json_value_t *marshalSpecie(global_species_t *s) {
     json_value_t *j = json_map();
     json_add(j, "sp", json_number(s->id));
     json_add(j, "name", json_string(s->name));
+    json_add(j, "govt_name", json_string(s->govt_name));
+    json_add(j, "govt_type", json_string(s->govt_type));
+    if (s->auto_orders) {
+        json_add(j, "auto_orders", json_boolean(1));
+    }
+    json_add(j, "econ_units", json_number(s->econ_units));
+    if (s->hp_original_base) {
+        json_add(j, "hp_original_base", json_number(s->hp_original_base));
+    }
+
+    json_add(j, "required_gases", marshalGases(s->required_gases));
+    json_add(j, "neutral_gases", marshalGases(s->neutral_gases));
+    json_add(j, "poison_gases", marshalGases(s->poison_gases));
+
+    json_value_t *v = NULL;
+    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
+        if (s->contacts[sp]) {
+            if (v == NULL) {
+                v = json_list();
+            }
+            json_append(v, json_number(sp));
+        }
+    }
+    if (v != NULL) {
+        json_add(j, "contacts", v);
+    }
+    v = NULL;
+    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
+        if (s->allies[sp]) {
+            if (v == NULL) {
+                v = json_list();
+            }
+            json_append(v, json_number(sp));
+        }
+    }
+    if (v != NULL) {
+        json_add(j, "allies", v);
+    }
+    v = NULL;
+    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
+        if (s->enemies[sp]) {
+            if (v == NULL) {
+                v = json_list();
+            }
+            json_append(v, json_number(sp));
+        }
+    }
+    if (v != NULL) {
+        json_add(j, "enemies", v);
+    }
+
     json_add(j, "colonies", marshalColonies(s->colonies));
     json_add(j, "ships", marshalShips(s->ships));
     return j;
