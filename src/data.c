@@ -54,6 +54,11 @@ typedef struct global_data {
     struct global_species **species;
 } global_data_t;
 
+typedef struct global_gas {
+    char code;
+    int percentage;
+} global_gas_t;
+
 typedef struct global_item {
     char code[4];
     int quantity;
@@ -62,9 +67,18 @@ typedef struct global_item {
 typedef struct global_planet {
     int id;
     int orbit;
+    int diameter;
+    int econ_efficiency;
+    struct global_gas gas[4];
+    int gravity;
     int idealHomePlanet;
     int idealColonyPlanet;
+    int md_increase;
+    int message;
+    int mining_difficulty;
+    int pressure_class;
     int radioactiveHellHole;
+    int temperature_class;
 } global_planet_t;
 
 typedef struct global_ship {
@@ -98,8 +112,14 @@ typedef struct global_species {
 typedef struct global_system {
     int id;
     int x, y, z;
+    int color;
+    int home_system;
+    int message;
+    int size;
+    int type;
     int wormholeExit;
     struct global_planet **planets;
+    int visited_by[MAX_SPECIES + 1];
 } global_system_t;
 
 
@@ -112,6 +132,8 @@ static json_value_t *marshalColonies(global_colony_t **c);
 static json_value_t *marshalGlobals(global_data_t *g);
 
 static json_value_t *marshalInventory(global_item_t **i);
+
+static json_value_t *marshalCoords(int x, int y, int z);
 
 static json_value_t *marshalPlanet(global_planet_t *p);
 
@@ -147,6 +169,15 @@ int exportData(FILE *fp) {
         s->x = star->x;
         s->y = star->y;
         s->z = star->z;
+        s->color =  star->color;
+        s->home_system = star->home_system;
+        s->size = star->size;
+        s->type = star->type;
+        for (int i = 0; i < galaxy.num_species; i++) {
+            if ((star->visited_by[i / 32] & (1 << (i % 32))) != 0) {
+                s->visited_by[i + 1] = TRUE;
+            }
+        }
         s->wormholeExit = star->wormholeExit ? star->wormholeExit->id : 0;
         s->planets = calloc(star->num_planets + 1, sizeof(global_planet_t *));
         for (int pn = 0; pn < star->num_planets; pn++) {
@@ -311,6 +342,15 @@ json_value_t *marshalColonies(global_colony_t **c) {
 }
 
 
+json_value_t *marshalCoords(int x, int y, int z) {
+    json_value_t *j = json_map();
+    json_add(j, "x", json_number(x));
+    json_add(j, "y", json_number(y));
+    json_add(j, "z", json_number(z));
+    return j;
+}
+
+
 json_value_t *marshalGlobals(global_data_t *g) {
     json_value_t *j = json_map();
     json_add(j, "turn", json_number(g->turn));
@@ -344,6 +384,7 @@ json_value_t *marshalPlanet(global_planet_t *p) {
     if (p->radioactiveHellHole) {
         json_add(j, "radioactive_hell_hole", json_boolean(1));
     }
+    json_add(j, "temperature_class", json_number(p->temperature_class));
     return j;
 }
 
@@ -455,11 +496,28 @@ json_value_t *marshalSpecies(global_species_t **s) {
 json_value_t *marshalSystem(global_system_t *s) {
     json_value_t *j = json_map();
     json_add(j, "sid", json_number(s->id));
-    json_add(j, "x", json_number(s->x));
-    json_add(j, "y", json_number(s->y));
-    json_add(j, "z", json_number(s->z));
+    json_add(j, "coords", marshalCoords(s->x, s->y, s->z));
+    json_add(j, "type", json_number(s->type));
+    json_add(j, "color", json_number(s->color));
+    json_add(j, "size", json_number(s->size));
+    if (s->home_system) {
+        json_add(j, "home_system", json_boolean(1));
+    }
+    json_add(j, "message", json_number(s->id));
     if (s->wormholeExit != 0) {
         json_add(j, "wormhole_exit", json_number(s->wormholeExit));
+    }
+    json_value_t *v = NULL;
+    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
+        if (s->visited_by[sp]) {
+            if (v == NULL) {
+                v = json_list();
+            }
+            json_append(v, json_number(sp));
+        }
+    }
+    if (v != NULL) {
+        json_add(j, "visited_by", v);
     }
     json_add(j, "planets", marshalPlanets(s->planets));
     return j;
