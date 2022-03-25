@@ -169,7 +169,7 @@ int exportData(FILE *fp) {
         s->x = star->x;
         s->y = star->y;
         s->z = star->z;
-        s->color =  star->color;
+        s->color = star->color;
         s->home_system = star->home_system;
         s->size = star->size;
         s->type = star->type;
@@ -186,9 +186,17 @@ int exportData(FILE *fp) {
             planet_data_t *planet = planet_base + star->planet_index + pn;
             p->id = planet->id;
             p->orbit = planet->orbit;
+            p->diameter = planet->diameter;
+            p->econ_efficiency = planet->econ_efficiency;
+            p->gravity = planet->gravity;
             p->idealHomePlanet = planet->special == 1;
             p->idealColonyPlanet = planet->special == 2;
+            p->md_increase = planet->md_increase;
+            p->message = planet->message;
+            p->mining_difficulty = planet->mining_difficulty;
+            p->pressure_class = planet->pressure_class;
             p->radioactiveHellHole = planet->special == 3;
+            p->temperature_class = planet->temperature_class;
         }
     }
     g->species = calloc(galaxy.num_species + 1, sizeof(global_species_t *));
@@ -375,12 +383,23 @@ json_value_t *marshalPlanet(global_planet_t *p) {
     json_value_t *j = json_map();
     json_add(j, "pid", json_number(p->id));
     json_add(j, "orbit", json_number(p->orbit));
+    json_add(j, "diameter", json_number(p->diameter));
+    json_add(j, "econ_efficiency", json_number(p->econ_efficiency));
+    json_add(j, "gravity", json_number(p->gravity));
     if (p->idealHomePlanet) {
         json_add(j, "ideal_home_planet", json_boolean(1));
     }
     if (p->idealColonyPlanet) {
         json_add(j, "ideal_colony_planet", json_boolean(1));
     }
+    json_add(j, "md_increase", json_number(p->md_increase));
+    if (p->message != 0) {
+        json_add(j, "message", json_number(p->message));
+    }
+    if (p->mining_difficulty != 0) {
+        json_add(j, "mining_difficulty", json_number(p->mining_difficulty));
+    }
+    json_add(j, "pressure_class", json_number(p->pressure_class));
     if (p->radioactiveHellHole) {
         json_add(j, "radioactive_hell_hole", json_boolean(1));
     }
