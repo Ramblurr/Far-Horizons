@@ -41,6 +41,7 @@ typedef struct global_cluster {
 typedef struct global_colony {
     int id;
     char name[32];
+    int homeworld;
     struct global_item **inventory;
     struct {
         struct global_system *system;
@@ -105,6 +106,8 @@ typedef struct global_ship {
 typedef struct global_species {
     int id;
     char name[32];
+    char govt_name[32];
+    char govt_type[32];
     struct global_colony **colonies;
     struct global_ship **ships;
 } global_species_t;
@@ -214,6 +217,7 @@ int exportData(FILE *fp) {
             nampla_data_t *nampla = namp_data[species->index] + n;
             p->id = nampla->id;
             strcpy(p->name, nampla->name);
+            p->homeworld = n == 0;
             for (global_system_t **system = g->cluster->systems; *system; system++) {
                 if (nampla->system->x == (*system)->x && nampla->system->y == (*system)->y &&
                     nampla->system->z == (*system)->z) {
@@ -329,8 +333,14 @@ json_value_t *marshalColony(global_colony_t *c) {
     json_value_t *j = json_map();
     // json_add(j, "cid", json_number(c->id));
     json_add(j, "name", json_string(c->name));
-    if (c->location.planet) {
-        json_add(j, "planet_pid", json_number(c->location.planet->id));
+    if (c->location.system) {
+        json_add(j, "system", json_number(c->location.system->id));
+        if (c->location.planet) {
+            json_add(j, "orbit", json_number(c->location.planet->orbit));
+        }
+    }
+    if (c->homeworld != FALSE) {
+        json_add(j, "homeworld", json_boolean(1));
     }
     if (c->inventory[0] != NULL) {
         json_add(j, "inventory", marshalInventory(c->inventory));
@@ -381,7 +391,7 @@ json_value_t *marshalInventory(global_item_t **i) {
 
 json_value_t *marshalPlanet(global_planet_t *p) {
     json_value_t *j = json_map();
-    json_add(j, "pid", json_number(p->id));
+    json_add(j, "id", json_number(p->id));
     json_add(j, "orbit", json_number(p->orbit));
     json_add(j, "diameter", json_number(p->diameter));
     json_add(j, "econ_efficiency", json_number(p->econ_efficiency));
@@ -514,7 +524,7 @@ json_value_t *marshalSpecies(global_species_t **s) {
 
 json_value_t *marshalSystem(global_system_t *s) {
     json_value_t *j = json_map();
-    json_add(j, "sid", json_number(s->id));
+    json_add(j, "id", json_number(s->id));
     json_add(j, "coords", marshalCoords(s->x, s->y, s->z));
     json_add(j, "type", json_number(s->type));
     json_add(j, "color", json_number(s->color));
