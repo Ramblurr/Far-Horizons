@@ -74,7 +74,7 @@ struct star_data {
     int worm_y;
     int worm_z;
     struct star_data *wormholeExit;
-    int planet_index; /* Index (starting at zero) into the file "planets.dat" of the first planet in the star system. */
+    int planet_index;  /* Index (starting at zero) into the file "planets.dat" of the first planet in the star system. */
     int message;       /* Message associated with this star system, if any. */
     uint32_t visited_by[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been here. */
 };
