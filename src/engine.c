@@ -151,10 +151,9 @@ int logRandomCommand(int argc, char *argv[]) {
 void *ncalloc(const char *fn, int line, int count, int size) {
     void *p = calloc(count, size);
     if (p == NULL) {
-        char lineNo[128];
-        perror(fn);
-        sprintf(lineNo, "%d", line);
-        perror(lineNo);
+        char msg[256];
+        snprintf(msg, 256, "%s: %d: calloc(%d, %d) failed", fn, line, count, size);
+        perror(msg);
         exit(2);
     }
     return p;
