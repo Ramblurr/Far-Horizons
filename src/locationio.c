@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include "engine.h"
 #include "locationio.h"
 #include "location.h"
 
