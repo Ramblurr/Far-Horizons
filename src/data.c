@@ -511,11 +511,15 @@ json_value_t *marshalColony(global_colony_t *c) {
     if (develop != NULL) {
         json_add(j, "develop", develop);
     }
-    json_add(j, "ma_base", json_number(c->ma_base));
+    if (c->ma_base) {
+        json_add(j, "ma_base", json_number(c->ma_base));
+    }
     if (c->message) {
         json_add(j, "message", json_number(c->message));
     }
-    json_add(j, "mi_base", json_number(c->mi_base));
+    if (c->mi_base) {
+        json_add(j, "mi_base", json_number(c->mi_base));
+    }
     if (c->pop_units) {
         json_add(j, "pop_units", json_number(c->pop_units));
     }
