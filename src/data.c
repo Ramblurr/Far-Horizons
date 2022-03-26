@@ -40,15 +40,23 @@ typedef struct global_cluster {
     struct global_system **systems;
 } global_cluster_t;
 
+typedef struct global_location {
+    int x, y, z;
+    int orbit;
+    char colony[64];
+    int deep_space;
+    int in_orbit;
+    int on_surface;
+    struct global_system *system;
+    struct global_planet *planet;
+} global_location_t;
+
 typedef struct global_colony {
     int id;
     char name[32];
     int homeworld;
+    struct global_location location;
     struct global_item **inventory;
-    struct {
-        struct global_system *system;
-        struct global_planet *planet;
-    } location;
 } global_colony_t;
 
 typedef struct global_data {
@@ -92,19 +100,15 @@ typedef struct global_ship {
     char name[64];
     int age;
     int arrived_via_wormhole;
-    int class;
     struct global_item **inventory;
-    struct {
-        int x, y, z, pn;
-        char colony[32];
-    } location;
+    struct global_location location;
+    struct global_location destination;
     int just_jumped;
     char loading_point[32];
     int remaining_cost;
     int special;
     int status;
-    int tonnage;
-    int type;
+    int tonnage; // valid only for starbases
     char unloading_point[32];
 } global_ship_t;
 
@@ -156,15 +160,17 @@ static json_value_t *marshalColony(global_colony_t *c);
 
 static json_value_t *marshalColonies(global_colony_t **c);
 
-static json_value_t *marshalGlobals(global_data_t *g);
-
-static json_value_t *marshalInventory(global_item_t **i);
-
 static json_value_t *marshalCoords(int x, int y, int z);
 
 static json_value_t *marshalGas(global_gas_t *g);
 
 static json_value_t *marshalGases(global_gas_t **g);
+
+static json_value_t *marshalGlobals(global_data_t *g);
+
+static json_value_t *marshalInventory(global_item_t **i);
+
+static json_value_t *marshalLocation(global_location_t l);
 
 static json_value_t *marshalPlanet(global_planet_t *p);
 
@@ -354,7 +360,6 @@ int exportData(FILE *fp) {
             strcpy(p->name, shipDisplayName(ship));
             p->age = ship->age;
             p->arrived_via_wormhole = ship->arrived_via_wormhole;
-            p->class = ship->class;
             int items = 0; // number of items in inventory
             for (int k = 0; k < MAX_ITEMS; k++) {
                 if (ship->item_quantity[k] != 0) {
@@ -372,6 +377,7 @@ int exportData(FILE *fp) {
                 }
             }
             p->just_jumped = ship->just_jumped;
+
             if (ship->loading_point == 9999) {
                 strcpy(p->loading_point, s->colonies[0]->name);
             } else if (ship->loading_point > 0) {
@@ -385,17 +391,25 @@ int exportData(FILE *fp) {
                     break;
                 }
             }
-            if (p->location.colony[0] == 0) {
-                p->location.x = ship->x;
-                p->location.y = ship->y;
-                p->location.z = ship->z;
-                p->location.pn = ship->pn;
-            }
+            p->location.x = ship->x;
+            p->location.y = ship->y;
+            p->location.z = ship->z;
+            p->location.orbit = ship->pn;
+            p->location.deep_space = ship->status == IN_DEEP_SPACE ? TRUE : FALSE;
+            p->location.in_orbit = ship->status == IN_ORBIT ? TRUE : FALSE;
+            p->location.on_surface = ship->status == ON_SURFACE ? TRUE : FALSE;
+
+            p->destination.x = ship->dest_x;
+            p->destination.y = ship->dest_y;
+            p->destination.z = ship->dest_z;
+
             p->remaining_cost = ship->remaining_cost;
             p->special = ship->special;
             p->status = ship->status;
-            p->tonnage = ship->tonnage;
-            p->type = ship->type;
+            if (ship->class == BA) {
+                p->tonnage = ship->tonnage;
+            }
+
             if (ship->unloading_point == 9999) {
                 strcpy(p->unloading_point, s->colonies[0]->name);
             } else if (ship->unloading_point > 0) {
@@ -452,15 +466,6 @@ json_value_t *marshalColonies(global_colony_t **c) {
 }
 
 
-json_value_t *marshalCoords(int x, int y, int z) {
-    json_value_t *j = json_map();
-    json_add(j, "x", json_number(x));
-    json_add(j, "y", json_number(y));
-    json_add(j, "z", json_number(z));
-    return j;
-}
-
-
 json_value_t *marshalGas(global_gas_t *g) {
     json_value_t *j = json_map();
     json_add(j, "code", json_string(g->code));
@@ -504,6 +509,31 @@ json_value_t *marshalInventory(global_item_t **i) {
         for (; *i; i++) {
             json_add(j, (*i)->code, json_number((*i)->quantity));
         }
+    }
+    return j;
+}
+
+
+json_value_t *marshalLocation(global_location_t l) {
+    json_value_t *j = json_map();
+    if (l.colony[0] == 0) {
+        json_add(j, "x", json_number(l.x));
+        json_add(j, "y", json_number(l.y));
+        json_add(j, "z", json_number(l.z));
+        if (l.orbit) {
+            json_add(j, "z", json_number(l.orbit));
+        }
+    } else {
+        json_add(j, "colony", json_string(l.colony));
+    }
+    if (l.deep_space) {
+        json_add(j, "deep_space", json_boolean(1));
+    }
+    if (l.in_orbit) {
+        json_add(j, "in_orbit", json_boolean(1));
+    }
+    if (l.on_surface) {
+        json_add(j, "on_surface", json_boolean(1));
     }
     return j;
 }
@@ -565,27 +595,10 @@ json_value_t *marshalShip(global_ship_t *s) {
     if (s->inventory[0] != NULL) {
         json_add(j, "inventory", marshalInventory(s->inventory));
     }
-    json_value_t *location = json_map();
-    if (s->location.colony[0]) {
-        json_add(location, "colony", json_string(s->location.colony));
-    } else {
-        json_add(location, "x", json_number(s->location.x));
-        json_add(location, "y", json_number(s->location.y));
-        json_add(location, "z", json_number(s->location.z));
-        if (s->location.pn) {
-            json_add(location, "pn", json_number(s->location.pn));
-        }
+    json_add(j, "location", marshalLocation(s->location));
+    if (s->destination.x != 0) {
+        json_add(j, "destination", marshalLocation(s->destination));
     }
-    if (s->status == IN_DEEP_SPACE) {
-        json_add(location, "deep_space", json_boolean(1));
-    }
-    if (s->status == IN_ORBIT) {
-        json_add(location, "in_orbit", json_boolean(1));
-    }
-    if (s->status == ON_SURFACE) {
-        json_add(location, "on_surface", json_boolean(1));
-    }
-    json_add(j, "location", location);
     if (s->status == JUMPED_IN_COMBAT) {
         json_add(j, "jumped_in_combat", json_boolean(1));
     }
@@ -598,11 +611,14 @@ json_value_t *marshalShip(global_ship_t *s) {
     if (s->remaining_cost) {
         json_add(j, "remaining_cost", json_number(s->remaining_cost));
     }
-    if (s->class == BA) {
+    if (s->tonnage != 0) {
         json_add(j, "tonnage", json_number(s->tonnage));
     }
     if (s->status == UNDER_CONSTRUCTION) {
         json_add(j, "under_construction", json_boolean(1));
+    }
+    if (s->special != 0) {
+        json_add(j, "special", json_number(s->special));
     }
     if (s->unloading_point[0]) {
         json_add(j, "unloading_point", json_string(s->unloading_point));
@@ -727,7 +743,8 @@ json_value_t *marshalSpecies(global_species_t **s) {
 json_value_t *marshalSystem(global_system_t *s) {
     json_value_t *j = json_map();
     json_add(j, "id", json_number(s->id));
-    json_add(j, "coords", marshalCoords(s->x, s->y, s->z));
+    global_location_t l = {.x =  s->x, y: s->y, z: s->z};
+    json_add(j, "coords", marshalLocation(l));
     json_add(j, "type", json_number(s->type));
     json_add(j, "color", json_number(s->color));
     json_add(j, "size", json_number(s->size));
