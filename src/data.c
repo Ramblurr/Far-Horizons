@@ -30,6 +30,7 @@
 #include "speciesio.h"
 #include "stario.h"
 #include "planetvars.h"
+#include "commandvars.h"
 
 
 typedef struct global_cluster {
@@ -107,11 +108,21 @@ typedef struct global_ship {
     char unloading_point[32];
 } global_ship_t;
 
+typedef struct global_skill {
+    char code[4];
+    char name[32];
+    int init_level;
+    int current_level;
+    int knowledge_level;
+    int xps;
+} global_skill_t;
+
 typedef struct global_species {
     int id;
     char name[32];
     char govt_name[32];
     char govt_type[32];
+    struct global_skill *skills[7];
     int auto_orders;
     int econ_units;
     int hp_original_base;
@@ -151,6 +162,10 @@ static json_value_t *marshalInventory(global_item_t **i);
 
 static json_value_t *marshalCoords(int x, int y, int z);
 
+static json_value_t *marshalGas(global_gas_t *g);
+
+static json_value_t *marshalGases(global_gas_t **g);
+
 static json_value_t *marshalPlanet(global_planet_t *p);
 
 static json_value_t *marshalPlanets(global_planet_t **p);
@@ -158,6 +173,10 @@ static json_value_t *marshalPlanets(global_planet_t **p);
 static json_value_t *marshalShip(global_ship_t *s);
 
 static json_value_t *marshalShips(global_ship_t **s);
+
+static json_value_t *marshalSkill(global_skill_t *s);
+
+static json_value_t *marshalSkills(global_skill_t **s);
 
 static json_value_t *marshalSpecie(global_species_t *s);
 
@@ -237,6 +256,15 @@ int exportData(FILE *fp) {
         s->econ_units = species->econ_units;
         s->hp_original_base = species->hp_original_base;
 
+        for (int l = 0; l < 6; l++) {
+            s->skills[l] = calloc(1, sizeof(global_skill_t));
+            strcpy(s->skills[l]->code, tech_abbr[l]);
+            strcpy(s->skills[l]->name, tech_name[l]);
+            s->skills[l]->init_level = species->init_tech_level[l];
+            s->skills[l]->current_level = species->tech_level[l];
+            s->skills[l]->knowledge_level = species->tech_knowledge[l];
+            s->skills[l]->xps = species->tech_eps[l];
+        }
         s->required_gases[0] = calloc(1, sizeof(global_gas_t));
         sprintf(s->required_gases[0]->code, gas_string[species->required_gas]);
         s->required_gases[0]->max_pct = species->required_gas_max;
@@ -594,12 +622,40 @@ json_value_t *marshalShips(global_ship_t **s) {
 }
 
 
+json_value_t *marshalSkill(global_skill_t *s) {
+    json_value_t *j = json_map();
+    json_add(j, "code", json_string(s->code));
+    if (s->init_level != 0) {
+        json_add(j, "init_level", json_number(s->init_level));
+    }
+    json_add(j, "current_level", json_number(s->current_level));
+    if (s->knowledge_level != 0) {
+        json_add(j, "knowledge_level", json_number(s->knowledge_level));
+    }
+    json_add(j, "xps", json_number(s->xps));
+
+    return j;
+}
+
+
+json_value_t *marshalSkills(global_skill_t **s) {
+    json_value_t *j = json_list();
+    if (s != NULL) {
+        for (; *s; s++) {
+            json_append(j, marshalSkill(*s));
+        }
+    }
+    return j;
+}
+
+
 json_value_t *marshalSpecie(global_species_t *s) {
     json_value_t *j = json_map();
     json_add(j, "sp", json_number(s->id));
     json_add(j, "name", json_string(s->name));
     json_add(j, "govt_name", json_string(s->govt_name));
     json_add(j, "govt_type", json_string(s->govt_type));
+
     if (s->auto_orders) {
         json_add(j, "auto_orders", json_boolean(1));
     }
@@ -607,6 +663,8 @@ json_value_t *marshalSpecie(global_species_t *s) {
     if (s->hp_original_base) {
         json_add(j, "hp_original_base", json_number(s->hp_original_base));
     }
+
+    json_add(j, "skills", marshalSkills(s->skills));
 
     json_add(j, "required_gases", marshalGases(s->required_gases));
     json_add(j, "neutral_gases", marshalGases(s->neutral_gases));
