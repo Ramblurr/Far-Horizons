@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "engine.h"
@@ -79,7 +78,7 @@ typedef struct global_data {
 
 typedef struct global_develop {
     char code[4];
-    int is_auto;
+    int auto_install;
     int units_needed;
     int units_to_install;
 } global_develop_t;
@@ -179,7 +178,7 @@ static json_value_t *marshalColony(global_colony_t *c);
 
 static json_value_t *marshalColonies(global_colony_t **c);
 
-static json_value_t *marshalCoords(int x, int y, int z);
+static json_value_t *marshalDevelop(global_develop_t *d);
 
 static json_value_t *marshalGas(global_gas_t *g);
 
@@ -334,7 +333,16 @@ int exportData(FILE *fp) {
             nampla_data_t *nampla = namp_data[species->index] + n;
             p->id = nampla->id;
             strcpy(p->name, nampla->name);
+            p->hidden = nampla->hidden;
+            p->hiding = nampla->hiding;
             p->homeworld = n == 0;
+            p->ma_base = nampla->ma_base;
+            p->message = nampla->message;
+            p->mi_base = nampla->mi_base;
+            p->pop_units = nampla->pop_units;
+            p->siege_eff = nampla->siege_eff;
+            p->special = nampla->special;
+            p->use_on_ambush = nampla->use_on_ambush;
             for (global_system_t **system = g->cluster->systems; *system; system++) {
                 if (nampla->system->x == (*system)->x && nampla->system->y == (*system)->y &&
                     nampla->system->z == (*system)->z) {
@@ -363,6 +371,23 @@ int exportData(FILE *fp) {
                     p->inventory[items]->quantity = nampla->item_quantity[k];
                     items++;
                 }
+            }
+            index = 0;
+            if (nampla->auto_AUs || nampla->AUs_needed || nampla->AUs_to_install) {
+                p->develop[index] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_develop_t));
+                strcpy(p->develop[index]->code, "AU");
+                p->develop[index]->auto_install = nampla->auto_AUs;
+                p->develop[index]->units_to_install = nampla->AUs_to_install;
+                p->develop[index]->units_needed = nampla->AUs_needed;
+                index++;
+            }
+            if (nampla->auto_IUs || nampla->IUs_needed || nampla->IUs_to_install) {
+                p->develop[index] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_develop_t));
+                strcpy(p->develop[index]->code, "IU");
+                p->develop[index]->auto_install = nampla->auto_IUs;
+                p->develop[index]->units_to_install = nampla->IUs_to_install;
+                p->develop[index]->units_needed = nampla->IUs_needed;
+                index++;
             }
         }
 
@@ -467,8 +492,41 @@ json_value_t *marshalColony(global_colony_t *c) {
     if (c->homeworld != FALSE) {
         json_add(j, "homeworld", json_boolean(1));
     }
+    if (c->hidden != FALSE) {
+        json_add(j, "hidden", json_boolean(1));
+    }
+    if (c->hiding != FALSE) {
+        json_add(j, "hiding", json_boolean(1));
+    }
     if (c->inventory[0] != NULL) {
         json_add(j, "inventory", marshalInventory(c->inventory));
+    }
+    json_value_t *develop = NULL;
+    for (global_develop_t **d = c->develop; *d != NULL; d++) {
+        if (develop == NULL) {
+            develop = json_list();
+        }
+        json_append(develop, marshalDevelop(*d));
+    }
+    if (develop != NULL) {
+        json_add(j, "develop", develop);
+    }
+    json_add(j, "ma_base", json_number(c->ma_base));
+    if (c->message) {
+        json_add(j, "message", json_number(c->message));
+    }
+    json_add(j, "mi_base", json_number(c->mi_base));
+    if (c->pop_units) {
+        json_add(j, "pop_units", json_number(c->pop_units));
+    }
+    if (c->siege_eff != 0) {
+        json_add(j, "siege_eff", json_boolean(1));
+    }
+    if (c->special != 0) {
+        json_add(j, "special", json_number(c->special));
+    }
+    if (c->use_on_ambush != 0) {
+        json_add(j, "use_on_ambush", json_boolean(1));
     }
     return j;
 }
@@ -480,6 +538,22 @@ json_value_t *marshalColonies(global_colony_t **c) {
         for (; *c; c++) {
             json_append(j, marshalColony(*c));
         }
+    }
+    return j;
+}
+
+
+json_value_t *marshalDevelop(global_develop_t *d) {
+    json_value_t *j = json_map();
+    json_add(j, "code", json_string(d->code));
+    if (d->auto_install) {
+        json_add(j, "auto_install", json_number(d->auto_install));
+    }
+    if (d->units_needed) {
+        json_add(j, "units_needed", json_number(d->units_needed));
+    }
+    if (d->units_to_install) {
+        json_add(j, "units_to_install", json_number(d->units_to_install));
     }
     return j;
 }
