@@ -45,9 +45,9 @@ typedef struct json_node {
 } json_node_t;
 
 
-json_value_t *json_read(FILE *fp);
+int json_marshal(json_value_t *j, int indent, FILE *fp);
 
-int json_write(json_value_t *j, FILE *fp);
+json_value_t *json_unmarshal(FILE *fp);
 
 json_value_t *json_boolean(int v);
 
@@ -65,11 +65,15 @@ json_value_t *json_string(char *v);
 
 json_value_t *json_undefined(void);
 
+
 // add a named value to a map
 json_value_t *json_add(json_value_t *j, const char *name, json_value_t *v);
 
 // add a value to the end of a list
 json_value_t *json_append(json_value_t *j, json_value_t *v);
+
+// length of a list or map
+int json_length(json_value_t *j);
 
 
 int json_is_atom(json_value_t *j);

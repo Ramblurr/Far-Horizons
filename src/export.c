@@ -231,7 +231,7 @@ int exportToJson(int argc, char *argv[]) {
 ////            perror("exportToJson:");
 ////            exit(2);
 ////        }
-////        json_value_t *j = json_read(fp);
+////        json_value_t *j = json_unmarshal(fp);
 ////        if (j == NULL) {
 ////            fprintf(stderr, "exportToJson: j is NULL\n");
 ////            exit(2);
@@ -239,7 +239,7 @@ int exportToJson(int argc, char *argv[]) {
 ////        fclose(fp);
 //
 //        FILE *fp = fopen("export.json", "w");
-////        json_write(j, fp);
+////        json_marshal(j, fp);
 ////        fclose(fp);
 ////
 ////        FILE *fp = fopen("galaxy.json", "wb");

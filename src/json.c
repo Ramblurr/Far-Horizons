@@ -70,10 +70,60 @@ static char *jp__stringer(json_symbol_t s);
 
 static json_value_t *jp__value(json_parser_t *p);
 
-static void json__print(int indent, const char *name, json_value_t *value, FILE *fp);
+
+int json_marshal(json_value_t *j, int indent, FILE *fp) {
+    if (json_is_atom(j)) {
+        if (j == NULL || j->flag == JSON_TYPE_UNDEFINED) {
+            fprintf(fp, "undefined");
+        } else if (j->flag == JSON_TYPE_BOOL) {
+            if (j->u.b) {
+                fprintf(fp, "true");
+            } else {
+                fprintf(fp, "false");
+            }
+        } else if (j->flag == JSON_TYPE_ERROR) {
+            fprintf(fp, "error(%s)", j->u.s);
+        } else if (j->flag == JSON_TYPE_NUMBER) {
+            fprintf(fp, "%d", j->u.n);
+        } else if (j->flag == JSON_TYPE_NULL) {
+            fprintf(fp, "null");
+        } else if (j->flag == JSON_TYPE_STRING) {
+            fprintf(fp, "\"%s\"", j->u.s);
+        } else {
+            fprintf(fp, "error(internal)");
+        }
+        return 0;
+    }
+
+    fprintf(fp, "\n");
+    for (int i = indent; i > 0; i--) {
+        fprintf(fp, "\t");
+    }
+    fprintf(fp, "%c", j->flag == JSON_TYPE_LIST ? '[' : '{');
+    if (j->u.a.root != NULL) {
+        for (json_node_t *n = j->u.a.root; n != NULL; n = n->next) {
+            fprintf(fp, "\n");
+            for (int i = indent + 1; i > 0; i--) {
+                fprintf(fp, "\t");
+            }
+            if (j->flag == JSON_TYPE_MAP) {
+                fprintf(fp, "\"%s\":", n->key);
+            }
+            json_marshal(n->value, indent + 1, fp);
+            fprintf(fp, "%s", n->next == NULL ? "" : ",");
+        }
+        fprintf(fp, "\n");
+        for (int i = indent; i > 0; i--) {
+            fprintf(fp, "\t");
+        }
+    }
+    fprintf(fp, "%c", j->flag == JSON_TYPE_LIST ? ']' : '}');
+
+    return 0;
+}
 
 
-json_value_t *json_read(FILE *fp) {
+json_value_t *json_unmarshal(FILE *fp) {
     json_parser_t p;
     memset(&p, 0, sizeof(p));
     p.fp = fp;
@@ -84,13 +134,6 @@ json_value_t *json_read(FILE *fp) {
     jp__expect(&p, eof);
 
     return value;
-}
-
-
-int json_write(json_value_t *value, FILE *fp) {
-    json__print(0, "", value, fp);
-    fprintf(fp, "\n");
-    return 0;
 }
 
 
@@ -212,6 +255,17 @@ json_value_t *json_error(const char *fmt, ...) {
 }
 
 
+int json_length(json_value_t *j) {
+    int length = 0;
+    if (json_is_list(j) || json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            length++;
+        }
+    }
+    return length;
+}
+
+
 json_value_t *json_list(void) {
     json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
@@ -321,93 +375,6 @@ int json_is_string(json_value_t *j) {
 
 int json_is_undefined(json_value_t *j) {
     return j == NULL || j->flag == JSON_TYPE_UNDEFINED;
-}
-
-
-void json__print(int indent, const char *name, json_value_t *value, FILE *fp) {
-    for (int i = indent; i > 0; i--) {
-        fprintf(fp, "\t");
-    }
-    if (name != NULL && *name) {
-        fprintf(fp, "\"%s\":", name);
-    }
-    if (value == NULL) {
-        fprintf(fp, "undefined");
-    } else {
-        switch (value->flag) {
-            case JSON_TYPE_UNDEFINED:
-                fprintf(fp, "undefined");
-                break;
-            case JSON_TYPE_BOOL:
-                if (value->u.b) {
-                    fprintf(fp, "true");
-                } else {
-                    fprintf(fp, "false");
-                }
-                break;
-            case JSON_TYPE_ERROR:
-                fprintf(fp, "error(%s)", value->u.s);
-                break;
-            case JSON_TYPE_LIST:
-                if (value->u.a.root == NULL) {
-                    fprintf(fp, "[]");
-                } else if (value->u.a.root->next == NULL && json_is_atom(value->u.a.root->value)) {
-                    fprintf(fp, "[");
-                    json__print(0, value->u.a.root->key, value->u.a.root->value, fp);
-                    fprintf(fp, "]");
-                } else {
-                    fprintf(fp, "[\n");
-                    for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 1, n->key, n->value, fp);
-                        if (n->next != NULL) {
-                            fprintf(fp, ",\n");
-                        } else {
-                            fprintf(fp, "\n");
-                        }
-                    }
-                    for (int i = indent; i > 0; i--) {
-                        fprintf(fp, "\t");
-                    }
-                    fprintf(fp, "]");
-                }
-                break;
-            case JSON_TYPE_MAP:
-                if (value->u.a.root == NULL) {
-                    fprintf(fp, "{}");
-                } else if (value->u.a.root->next == NULL && json_is_atom(value->u.a.root->value)) {
-                    fprintf(fp, "{");
-                    json__print(0, value->u.a.root->key, value->u.a.root->value, fp);
-                    fprintf(fp, "}");
-                } else {
-                    fprintf(fp, "{\n");
-                    for (json_node_t *n = value->u.a.root; n != NULL; n = n->next) {
-                        json__print(indent + 1, n->key, n->value, fp);
-                        if (n->next != NULL) {
-                            fprintf(fp, ",\n");
-                        } else {
-                            fprintf(fp, "\n");
-                        }
-                    }
-                    for (int i = indent; i > 0; i--) {
-                        fprintf(fp, "\t");
-                    }
-                    fprintf(fp, "}");
-                }
-                break;
-            case JSON_TYPE_NUMBER:
-                fprintf(fp, "%d", value->u.n);
-                break;
-            case JSON_TYPE_NULL:
-                fprintf(fp, "null");
-                break;
-            case JSON_TYPE_STRING:
-                fprintf(fp, "\"%s\"", value->u.s);
-                break;
-            default:
-                fprintf(fp, "undefined");
-                break;
-        }
-    }
 }
 
 
