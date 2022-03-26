@@ -54,7 +54,7 @@ typedef struct {
 /* load ship data from file and create empty slots for future use */
 struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
     /* Allocate enough memory for all ships. */
-    binary_data_t *binData = (binary_data_t *) calloc(numShips + extraShips, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("get_ship_data");
         fprintf(stderr, "\nCannot allocate enough memory for ship data!\n");
@@ -69,7 +69,7 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
         exit(-1);
     }
     /* translate between the structures */
-    struct ship_data *shipData = (struct ship_data *) calloc(numShips + extraShips, sizeof(struct ship_data));
+    struct ship_data *shipData = (struct ship_data *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips, sizeof(struct ship_data));
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
         binary_data_t *sd = &binData[i];
@@ -105,7 +105,7 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
 
 void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     /* Allocate enough memory for all ships. */
-    binary_data_t *binData = (binary_data_t *) calloc(numShips, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("save_ship_data");
         fprintf(stderr, "\nCannot allocate enough memory for ship data!\n");

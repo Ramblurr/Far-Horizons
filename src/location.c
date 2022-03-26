@@ -107,7 +107,7 @@ int locationCommand(int argc, char *argv[]) {
     get_species_data();
 
     // allocate memory for array "total_econ_base"
-    long *total_econ_base = (long *) calloc(num_planets, sizeof(long));
+    long *total_econ_base = (long *) ncalloc(__FUNCTION__, __LINE__, num_planets, sizeof(long));
     if (total_econ_base == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
         exit(-1);

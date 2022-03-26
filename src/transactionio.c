@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "engine.h"
 #include "transactionio.h"
 
 
@@ -72,7 +73,7 @@ void get_transaction_data(void) {
     }
 
     /* Allocate enough memory for all records. */
-    binary_data_t *binData = (binary_data_t *) calloc(num_transactions, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("get_transaction_data");
         fprintf(stderr, "\nCannot allocate enough memory for transaction data!\n");
@@ -130,7 +131,7 @@ void save_transaction_data(void) {
 
     if (num_transactions > 0) {
         /* Allocate enough memory for all records. */
-        binary_data_t *binData = (binary_data_t *) calloc(num_transactions, sizeof(binary_data_t));
+        binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_data_t));
         if (binData == NULL) {
             perror("save_transaction_data");
             fprintf(stderr, "\nCannot allocate enough memory for transaction data!\n");

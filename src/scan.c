@@ -270,13 +270,13 @@ int scanNearCommand(int argc, char *argv[]) {
     }
 
     printf("Systems within %d parsecs of %d %d %d:\n", radius, x, y, z);
-    scan_system_t **ss = calloc(num_stars, sizeof(scan_system_t *));
+    scan_system_t **ss = ncalloc(__FUNCTION__, __LINE__, num_stars, sizeof(scan_system_t *));
     if (ss == NULL) {
         perror("scan_system_t *");
         return 2;
     }
     for (int i = 0; i < num_stars; i++) {
-        ss[i] = calloc(1, sizeof(scan_system_t));
+        ss[i] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(scan_system_t));
         if (ss[i] == NULL) {
             perror("scan_system_t");
             return 2;

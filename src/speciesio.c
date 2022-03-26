@@ -73,7 +73,7 @@ typedef struct {
 // get_species_data will read in data files for all species
 void get_species_data(void) {
     // allocate memory to load the data into memory
-    binary_data_t *data = (binary_data_t *) calloc(sizeof(binary_data_t), 1);
+    binary_data_t *data = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, sizeof(binary_data_t), 1);
     if (data == NULL) {
         perror("get_species_data");
         fprintf(stderr, "\nCannot allocate enough memory for species file!\n\n");

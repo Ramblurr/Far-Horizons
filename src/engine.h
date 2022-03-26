@@ -194,6 +194,8 @@ void gamemaster_abort_option(void);
 
 int logRandomCommand(int argc, char *argv[]);
 
+void *ncalloc(const char *fn, int line, int count, int size);
+
 char *readln(char *dst, int len, FILE *fp);
 
 int rnd(unsigned int max);

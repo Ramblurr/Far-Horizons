@@ -69,7 +69,7 @@ void get_planet_data(void) {
         exit(-1);
     }
     /* Allocate enough memory for all planets. */
-    planetData = (binary_data_t *) calloc(numPlanets + NUM_EXTRA_PLANETS, sizeof(binary_data_t));
+    planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets + NUM_EXTRA_PLANETS, sizeof(binary_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d + %d planet entries\n\n", numPlanets, NUM_EXTRA_PLANETS);
@@ -84,7 +84,7 @@ void get_planet_data(void) {
 
     num_planets = numPlanets;
     /* Allocate enough memory for all planets. */
-    planet_base = (struct planet_data *) calloc(num_planets + NUM_EXTRA_PLANETS, sizeof(struct planet_data));
+    planet_base = (struct planet_data *) ncalloc(__FUNCTION__, __LINE__, num_planets + NUM_EXTRA_PLANETS, sizeof(struct planet_data));
     if (planet_base == NULL) {
         perror("get_planet_data");
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n\n");
@@ -147,7 +147,7 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     }
 
     // allocate enough memory for all records
-    binary_data_t *rawRecords = (binary_data_t *) calloc(numRecords, sizeof(binary_data_t));
+    binary_data_t *rawRecords = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_data_t));
     if (rawRecords == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n", filename);
         exit(-1);
@@ -164,7 +164,7 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     if (extraRecords < 0) {
         extraRecords = 0;
     }
-    planet_data_t *planetBase = (planet_data_t *) calloc(numRecords + extraRecords + 1, sizeof(planet_data_t));
+    planet_data_t *planetBase = (planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords + extraRecords + 1, sizeof(planet_data_t));
     if (planet_base == NULL) {
         perror("get_planet_data");
         fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n\n", filename);
@@ -253,7 +253,7 @@ void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
 void save_planet_data(void) {
     FILE *fp;
     int32_t numPlanets = num_planets;
-    binary_data_t *planetData = (binary_data_t *) calloc(numPlanets, sizeof(binary_data_t));
+    binary_data_t *planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets, sizeof(binary_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d planet entries\n\n", numPlanets);
@@ -306,7 +306,7 @@ void save_planet_data(void) {
 
 void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename) {
     int32_t numRecords = numPlanets;
-    binary_data_t *planetData = (binary_data_t *) calloc(numRecords, sizeof(binary_data_t));
+    binary_data_t *planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
         fprintf(stderr, "       attempted to allocate %d planet records\n", numRecords);

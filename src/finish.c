@@ -106,7 +106,7 @@ int finishCommand(int argc, char *argv[]) {
 
     /* Allocate memory for array "total_econ_base". */
     total = (long) num_planets * sizeof(long);
-    total_econ_base = (long *) calloc(total, sizeof(long));
+    total_econ_base = (long *) ncalloc(__FUNCTION__, __LINE__, total, sizeof(long));
     if (total_econ_base == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for total_econ_base!\n\n");
         exit(2);

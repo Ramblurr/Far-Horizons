@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include "engine.h"
 #include "cfgfile.h"
 
 typedef struct {
@@ -139,10 +140,10 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
         } else if (strcmp(kv.key, "species") == 0) {
             // append a new section to the list
             if (root == NULL) {
-                curr = calloc(1, sizeof(species_cfg_t));
+                curr = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
                 root = curr;
             } else {
-                curr->next = calloc(1, sizeof(species_cfg_t));
+                curr->next = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
                 curr = curr->next;
             }
             if (curr == NULL) {

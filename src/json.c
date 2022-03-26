@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include "engine.h"
 #include "json.h"
 
 
@@ -111,7 +112,7 @@ json_value_t *json_add(json_value_t *j, const char *key, json_value_t *value) {
         exit(2);
     }
 
-    json_node_t *t = calloc(1, sizeof(json_node_t));
+    json_node_t *t = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_node_t));
     if (t == NULL) {
         perror("json_add:");
         exit(2);
@@ -159,7 +160,7 @@ json_value_t *json_append(json_value_t *j, json_value_t *value) {
         exit(2);
     }
 
-    json_node_t *t = calloc(1, sizeof(json_node_t));
+    json_node_t *t = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_node_t));
     if (t == NULL) {
         perror("json_append:");
         exit(2);
@@ -179,7 +180,7 @@ json_value_t *json_append(json_value_t *j, json_value_t *value) {
 
 
 json_value_t *json_boolean(int v) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_boolean:");
         exit(2);
@@ -191,7 +192,7 @@ json_value_t *json_boolean(int v) {
 
 
 json_value_t *json_error(const char *fmt, ...) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_error:");
         exit(2);
@@ -212,7 +213,7 @@ json_value_t *json_error(const char *fmt, ...) {
 
 
 json_value_t *json_list(void) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_list:");
         exit(2);
@@ -223,7 +224,7 @@ json_value_t *json_list(void) {
 
 
 json_value_t *json_map(void) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_map:");
         exit(2);
@@ -234,7 +235,7 @@ json_value_t *json_map(void) {
 
 
 json_value_t *json_null(void) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_null:");
         exit(2);
@@ -245,7 +246,7 @@ json_value_t *json_null(void) {
 
 
 json_value_t *json_number(int v) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_number:");
         exit(2);
@@ -257,7 +258,7 @@ json_value_t *json_number(int v) {
 
 
 json_value_t *json_string(char *v) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_string:");
         exit(2);
@@ -273,7 +274,7 @@ json_value_t *json_string(char *v) {
 
 
 json_value_t *json_undefined(void) {
-    json_value_t *j = calloc(1, sizeof(json_value_t));
+    json_value_t *j = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(json_value_t));
     if (j == NULL) {
         perror("json_undefined:");
         exit(2);

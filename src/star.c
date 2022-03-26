@@ -254,7 +254,7 @@ double distanceBetween(star_data_t *s1, star_data_t *s2) {
 // is not currently a home system, is not a worm_hole endpoint, and is at least the
 // minimum distance from any existing home system. it returns NULL if there are no such systems.
 star_data_t *findHomeSystemCandidate(int radius) {
-    star_data_t **candidates = calloc(num_stars + 1, sizeof(star_data_t *));
+    star_data_t **candidates = ncalloc(__FUNCTION__, __LINE__, num_stars + 1, sizeof(star_data_t *));
     if (candidates == NULL) {
         perror("findHomeSystemCandidate:");
         exit(2);

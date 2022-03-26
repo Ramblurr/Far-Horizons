@@ -74,14 +74,14 @@ void get_star_data(void) {
     }
 
     /* Allocate enough memory for all stars plus maybe an extra few. */
-    starData = (binary_data_t *) calloc(numStars, sizeof(binary_data_t));
+    starData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_data_t));
     if (starData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d star entries\n\n", numStars);
         exit(-1);
     }
     num_stars = numStars;
-    star_base = (struct star_data *) calloc(num_stars + NUM_EXTRA_STARS, sizeof(struct star_data));
+    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars + NUM_EXTRA_STARS, sizeof(struct star_data));
     if (star_base == NULL) {
         perror("get_star_data");
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
@@ -166,7 +166,7 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
         fprintf(stderr, "error: saveStarData: internal error: passed null file pointer\n");
         exit(2);
     }
-    binary_data_t *starData = (binary_data_t *) calloc(numStars, sizeof(binary_data_t));
+    binary_data_t *starData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_data_t));
     if (starData == NULL) {
         perror("saveStarData:");
         fprintf(stderr, "error: cannot allocate enough memory to convert stars data\n");

@@ -446,7 +446,7 @@ int createSpeciesCommand(int argc, char *argv[]) {
         sp->z = homeSystem->z;
         sp->pn = home_planet->orbit;
 
-        nampla_data_t *home_nampla = calloc(1, sizeof(nampla_data_t));
+        nampla_data_t *home_nampla = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(nampla_data_t));
         if (home_nampla == NULL) {
             perror("createSpeciesCommand:");
             fprintf(stderr, "error: createSpeciesCommand: unable to allocate memory\n");

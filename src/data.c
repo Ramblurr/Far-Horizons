@@ -56,7 +56,19 @@ typedef struct global_colony {
     char name[32];
     int homeworld;
     struct global_location location;
+    struct global_develop *develop[3];
+    int hiding;
+    int hidden;
     struct global_item **inventory;
+    int ma_base;
+    int message;
+    int mi_base;
+    int pop_units;
+    int shipyards;
+    int siege_eff;
+    int special;
+    int status;
+    int use_on_ambush;
 } global_colony_t;
 
 typedef struct global_data {
@@ -64,6 +76,13 @@ typedef struct global_data {
     struct global_cluster *cluster;
     struct global_species **species;
 } global_data_t;
+
+typedef struct global_develop {
+    char code[4];
+    int is_auto;
+    int units_needed;
+    int units_to_install;
+} global_develop_t;
 
 typedef struct global_gas {
     char code[4];
@@ -194,16 +213,16 @@ static json_value_t *marshalSystems(global_system_t **s);
 
 
 int exportData(FILE *fp) {
-    global_data_t *g = calloc(1, sizeof(global_data_t));
+    global_data_t *g = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_data_t));
     g->turn = galaxy.turn_number;
 
-    g->cluster = calloc(1, sizeof(global_cluster_t));
+    g->cluster = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_cluster_t));
     g->cluster->radius = galaxy.radius;
     g->cluster->d_num_species = galaxy.d_num_species;
     g->cluster->num_species = galaxy.num_species;
-    g->cluster->systems = calloc(num_stars + 1, sizeof(global_system_t *));
+    g->cluster->systems = ncalloc(__FUNCTION__, __LINE__, num_stars + 1, sizeof(global_system_t *));
     for (int i = 0; i < num_stars; i++) {
-        g->cluster->systems[i] = calloc(1, sizeof(global_system_t));
+        g->cluster->systems[i] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_system_t));
         global_system_t *s = g->cluster->systems[i];
         star_data_t *star = star_base + i;
         s->id = star->id;
@@ -220,9 +239,9 @@ int exportData(FILE *fp) {
             }
         }
         s->wormholeExit = star->wormholeExit ? star->wormholeExit->id : 0;
-        s->planets = calloc(star->num_planets + 1, sizeof(global_planet_t *));
+        s->planets = ncalloc(__FUNCTION__, __LINE__, star->num_planets + 1, sizeof(global_planet_t *));
         for (int pn = 0; pn < star->num_planets; pn++) {
-            s->planets[pn] = calloc(1, sizeof(global_planet_t));
+            s->planets[pn] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_planet_t));
             global_planet_t *p = s->planets[pn];
             planet_data_t *planet = planet_base + star->planet_index + pn;
             p->id = planet->id;
@@ -232,7 +251,7 @@ int exportData(FILE *fp) {
             int index = 0;
             for (int g = 0; g < 4; g++) {
                 if (planet->gas[g] != 0) {
-                    p->gases[index] = calloc(1, sizeof(global_gas_t));
+                    p->gases[index] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_gas_t));
                     strcpy(p->gases[index]->code, gas_string[planet->gas[g]]);
                     p->gases[index]->atmos_pct = planet->gas_percent[g];
                     index++;
@@ -249,9 +268,9 @@ int exportData(FILE *fp) {
             p->temperature_class = planet->temperature_class;
         }
     }
-    g->species = calloc(galaxy.num_species + 1, sizeof(global_species_t *));
+    g->species = ncalloc(__FUNCTION__, __LINE__, galaxy.num_species + 1, sizeof(global_species_t *));
     for (int i = 0; i < galaxy.num_species; i++) {
-        g->species[i] = calloc(1, sizeof(global_species_t));
+        g->species[i] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_species_t));
         global_species_t *s = g->species[i];
         species_data_t *species = spec_data + i;
         s->id = species->id;
@@ -263,7 +282,7 @@ int exportData(FILE *fp) {
         s->hp_original_base = species->hp_original_base;
 
         for (int l = 0; l < 6; l++) {
-            s->skills[l] = calloc(1, sizeof(global_skill_t));
+            s->skills[l] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_skill_t));
             strcpy(s->skills[l]->code, tech_abbr[l]);
             strcpy(s->skills[l]->name, tech_name[l]);
             s->skills[l]->init_level = species->init_tech_level[l];
@@ -271,7 +290,7 @@ int exportData(FILE *fp) {
             s->skills[l]->knowledge_level = species->tech_knowledge[l];
             s->skills[l]->xps = species->tech_eps[l];
         }
-        s->required_gases[0] = calloc(1, sizeof(global_gas_t));
+        s->required_gases[0] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_gas_t));
         strcpy(s->required_gases[0]->code, gas_string[species->required_gas]);
         s->required_gases[0]->max_pct = species->required_gas_max;
         s->required_gases[0]->min_pct = species->required_gas_min;
@@ -280,7 +299,7 @@ int exportData(FILE *fp) {
             if (species->neutral_gas[g] == 0) {
                 break;
             }
-            s->neutral_gases[index] = calloc(1, sizeof(global_gas_t));
+            s->neutral_gases[index] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_gas_t));
             strcpy(s->neutral_gases[index]->code, gas_string[species->neutral_gas[g]]);
             index++;
         }
@@ -289,7 +308,7 @@ int exportData(FILE *fp) {
             if (species->poison_gas[g] == 0) {
                 break;
             }
-            s->poison_gases[index] = calloc(1, sizeof(global_gas_t));
+            s->poison_gases[index] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_gas_t));
             strcpy(s->poison_gases[index]->code, gas_string[species->poison_gas[g]]);
             index++;
         }
@@ -308,9 +327,9 @@ int exportData(FILE *fp) {
             }
         }
 
-        s->colonies = calloc(species->num_namplas + 1, sizeof(global_colony_t *));
+        s->colonies = ncalloc(__FUNCTION__, __LINE__, species->num_namplas + 1, sizeof(global_colony_t *));
         for (int n = 0; n < species->num_namplas; n++) {
-            s->colonies[n] = calloc(1, sizeof(global_colony_t));
+            s->colonies[n] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_colony_t));
             global_colony_t *p = s->colonies[n];
             nampla_data_t *nampla = namp_data[species->index] + n;
             p->id = nampla->id;
@@ -335,11 +354,11 @@ int exportData(FILE *fp) {
                     items++;
                 }
             }
-            p->inventory = calloc(items + 1, sizeof(global_item_t *));
+            p->inventory = ncalloc(__FUNCTION__, __LINE__, items + 1, sizeof(global_item_t *));
             items = 0; // reset and use as index to populate inventory
             for (int k = 0; k < MAX_ITEMS; k++) {
                 if (nampla->item_quantity[k] != 0) {
-                    p->inventory[items] = calloc(items + 1, sizeof(global_item_t));
+                    p->inventory[items] = ncalloc(__FUNCTION__, __LINE__, items + 1, sizeof(global_item_t));
                     strcpy(p->inventory[items]->code, item_abbr[k]);
                     p->inventory[items]->quantity = nampla->item_quantity[k];
                     items++;
@@ -347,14 +366,14 @@ int exportData(FILE *fp) {
             }
         }
 
-        s->ships = calloc(species->num_ships + 1, sizeof(global_ship_t *));
+        s->ships = ncalloc(__FUNCTION__, __LINE__, species->num_ships + 1, sizeof(global_ship_t *));
         int counter = 0;
         for (int n = 0; n < species->num_ships; n++) {
             ship_data_t *ship = ship_data[species->index] + n;
             if (strcmp(ship->name, "Unused") == 0) {
                 continue;
             }
-            s->ships[counter] = calloc(1, sizeof(global_ship_t));
+            s->ships[counter] = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_ship_t));
             global_ship_t *p = s->ships[counter];
             counter++;
             strcpy(p->name, shipDisplayName(ship));
@@ -366,11 +385,11 @@ int exportData(FILE *fp) {
                     items++;
                 }
             }
-            p->inventory = calloc(items + 1, sizeof(global_item_t *));
+            p->inventory = ncalloc(__FUNCTION__, __LINE__, items + 1, sizeof(global_item_t *));
             items = 0; // reset and use as index to populate inventory
             for (int k = 0; k < MAX_ITEMS; k++) {
                 if (ship->item_quantity[k] != 0) {
-                    p->inventory[items] = calloc(items + 1, sizeof(global_item_t));
+                    p->inventory[items] = ncalloc(__FUNCTION__, __LINE__, items + 1, sizeof(global_item_t));
                     strcpy(p->inventory[items]->code, item_abbr[k]);
                     p->inventory[items]->quantity = ship->item_quantity[k];
                     items++;

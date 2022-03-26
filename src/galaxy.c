@@ -110,14 +110,14 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
     galaxy.turn_number = 0;
 
     /* Allocate enough memory for star and planet data. */
-    star_base = (struct star_data *) calloc(desiredNumStars, sizeof(struct star_data));
+    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, desiredNumStars, sizeof(struct star_data));
     if (star_base == NULL) {
         fprintf(stderr, "error: cannot allocate enough memory for star data!\n");
         return 2;
     }
 
     int max_planets = 9 * desiredNumStars;    /* Maximum number possible. */
-    planet_base = (struct planet_data *) calloc(max_planets, sizeof(struct planet_data));
+    planet_base = (struct planet_data *) ncalloc(__FUNCTION__, __LINE__, max_planets, sizeof(struct planet_data));
     if (planet_base == NULL) {
         fprintf(stderr, "error: cannot allocate enough memory for planet data!\n");
         exit(-1);

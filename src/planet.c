@@ -40,7 +40,7 @@ int createHomeSystemTemplates() {
         printf(" info: creating template '%s'...\n", filename);
 
         /* Allocate enough memory for all planets. */
-        planet_base = (struct planet_data *) calloc(num_planets, sizeof(struct planet_data));
+        planet_base = (struct planet_data *) ncalloc(__FUNCTION__, __LINE__, num_planets, sizeof(struct planet_data));
         if (planet_base == NULL) {
             perror("createHomeSystemTemplates");
             fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);

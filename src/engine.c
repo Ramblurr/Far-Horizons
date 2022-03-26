@@ -148,6 +148,19 @@ int logRandomCommand(int argc, char *argv[]) {
 }
 
 
+void *ncalloc(const char *fn, int line, int count, int size) {
+    void *p = calloc(count, size);
+    if (p == NULL) {
+        char lineNo[128];
+        perror(fn);
+        sprintf(lineNo, "%d", line);
+        perror(lineNo);
+        exit(2);
+    }
+    return p;
+}
+
+
 // readln is a helper for command parsing that coerces all line-endings to be just '\n'.
 char *readln(char *dst, int len, FILE *fp) {
     static char buf[1024];

@@ -63,7 +63,7 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
     assert(planet_base != NULL);
 
     /* Allocate enough memory for all namplas. */
-    binary_data_t *binData = (binary_data_t *) calloc(numNamplas + extraNamplas, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas + extraNamplas, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("get_nampla_data");
         fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n");
@@ -78,7 +78,7 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
         exit(-1);
     }
     /* translate between the structures */
-    struct nampla_data *namplaData = (struct nampla_data *) calloc(numNamplas + extraNamplas,
+    struct nampla_data *namplaData = (struct nampla_data *) ncalloc(__FUNCTION__, __LINE__, numNamplas + extraNamplas,
                                                                    sizeof(struct nampla_data));
     for (int i = 0; i < numNamplas; i++) {
         struct nampla_data *nampla = &namplaData[i];
@@ -209,7 +209,7 @@ void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas
 
 void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) {
     /* Allocate enough memory for all namplas. */
-    binary_data_t *binData = (binary_data_t *) calloc(numNamplas, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("save_nampla_data");
         fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n");

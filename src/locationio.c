@@ -60,7 +60,7 @@ void get_location_data(void) {
     }
 
     /* Allocate enough memory for all records. */
-    binary_data_t *binData = (binary_data_t *) calloc(num_locs, sizeof(binary_data_t));
+    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_data_t));
     if (binData == NULL) {
         perror("get_location_data");
         fprintf(stderr, "\nCannot allocate enough memory for location data!\n");
@@ -131,7 +131,7 @@ void save_location_data(void) {
 
     if (num_locs > 0) {
         /* Allocate enough memory for all records. */
-        binary_data_t *binData = (binary_data_t *) calloc(num_locs, sizeof(binary_data_t));
+        binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_data_t));
         if (binData == NULL) {
             perror("save_location_data");
             fprintf(stderr, "\nCannot allocate enough memory for location data!\n");

@@ -1130,7 +1130,7 @@ int combatCommand(int argc, char *argv[]) {
     get_location_data();
 
     /* Allocate memory for battle data. */
-    battle_base = (struct battle_data *) calloc(MAX_BATTLES, sizeof(struct battle_data));
+    battle_base = (struct battle_data *) ncalloc(__FUNCTION__, __LINE__, MAX_BATTLES, sizeof(struct battle_data));
     if (battle_base == NULL) {
         perror("combatCommand:");
         fprintf(stderr, "\nCannot allocate enough memory for battle data!\n\n");
@@ -1200,7 +1200,7 @@ int combatCommand(int argc, char *argv[]) {
     get_species_data();
 
     for (int sp_index = 0; sp_index < galaxy.num_species; sp_index++) {
-        sp_name[sp_index] = calloc(1, 32);
+        sp_name[sp_index] = ncalloc(__FUNCTION__, __LINE__, 1, 32);
         if (!data_in_memory[sp_index]) {
             /* No longer in game. */
             continue;
