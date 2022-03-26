@@ -266,7 +266,7 @@ int exportData(FILE *fp) {
             s->skills[l]->xps = species->tech_eps[l];
         }
         s->required_gases[0] = calloc(1, sizeof(global_gas_t));
-        sprintf(s->required_gases[0]->code, gas_string[species->required_gas]);
+        strcpy(s->required_gases[0]->code, gas_string[species->required_gas]);
         s->required_gases[0]->max_pct = species->required_gas_max;
         s->required_gases[0]->min_pct = species->required_gas_min;
         int index = 0;
@@ -275,7 +275,7 @@ int exportData(FILE *fp) {
                 break;
             }
             s->neutral_gases[index] = calloc(1, sizeof(global_gas_t));
-            sprintf(s->neutral_gases[index]->code, gas_string[species->neutral_gas[g]]);
+            strcpy(s->neutral_gases[index]->code, gas_string[species->neutral_gas[g]]);
             index++;
         }
         index = 0;
@@ -284,7 +284,7 @@ int exportData(FILE *fp) {
                 break;
             }
             s->poison_gases[index] = calloc(1, sizeof(global_gas_t));
-            sprintf(s->poison_gases[index]->code, gas_string[species->poison_gas[g]]);
+            strcpy(s->poison_gases[index]->code, gas_string[species->poison_gas[g]]);
             index++;
         }
 
