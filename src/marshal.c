@@ -324,7 +324,7 @@ json_value_t *marshalSkills(global_skill_t **s) {
 
 json_value_t *marshalSpecie(global_species_t *s) {
     json_value_t *j = json_map();
-    json_add(j, "sp", json_number(s->id));
+    json_add(j, "sp_no", json_number(s->id));
     json_add(j, "name", json_string(s->name));
     json_add(j, "govt_name", json_string(s->govt_name));
     json_add(j, "govt_type", json_string(s->govt_type));

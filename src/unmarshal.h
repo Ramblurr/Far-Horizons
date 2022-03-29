@@ -46,6 +46,8 @@ global_ship_t *unmarshalShip(json_value_t *j);
 
 global_ship_t **unmarshalShips(json_value_t *j);
 
+global_skill_t *unmarshalSkill(json_value_t *j);
+
 global_species_t *unmarshalSpecie(json_value_t *j);
 
 global_species_t **unmarshalSpecies(json_value_t *j);

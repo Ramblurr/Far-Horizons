@@ -23,6 +23,7 @@
 #include "engine.h"
 #include "star.h"
 #include "unmarshal.h"
+#include "species.h"
 
 
 global_cluster_t *unmarshalCluster(json_value_t *j) {
@@ -224,22 +225,140 @@ global_ship_t **unmarshalShips(json_value_t *j) {
 }
 
 
+global_skill_t *unmarshalSkill(json_value_t *j) {
+    global_skill_t *skill = ncalloc(__FUNCTION__, __LINE__, json_length(j) + 1, sizeof(global_species_t *));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp("code", t->key) == 0) {
+                strncpy(skill->code, t->value->u.s, 4);
+            } else if (strcmp("current_level", t->key) == 0) {
+                if (t->value->u.n > 0) {
+                    skill->current_level = t->value->u.n;
+                }
+            } else if (strcmp("init_level", t->key) == 0) {
+                if (t->value->u.n > 0) {
+                    skill->init_level = t->value->u.n;
+                }
+            } else if (strcmp("knowledge_level", t->key) == 0) {
+                if (t->value->u.n > 0) {
+                    skill->knowledge_level = t->value->u.n;
+                }
+            } else if (strcmp("xps", t->key) == 0) {
+                if (t->value->u.n > 0) {
+                    skill->xps = t->value->u.n;
+                }
+            } else {
+                fprintf(stderr, "%s: unknown key 'skill.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
+    return skill;
+}
+
+
 global_species_t *unmarshalSpecie(json_value_t *j) {
     global_species_t *species = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_species_t));
     if (json_is_map(j)) {
         for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
-            if (strcmp(t->key, "colonies") == 0) {
+            if (strcmp(t->key, "auto_orders") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                species->auto_orders = t->value->u.b;
+            } else if (strcmp(t->key, "colonies") == 0) {
                 if (!json_is_map(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "map");
                     exit(2);
                 }
                 species->colonies = unmarshalColonies(t->value);
+            } else if (strcmp(t->key, "econ_units") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: species.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                species->econ_units = t->value->u.n;
+            } else if (strcmp(t->key, "govt_name") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->value->u.s) < 5 || strlen(t->value->u.s) > 32) {
+                    fprintf(stderr, "%s: species.%s must be a string between 5 and 31 characters\n", __FUNCTION__,
+                            t->key);
+                    exit(2);
+                }
+                strncpy(species->govt_name, t->value->u.s, 32);
+            } else if (strcmp(t->key, "govt_type") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->value->u.s) < 5 || strlen(t->value->u.s) > 32) {
+                    fprintf(stderr, "%s: species.%s must be a string between 5 and 31 characters\n", __FUNCTION__,
+                            t->key);
+                    exit(2);
+                }
+                strncpy(species->govt_type, t->value->u.s, 32);
+            } else if (strcmp(t->key, "name") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->value->u.s) < 5 || strlen(t->value->u.s) > 32) {
+                    fprintf(stderr, "%s: species.%s must be a string between 5 and 31 characters\n", __FUNCTION__,
+                            t->key);
+                    exit(2);
+                }
+                strncpy(species->name, t->value->u.s, 32);
             } else if (strcmp(t->key, "ships") == 0) {
                 if (!json_is_map(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "map");
                     exit(2);
                 }
                 species->ships = unmarshalShips(t->value);
+            } else if (strcmp(t->key, "skills") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                for (json_node_t *sk = t->value->u.a.root; sk != NULL; sk = sk->next) {
+                    if (!json_is_map(sk->value)) {
+                        fprintf(stderr, "%s: species.%s must be a list of map\n", __FUNCTION__, t->key);
+                        exit(2);
+                    }
+                    global_skill_t *skill = unmarshalSkill(sk->value);
+                    if (skill != NULL) {
+                        if (strcmp(skill->code, "MI") == 0) {
+                            species->skills[MI] = skill;
+                        } else if (strcmp(skill->code, "MA") == 0) {
+                            species->skills[MA] = skill;
+                        } else if (strcmp(skill->code, "ML") == 0) {
+                            species->skills[ML] = skill;
+                        } else if (strcmp(skill->code, "GV") == 0) {
+                            species->skills[GV] = skill;
+                        } else if (strcmp(skill->code, "LS") == 0) {
+                            species->skills[LS] = skill;
+                        } else if (strcmp(skill->code, "BI") == 0) {
+                            species->skills[BI] = skill;
+                        } else {
+                            fprintf(stderr, "%s: species.%s.code of '%s' is not valid\n", __FUNCTION__, t->key,
+                                    skill->code);
+                            exit(2);
+                        }
+                    }
+                }
+            } else if (strcmp(t->key, "sp_no") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > MAX_SPECIES) {
+                    fprintf(stderr, "%s: species.%s must be a number between 1 and %d\n", __FUNCTION__, t->key,
+                            MAX_SPECIES);
+                    exit(2);
+                }
+                species->id = t->value->u.n;
             } else {
                 fprintf(stderr, "%s: unknown key 'species.%s'\n", __FUNCTION__, t->key);
                 exit(2);
