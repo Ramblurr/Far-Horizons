@@ -23,6 +23,7 @@
 #include "data.h"
 #include "json.h"
 #include "shipvars.h"
+#include "star.h"
 
 
 json_value_t *marshalCluster(global_cluster_t *c) {
@@ -399,15 +400,52 @@ json_value_t *marshalSpecies(global_species_t **s) {
 json_value_t *marshalSystem(global_system_t *s) {
     json_value_t *j = json_map();
     json_add(j, "id", json_number(s->id));
-    global_location_t l = {.x =  s->x, y: s->y, z: s->z};
+    global_location_t l = {.x =  s->coords.x, y: s->coords.y, z: s->coords.z};
     json_add(j, "coords", marshalLocation(l));
-    json_add(j, "type", json_number(s->type));
-    json_add(j, "color", json_number(s->color));
+    switch (s->type) {
+        case DEGENERATE:
+            json_add(j, "type", json_string("degenerate"));
+            break;
+        case DWARF:
+            json_add(j, "type", json_string("dwarf"));
+            break;
+        case GIANT:
+            json_add(j, "type", json_string("giant"));
+            break;
+        case MAIN_SEQUENCE:
+            json_add(j, "type", json_string("main_sequence"));
+            break;
+    }
+    switch (s->color) {
+        case BLUE:
+            json_add(j, "color", json_string("blue"));
+            break;
+        case BLUE_WHITE:
+            json_add(j, "color", json_string("blue_white"));
+            break;
+        case WHITE:
+            json_add(j, "color", json_string("white"));
+            break;
+        case YELLOW_WHITE:
+            json_add(j, "color", json_string("yellow_white"));
+            break;
+        case YELLOW:
+            json_add(j, "color", json_string("yellow"));
+            break;
+        case ORANGE:
+            json_add(j, "color", json_string("orange"));
+            break;
+        case RED:
+            json_add(j, "color", json_string("red"));
+            break;
+    }
     json_add(j, "size", json_number(s->size));
     if (s->home_system) {
         json_add(j, "home_system", json_boolean(1));
     }
-    json_add(j, "message", json_number(s->id));
+    if (s->message != 0) {
+        json_add(j, "message", json_number(s->message));
+    }
     if (s->wormholeExit != 0) {
         json_add(j, "wormhole_exit", json_number(s->wormholeExit));
     }

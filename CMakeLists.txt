@@ -47,6 +47,7 @@ add_executable(fh
         src/finish.c src/finish.h
         src/galaxy.c src/galaxy.h
         src/galaxyio.c src/galaxyio.h
+        src/import.c src/import.h
         src/intercept.c src/intercept.h
         src/item.c src/item.h
         src/json.c src/json.h

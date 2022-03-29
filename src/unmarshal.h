@@ -30,6 +30,8 @@ global_colony_t *unmarshalColony(json_value_t *j);
 
 global_colony_t **unmarshalColonies(json_value_t *j);
 
+global_coords_t *unmarshalCoords(json_value_t *j);
+
 global_data_t *unmarshalData(json_value_t *j);
 
 global_item_t **unmarshalInventory(json_value_t *j);

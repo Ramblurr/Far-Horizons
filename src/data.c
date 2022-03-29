@@ -48,9 +48,9 @@ int exportData(FILE *fp) {
         global_system_t *s = g->cluster->systems[i];
         star_data_t *star = star_base + i;
         s->id = star->id;
-        s->x = star->x;
-        s->y = star->y;
-        s->z = star->z;
+        s->coords.x = star->x;
+        s->coords.y = star->y;
+        s->coords.z = star->z;
         s->color = star->color;
         s->home_system = star->home_system;
         s->size = star->size;
@@ -167,8 +167,8 @@ int exportData(FILE *fp) {
             p->special = nampla->special;
             p->use_on_ambush = nampla->use_on_ambush;
             for (global_system_t **system = g->cluster->systems; *system; system++) {
-                if (nampla->system->x == (*system)->x && nampla->system->y == (*system)->y &&
-                    nampla->system->z == (*system)->z) {
+                if (nampla->system->x == (*system)->coords.x && nampla->system->y == (*system)->coords.y
+                    && nampla->system->z == (*system)->coords.z) {
                     p->location.system = *system;
                     for (global_planet_t **planet = (*system)->planets; *planet; planet++) {
                         if (nampla->planet->orbit == (*planet)->orbit) {
@@ -252,8 +252,8 @@ int exportData(FILE *fp) {
             }
             // location can be either the name of a colony or x,y,z coordinates
             for (global_colony_t **c = s->colonies; *c; c++) {
-                if ((*c)->location.system->x == ship->x && (*c)->location.system->y == ship->y &&
-                    (*c)->location.system->z == ship->z) {
+                if ((*c)->location.system->coords.x == ship->x && (*c)->location.system->coords.y == ship->y
+                    && (*c)->location.system->coords.z == ship->z) {
                     strcpy(p->location.colony, (*c)->name);
                     break;
                 }
@@ -286,23 +286,6 @@ int exportData(FILE *fp) {
     }
 
     json_marshal(marshalGlobals(g), 0, fp);
-
-    return 0;
-}
-
-
-int importData(FILE *fp) {
-    json_value_t *j = json_unmarshal(fp);
-    global_data_t *d = unmarshalData(j);
-
-    galaxy.turn_number = d->turn;
-    galaxy.radius = d->cluster->radius;
-    galaxy.d_num_species = d->cluster->d_num_species;
-    if (d->cluster != NULL) {
-        for (global_species_t **species = d->species; species != NULL; species++) {
-            galaxy.num_species++;
-        }
-    }
 
     return 0;
 }

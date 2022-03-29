@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "engine.h"
+#include "star.h"
 #include "unmarshal.h"
 
 
@@ -41,8 +42,8 @@ global_cluster_t *unmarshalCluster(json_value_t *j) {
                 }
                 cluster->radius = t->value->u.n;
             } else if (strcmp(t->key, "systems") == 0) {
-                if (!json_is_map(t->value)) {
-                    fprintf(stderr, "%s: cluster.%s must be %s\n", __FUNCTION__, t->key, "map");
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: cluster.%s must be %s\n", __FUNCTION__, t->key, "list");
                     exit(2);
                 }
                 cluster->systems = unmarshalSystems(t->value);
@@ -93,6 +94,26 @@ global_colony_t **unmarshalColonies(json_value_t *j) {
 }
 
 
+global_coords_t *unmarshalCoords(json_value_t *j) {
+    global_coords_t *coords = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_coords_t));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp(t->key, "x") == 0 && json_is_number(t->value)) {
+                coords->x = t->value->u.n;
+            } else if (strcmp(t->key, "y") == 0 && json_is_number(t->value)) {
+                coords->y = t->value->u.n;
+            } else if (strcmp(t->key, "z") == 0 && json_is_number(t->value)) {
+                coords->z = t->value->u.n;
+            } else {
+                fprintf(stderr, "%s: unknown key 'coords.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
+    return coords;
+}
+
+
 global_data_t *unmarshalData(json_value_t *j) {
     global_data_t *d = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_data_t));
     if (json_is_map(j)) {
@@ -104,8 +125,8 @@ global_data_t *unmarshalData(json_value_t *j) {
                 }
                 d->cluster = unmarshalCluster(t->value);
             } else if (strcmp(t->key, "species") == 0) {
-                if (!json_is_map(t->value)) {
-                    fprintf(stderr, "%s: data.%s must be %s\n", __FUNCTION__, t->key, "map");
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: data.%s must be %s\n", __FUNCTION__, t->key, "list");
                     exit(2);
                 }
                 d->species = unmarshalSpecies(t->value);
@@ -256,13 +277,101 @@ global_system_t *unmarshalSystem(json_value_t *j) {
                     exit(2);
                 }
                 system->id = t->value->u.n;
+            } else if (strcmp(t->key, "color") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strcmp(t->value->u.s, "blue") == 0) {
+                    system->color = BLUE;
+                } else if (strcmp(t->value->u.s, "blue_white") == 0) {
+                    system->color = BLUE_WHITE;
+                } else if (strcmp(t->value->u.s, "white") == 0) {
+                    system->color = WHITE;
+                } else if (strcmp(t->value->u.s, "yellow_white") == 0) {
+                    system->color = YELLOW_WHITE;
+                } else if (strcmp(t->value->u.s, "yellow") == 0) {
+                    system->color = YELLOW;
+                } else if (strcmp(t->value->u.s, "orange") == 0) {
+                    system->color = ORANGE;
+                } else if (strcmp(t->value->u.s, "red") == 0) {
+                    system->color = RED;
+                } else {
+                    fprintf(stderr, "%s: system.%s value of '%s' is not valid\n", __FUNCTION__, t->key, t->value->u.s);
+                    exit(2);
+                }
             } else if (strcmp(t->key, "coords") == 0) {
+                if (!json_is_map(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "map");
+                    exit(2);
+                }
+                global_coords_t *coords = unmarshalCoords(t->value);
+                system->coords.x = coords->x;
+                system->coords.y = coords->y;
+                system->coords.z = coords->z;
+                free(coords);
+            } else if (strcmp(t->key, "home_system") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                system->home_system = t->value->u.b;
             } else if (strcmp(t->key, "planets") == 0) {
                 if (!json_is_list(t->value)) {
                     fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "list");
                     exit(2);
                 }
                 system->planets = unmarshalPlanets(t->value);
+            } else if (strcmp(t->key, "size") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 9) {
+                    fprintf(stderr, "%s: system.%s must be between 0 and 9\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                system->size = t->value->u.n;
+            } else if (strcmp(t->key, "type") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strcmp(t->value->u.s, "degenerate") == 0) {
+                    system->type = DEGENERATE;
+                } else if (strcmp(t->value->u.s, "dwarf") == 0) {
+                    system->type = DWARF;
+                } else if (strcmp(t->value->u.s, "giant") == 0) {
+                    system->type = GIANT;
+                } else if (strcmp(t->value->u.s, "main_sequence") == 0) {
+                    system->type = MAIN_SEQUENCE;
+                } else {
+                    fprintf(stderr, "%s: system.%s value of '%s' is not valid\n", __FUNCTION__, t->key,
+                            t->value->u.s);
+                    exit(2);
+                }
+            } else if (strcmp(t->key, "visited_by") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                for (json_node_t *spNo = t->value->u.a.root; spNo != NULL; spNo = spNo->next) {
+                    if (!json_is_number(spNo->value)) {
+                        fprintf(stderr, "%s: system.%s values must be %s\n", __FUNCTION__, t->key, "number");
+                        exit(2);
+                    } else if (spNo->value->u.n < 1 || spNo->value->u.n > MAX_SPECIES) {
+                        fprintf(stderr, "%s: system.%s values must be between 1 and %d\n", __FUNCTION__, t->key,
+                                MAX_SPECIES);
+                        exit(2);
+                    }
+                    system->visited_by[(spNo->value->u.n - 1) / 32] ^= (1 << ((spNo->value->u.n - 1) % 32));
+                }
+            } else if (strcmp(t->key, "wormhole_exit") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: system.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > MAX_STARS) {
+                    fprintf(stderr, "%s: system.%s must be between 0 and %d\n", __FUNCTION__, t->key, MAX_STARS);
+                    exit(2);
+                }
+                system->wormholeExit = t->value->u.n;
             } else {
                 fprintf(stderr, "%s: unknown key '%s'\n", __FUNCTION__, t->key);
                 exit(2);

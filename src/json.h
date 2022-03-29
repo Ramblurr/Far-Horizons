@@ -53,6 +53,8 @@ json_value_t *json_boolean(int v);
 
 json_value_t *json_error(const char *fmt, ...);
 
+json_value_t *json_free(json_value_t *j);
+
 json_value_t *json_list(void);
 
 json_value_t *json_map(void);

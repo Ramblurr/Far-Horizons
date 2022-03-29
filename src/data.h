@@ -30,6 +30,10 @@ typedef struct global_cluster {
     struct global_system **systems;
 } global_cluster_t;
 
+typedef struct global_coords {
+    int x, y, z;
+} global_coords_t;
+
 typedef struct global_location {
     int x, y, z;
     int orbit;
@@ -151,7 +155,7 @@ typedef struct global_species {
 
 typedef struct global_system {
     int id;
-    int x, y, z;
+    struct global_coords coords;
     int color;
     int home_system;
     int message;
@@ -165,7 +169,5 @@ typedef struct global_system {
 
 
 int exportData(FILE *fp);
-
-int importData(FILE *fp);
 
 #endif //FAR_HORIZONS_DATA_H
