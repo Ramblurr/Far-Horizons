@@ -58,6 +58,7 @@ add_executable(fh
         src/locationvars.c src/locationvars.h
         src/log.c src/log.h
         src/logvars.c src/logvars.h
+        src/marshal.c src/marshal.h
         src/money.c src/money.h
         src/nampla.c src/nampla.h
         src/namplaio.c src/namplaio.h
@@ -87,6 +88,7 @@ add_executable(fh
         src/stats.c src/stats.h
         src/transactionio.c src/transactionio.h
         src/turn.c src/turn.h
+        src/unmarshal.c src/unmarshal.h
         src/update.c src/update.h)
 
 target_link_libraries(fh ${USE_LIB_M})
