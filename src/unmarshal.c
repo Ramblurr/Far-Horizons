@@ -147,6 +147,80 @@ global_data_t *unmarshalData(json_value_t *j) {
 }
 
 
+global_gas_t *unmarshalGas(json_value_t *j) {
+    global_gas_t *gas = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_gas_t));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp(t->key, "atmos_pct") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: gas.%s must be %s\n", __FUNCTION__, t->key, "numeric");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 100) {
+                    fprintf(stderr, "%s: gas.%s must be number between 0 and 100\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                gas->atmos_pct = t->value->u.n;
+            } else if (strcmp(t->key, "code") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: gas.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->value->u.s) < 1 || strlen(t->value->u.s) > 3) {
+                    fprintf(stderr, "%s: gas.%s must be string with 1 to 3 characters\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                strncpy(gas->code, t->value->u.s, 4);
+            } else if (strcmp(t->key, "max_pct") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: gas.%s must be %s\n", __FUNCTION__, t->key, "numeric");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 100) {
+                    fprintf(stderr, "%s: gas.%s must be number between 0 and 100\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                gas->max_pct = t->value->u.n;
+            } else if (strcmp(t->key, "min_pct") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: gas.%s must be %s\n", __FUNCTION__, t->key, "numeric");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 100) {
+                    fprintf(stderr, "%s: gas.%s must be number between 0 and 100\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                gas->min_pct = t->value->u.n;
+            } else if (strcmp(t->key, "required") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: gas.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 100) {
+                    fprintf(stderr, "%s: gas.%s must be number between 0 and 100\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                gas->required = t->value->u.b;
+            } else {
+                fprintf(stderr, "%s: unknown key 'data.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
+    return gas;
+}
+
+
+global_gas_t **unmarshalGases(json_value_t *j) {
+    global_gas_t **gases = ncalloc(__FUNCTION__, __LINE__, json_length(j) + 1, sizeof(global_gas_t *));
+    if (json_is_list(j)) {
+        int index = 0;
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (json_is_map(t->value)) {
+                gases[index] = unmarshalGas(t->value);
+                index++;
+            }
+        }
+    }
+    return gases;
+}
+
+
 global_item_t **unmarshalInventory(json_value_t *j) {
     global_item_t **inventory = ncalloc(__FUNCTION__, __LINE__, json_length(j) + 1, sizeof(global_item_t *));
     if (json_is_map(j)) {
@@ -268,11 +342,27 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                 }
                 species->auto_orders = t->value->u.b;
             } else if (strcmp(t->key, "colonies") == 0) {
-                if (!json_is_map(t->value)) {
-                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "map");
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
                     exit(2);
                 }
                 species->colonies = unmarshalColonies(t->value);
+            } else if (strcmp(t->key, "contacts") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                for (json_node_t *spNo = t->value->u.a.root; spNo != NULL; spNo = spNo->next) {
+                    if (!json_is_number(spNo->value)) {
+                        fprintf(stderr, "%s: species.%s values must be %s\n", __FUNCTION__, t->key, "number");
+                        exit(2);
+                    } else if (spNo->value->u.n < 1 || spNo->value->u.n > MAX_SPECIES) {
+                        fprintf(stderr, "%s: species.%s values must be between 1 and %d\n", __FUNCTION__, t->key,
+                                MAX_SPECIES);
+                        exit(2);
+                    }
+                    species->contacts[(spNo->value->u.n - 1) / 32] ^= (1 << ((spNo->value->u.n - 1) % 32));
+                }
             } else if (strcmp(t->key, "econ_units") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "number");
@@ -312,9 +402,36 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                     exit(2);
                 }
                 strncpy(species->name, t->value->u.s, 32);
+            } else if (strcmp(t->key, "neutral_gases") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                global_gas_t **gases = unmarshalGases(t->value);
+                for (int index = 0; gases[index] != NULL; index++) {
+                    species->neutral_gases[index] = gases[index];
+                }
+            } else if (strcmp(t->key, "poison_gases") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                global_gas_t **gases = unmarshalGases(t->value);
+                for (int index = 0; gases[index] != NULL; index++) {
+                    species->poison_gases[index] = gases[index];
+                }
+            } else if (strcmp(t->key, "required_gases") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                global_gas_t **gases = unmarshalGases(t->value);
+                for (int index = 0; gases[index] != NULL; index++) {
+                    species->required_gases[index] = gases[index];
+                }
             } else if (strcmp(t->key, "ships") == 0) {
-                if (!json_is_map(t->value)) {
-                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "map");
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
                     exit(2);
                 }
                 species->ships = unmarshalShips(t->value);
