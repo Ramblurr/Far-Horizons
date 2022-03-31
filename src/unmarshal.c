@@ -463,6 +463,105 @@ global_location_t *unmarshalLocation(json_value_t *j) {
 
 global_planet_t *unmarshalPlanet(json_value_t *j) {
     global_planet_t *planet = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_planet_t));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp(t->key, "diameter") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                planet->diameter = t->value->u.n;
+            } else if (strcmp(t->key, "econ_efficiency") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0 || t->value->u.n > 100) {
+                    fprintf(stderr, "%s: planet.%s must be %s between 0 and 100\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                planet->econ_efficiency = t->value->u.n;
+            } else if (strcmp(t->key, "gases") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                global_gas_t **gases = unmarshalGases(t->value);
+                for (int index = 0; gases[index] != NULL; index++) {
+                    planet->gases[index] = gases[index];
+                }
+                free(gases);
+            } else if (strcmp(t->key, "gravity") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                planet->gravity = t->value->u.n;
+            } else if (strcmp(t->key, "ideal_home_planet") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                planet->idealColonyPlanet = t->value->u.b;
+            } else if (strcmp(t->key, "md_increase") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than or equal to zero\n", __FUNCTION__, t->key,
+                            "number");
+                    exit(2);
+                }
+                planet->md_increase = t->value->u.n;
+            } else if (strcmp(t->key, "mining_difficulty") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                planet->mining_difficulty = t->value->u.n;
+            } else if (strcmp(t->key, "orbit") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > 9) {
+                    fprintf(stderr, "%s: planet.%s must be %s between 1 and 9\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                planet->orbit = t->value->u.n;
+            } else if (strcmp(t->key, "pressure_class") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than or equal to zero\n", __FUNCTION__, t->key,
+                            "number");
+                    exit(2);
+                }
+                planet->pressure_class = t->value->u.n;
+            } else if (strcmp(t->key, "temperature_class") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: planet.%s must be %s greater than or equal to zero\n", __FUNCTION__, t->key,
+                            "number");
+                    exit(2);
+                }
+                planet->temperature_class = t->value->u.n;
+            } else {
+                fprintf(stderr, "%s: unknown key 'planet.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
     return planet;
 }
 
@@ -734,6 +833,7 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                 for (int index = 0; gases[index] != NULL; index++) {
                     species->neutral_gases[index] = gases[index];
                 }
+                free(gases);
             } else if (strcmp(t->key, "poison_gases") == 0) {
                 if (!json_is_list(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
@@ -743,6 +843,7 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                 for (int index = 0; gases[index] != NULL; index++) {
                     species->poison_gases[index] = gases[index];
                 }
+                free(gases);
             } else if (strcmp(t->key, "required_gases") == 0) {
                 if (!json_is_list(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
@@ -752,6 +853,7 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                 for (int index = 0; gases[index] != NULL; index++) {
                     species->required_gases[index] = gases[index];
                 }
+                free(gases);
             } else if (strcmp(t->key, "ships") == 0) {
                 if (!json_is_list(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
