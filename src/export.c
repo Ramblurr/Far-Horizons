@@ -43,6 +43,18 @@ int exportToJson(int argc, char *argv[]);
 
 
 int exportCommand(int argc, char *argv[]) {
+    const char *cmdName = argv[0];
+    printf("fh: export: %s: loading   galaxy  data...\n", cmdName);
+    get_galaxy_data();
+    printf("fh: export: %s: loading   star    data...\n", cmdName);
+    get_star_data();
+    printf("fh: export: %s: loading   planet  data...\n", cmdName);
+    get_planet_data();
+    printf("fh: export: %s: loading   species data...\n", cmdName);
+    get_species_data();
+
+    char *exportFileName = NULL;
+
     for (int i = 1; i < argc; i++) {
         // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         char *opt = argv[i];
@@ -67,6 +79,8 @@ int exportCommand(int argc, char *argv[]) {
             verbose_mode = TRUE;
         } else if (strcmp(opt, "--test") == 0 && val == NULL) {
             test_mode = TRUE;
+        } else if (strcmp(opt, "--file") == 0 && val && *val) {
+            exportFileName = val;
         } else if (strcmp(opt, "json") == 0 && val == NULL) {
             return exportToJson(argc - i, argv + i);
         } else if (strcmp(opt, "sexpr") == 0 && val == NULL) {
@@ -77,7 +91,23 @@ int exportCommand(int argc, char *argv[]) {
         }
     }
 
-    return 0;
+    if (exportFileName == NULL || *exportFileName == 0) {
+        fprintf(stderr, "error: you must supply the file name to export to\n");
+        return 2;
+    }
+    if (verbose_mode) {
+        printf(" info: exporting '%s'\n", exportFileName);
+    }
+
+    FILE *fp = fopen(exportFileName, "wb");
+    if (fp == NULL) {
+        perror("exportCommand: ");
+        exit(2);
+    }
+    int rs = exportData(fp);
+    fclose(fp);
+
+    return rs;
 }
 
 
@@ -388,5 +418,6 @@ int exportToSExpr(int argc, char *argv[]) {
             return 2;
         }
     }
+
     return 0;
 }

@@ -67,7 +67,7 @@ int importCommand(int argc, char *argv[]) {
     }
 
     if (importFileName == NULL || *importFileName == 0) {
-        fprintf(stderr, "error: you must supply the file name to import\n");
+        fprintf(stderr, "error: you must supply the file name to import from\n");
         return 2;
     }
     if (verbose_mode) {
