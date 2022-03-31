@@ -94,11 +94,12 @@ int importData(FILE *fp) {
     galaxy.radius = d->cluster->radius;
     galaxy.d_num_species = d->cluster->d_num_species;
     if (d->cluster != NULL) {
-        for (global_species_t **species = d->species; species != NULL; species++) {
+        for (global_species_t **species = d->species; *species != NULL; species++) {
             galaxy.num_species++;
         }
     }
 
+    //fprintf(stderr, "%s: %s: %d\n", __FILE__, __FUNCTION__ , __LINE__);
     return 0;
 }
 

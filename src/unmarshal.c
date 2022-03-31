@@ -126,6 +126,16 @@ global_colony_t *unmarshalColony(json_value_t *j) {
                     exit(2);
                 }
                 colony->pop_units = t->value->u.n;
+            } else if (strcmp(t->key, "siege_eff") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: colony.%s must be number greater than or equal to zero\n", __FUNCTION__,
+                            t->key);
+                    exit(2);
+                }
+                colony->siege_eff = t->value->u.n;
             } else if (strcmp(t->key, "system") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
@@ -372,9 +382,9 @@ global_location_t *unmarshalLocation(json_value_t *j) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "string");
                     exit(2);
-                } else if (strlen(t->value->u.s) < 5 || strlen(t->value->u.s) > 31) {
-                    fprintf(stderr, "%s: location.%s must be a string between 5 and 31 characters long\n", __FUNCTION__,
-                            t->key);
+                } else if (strlen(t->value->u.s) < 1 || strlen(t->value->u.s) > 31) {
+                    fprintf(stderr, "%s: location.%s must be a string of 1 to 31 characters, not '%s'\n", __FUNCTION__,
+                            t->key, t->value->u.s);
                     exit(2);
                 }
                 strncpy(location->colony, t->value->u.s, 32);
@@ -616,7 +626,23 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
     global_species_t *species = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_species_t));
     if (json_is_map(j)) {
         for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
-            if (strcmp(t->key, "auto_orders") == 0) {
+            if (strcmp(t->key, "allies") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                for (json_node_t *spNo = t->value->u.a.root; spNo != NULL; spNo = spNo->next) {
+                    if (!json_is_number(spNo->value)) {
+                        fprintf(stderr, "%s: species.%s values must be %s\n", __FUNCTION__, t->key, "number");
+                        exit(2);
+                    } else if (spNo->value->u.n < 1 || spNo->value->u.n > MAX_SPECIES) {
+                        fprintf(stderr, "%s: species.%s values must be between 1 and %d\n", __FUNCTION__, t->key,
+                                MAX_SPECIES);
+                        exit(2);
+                    }
+                    species->allies[(spNo->value->u.n - 1) / 32] ^= (1 << ((spNo->value->u.n - 1) % 32));
+                }
+            } else if (strcmp(t->key, "auto_orders") == 0) {
                 if (!json_is_bool(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "boolean");
                     exit(2);
@@ -653,6 +679,22 @@ global_species_t *unmarshalSpecie(json_value_t *j) {
                     exit(2);
                 }
                 species->econ_units = t->value->u.n;
+            } else if (strcmp(t->key, "enemies") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "list");
+                    exit(2);
+                }
+                for (json_node_t *spNo = t->value->u.a.root; spNo != NULL; spNo = spNo->next) {
+                    if (!json_is_number(spNo->value)) {
+                        fprintf(stderr, "%s: species.%s values must be %s\n", __FUNCTION__, t->key, "number");
+                        exit(2);
+                    } else if (spNo->value->u.n < 1 || spNo->value->u.n > MAX_SPECIES) {
+                        fprintf(stderr, "%s: species.%s values must be between 1 and %d\n", __FUNCTION__, t->key,
+                                MAX_SPECIES);
+                        exit(2);
+                    }
+                    species->enemies[(spNo->value->u.n - 1) / 32] ^= (1 << ((spNo->value->u.n - 1) % 32));
+                }
             } else if (strcmp(t->key, "govt_name") == 0) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: species.%s must be %s\n", __FUNCTION__, t->key, "string");

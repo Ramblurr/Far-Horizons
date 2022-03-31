@@ -80,7 +80,7 @@ json_value_t *marshalColony(global_colony_t *c) {
         json_add(j, "pop_units", json_number(c->pop_units));
     }
     if (c->siege_eff != 0) {
-        json_add(j, "siege_eff", json_boolean(1));
+        json_add(j, "siege_eff", json_number(c->siege_eff));
     }
     if (c->special != 0) {
         json_add(j, "special", json_number(c->special));
