@@ -34,6 +34,10 @@ global_coords_t *unmarshalCoords(json_value_t *j);
 
 global_data_t *unmarshalData(json_value_t *j);
 
+global_develop_t *unmarshalDevelop(json_value_t *j);
+
+global_develop_t **unmarshalDevelopList(json_value_t *j);
+
 global_gas_t *unmarshalGas(json_value_t *j);
 
 global_gas_t **unmarshalGases(json_value_t *j);

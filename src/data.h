@@ -42,7 +42,9 @@ typedef struct global_location {
     int in_orbit;
     int on_surface;
     struct global_system *system;
+    int systemId;
     struct global_planet *planet;
+    int planetId;
 } global_location_t;
 
 typedef struct global_colony {

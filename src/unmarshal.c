@@ -62,12 +62,79 @@ global_colony_t *unmarshalColony(json_value_t *j) {
     global_colony_t *colony = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_colony_t));
     if (json_is_map(j)) {
         for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
-            if (strcmp(t->key, "name") == 0) {
+            if (strcmp(t->key, "develop") == 0) {
+                if (!json_is_list(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "developList");
+                    exit(2);
+                }
+                global_develop_t **developList = unmarshalDevelopList(t->value);
+                for (int n = 0; n < 2 && developList[n]; n++) {
+                    colony->develop[n] = developList[n];
+                }
+                free(developList);
+            } else if (strcmp(t->key, "homeworld") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                colony->homeworld = t->value->u.b;
+            } else if (strcmp(t->key, "inventory") == 0) {
+                if (!json_is_map(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "map");
+                    exit(2);
+                }
+                colony->inventory = unmarshalInventory(t->value);
+            } else if (strcmp(t->key, "ma_base") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: colony.%s must be number greater than zero\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                colony->ma_base = t->value->u.n;
+            } else if (strcmp(t->key, "mi_base") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: colony.%s must be number greater than zero\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                colony->ma_base = t->value->u.n;
+            } else if (strcmp(t->key, "name") == 0) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "string");
                     exit(2);
                 }
                 strncpy(colony->name, t->value->u.s, 32);
+            } else if (strcmp(t->key, "orbit") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > 9) {
+                    fprintf(stderr, "%s: colony.%s must be number between 1 and 9\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                colony->location.orbit = t->value->u.n;
+            } else if (strcmp(t->key, "pop_units") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: colony.%s must be number greater than zero\n", __FUNCTION__, t->key);
+                    exit(2);
+                }
+                colony->pop_units = t->value->u.n;
+            } else if (strcmp(t->key, "system") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > MAX_STARS) {
+                    fprintf(stderr, "%s: colony.%s must be number between 1 and %d\n", __FUNCTION__, t->key, MAX_STARS);
+                    exit(2);
+                }
+                colony->location.systemId = t->value->u.n;
             } else {
                 fprintf(stderr, "%s: unknown key 'colony.%s'\n", __FUNCTION__, t->key);
                 exit(2);
@@ -144,6 +211,64 @@ global_data_t *unmarshalData(json_value_t *j) {
         }
     }
     return d;
+}
+
+
+global_develop_t *unmarshalDevelop(json_value_t *j) {
+    global_develop_t *develop = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_develop_t));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp(t->key, "auto_install") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: develop.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                develop->auto_install = t->value->u.n;
+            } else if (strcmp(t->key, "code") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: develop.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (!(strcmp(t->value->u.s, "AU") == 0 || strcmp(t->value->u.s, "IU") == 0)) {
+                    fprintf(stderr, "%s: develop.%s must be AU or IU, not '%s'\n", __FUNCTION__, t->key, t->value->u.s);
+                    exit(2);
+                }
+                strncpy(develop->code, t->value->u.s, 3);
+            } else if (strcmp(t->key, "units_needed") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: develop.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                develop->units_needed = t->value->u.n;
+            } else if (strcmp(t->key, "units_to_install") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: develop.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                develop->units_to_install = t->value->u.n;
+            } else {
+                fprintf(stderr, "%s: unknown key 'develop.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
+    return develop;
+}
+
+
+global_develop_t **unmarshalDevelopList(json_value_t *j) {
+    global_develop_t **developList = ncalloc(__FUNCTION__, __LINE__, json_length(j) + 1, sizeof(global_develop_t *));
+    if (json_is_list(j)) {
+        int index = 0;
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (!json_is_map(t->value)) {
+                fprintf(stderr, "%s: develop.%s must be %s\n", __FUNCTION__, "entry", "map");
+                exit(2);
+            }
+            developList[index] = unmarshalDevelop(t->value);
+            index++;
+        }
+    }
+    return developList;
 }
 
 
