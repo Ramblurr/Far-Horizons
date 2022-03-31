@@ -220,6 +220,21 @@ global_data_t *unmarshalData(json_value_t *j) {
             }
         }
     }
+    for (global_species_t **species = d->species; *species != NULL; species++) {
+        d->num_species++;
+    }
+    if (d->cluster) {
+        for (global_system_t **systems = d->cluster->systems; *systems; systems++) {
+            d->cluster->num_systems++;
+            for (global_planet_t **planets = (*systems)->planets; *planets; planets++) {
+                (*systems)->num_planets++;
+            }
+        }
+        if (d->cluster->d_num_species == 0) {
+            d->cluster->d_num_species = d->num_species;
+        }
+    }
+
     return d;
 }
 

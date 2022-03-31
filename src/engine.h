@@ -234,6 +234,7 @@ typedef struct global_colony {
 typedef struct global_data {
     int turn;
     struct global_cluster *cluster;
+    int num_species;
     struct global_species **species;
 } global_data_t;
 
@@ -328,6 +329,7 @@ typedef struct global_system {
     int size;
     int type;
     int wormholeExit;
+    int num_planets;
     struct global_planet **planets;
     int visited_by[MAX_SPECIES + 1];
 } global_system_t;

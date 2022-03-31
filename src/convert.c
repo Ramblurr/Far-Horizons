@@ -18,6 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -36,6 +37,8 @@
 #include "stario.h"
 #include "unmarshal.h"
 
+
+static int convertDataToGlobals(global_data_t *g);
 
 static global_data_t *convertGlobalsToData(void);
 
@@ -173,30 +176,105 @@ int convertCommand(int argc, char *argv[]) {
         return rs;
     }
 
-    printf("convert: importing   JSON    data...\n");
+    printf("convert: importing    JSON    data...\n");
     FILE *fp = fopen(importName, "rb");
     if (fp == NULL) {
         perror("convert: import:");
         return 2;
     }
+    printf("convert: unmarshaling JSON    data...\n");
     json_value_t *j = json_unmarshal(fp);
     fclose(fp);
 
+    printf("convert: converting   JSON    data...\n");
     global_data_t *d = unmarshalData(j);
+    if (d->cluster == NULL) {
+        fprintf(stderr, "error: missing cluster data\n");
+        return 2;
+    }
 
-    printf("convert: translating JSON    data...\n");
-    galaxy.turn_number = d->turn;
-    galaxy.radius = d->cluster->radius;
+    printf("convert: linking      global  data...\n");
+    int rs = convertDataToGlobals(d);
+
+    printf("convert: saving       galaxy  data...\n");
+    save_galaxy_data();
+    printf("convert: saving       star    data...\n");
+    save_star_data();
+
+    return rs;
+}
+
+
+int convertDataToGlobals(global_data_t *d) {
     galaxy.d_num_species = d->cluster->d_num_species;
-    if (d->cluster != NULL) {
-        for (global_species_t **species = d->species; *species != NULL; species++) {
-            galaxy.num_species++;
+    galaxy.num_species = d->num_species;
+    galaxy.radius = d->cluster->radius;
+    galaxy.turn_number = d->turn;
+
+    num_stars = d->cluster->num_systems;
+    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars, sizeof(struct star_data));
+    if (star_base == NULL) {
+        perror("convertDataToGlobals");
+        fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
+        exit(2);
+    }
+    for (int i = 0; i < num_stars; i++) {
+        global_system_t *data = d->cluster->systems[i];
+        if (data == NULL) {
+            fprintf(stderr, "convert: data error: system id %d not in range 0..%d\n", i, num_stars - 1);
+            exit(2);
+        } else if (data->id < 1 || data->id > num_stars) {
+            fprintf(stderr, "convert: data error: system id %d not in range 1..%d\n", data->id, num_stars);
+            exit(2);
+        }
+        struct star_data *s = &star_base[data->id - 1];
+        if (s->id != 0) {
+            fprintf(stderr, "convert: data error: system id %d is not unique\n", s->id);
+            exit(2);
+        }
+        s->id = data->id;
+        s->index = data->id - 1;
+        s->x = data->coords.x;
+        s->y = data->coords.y;
+        s->z = data->coords.z;
+        s->type = data->type;
+        s->color = data->color;
+        s->size = data->size;
+        s->num_planets = data->num_planets;
+        s->home_system = data->home_system;
+        s->worm_here = data->wormholeExit;
+        s->message = data->message;
+        for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
+            s->visited_by[j] = data->visited_by[j];
         }
     }
-    printf("convert: exporting   galaxy  data...\n");
-    save_galaxy_data();
+    for (int i = 0; i < num_stars; i++) {
+        struct star_data *s = &star_base[i];
+        if (s->id == 0) {
+            fprintf(stderr, "convert: data error: system id %d is missing\n", i + 1);
+            exit(2);
+        }
+        s->planet_index = star_base[i - 1].planet_index + star_base[i - 1].num_planets;
+    }
+    for (int i = 0; i < num_stars; i++) {
+        struct star_data *s = &star_base[i];
+        if (s->worm_here == 0) {
+            continue;
+        }
+        if (s->worm_here < 1 || s->worm_here > num_stars) {
+            fprintf(stderr, "convert: data error: system id %d wormhole_exit %d is not in range 1..%d\n",
+                    s->id, s->worm_here, num_stars);
+            exit(2);
+        }
+        struct star_data *w = &star_base[s->worm_here - 1];
+        s->worm_x = w->x;
+        s->worm_y = w->y;
+        s->worm_z = w->z;
+        s->worm_here = TRUE;
+    }
+    star_data_modified = TRUE;
 
-    return 0;
+    return 2;
 }
 
 
