@@ -364,6 +364,93 @@ global_item_t **unmarshalInventory(json_value_t *j) {
 }
 
 
+global_location_t *unmarshalLocation(json_value_t *j) {
+    global_location_t *location = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_location_t));
+    if (json_is_map(j)) {
+        for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
+            if (strcmp(t->key, "colony") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->value->u.s) < 5 || strlen(t->value->u.s) > 31) {
+                    fprintf(stderr, "%s: location.%s must be a string between 5 and 31 characters long\n", __FUNCTION__,
+                            t->key);
+                    exit(2);
+                }
+                strncpy(location->colony, t->value->u.s, 32);
+            } else if (strcmp(t->key, "deep_space") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                location->deep_space = t->value->u.b;
+            } else if (strcmp(t->key, "in_orbit") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                location->in_orbit = t->value->u.b;
+            } else if (strcmp(t->key, "on_surface") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                location->on_surface = t->value->u.b;
+            } else if (strcmp(t->key, "orbit") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > 9) {
+                    fprintf(stderr, "%s: location.%s must be %s between 1 and 9\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                location->orbit = t->value->u.n;
+            } else if (strcmp(t->key, "x") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > MAX_STARS) {
+                    fprintf(stderr, "%s: location.%s must be %s between 1 and %d\n", __FUNCTION__, t->key, "number",
+                            MAX_STARS);
+                    exit(2);
+                }
+                location->x = t->value->u.n;
+            } else if (strcmp(t->key, "y") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > MAX_STARS) {
+                    fprintf(stderr, "%s: location.%s must be %s between 1 and %d\n", __FUNCTION__, t->key, "number",
+                            MAX_STARS);
+                    exit(2);
+                }
+                location->y = t->value->u.n;
+            } else if (strcmp(t->key, "z") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: location.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1 || t->value->u.n > MAX_STARS) {
+                    fprintf(stderr, "%s: location.%s must be %s between 1 and %d\n", __FUNCTION__, t->key, "number",
+                            MAX_STARS);
+                    exit(2);
+                }
+                location->z = t->value->u.n;
+            } else {
+                fprintf(stderr, "%s: unknown key 'location.%s'\n", __FUNCTION__, t->key);
+                exit(2);
+            }
+        }
+    }
+    if (location->deep_space) {
+        location->in_orbit = FALSE;
+        location->on_surface = FALSE;
+    } else if (location->in_orbit) {
+        location->on_surface = FALSE;
+    }
+    return location;
+}
+
+
 global_planet_t *unmarshalPlanet(json_value_t *j) {
     global_planet_t *planet = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_planet_t));
     return planet;
@@ -391,12 +478,81 @@ global_ship_t *unmarshalShip(json_value_t *j) {
     global_ship_t *ship = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(global_ship_t));
     if (json_is_map(j)) {
         for (json_node_t *t = j->u.a.root; t != NULL; t = t->next) {
-            if (strcmp(t->key, "name") == 0) {
+            if (strcmp(t->key, "age") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: ship.%s must be %s greater than or equal to zero\n", __FUNCTION__, t->key,
+                            "number");
+                    exit(2);
+                }
+                ship->age = t->value->u.n;
+            } else if (strcmp(t->key, "inventory") == 0) {
+                if (!json_is_map(t->value)) {
+                    fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "map");
+                    exit(2);
+                }
+                ship->inventory = unmarshalInventory(t->value);
+            } else if (strcmp(t->key, "loading_point") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->key) < 5 || strlen(t->key) > 31) {
+                    fprintf(stderr, "%s: ship.%s must be %s of 5 to 31 characters\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                }
+                strncpy(ship->loading_point, t->value->u.s, 32);
+            } else if (strcmp(t->key, "location") == 0) {
+                if (!json_is_map(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "map");
+                    exit(2);
+                }
+                global_location_t *location = unmarshalLocation(t->value);
+                strncpy(ship->location.colony, location->colony, 32);
+                ship->location.deep_space = location->deep_space;
+                ship->location.in_orbit = location->in_orbit;
+                ship->location.on_surface = location->on_surface;
+                ship->location.orbit = location->orbit;
+                ship->location.planetId = location->planetId;
+                ship->location.systemId = location->systemId;
+                ship->location.x = location->x;
+                ship->location.y = location->y;
+                ship->location.z = location->z;
+                free(location);
+            } else if (strcmp(t->key, "name") == 0) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "string");
                     exit(2);
                 }
                 strncpy(ship->name, t->value->u.s, 32);
+            } else if (strcmp(t->key, "remaining_cost") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: ship.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                ship->remaining_cost = t->value->u.n;
+            } else if (strcmp(t->key, "tonnage") == 0) {
+                if (!json_is_number(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                } else if (t->value->u.n < 1) {
+                    fprintf(stderr, "%s: ship.%s must be %s greater than zero\n", __FUNCTION__, t->key, "number");
+                    exit(2);
+                }
+                ship->tonnage = t->value->u.n;
+            } else if (strcmp(t->key, "unloading_point") == 0) {
+                if (!json_is_string(t->value)) {
+                    fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                } else if (strlen(t->key) < 5 || strlen(t->key) > 31) {
+                    fprintf(stderr, "%s: ship.%s must be %s of 5 to 31 characters\n", __FUNCTION__, t->key, "string");
+                    exit(2);
+                }
+                strncpy(ship->unloading_point, t->value->u.s, 32);
             } else {
                 fprintf(stderr, "%s: unknown key 'ship.%s'\n", __FUNCTION__, t->key);
                 exit(2);
