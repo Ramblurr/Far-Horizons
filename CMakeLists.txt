@@ -37,6 +37,7 @@ add_executable(fh
         src/combat.c src/combat.h
         src/command.c src/command.h
         src/commandvars.c src/commandvars.h
+        src/convert.c src/convert.h
         src/create.c src/create.h
         src/data.c src/data.h
         src/dev_log.c src/dev_log.h

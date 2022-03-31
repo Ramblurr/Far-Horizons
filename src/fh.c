@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 #include "combat.h"
+#include "convert.h"
 #include "create.h"
 #include "enginevars.h"
 #include "export.h"
@@ -64,6 +65,8 @@ int main(int argc, char *argv[]) {
             return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "convert") == 0) {
+            return convertCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "create") == 0) {
             return createCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "export") == 0) {

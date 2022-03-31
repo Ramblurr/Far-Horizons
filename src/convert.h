@@ -17,4 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#ifndef FAR_HORIZONS_CONVERT_H
+#define FAR_HORIZONS_CONVERT_H
 
+
+int convertCommand(int argc, char *argv[]);
+
+
+#endif //FAR_HORIZONS_CONVERT_H

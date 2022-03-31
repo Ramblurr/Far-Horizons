@@ -79,8 +79,6 @@ int exportCommand(int argc, char *argv[]) {
             verbose_mode = TRUE;
         } else if (strcmp(opt, "--test") == 0 && val == NULL) {
             test_mode = TRUE;
-        } else if (strcmp(opt, "--file") == 0 && val && *val) {
-            exportFileName = val;
         } else if (strcmp(opt, "json") == 0 && val == NULL) {
             return exportToJson(argc - i, argv + i);
         } else if (strcmp(opt, "sexpr") == 0 && val == NULL) {
@@ -91,23 +89,7 @@ int exportCommand(int argc, char *argv[]) {
         }
     }
 
-    if (exportFileName == NULL || *exportFileName == 0) {
-        fprintf(stderr, "error: you must supply the file name to export to\n");
-        return 2;
-    }
-    if (verbose_mode) {
-        printf(" info: exporting '%s'\n", exportFileName);
-    }
-
-    FILE *fp = fopen(exportFileName, "wb");
-    if (fp == NULL) {
-        perror("exportCommand: ");
-        exit(2);
-    }
-    int rs = exportData(fp);
-    fclose(fp);
-
-    return rs;
+    return 2;
 }
 
 
@@ -152,15 +134,6 @@ int exportToJson(int argc, char *argv[]) {
                 return 2;
             }
             galaxyDataAsJson(fp);
-            fclose(fp);
-        } else if (strcmp(opt, "globals") == 0 && val == NULL) {
-            FILE *fp = fopen("export.json", "w");
-            if (fp == NULL) {
-                perror("fh: export: globals");
-                fprintf(stderr, "\n\tCannot create new version of file 'export.json'!\n");
-                return 2;
-            }
-            exportData(fp);
             fclose(fp);
         } else if (strcmp(opt, "locations") == 0 && val == NULL) {
             printf("fh: export: %s: loading   %s data...\n", cmdName, opt);
