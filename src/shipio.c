@@ -21,40 +21,17 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "data.h"
 #include "ship.h"
 #include "shipio.h"
 #include "item.h"
 
 
-typedef struct {
-    uint8_t name[32];                   /* Name of ship. */
-    uint8_t x, y, z, pn;                /* Current coordinates. */
-    uint8_t status;                     /* Current status of ship. */
-    uint8_t type;                       /* Ship type. */
-    uint8_t dest_x, dest_y;             /* Destination if ship was forced to jump from combat. */
-    uint8_t dest_z;                     /* Ditto. Also used by TELESCOPE command. */
-    uint8_t just_jumped;                /* Set if ship jumped this turn. */
-    uint8_t arrived_via_wormhole;       /* Ship arrived via wormhole in the PREVIOUS turn. */
-    uint8_t reserved1;                  /* Unused. Zero for now. */
-    int16_t reserved2;                  /* Unused. Zero for now. */
-    int16_t reserved3;                  /* Unused. Zero for now. */
-    int16_t class;                      /* Ship class. */
-    int16_t tonnage;                    /* Ship tonnage divided by 10,000. */
-    int16_t item_quantity[MAX_ITEMS];   /* Quantity of each item carried. */
-    int16_t age;                        /* Ship age. */
-    int16_t remaining_cost;             /* The cost needed to complete the ship if still under construction. */
-    int16_t reserved4;                  /* Unused. Zero for now. */
-    int16_t loading_point;              /* Nampla index for planet where ship was last loaded with CUs. Zero = none. Use 9999 for home planet. */
-    int16_t unloading_point;            /* Nampla index for planet that ship should be given orders to jump to where it will unload. Zero = none. Use 9999 for home planet. */
-    int32_t special;                    /* Different for each application. */
-    uint8_t padding[28];                /* Use for expansion. Initialized to all zeroes. */
-} binary_data_t;
-
-
 /* load ship data from file and create empty slots for future use */
 struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
     /* Allocate enough memory for all ships. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips, sizeof(binary_data_t));
+    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips,
+                                                                 sizeof(binary_ship_data_t));
     if (binData == NULL) {
         perror("get_ship_data");
         fprintf(stderr, "\nCannot allocate enough memory for ship data!\n");
@@ -62,17 +39,18 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
         exit(-1);
     }
     /* Read it all into memory. */
-    if (numShips > 0 && fread(binData, sizeof(binary_data_t), numShips, fp) != numShips) {
+    if (numShips > 0 && fread(binData, sizeof(binary_ship_data_t), numShips, fp) != numShips) {
         perror("get_ship_data");
         fprintf(stderr, "\nCannot read ship data into memory!\n");
         fprintf(stderr, "\n\tattempted to read %d ship entries\n\n", numShips);
         exit(-1);
     }
     /* translate between the structures */
-    struct ship_data *shipData = (struct ship_data *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips, sizeof(struct ship_data));
+    struct ship_data *shipData = (struct ship_data *) ncalloc(__FUNCTION__, __LINE__, numShips + extraShips,
+                                                              sizeof(struct ship_data));
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
-        binary_data_t *sd = &binData[i];
+        binary_ship_data_t *sd = &binData[i];
         memcpy(s->name, sd->name, 32);
         s->x = (char) (sd->x);
         s->y = (char) (sd->y);
@@ -105,7 +83,8 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
 
 void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     /* Allocate enough memory for all ships. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips, sizeof(binary_data_t));
+    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips,
+                                                                 sizeof(binary_ship_data_t));
     if (binData == NULL) {
         perror("save_ship_data");
         fprintf(stderr, "\nCannot allocate enough memory for ship data!\n");
@@ -115,7 +94,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     /* translate between the structures */
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
-        binary_data_t *sd = &binData[i];
+        binary_ship_data_t *sd = &binData[i];
         memcpy(sd->name, s->name, 32);
         sd->x = s->x;
         sd->y = s->y;
@@ -140,7 +119,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
         sd->special = s->special;
     }
     /* Write ship data. */
-    if (numShips > 0 && fwrite(binData, sizeof(binary_data_t), numShips, fp) != numShips) {
+    if (numShips > 0 && fwrite(binData, sizeof(binary_ship_data_t), numShips, fp) != numShips) {
         perror("save_ship_data");
         fprintf(stderr, "\nCannot write ship data to file!\n");
         fprintf(stderr, "\n\tattempted to write %d ship entries\n\n", numShips);

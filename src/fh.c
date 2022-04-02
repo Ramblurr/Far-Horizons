@@ -23,6 +23,7 @@
 #include "combat.h"
 #include "convert.h"
 #include "create.h"
+#include "data.h"
 #include "enginevars.h"
 #include "export.h"
 #include "finish.h"
@@ -76,16 +77,22 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "import") == 0) {
             return importCommand(argc - 1, argv + 1);
         } else if (strcmp(argv[i], "inspect") == 0) {
-            printf("inspect: sizeof(uint16_t)       == %5d\n", (int) sizeof(uint16_t));
-            printf("inspect: sizeof(uint32_t)       == %5d\n", (int) sizeof(uint32_t));
-            printf("inspect: sizeof(int)            == %5d\n", (int) sizeof(int));
-            printf("inspect: sizeof(long)           == %5d\n", (int) sizeof(long));
-            printf("inspect: sizeof(galaxy_data_t)  == %5d\n", (int) sizeof(galaxy_data_t));
-            printf("inspect: sizeof(star_data_t)    == %5d\n", (int) sizeof(star_data_t));
-            printf("inspect: sizeof(planet_data_t)  == %5d\n", (int) sizeof(planet_data_t));
-            printf("inspect: sizeof(species_data_t) == %5d\n", (int) sizeof(species_data_t));
-            printf("inspect: sizeof(nampla_data_t)  == %5d\n", (int) sizeof(nampla_data_t));
-            printf("inspect: sizeof(ship_data_t)    == %5d\n", (int) sizeof(ship_data_t));
+            printf("inspect: sizeof(int)                   == %5d\n", (int) sizeof(int));
+            printf("inspect: sizeof(long)                  == %5d\n", (int) sizeof(long));
+            printf("inspect: sizeof(galaxy_data_t)         == %5d\n", (int) sizeof(galaxy_data_t));
+            printf("inspect: sizeof(star_data_t)           == %5d\n", (int) sizeof(star_data_t));
+            printf("inspect: sizeof(planet_data_t)         == %5d\n", (int) sizeof(planet_data_t));
+            printf("inspect: sizeof(species_data_t)        == %5d\n", (int) sizeof(species_data_t));
+            printf("inspect: sizeof(nampla_data_t)         == %5d\n", (int) sizeof(nampla_data_t));
+            printf("inspect: sizeof(ship_data_t)           == %5d\n", (int) sizeof(ship_data_t));
+            printf("inspect: sizeof(uint16_t)              == %5d\n", (int) sizeof(uint16_t));
+            printf("inspect: sizeof(uint32_t)              == %5d\n", (int) sizeof(uint32_t));
+            printf("inspect: sizeof(binary_galaxy_data_t)  == %5d\n", (int) sizeof(binary_galaxy_data_t));
+            printf("inspect: sizeof(binary_star_data_t)    == %5d\n", (int) sizeof(binary_star_data_t));
+            printf("inspect: sizeof(binary_planet_data_t)  == %5d\n", (int) sizeof(binary_planet_data_t));
+            printf("inspect: sizeof(binary_species_data_t) == %5d\n", (int) sizeof(binary_species_data_t));
+            printf("inspect: sizeof(binary_nampla_data_t)  == %5d\n", (int) sizeof(binary_nampla_data_t));
+            printf("inspect: sizeof(binary_ship_data_t)    == %5d\n", (int) sizeof(binary_ship_data_t));
             return 0;
         } else if (strcmp(argv[i], "jump") == 0) {
             return jumpCommand(argc - i, argv + i);

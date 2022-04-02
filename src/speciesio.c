@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "data.h"
 #include "engine.h"
 #include "galaxy.h"
 #include "galaxyio.h"
@@ -32,6 +33,7 @@
 #include "shipio.h"
 #include "shipvars.h"
 
+
 int data_in_memory[MAX_SPECIES];
 
 int data_modified[MAX_SPECIES];
@@ -39,41 +41,11 @@ int data_modified[MAX_SPECIES];
 struct species_data spec_data[MAX_SPECIES];
 
 
-typedef struct {
-    uint8_t name[32];                      /* Name of species. */
-    uint8_t govt_name[32];                 /* Name of government. */
-    uint8_t govt_type[32];                 /* Type of government. */
-    uint8_t x, y, z, pn;                   /* Coordinates of home planet. */
-    uint8_t required_gas;                  /* Gas required by species. */
-    uint8_t required_gas_min;              /* Minimum needed percentage. */
-    uint8_t required_gas_max;              /* Maximum allowed percentage. */
-    uint8_t reserved5;                     /* Zero for now. */
-    uint8_t neutral_gas[6];                /* Gases neutral to species. */
-    uint8_t poison_gas[6];                 /* Gases poisonous to species. */
-    uint8_t auto_orders;                   /* AUTO command was issued. */
-    uint8_t reserved3;                     /* Zero for now. */
-    int16_t reserved4;                     /* Zero for now. */
-    int16_t tech_level[6];                 /* Actual tech levels. */
-    int16_t init_tech_level[6];            /* Tech levels at start of turn. */
-    int16_t tech_knowledge[6];             /* Unapplied tech level knowledge. */
-    int32_t num_namplas;                   /* Number of named planets, including home planet and colonies. */
-    int32_t num_ships;                     /* Number of ships. */
-    int32_t tech_eps[6];                   /* Experience points for tech levels. */
-    int32_t hp_original_base;              /* If non-zero, home planet was bombed either by bombardment or germ warfare and has not yet fully recovered. Value is total economic base before bombing. */
-    int32_t econ_units;                    /* Number of economic units. */
-    int32_t fleet_cost;                    /* Total fleet maintenance cost. */
-    int32_t fleet_percent_cost;            /* Fleet maintenance cost as a percentage times one hundred. */
-    uint32_t contact[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species has been met. */
-    uint32_t ally[NUM_CONTACT_WORDS];      /* A bit is set if corresponding species is considered an ally. */
-    uint32_t enemy[NUM_CONTACT_WORDS];     /* A bit is set if corresponding species is considered an enemy. */
-    uint8_t padding[12];                   /* Use for expansion. Initialized to all zeroes. */
-} binary_data_t;
-
-
 // get_species_data will read in data files for all species
 void get_species_data(void) {
     // allocate memory to load the data into memory
-    binary_data_t *data = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, sizeof(binary_data_t), 1);
+    binary_species_data_t *data = (binary_species_data_t *) ncalloc(__FUNCTION__, __LINE__,
+                                                                    sizeof(binary_species_data_t), 1);
     if (data == NULL) {
         perror("get_species_data");
         fprintf(stderr, "\nCannot allocate enough memory for species file!\n\n");
@@ -121,10 +93,10 @@ void get_species_data(void) {
         }
 
         // clear out the translation buffer
-        memset(data, 0, sizeof(binary_data_t));
+        memset(data, 0, sizeof(binary_species_data_t));
 
         /* Read in species data. */
-        if (fread(data, sizeof(binary_data_t), 1, fp) != 1) {
+        if (fread(data, sizeof(binary_species_data_t), 1, fp) != 1) {
             perror("get_species_data");
             fprintf(stderr, "\nCannot read species record in file '%s'!\n\n", filename);
             exit(2);
@@ -215,8 +187,8 @@ void save_species_data(void) {
 
 void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *ships, FILE *fp) {
     // use a buffer on the stack to translate the data
-    binary_data_t spData;
-    memset(&spData, 0, sizeof(binary_data_t));
+    binary_species_data_t spData;
+    memset(&spData, 0, sizeof(binary_species_data_t));
 
     // translate data
     memcpy(spData.name, sp->name, 32);
@@ -253,7 +225,7 @@ void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *s
     }
 
     // save the translated data
-    if (fwrite(&spData, sizeof(binary_data_t), 1, fp) != 1) {
+    if (fwrite(&spData, sizeof(binary_species_data_t), 1, fp) != 1) {
         perror("saveSpeciesData:");
         fprintf(stderr, "error: cannot write species record to file\n");
         exit(2);

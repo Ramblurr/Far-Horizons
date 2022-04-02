@@ -46,7 +46,7 @@ typedef struct {
     uint8_t name2[40];
     int32_t number3;
     uint8_t name3[40];
-} binary_data_t;
+} binary_ship_data_t;
 
 /* Read transactions from file. */
 void get_transaction_data(void) {
@@ -58,10 +58,10 @@ void get_transaction_data(void) {
     }
 
     // get number of records in the file
-    num_transactions = sb.st_size / sizeof(binary_data_t);
-    if (sb.st_size != num_transactions * sizeof(binary_data_t)) {
+    num_transactions = sb.st_size / sizeof(binary_ship_data_t);
+    if (sb.st_size != num_transactions * sizeof(binary_ship_data_t)) {
         fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %ld)!\n\n",
-                sb.st_size, num_transactions * sizeof(binary_data_t));
+                sb.st_size, num_transactions * sizeof(binary_ship_data_t));
         exit(-1);
     } else if (num_transactions == 0) {
         // nothing to do
@@ -73,7 +73,7 @@ void get_transaction_data(void) {
     }
 
     /* Allocate enough memory for all records. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_data_t));
+    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_ship_data_t));
     if (binData == NULL) {
         perror("get_transaction_data");
         fprintf(stderr, "\nCannot allocate enough memory for transaction data!\n");
@@ -90,7 +90,7 @@ void get_transaction_data(void) {
     }
 
     /* Read it all into memory. */
-    if (fread(binData, sizeof(binary_data_t), num_transactions, fp) != num_transactions) {
+    if (fread(binData, sizeof(binary_ship_data_t), num_transactions, fp) != num_transactions) {
         fprintf(stderr, "\nCannot read file 'interspecies.dat' into memory!\n");
         fprintf(stderr, "\n\tattempted to read %d transaction entries\n\n", num_transactions);
         exit(-1);
@@ -131,7 +131,7 @@ void save_transaction_data(void) {
 
     if (num_transactions > 0) {
         /* Allocate enough memory for all records. */
-        binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_data_t));
+        binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, num_transactions, sizeof(binary_ship_data_t));
         if (binData == NULL) {
             perror("save_transaction_data");
             fprintf(stderr, "\nCannot allocate enough memory for transaction data!\n");
@@ -159,7 +159,7 @@ void save_transaction_data(void) {
 
         /* Write array to disk. */
         if (num_transactions > 0) {
-            if (fwrite(binData, sizeof(binary_data_t), num_transactions, fp) != num_transactions) {
+            if (fwrite(binData, sizeof(binary_ship_data_t), num_transactions, fp) != num_transactions) {
                 perror("save_transaction_data");
                 fprintf(stderr, "\n\n\tCannot write to 'interspecies.dat'!\n\n");
                 exit(-1);

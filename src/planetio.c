@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "data.h"
 #include "engine.h"
 #include "planet.h"
 #include "planetio.h"
@@ -32,29 +33,9 @@ struct planet_data *planet_base;
 int planet_data_modified;
 
 
-typedef struct {
-    uint8_t temperature_class;  /* Temperature class, 1-30. */
-    uint8_t pressure_class;     /* Pressure class, 0-29. */
-    uint8_t special;            /* 0 = not special, 1 = ideal home planet, 2 = ideal colony planet, 3 = radioactive hellhole. */
-    uint8_t reserved1;          /* Reserved for future use. Zero for now. */
-    uint8_t gas[4];             /* Gas in atmosphere. Zero if none. */
-    uint8_t gas_percent[4];     /* Percentage of gas in atmosphere. */
-    int16_t reserved2;          /* Reserved for future use. Zero for now. */
-    int16_t diameter;           /* Diameter in thousands of kilometers. */
-    int16_t gravity;            /* Surface gravity. Multiple of Earth gravity times 100. */
-    int16_t mining_difficulty;  /* Mining difficulty times 100. */
-    int16_t econ_efficiency;    /* Economic efficiency. Always 100 for a home planet. */
-    int16_t md_increase;        /* Increase in mining difficulty. */
-    int32_t message;            /* Message associated with this planet, if any. */
-    int32_t reserved3;          /* Reserved for future use. Zero for now. */
-    int32_t reserved4;          /* Reserved for future use. Zero for now. */
-    int32_t reserved5;          /* Reserved for future use. Zero for now. */
-} binary_data_t;
-
-
 void get_planet_data(void) {
     int32_t numPlanets;
-    binary_data_t *planetData;
+    binary_planet_data_t *planetData;
 
     /* Open planet file. */
     FILE *fp = fopen("planets.dat", "rb");
@@ -69,14 +50,14 @@ void get_planet_data(void) {
         exit(-1);
     }
     /* Allocate enough memory for all planets. */
-    planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets + NUM_EXTRA_PLANETS, sizeof(binary_data_t));
+    planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets + NUM_EXTRA_PLANETS, sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d + %d planet entries\n\n", numPlanets, NUM_EXTRA_PLANETS);
         exit(-1);
     }
     /* Read it all into memory. */
-    if (fread(planetData, sizeof(binary_data_t), numPlanets, fp) != numPlanets) {
+    if (fread(planetData, sizeof(binary_planet_data_t), numPlanets, fp) != numPlanets) {
         fprintf(stderr, "\nCannot read planet file into memory!\n\n");
         exit(-1);
     }
@@ -93,7 +74,7 @@ void get_planet_data(void) {
 
     for (int i = 0; i < num_planets; i++) {
         struct planet_data *p = &planet_base[i];
-        binary_data_t *pd = &planetData[i];
+        binary_planet_data_t *pd = &planetData[i];
         p->temperature_class = pd->temperature_class;
         p->pressure_class = pd->pressure_class;
         p->special = pd->special;
@@ -147,14 +128,14 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     }
 
     // allocate enough memory for all records
-    binary_data_t *rawRecords = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_data_t));
+    binary_planet_data_t *rawRecords = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_planet_data_t));
     if (rawRecords == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n", filename);
         exit(-1);
     }
 
     // read all records into memory
-    if (fread(rawRecords, sizeof(binary_data_t), numRecords, fp) != numRecords) {
+    if (fread(rawRecords, sizeof(binary_planet_data_t), numRecords, fp) != numRecords) {
         fprintf(stderr, "\nCannot read planet file '%s' into memory!\n\n", filename);
         exit(-1);
     }
@@ -175,7 +156,7 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     // translate from the raw input record into the application record
     for (int i = 0; i < numRecords; i++) {
         struct planet_data *p = &planetBase[i];
-        binary_data_t *pd = &rawRecords[i];
+        binary_planet_data_t *pd = &rawRecords[i];
         p->temperature_class = pd->temperature_class;
         p->pressure_class = pd->pressure_class;
         p->special = pd->special;
@@ -253,7 +234,7 @@ void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
 void save_planet_data(void) {
     FILE *fp;
     int32_t numPlanets = num_planets;
-    binary_data_t *planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets, sizeof(binary_data_t));
+    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets, sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d planet entries\n\n", numPlanets);
@@ -261,7 +242,7 @@ void save_planet_data(void) {
     }
     for (int i = 0; i < num_planets; i++) {
         struct planet_data *p = &planet_base[i];
-        binary_data_t *pd = &planetData[i];
+        binary_planet_data_t *pd = &planetData[i];
         pd->temperature_class = p->temperature_class;
         pd->pressure_class = p->pressure_class;
         pd->special = p->special;
@@ -291,7 +272,7 @@ void save_planet_data(void) {
         exit(-1);
     }
     /* Write planet data to disk. */
-    if (fwrite(planetData, sizeof(binary_data_t), numPlanets, fp) != numPlanets) {
+    if (fwrite(planetData, sizeof(binary_planet_data_t), numPlanets, fp) != numPlanets) {
         perror("save_planet_data");
         fprintf(stderr, "\nCannot write planet data to disk!\n\n");
         exit(-1);
@@ -306,7 +287,7 @@ void save_planet_data(void) {
 
 void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename) {
     int32_t numRecords = numPlanets;
-    binary_data_t *planetData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_data_t));
+    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
         fprintf(stderr, "       attempted to allocate %d planet records\n", numRecords);
@@ -314,7 +295,7 @@ void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filen
     }
     for (int i = 0; i < numPlanets; i++) {
         struct planet_data *p = &planetBase[i];
-        binary_data_t *pd = &planetData[i];
+        binary_planet_data_t *pd = &planetData[i];
         pd->temperature_class = p->temperature_class;
         pd->pressure_class = p->pressure_class;
         pd->special = p->special;
@@ -344,7 +325,7 @@ void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filen
         exit(2);
     }
     /* Write planet data to disk. */
-    if (fwrite(planetData, sizeof(binary_data_t), numRecords, fp) != numRecords) {
+    if (fwrite(planetData, sizeof(binary_planet_data_t), numRecords, fp) != numRecords) {
         perror("savePlanetData");
         fprintf(stderr, "error: cannot write planet data to file '%s'!\n", filename);
         exit(2);

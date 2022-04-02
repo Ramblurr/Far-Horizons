@@ -32,6 +32,7 @@ if (HAVE_LIB_M)
 endif (HAVE_LIB_M)
 
 add_executable(fh
+        src/const.h
         src/fh.c src/fh.h
         src/cfgfile.c src/cfgfile.h
         src/combat.c src/combat.h

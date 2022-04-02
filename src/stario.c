@@ -17,8 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #include <stdlib.h>
 #include <stdio.h>
+#include "data.h"
 #include "galaxy.h"
 #include "galaxyio.h"
 #include "star.h"
@@ -32,33 +34,11 @@ struct star_data *star_base;
 int star_data_modified;
 
 
-typedef struct {
-    uint8_t x;              /* Coordinates. */
-    uint8_t y;
-    uint8_t z;
-    uint8_t type;           /* Dwarf, degenerate, main sequence or giant. */
-    uint8_t color;          /* Star color. Blue, blue-white, etc. */
-    uint8_t size;           /* Star size, from 0 thru 9 inclusive. */
-    uint8_t num_planets;    /* Number of usable planets in star system. */
-    uint8_t home_system;    /* TRUE if this is a good potential home system. */
-    uint8_t worm_here;      /* TRUE if wormhole entry/exit. */
-    uint8_t worm_x;         /* Coordinates of wormhole exit (if there is one) */
-    uint8_t worm_y;
-    uint8_t worm_z;
-    int16_t reserved1;      /* Reserved for future use. Zero for now. */
-    int16_t reserved2;      /* Reserved for future use. Zero for now. */
-    int16_t planet_index;   /* Index (starting at zero) into the file "planets.dat" of the first planet in the star system. */
-    int32_t message;        /* Message associated with this star system, if any. */
-    uint32_t visited_by[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been here. */
-    int32_t reserved3;      /* Reserved for future use. Zero for now. */
-    int32_t reserved4;      /* Reserved for future use. Zero for now. */
-    int32_t reserved5;      /* Reserved for future use. Zero for now. */
-} binary_data_t;
 
 
 void get_star_data(void) {
     int32_t numStars;
-    binary_data_t *starData;
+    binary_star_data_t *starData;
 
     /* Open star file. */
     FILE *fp = fopen("stars.dat", "rb");
@@ -74,7 +54,7 @@ void get_star_data(void) {
     }
 
     /* Allocate enough memory for all stars plus maybe an extra few. */
-    starData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_data_t));
+    starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_star_data_t));
     if (starData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d star entries\n\n", numStars);
@@ -89,7 +69,7 @@ void get_star_data(void) {
     }
 
     /* Read it all into memory. */
-    if (fread(starData, sizeof(binary_data_t), numStars, fp) != numStars) {
+    if (fread(starData, sizeof(binary_star_data_t), numStars, fp) != numStars) {
         fprintf(stderr, "\nCannot read star file into memory!\n\n");
         exit(-1);
     }
@@ -98,7 +78,7 @@ void get_star_data(void) {
     // translate the data
     for (int i = 0; i < num_stars; i++) {
         struct star_data *s = &star_base[i];
-        binary_data_t *data = &starData[i];
+        binary_star_data_t *data = &starData[i];
         s->x = data->x;
         s->y = data->y;
         s->z = data->z;
@@ -166,7 +146,7 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
         fprintf(stderr, "error: saveStarData: internal error: passed null file pointer\n");
         exit(2);
     }
-    binary_data_t *starData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_data_t));
+    binary_star_data_t *starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_star_data_t));
     if (starData == NULL) {
         perror("saveStarData:");
         fprintf(stderr, "error: cannot allocate enough memory to convert stars data\n");
@@ -177,7 +157,7 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
     // translate the data
     for (int i = 0; i < numStars; i++) {
         struct star_data *s = &starBase[i];
-        binary_data_t *data = &starData[i];
+        binary_star_data_t *data = &starData[i];
         data->x = s->x;
         data->y = s->y;
         data->z = s->z;
@@ -205,7 +185,7 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
         exit(2);
     }
     // write records
-    if (fwrite(starData, sizeof(binary_data_t), numOfElements, fp) != numOfElements) {
+    if (fwrite(starData, sizeof(binary_star_data_t), numOfElements, fp) != numOfElements) {
         perror("saveStarData:");
         fprintf(stderr, "error: cannot write stars data to file\n");
         exit(2);

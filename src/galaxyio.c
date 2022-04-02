@@ -20,23 +20,15 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "data.h"
 #include "galaxy.h"
 #include "galaxyio.h"
-#include "json.h"
 
 
 struct galaxy_data galaxy;
 
 
-typedef struct {
-    int32_t d_num_species;  /* Design number of species in galaxy. */
-    int32_t num_species;    /* Actual number of species allocated. */
-    int32_t radius;         /* Galactic radius in parsecs. */
-    int32_t turn_number;    /* Current turn number. */
-} binary_data_t;
-
-
-static binary_data_t galaxyData;
+static binary_galaxy_data_t galaxyData;
 
 
 void galaxyDataAsJson(FILE *fp) {

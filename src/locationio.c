@@ -35,7 +35,7 @@ typedef struct {
     uint8_t x;
     uint8_t y;
     uint8_t z;
-} binary_data_t;
+} binary_ship_data_t;
 
 
 void get_location_data(void) {
@@ -47,10 +47,10 @@ void get_location_data(void) {
     }
 
     // get number of records in the file
-    num_locs = sb.st_size / sizeof(binary_data_t);
-    if (sb.st_size != num_locs * sizeof(binary_data_t)) {
+    num_locs = sb.st_size / sizeof(binary_ship_data_t);
+    if (sb.st_size != num_locs * sizeof(binary_ship_data_t)) {
         fprintf(stderr, "\nFile locations.dat contains extra bytes (%ld > %ld)!\n\n",
-                sb.st_size, num_locs * sizeof(binary_data_t));
+                sb.st_size, num_locs * sizeof(binary_ship_data_t));
         exit(-1);
     } else if (num_locs == 0) {
         // nothing to do
@@ -61,7 +61,7 @@ void get_location_data(void) {
     }
 
     /* Allocate enough memory for all records. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_data_t));
+    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_ship_data_t));
     if (binData == NULL) {
         perror("get_location_data");
         fprintf(stderr, "\nCannot allocate enough memory for location data!\n");
@@ -77,7 +77,7 @@ void get_location_data(void) {
         exit(-1);
     }
     /* Read it all into memory. */
-    if (fread(binData, sizeof(binary_data_t), num_locs, fp) != num_locs) {
+    if (fread(binData, sizeof(binary_ship_data_t), num_locs, fp) != num_locs) {
         fprintf(stderr, "\nCannot read file 'locations.dat' into memory!\n");
         fprintf(stderr, "\n\tattempted to read %d location entries\n\n", num_locs);
         exit(-1);
@@ -132,7 +132,7 @@ void save_location_data(void) {
 
     if (num_locs > 0) {
         /* Allocate enough memory for all records. */
-        binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_data_t));
+        binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_ship_data_t));
         if (binData == NULL) {
             perror("save_location_data");
             fprintf(stderr, "\nCannot allocate enough memory for location data!\n");
@@ -149,7 +149,7 @@ void save_location_data(void) {
         }
 
         /* Write array to disk. */
-        if (fwrite(binData, sizeof(binary_data_t), num_locs, fp) != num_locs) {
+        if (fwrite(binData, sizeof(binary_ship_data_t), num_locs, fp) != num_locs) {
             perror("save_location_data");
             fprintf(stderr, "\n\n\tCannot write to 'locations.dat'!\n\n");
             exit(-1);

@@ -22,31 +22,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "const.h"
 #include "item.h"
-
-
-// declare constants
-#define TRUE  1
-#define FALSE 0
-
-#define STANDARD_NUMBER_OF_SPECIES      15 /* A standard game has 15 species. */
-#define STANDARD_NUMBER_OF_STAR_SYSTEMS 90 /* A standard game has 90 star systems. */
-#define STANDARD_GALACTIC_RADIUS        20 /* A standard game has a galaxy with a radius of 20 parsecs. */
-
-/* Minimum and maximum values for a galaxy. */
-#define MIN_SPECIES  1
-#define MAX_SPECIES  100
-#define MIN_STARS    12
-#define MAX_STARS    1000
-#define MIN_RADIUS   6
-#define MAX_RADIUS   50
-#define MAX_DIAMETER (2*MAX_RADIUS)
-#define MAX_PLANETS  (9*MAX_STARS)
-#define MAX_OBS_LOCS 5000
-#define HP_AVAILABLE_POP 1500
-
-/* Assume at least 32 bits per long word. */
-#define NUM_CONTACT_WORDS    ((MAX_SPECIES - 1) / 32) + 1
 
 
 struct galaxy_data {
@@ -334,7 +311,6 @@ typedef struct global_system {
     struct global_planet **planets;
     int visited_by[MAX_SPECIES + 1];
 } global_system_t;
-
 
 
 int agrep_score(char *correct_string, char *unknown_string);

@@ -17,45 +17,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "data.h"
 #include "item.h"
 #include "nampla.h"
 #include "namplaio.h"
 #include "planetio.h"
-
-typedef struct {
-    uint8_t name[32];                   /* Name of planet. */
-    uint8_t x, y, z, pn;                /* Coordinates. */
-    uint8_t status;                     /* Status of planet. */
-    uint8_t reserved1;                  /* Zero for now. */
-    uint8_t hiding;                     /* HIDE order given. */
-    uint8_t hidden;                     /* Colony is hidden. */
-    int16_t reserved2;                  /* Zero for now. */
-    int16_t planet_index;               /* Index (starting at zero) into the file "planets.dat" of this planet. */
-    int16_t siege_eff;                  /* Siege effectiveness - a percentage between 0 and 99. */
-    int16_t shipyards;                  /* Number of shipyards on planet. */
-    int32_t reserved4;                  /* Zero for now. */
-    int32_t IUs_needed;                 /* Incoming nampla with only CUs on board. */
-    int32_t AUs_needed;                 /* Incoming nampla with only CUs on board. */
-    int32_t auto_IUs;                   /* Number of IUs to be automatically installed. */
-    int32_t auto_AUs;                   /* Number of AUs to be automatically installed. */
-    int32_t reserved5;                  /* Zero for now. */
-    int32_t IUs_to_install;             /* Colonial mining units to be installed. */
-    int32_t AUs_to_install;             /* Colonial manufacturing units to be installed. */
-    int32_t mi_base;                    /* Mining base times 10. */
-    int32_t ma_base;                    /* Manufacturing base times 10. */
-    int32_t pop_units;                  /* Number of available population units. */
-    int32_t item_quantity[MAX_ITEMS];   /* Quantity of each item available. */
-    int32_t reserved6;                  /* Zero for now. */
-    int32_t use_on_ambush;              /* Amount to use on ambush. */
-    int32_t message;                    /* Message associated with this planet, if any. */
-    int32_t special;                    /* Different for each application. */
-    uint8_t padding[28];                /* Use for expansion. Initialized to all zeroes. */
-} binary_data_t;
 
 
 /* load named planet data from file and create empty slots for future use */
@@ -63,7 +35,8 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
     assert(planet_base != NULL);
 
     /* Allocate enough memory for all namplas. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas + extraNamplas, sizeof(binary_data_t));
+    binary_nampla_data_t *binData = (binary_nampla_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas + extraNamplas,
+                                                                     sizeof(binary_nampla_data_t));
     if (binData == NULL) {
         perror("get_nampla_data");
         fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n");
@@ -71,7 +44,7 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
         exit(-1);
     }
     /* Read it all into memory. */
-    if (numNamplas > 0 && fread(binData, sizeof(binary_data_t), numNamplas, fp) != numNamplas) {
+    if (numNamplas > 0 && fread(binData, sizeof(binary_nampla_data_t), numNamplas, fp) != numNamplas) {
         perror("get_nampla_data");
         fprintf(stderr, "\nCannot read nampla data into memory!\n");
         fprintf(stderr, "\n\tattempted to read %d nampla entries\n\n", numNamplas);
@@ -79,10 +52,10 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
     }
     /* translate between the structures */
     struct nampla_data *namplaData = (struct nampla_data *) ncalloc(__FUNCTION__, __LINE__, numNamplas + extraNamplas,
-                                                                   sizeof(struct nampla_data));
+                                                                    sizeof(struct nampla_data));
     for (int i = 0; i < numNamplas; i++) {
         struct nampla_data *nampla = &namplaData[i];
-        binary_data_t *data = &binData[i];
+        binary_nampla_data_t *data = &binData[i];
         memcpy(nampla->name, data->name, 32);
         nampla->x = data->x;
         nampla->y = data->y;
@@ -209,7 +182,8 @@ void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas
 
 void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) {
     /* Allocate enough memory for all namplas. */
-    binary_data_t *binData = (binary_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas, sizeof(binary_data_t));
+    binary_nampla_data_t *binData = (binary_nampla_data_t *) ncalloc(__FUNCTION__, __LINE__, numNamplas,
+                                                                     sizeof(binary_nampla_data_t));
     if (binData == NULL) {
         perror("save_nampla_data");
         fprintf(stderr, "\nCannot allocate enough memory for nampla data!\n");
@@ -219,7 +193,7 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
     /* translate between the structures */
     for (int i = 0; i < numNamplas; i++) {
         struct nampla_data *nampla = &namplaData[i];
-        binary_data_t *data = &binData[i];
+        binary_nampla_data_t *data = &binData[i];
         memcpy(data->name, nampla->name, 32);
         data->x = nampla->x;
         data->y = nampla->y;
@@ -248,7 +222,7 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
         data->special = nampla->special;
     }
     /* Write nampla data. */
-    if (numNamplas > 0 && fwrite(binData, sizeof(binary_data_t), numNamplas, fp) != numNamplas) {
+    if (numNamplas > 0 && fwrite(binData, sizeof(binary_nampla_data_t), numNamplas, fp) != numNamplas) {
         perror("save_nampla_data");
         fprintf(stderr, "\nCannot write nampla data to file!\n");
         fprintf(stderr, "\n\tattempted to write %d nampla entries\n\n", numNamplas);
