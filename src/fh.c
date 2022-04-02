@@ -76,6 +76,8 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "import") == 0) {
             return importCommand(argc - 1, argv + 1);
         } else if (strcmp(argv[i], "inspect") == 0) {
+            printf("inspect: sizeof(uint16_t)       == %5d\n", (int) sizeof(uint16_t));
+            printf("inspect: sizeof(uint32_t)       == %5d\n", (int) sizeof(uint32_t));
             printf("inspect: sizeof(int)            == %5d\n", (int) sizeof(int));
             printf("inspect: sizeof(long)           == %5d\n", (int) sizeof(long));
             printf("inspect: sizeof(galaxy_data_t)  == %5d\n", (int) sizeof(galaxy_data_t));
