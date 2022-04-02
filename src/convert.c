@@ -377,6 +377,7 @@ int convertDataToGlobals(global_data_t *d) {
             }
         }
     }
+    planet_data_modified = TRUE;
 
     return 0;
 }
