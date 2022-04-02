@@ -200,24 +200,30 @@ int convertCommand(int argc, char *argv[]) {
     save_galaxy_data();
     printf("convert: saving       star    data...\n");
     save_star_data();
+    printf("convert: saving       planet  data...\n");
+    save_planet_data();
 
     return rs;
 }
 
 
 int convertDataToGlobals(global_data_t *d) {
+    num_stars = 0;
+    num_planets = 0;
+
     galaxy.d_num_species = d->cluster->d_num_species;
     galaxy.num_species = d->num_species;
     galaxy.radius = d->cluster->radius;
     galaxy.turn_number = d->turn;
 
     num_stars = d->cluster->num_systems;
-    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars, sizeof(struct star_data));
+    star_base = (star_data_t *) ncalloc(__FUNCTION__, __LINE__, num_stars, sizeof(star_data_t));
     if (star_base == NULL) {
         perror("convertDataToGlobals");
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
         exit(2);
     }
+    // convert the easy stuff
     for (int i = 0; i < num_stars; i++) {
         global_system_t *data = d->cluster->systems[i];
         if (data == NULL) {
@@ -227,7 +233,7 @@ int convertDataToGlobals(global_data_t *d) {
             fprintf(stderr, "convert: data error: system id %d not in range 1..%d\n", data->id, num_stars);
             exit(2);
         }
-        struct star_data *s = &star_base[data->id - 1];
+        star_data_t *s = &star_base[data->id - 1];
         if (s->id != 0) {
             fprintf(stderr, "convert: data error: system id %d is not unique\n", s->id);
             exit(2);
@@ -242,39 +248,137 @@ int convertDataToGlobals(global_data_t *d) {
         s->size = data->size;
         s->num_planets = data->num_planets;
         s->home_system = data->home_system;
+        if (data->wormholeExit < 0 || data->wormholeExit > num_stars) {
+            fprintf(stderr, "convert: data error: system id %d wormhole_exit %d is not in range 0..%d\n",
+                    s->id, data->wormholeExit, num_stars);
+            exit(2);
+        }
         s->worm_here = data->wormholeExit;
         s->message = data->message;
         for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
             s->visited_by[j] = data->visited_by[j];
         }
+        s->planet_index = num_planets;
+        num_planets += data->num_planets;
     }
+    // verify that we're not missing any systems
     for (int i = 0; i < num_stars; i++) {
-        struct star_data *s = &star_base[i];
+        star_data_t *s = &star_base[i];
         if (s->id == 0) {
             fprintf(stderr, "convert: data error: system id %d is missing\n", i + 1);
             exit(2);
         }
-        s->planet_index = star_base[i - 1].planet_index + star_base[i - 1].num_planets;
     }
+    // add wormhole coordinates
     for (int i = 0; i < num_stars; i++) {
-        struct star_data *s = &star_base[i];
-        if (s->worm_here == 0) {
-            continue;
+        star_data_t *s = &star_base[i];
+        if (s->worm_here != 0) {
+            struct star_data *w = &star_base[s->worm_here - 1];
+            s->worm_x = w->x;
+            s->worm_y = w->y;
+            s->worm_z = w->z;
+            s->worm_here = TRUE;
         }
-        if (s->worm_here < 1 || s->worm_here > num_stars) {
-            fprintf(stderr, "convert: data error: system id %d wormhole_exit %d is not in range 1..%d\n",
-                    s->id, s->worm_here, num_stars);
-            exit(2);
-        }
-        struct star_data *w = &star_base[s->worm_here - 1];
-        s->worm_x = w->x;
-        s->worm_y = w->y;
-        s->worm_z = w->z;
-        s->worm_here = TRUE;
     }
     star_data_modified = TRUE;
 
-    return 2;
+    num_planets = star_base[num_stars - 1].planet_index + star_base[num_stars - 1].num_planets;
+    planet_base = (planet_data_t *) ncalloc(__FUNCTION__, __LINE__, num_planets, sizeof(planet_data_t));
+    if (planet_base == NULL) {
+        perror("convertDataToGlobals");
+        fprintf(stderr, "\nCannot allocate enough memory for planet file!\n\n");
+        exit(2);
+    }
+    // planet data is stored inside the system, so we have to loop through the systems to map the planets
+    for (int i = 0; i < num_stars; i++) {
+        global_system_t *data = d->cluster->systems[i];
+        star_data_t *s = &star_base[data->id - 1];
+        for (int pn = 0; pn < s->num_planets; pn++) {
+            global_planet_t *p = data->planets[pn];
+            if (p == NULL) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is null\n", s->id, pn + 1);
+                exit(2);
+            }
+            planet_data_t *planet = planet_base + s->planet_index + pn;
+            if (planet == NULL) {
+                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is missing\n", s->id, pn + 1,
+                        s->planet_index + pn);
+                exit(2);
+            } else if (planet->id != 0) {
+                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is not unique: %d\n", s->id, pn + 1,
+                        s->planet_index + pn, planet->id);
+                exit(2);
+            }
+            planet->id = s->planet_index + pn + 1;
+            planet->diameter = p->diameter;
+            planet->econ_efficiency = p->econ_efficiency;
+            planet->gravity = p->gravity;
+            planet->index = s->planet_index + pn;
+            planet->md_increase = p->md_increase;
+            planet->message = p->message;
+            planet->mining_difficulty = p->mining_difficulty;
+            planet->orbit = p->orbit;
+            planet->pressure_class = p->pressure_class;
+            planet->system = s;
+            planet->temperature_class = p->temperature_class;
+            for (int i = 0; p->gases[i]; i++) {
+                planet->gas_percent[i] = p->gases[i]->atmos_pct;
+                for (int g = 0; g < 14; g++) {
+                    if (strcmp(gas_string[g], p->gases[i]->code) == 0) {
+                        planet->gas[i] = g;
+                        break;
+                    }
+                }
+                if (planet->gas[i] == 0) {
+                    fprintf(stderr, "convert: data error: system id %d planet %d (%d): unknown gas '%s'\n", s->id,
+                            pn + 1, s->planet_index + pn, p->gases[i]->code);
+                    exit(2);
+                }
+            }
+            if (p->idealHomePlanet) {
+                planet->special = 1;
+            } else if (p->idealColonyPlanet) {
+                planet->special = 2;
+            } else if (p->radioactiveHellHole) {
+                planet->special = 3;
+            }
+            // for completeness, link the planet into the system
+            s->planets[pn] = planet;
+        }
+    }
+    // verify that we're not missing any planets
+    for (int pn = 0; pn < num_planets; pn++) {
+        planet_data_t *p = &planet_base[pn];
+        if (p->id == 0) {
+            fprintf(stderr, "convert: data error: planet id %d is missing\n", pn + 1);
+            exit(2);
+        } else if (p->id != pn + 1) {
+            fprintf(stderr, "convert: data error: planet id %d: bad id: %d\n", pn + 1, p->id);
+            exit(2);
+        } else if (p->index != pn) {
+            fprintf(stderr, "convert: data error: planet id %d: bad index: %d\n", pn + 1, p->index);
+            exit(2);
+        } else if (p->system == NULL) {
+            fprintf(stderr, "convert: data error: planet id %d: is missing system pointer\n", pn + 1);
+            exit(2);
+        }
+    }
+    // verify the cross-link between planets and systems
+    for (int i = 0; i < num_stars; i++) {
+        star_data_t *s = &star_base[i];
+        for (int pn = 0; pn < s->num_planets; pn++) {
+            if (s->planets[pn] == NULL) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is not owned by system\n", s->id, pn + 1);
+                exit(2);
+            } else if (s->planets[pn]->system != s) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is owned by system %d\n", s->id,
+                        s->planets[pn]->id, s->planets[pn]->system->id);
+                exit(2);
+            }
+        }
+    }
+
+    return 0;
 }
 
 
