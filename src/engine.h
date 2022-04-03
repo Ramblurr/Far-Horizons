@@ -158,8 +158,9 @@ struct species_data {
     uint32_t contact[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been met. */
     uint32_t ally[NUM_CONTACT_WORDS];    /* A bit is set if corresponding species is considered an ally. */
     uint32_t enemy[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species is considered an enemy. */
-    star_data_t *homeSystem;             // pointer to the star containing the planet
-    nampla_data_t *homeColony;           // not a pointer to the planet but a pointer to the nampla
+    star_data_t *homeSystem;             // pointer to the star containing the planet containing the colony
+    star_data_t *homePlanet;             // pointer to the planet containing the colony
+    nampla_data_t *homeColony;           // pointer to the nampla defining the colony
 };
 typedef struct species_data species_data_t;
 

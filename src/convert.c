@@ -34,6 +34,7 @@
 #include "planetvars.h"
 #include "shipvars.h"
 #include "speciesio.h"
+#include "speciesvars.h"
 #include "stario.h"
 #include "unmarshal.h"
 
@@ -202,14 +203,22 @@ int convertCommand(int argc, char *argv[]) {
     save_star_data();
     printf("convert: saving       planet  data...\n");
     save_planet_data();
+    //printf("convert: saving       species data...\n");
+    //save_species_data();
 
     return rs;
 }
 
 
 int convertDataToGlobals(global_data_t *d) {
+    // initialize/reset/clear existing global variables
     num_stars = 0;
     num_planets = 0;
+    memset(spec_data, 0, sizeof(spec_data));
+    memset(data_in_memory, 0, sizeof(data_in_memory));
+    memset(data_modified, 0, sizeof(data_modified));
+    memset(num_new_namplas, 0, sizeof(num_new_namplas));
+    memset(num_new_ships, 0, sizeof(num_new_ships));
 
     galaxy.d_num_species = d->cluster->d_num_species;
     galaxy.num_species = d->num_species;
@@ -255,9 +264,12 @@ int convertDataToGlobals(global_data_t *d) {
         }
         s->worm_here = data->wormholeExit;
         s->message = data->message;
-        for (int j = 0; j < NUM_CONTACT_WORDS; j++) {
-            s->visited_by[j] = data->visited_by[j];
+        for (int b = 0; b < galaxy.num_species; b++) {
+            if (data->visited_by[b]) {
+                s->visited_by[b / 32] ^= (1 << (b % 32));
+            }
         }
+
         s->planet_index = num_planets;
         num_planets += data->num_planets;
     }
@@ -378,6 +390,182 @@ int convertDataToGlobals(global_data_t *d) {
         }
     }
     planet_data_modified = TRUE;
+
+    for (int i = 0; d->species[i] != NULL; i++) {
+        global_species_t *data = d->species[i];
+
+        species_index = i;
+        species_data_t *sp = &spec_data[species_index];
+
+        if (sp->id != 0) {
+            fprintf(stderr, "convert: data error: species id %d is not unique: %d\n", data->id, sp->id);
+            exit(2);
+        }
+        sp->id = data->id;
+        sp->index = species_index + 1;
+        sp->auto_orders = data->auto_orders ? TRUE : FALSE;
+        for (int b = 0; b < galaxy.num_species; b++) {
+            if (data->contacts[b]) {
+                sp->contact[b / 32] ^= (1 << (b % 32));
+            }
+        }
+        if (sp->econ_units < 0) {
+            fprintf(stderr, "convert: data error: species id %d: econ_units must be zero or more\n", sp->id);
+            exit(2);
+        }
+        sp->econ_units = data->econ_units;
+        if (sp->hp_original_base < 0) {
+            fprintf(stderr, "convert: data error: species id %d: hp_original_base must be zero or more\n", sp->id);
+            exit(2);
+        }
+        for (int b = 0; b < galaxy.num_species; b++) {
+            if (data->enemies[b]) {
+                sp->enemy[b / 32] ^= (1 << (b % 32));
+            }
+        }
+        sp->fleet_cost = 0;
+        sp->fleet_percent_cost = 0;
+        if (strlen(data->govt_name) < 3 || strlen(data->govt_name) > 31) {
+            fprintf(stderr,
+                    "convert: data error: species id %d govt_name must be between 3 and 31 characters, not '%s'\n",
+                    sp->id, data->govt_name);
+            exit(2);
+        }
+        strncpy(sp->govt_name, data->govt_name, 32);
+        if (strlen(data->govt_type) < 3 || strlen(data->govt_type) > 31) {
+            fprintf(stderr,
+                    "convert: data error: species id %d govt_type must be between 3 and 31 characters, not '%s'\n",
+                    sp->id, data->govt_type);
+            exit(2);
+        }
+        strncpy(sp->govt_type, data->govt_type, 32);
+        for (int b = 0; b < galaxy.num_species; b++) {
+            if (data->allies[b]) {
+                sp->ally[b / 32] ^= (1 << (b % 32));
+            }
+        }
+        if (data->colonies[0] == NULL) {
+            fprintf(stderr, "convert: data error: species id %d is missing home colony\n", sp->id);
+            exit(2);
+        } else if (data->colonies[0]->location.system == NULL) {
+            fprintf(stderr, "convert: data error: species id %d is missing home system\n", sp->id);
+            exit(2);
+        } else if (data->colonies[0]->location.planet == NULL) {
+            fprintf(stderr, "convert: data error: species id %d is missing home planet\n", sp->id);
+            exit(2);
+        }
+        sp->homeSystem = NULL; //data->colonies[0]->location.system;
+        sp->homePlanet = NULL; //sp->homeSystem->planets[data->colonies[0]->location.orbit - 1];
+        sp->homeColony = NULL;
+        sp->hp_original_base = data->hp_original_base;
+        for (int sk = 0; sk < 6; sk++) {
+            if (data->skills[sk]) {
+                sp->init_tech_level[sk] = data->skills[sk]->init_level;
+                sp->tech_eps[sk] = data->skills[sk]->xps;
+                sp->tech_knowledge[sk] = data->skills[sk]->knowledge_level;
+                sp->tech_level[sk] = data->skills[sk]->current_level;
+            }
+        }
+        if (strlen(data->name) < 5 || strlen(data->name) > 31) {
+            fprintf(stderr, "convert: data error: species id %d name must be between 5 and 31 characters, not '%s'\n",
+                    sp->id, data->name);
+            exit(2);
+        }
+        strncpy(sp->name, data->name, 32);
+        if (data->neutral_gases[0]) {
+            int index = 0;
+            for (int k = 0; k < 6; k++) {
+                if (data->neutral_gases[k]) {
+                    for (int g = 0; g < 14; g++) {
+                        if (strcmp(gas_string[g], data->neutral_gases[k]->code) == 0) {
+                            sp->neutral_gas[index] = g;
+                            index++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        for (global_colony_t **colonies = data->colonies; *colonies; colonies++) {
+            sp->num_namplas++;
+        }
+        for (global_ship_t **ships = data->ships; *ships; ships++) {
+            sp->num_ships++;
+        }
+        if (data->poison_gases[0]) {
+            int index = 0;
+            for (int k = 0; k < 6; k++) {
+                if (data->poison_gases[k]) {
+                    for (int g = 0; g < 14; g++) {
+                        if (strcmp(gas_string[g], data->poison_gases[k]->code) == 0) {
+                            sp->poison_gas[index] = g;
+                            index++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (data->required_gases[0]) {
+            for (int g = 0; g < 14; g++) {
+                if (strcmp(gas_string[g], data->required_gases[0]->code) == 0) {
+                    sp->required_gas = g;
+                    break;
+                }
+                sp->required_gas_max = data->required_gases[0]->max_pct;
+                sp->required_gas_min = data->required_gases[0]->min_pct;
+            }
+        }
+        sp->x = data->colonies[0]->location.system->coords.x;
+        sp->y = data->colonies[0]->location.system->coords.y;
+        sp->z = data->colonies[0]->location.system->coords.z;
+        sp->pn = data->colonies[0]->location.orbit;
+
+        nampla_base = ncalloc(__FUNCTION__, __LINE__, sp->num_namplas, sizeof(nampla_data_t));
+        namp_data[species_index] = nampla_base;
+        for (int j = 0; data->colonies[j]; j++) {
+            global_colony_t *p = data->colonies[j];
+            nampla = nampla_base + j;
+            nampla->id = p->id;
+        }
+
+        ship_base = ncalloc(__FUNCTION__, __LINE__, sp->num_ships, sizeof(ship_data_t));
+        ship_data[species_index] = ship_base;
+        for (int j = 0; data->ships[j]; j++) {
+            global_ship_t *p = data->ships[j];
+            ship = ship_base + j;
+            ship->id = p->id;
+        }
+
+        num_new_namplas[species_index] = 0;
+        num_new_ships[species_index] = 0;
+        data_in_memory[species_index] = TRUE;
+        data_modified[species_index] = TRUE;
+    }
+    // quick sanity checks on the species
+    for (int i = 0; i < galaxy.num_species; i++) {
+        species_index = i;
+        species_data_t *sp = &spec_data[species_index];
+        if (sp->id != species_index + 1) {
+            fprintf(stderr, "convert: data error: species id %d: invalid index %d\n", sp->id, species_index + 1);
+            exit(2);
+        } else if (data_in_memory[species_index] != TRUE) {
+            fprintf(stderr, "convert: data error: species id %d: not in memory\n", sp->id);
+            exit(2);
+        } else if (data_modified[species_index] != TRUE) {
+            fprintf(stderr, "convert: data error: species id %d: not modified\n", sp->id);
+            exit(2);
+        } else if (sp->homeSystem == NULL) {
+            fprintf(stderr, "convert: data error: species id %d: missing home system\n", sp->id);
+            exit(2);
+        } else if (sp->homePlanet == NULL) {
+            fprintf(stderr, "convert: data error: species id %d: missing home planet\n", sp->id);
+            exit(2);
+        } else if (sp->homeColony == NULL) {
+            fprintf(stderr, "convert: data error: species id %d: missing home colony\n", sp->id);
+            exit(2);
+        }
+    }
 
     return 0;
 }

@@ -21,6 +21,9 @@ seventh edition rules and source code were released in 1999 by [Rick Morneau](ht
 This repository contains the original source code with various bug fixes and improvements. There have been *no changes
 to the game mechanics*, and there are no immediate plans to make any.
 
+If you find a change to the game mechanics, please file a bug report on the
+[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
+
 # Rules
 
 You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
@@ -29,6 +32,40 @@ You can also build a PDF and HTML versions of these if you have [pandoc](https:/
 
     cd doc/manual
     make
+
+# Change Notes
+
+Our changes are focused on
+
+* bug fixes
+* removing compiler warnings
+* simplify the build process
+* making the data files portable between 32- and 64-bit x86 machines
+* creating a single executable to reduce the dependencies on Python and Perl to run game turns
+
+The shell scripts used to compile have been replaced with a single CMakefile. This should allow the engine to build on
+Linux, Windows and Mac. Please file a bug report on the
+[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
+if you have problems with the build on any of these systems.
+
+We refactored the source and added a common entry point for all the commands. Those changes are covered in later
+sections of this document.
+
+The major change to the engine has been the data structures. The original code performed some minor miracles to support
+16- and 32-bit systems. We've changed to that support 32- and 64-bit systems.
+
+The internal structures have been cleaned up to remove unused fields.
+
+New structures were created for the external data formats (the binary and JSON data files). The `get` and `save`
+functions were updated to convert between the internal and external structures when fetching and saving data.
+(A few of the internal structures had new fields added to help with the conversion.)
+
+We replaced the commands used to edit data (`AsciiToBinary`, `BinaryToAscii`, and `Edit`). Gamemasters must convert the
+binary data to JSON, edit the JSON data directly, and then convert back to binary. We apologize for the inconvenience of
+the extra steps, but it simplifies the code and testing.
+
+Again, we have not intentionally changed any of the game mechanics. If you find a change it is very likely a bug. Please
+file a report on the [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
 
 # Building
 
@@ -84,6 +121,7 @@ The game has scripts to help initialize and run a game. See [tools/README.md](to
 ## Running by Hand
 
 ### Example: Creating a New Galaxy
+
 ```bash
 mkdir gamma
 cp examples/farhorizons.cfg gamma/
@@ -121,9 +159,9 @@ FH_SEED=$RANDOM ../build/fh stats
 
 The `fh create-galaxy` command initializes a new game by creating three files:
 
-* galaxy.dat, which contains the parameters for the galaxy
-* stars.dat, which contains data for all the systems in the galaxy
-* planets.dat, which contains data for all the planets in the galaxy
+* `galaxy.dat`, which contains the parameters for the galaxy
+* `stars.dat`, which contains data for all the systems in the galaxy
+* `planets.dat`, which contains data for all the planets in the galaxy
 
 The command accepts the following options:
 
@@ -140,8 +178,8 @@ the `--suggest-values` flag to display suggested values based on the number of s
 The `--less-crowded` flag increases the number of stars by about 50%.
 (It has no effect if you specify the number of stars yourself.)
 
-Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter each
-other.
+Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter
+each other.
 
 NB: `fh create-galaxy` replaces `NewGalaxy`.
 
