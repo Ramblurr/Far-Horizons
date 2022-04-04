@@ -165,6 +165,18 @@ global_colony_t **unmarshalColonies(json_value_t *j) {
                 exit(2);
             }
             colonies[index] = unmarshalColony(t->value);
+            // the first (and only the first) colony in the list must be a homeworld
+            if (index == 0) {
+                if (colonies[index]->homeworld == FALSE) {
+                    fprintf(stderr, "%s: colonies.homeworld must be true for colony '%s'\n", __FUNCTION__, "colony",
+                            colonies[index]->name);
+                    exit(2);
+                }
+            } else if (colonies[index]->homeworld != FALSE) {
+                fprintf(stderr, "%s: colonies.homeworld must not be set for colony '%s'\n", __FUNCTION__, "colony",
+                        colonies[index]->name);
+                exit(2);
+            }
             index++;
         }
     }
@@ -220,9 +232,8 @@ global_data_t *unmarshalData(json_value_t *j) {
             }
         }
     }
-    for (global_species_t **species = d->species; *species != NULL; species++) {
-        d->num_species++;
-    }
+
+    // count the number of systems and planets in the data
     if (d->cluster) {
         for (global_system_t **systems = d->cluster->systems; *systems; systems++) {
             d->cluster->num_systems++;
@@ -232,6 +243,27 @@ global_data_t *unmarshalData(json_value_t *j) {
         }
         if (d->cluster->d_num_species == 0) {
             d->cluster->d_num_species = d->num_species;
+        }
+    }
+
+    // count the number of species in the data and link colonies to their planets and systems
+    for (global_species_t **species = d->species; *species != NULL; species++) {
+        d->num_species++;
+        if (d->cluster && d->cluster->systems) {
+            // link all colonies to their system and planet
+            for (global_colony_t **colonies = (*species)->colonies; *colonies; colonies++) {
+                for (global_system_t **systems = d->cluster->systems; *systems; systems++) {
+                    if ((*systems)->id == (*colonies)->location.systemId) {
+                        (*colonies)->location.system = *systems;
+                        (*colonies)->location.planet = (*systems)->planets[(*colonies)->location.orbit - 1];
+                        (*colonies)->location.planetId = (*systems)->planets[(*colonies)->location.orbit - 1]->id;
+                        (*colonies)->location.x = (*systems)->coords.x;
+                        (*colonies)->location.y = (*systems)->coords.y;
+                        (*colonies)->location.z = (*systems)->coords.z;
+                        break;
+                    }
+                }
+            }
         }
     }
 

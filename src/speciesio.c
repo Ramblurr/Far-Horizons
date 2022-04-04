@@ -149,8 +149,9 @@ void get_species_data(void) {
         // mdhender: added fields to help clean up code
         sp->id = species_index + 1;
         sp->index = species_index;
-        sp->homeColony = &namp_data[species_index][0];
-        sp->homeSystem = sp->homeColony->system;
+        sp->home.nampla = &namp_data[species_index][0];
+        sp->home.planet = sp->home.nampla->planet;
+        sp->home.star = sp->home.nampla->star;
 
         fclose(fp);
     }

@@ -454,7 +454,7 @@ int createSpeciesCommand(int argc, char *argv[]) {
         }
         namp_data[species_index] = home_nampla;
         strcpy(home_nampla->name, c->homeworld);
-        home_nampla->system = homeSystem;
+        home_nampla->star = homeSystem;
         home_nampla->planet = home_planet;
         home_nampla->x = homeSystem->x;
         home_nampla->y = homeSystem->y;

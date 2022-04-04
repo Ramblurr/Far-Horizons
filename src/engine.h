@@ -74,7 +74,7 @@ struct planet_data {
     int md_increase;        /* Increase in mining difficulty. */
     int message;            /* Message associated with this planet, if any. */
     int isValid;            // FALSE if the record is invalid
-    star_data_t *system;    // pointer to the star the planet is orbiting
+    struct star_data *star; // pointer to the star the planet is orbiting
     int orbit;              // orbit of planet in the system
 };
 typedef struct planet_data planet_data_t;
@@ -103,8 +103,8 @@ struct nampla_data {
     int use_on_ambush;             /* Amount to use on ambush. */
     int message;                   /* Message associated with this planet, if any. */
     int special;                   /* Different for each application. */
-    star_data_t *system;           // pointer to system the colony is in
-    planet_data_t *planet;         // pointer to planet the colony is on
+    struct star_data *star;        // pointer to system the colony is in
+    struct planet_data *planet;    // pointer to planet the colony is on
 };
 typedef struct nampla_data nampla_data_t;
 
@@ -158,9 +158,11 @@ struct species_data {
     uint32_t contact[NUM_CONTACT_WORDS]; /* A bit is set if corresponding species has been met. */
     uint32_t ally[NUM_CONTACT_WORDS];    /* A bit is set if corresponding species is considered an ally. */
     uint32_t enemy[NUM_CONTACT_WORDS];   /* A bit is set if corresponding species is considered an enemy. */
-    star_data_t *homeSystem;             // pointer to the star containing the planet containing the colony
-    star_data_t *homePlanet;             // pointer to the planet containing the colony
-    nampla_data_t *homeColony;           // pointer to the nampla defining the colony
+    struct {
+        struct star_data *star;          // pointer to the star containing the planet containing the colony
+        struct planet_data *planet;      // pointer to the planet containing the colony
+        struct nampla_data *nampla;      // pointer to the nampla defining the colony
+    } home;
 };
 typedef struct species_data species_data_t;
 
@@ -179,7 +181,7 @@ typedef struct global_coords {
 
 typedef struct global_location {
     int x, y, z;
-    int orbit;
+    int orbit;   // the first orbit is 1
     char colony[64];
     int deep_space;
     int in_orbit;
@@ -208,6 +210,7 @@ typedef struct global_colony {
     int special;
     int status;
     int use_on_ambush;
+    nampla_data_t *_nampla;
 } global_colony_t;
 
 typedef struct global_data {
@@ -252,6 +255,7 @@ typedef struct global_planet {
     int pressure_class;
     int radioactiveHellHole;
     int temperature_class;
+    planet_data_t *_planet;
 } global_planet_t;
 
 typedef struct global_ship {
@@ -269,6 +273,7 @@ typedef struct global_ship {
     int status;
     int tonnage; // valid only for starbases
     char unloading_point[32];
+    ship_data_t *_ship;
 } global_ship_t;
 
 typedef struct global_skill {
@@ -297,6 +302,7 @@ typedef struct global_species {
     int contacts[MAX_SPECIES + 1];
     int allies[MAX_SPECIES + 1];
     int enemies[MAX_SPECIES + 1];
+    species_data_t *_species;
 } global_species_t;
 
 typedef struct global_system {
@@ -311,6 +317,7 @@ typedef struct global_system {
     int num_planets;
     struct global_planet **planets;
     int visited_by[MAX_SPECIES + 1];
+    star_data_t *_star;
 } global_system_t;
 
 

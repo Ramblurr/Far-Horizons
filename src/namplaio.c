@@ -86,7 +86,7 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
         // mdhender: added fields to help clean up code
         nampla->id = i + 1;
         nampla->planet = planet_base + nampla->planet_index;
-        nampla->system = nampla->planet->system;
+        nampla->star = nampla->planet->star;
     }
     /* release the binary data memory we allocated */
     free(binData);

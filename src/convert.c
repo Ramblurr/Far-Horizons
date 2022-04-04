@@ -247,6 +247,8 @@ int convertDataToGlobals(global_data_t *d) {
             fprintf(stderr, "convert: data error: system id %d is not unique\n", s->id);
             exit(2);
         }
+        data->_star = s;
+
         s->id = data->id;
         s->index = data->id - 1;
         s->x = data->coords.x;
@@ -303,88 +305,92 @@ int convertDataToGlobals(global_data_t *d) {
     }
     // planet data is stored inside the system, so we have to loop through the systems to map the planets
     for (int i = 0; i < num_stars; i++) {
-        global_system_t *data = d->cluster->systems[i];
-        star_data_t *s = &star_base[data->id - 1];
-        for (int pn = 0; pn < s->num_planets; pn++) {
-            global_planet_t *p = data->planets[pn];
-            if (p == NULL) {
-                fprintf(stderr, "convert: data error: system id %d planet %d is null\n", s->id, pn + 1);
+        global_system_t *system = d->cluster->systems[i];
+        star_data_t *star = &star_base[system->id - 1];
+        for (int pn = 0; pn < star->num_planets; pn++) {
+            global_planet_t *data = system->planets[pn];
+            if (data == NULL) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is null\n", star->id, pn + 1);
                 exit(2);
             }
-            planet_data_t *planet = planet_base + s->planet_index + pn;
+            planet_data_t *planet = planet_base + star->planet_index + pn;
             if (planet == NULL) {
-                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is missing\n", s->id, pn + 1,
-                        s->planet_index + pn);
+                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is missing\n", star->id, pn + 1,
+                        star->planet_index + pn);
                 exit(2);
             } else if (planet->id != 0) {
-                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is not unique: %d\n", s->id, pn + 1,
-                        s->planet_index + pn, planet->id);
+                fprintf(stderr, "convert: data error: system id %d planet %d (%d) is not unique: %d\n", star->id,
+                        pn + 1,
+                        star->planet_index + pn, planet->id);
                 exit(2);
             }
-            planet->id = s->planet_index + pn + 1;
-            planet->diameter = p->diameter;
-            planet->econ_efficiency = p->econ_efficiency;
-            planet->gravity = p->gravity;
-            planet->index = s->planet_index + pn;
-            planet->md_increase = p->md_increase;
-            planet->message = p->message;
-            planet->mining_difficulty = p->mining_difficulty;
-            planet->orbit = p->orbit;
-            planet->pressure_class = p->pressure_class;
-            planet->system = s;
-            planet->temperature_class = p->temperature_class;
-            for (int i = 0; p->gases[i]; i++) {
-                planet->gas_percent[i] = p->gases[i]->atmos_pct;
+            data->_planet = planet;
+
+            planet->id = star->planet_index + pn + 1;
+            planet->diameter = data->diameter;
+            planet->econ_efficiency = data->econ_efficiency;
+            planet->gravity = data->gravity;
+            planet->index = star->planet_index + pn;
+            planet->md_increase = data->md_increase;
+            planet->message = data->message;
+            planet->mining_difficulty = data->mining_difficulty;
+            planet->orbit = data->orbit;
+            planet->pressure_class = data->pressure_class;
+            planet->temperature_class = data->temperature_class;
+            for (int k = 0; data->gases[k]; k++) {
+                planet->gas_percent[k] = data->gases[k]->atmos_pct;
                 for (int g = 0; g < 14; g++) {
-                    if (strcmp(gas_string[g], p->gases[i]->code) == 0) {
-                        planet->gas[i] = g;
+                    if (strcmp(gas_string[g], data->gases[k]->code) == 0) {
+                        planet->gas[k] = g;
                         break;
                     }
                 }
-                if (planet->gas[i] == 0) {
-                    fprintf(stderr, "convert: data error: system id %d planet %d (%d): unknown gas '%s'\n", s->id,
-                            pn + 1, s->planet_index + pn, p->gases[i]->code);
+                if (planet->gas[k] == 0) {
+                    fprintf(stderr, "convert: data error: system id %d planet %d (%d): unknown gas '%star'\n", star->id,
+                            pn + 1, star->planet_index + pn, data->gases[k]->code);
                     exit(2);
                 }
             }
-            if (p->idealHomePlanet) {
+            if (data->idealHomePlanet) {
                 planet->special = 1;
-            } else if (p->idealColonyPlanet) {
+            } else if (data->idealColonyPlanet) {
                 planet->special = 2;
-            } else if (p->radioactiveHellHole) {
+            } else if (data->radioactiveHellHole) {
                 planet->special = 3;
             }
-            // for completeness, link the planet into the system
-            s->planets[pn] = planet;
+            // for completeness, link the star and planet
+            planet->star = star;
+            star->planets[pn] = planet;
         }
     }
     // verify that we're not missing any planets
     for (int pn = 0; pn < num_planets; pn++) {
-        planet_data_t *p = &planet_base[pn];
-        if (p->id == 0) {
+        planet_data_t *planet = &planet_base[pn];
+        if (planet->id == 0) {
             fprintf(stderr, "convert: data error: planet id %d is missing\n", pn + 1);
             exit(2);
-        } else if (p->id != pn + 1) {
-            fprintf(stderr, "convert: data error: planet id %d: bad id: %d\n", pn + 1, p->id);
+        } else if (planet->id != pn + 1) {
+            fprintf(stderr, "convert: data error: planet id %d: bad id: %d\n", pn + 1, planet->id);
             exit(2);
-        } else if (p->index != pn) {
-            fprintf(stderr, "convert: data error: planet id %d: bad index: %d\n", pn + 1, p->index);
+        } else if (planet->index != pn) {
+            fprintf(stderr, "convert: data error: planet id %d: bad index: %d\n", pn + 1, planet->index);
             exit(2);
-        } else if (p->system == NULL) {
-            fprintf(stderr, "convert: data error: planet id %d: is missing system pointer\n", pn + 1);
+        } else if (planet->star == NULL) {
+            fprintf(stderr, "convert: data error: planet id %d: is missing star pointer\n", pn + 1);
             exit(2);
         }
     }
     // verify the cross-link between planets and systems
     for (int i = 0; i < num_stars; i++) {
-        star_data_t *s = &star_base[i];
-        for (int pn = 0; pn < s->num_planets; pn++) {
-            if (s->planets[pn] == NULL) {
-                fprintf(stderr, "convert: data error: system id %d planet %d is not owned by system\n", s->id, pn + 1);
+        star_data_t *star = &star_base[i];
+        for (int pn = 0; pn < star->num_planets; pn++) {
+            if (star->planets[pn] == NULL) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is not owned by system\n", star->id,
+                        pn + 1);
                 exit(2);
-            } else if (s->planets[pn]->system != s) {
-                fprintf(stderr, "convert: data error: system id %d planet %d is owned by system %d\n", s->id,
-                        s->planets[pn]->id, s->planets[pn]->system->id);
+            } else if (star->planets[pn]->star != star) {
+                fprintf(stderr, "convert: data error: system id %d planet %d is owned by star %d\n", star->id,
+                        star->planets[pn]->id, star->planets[pn]->star->id);
                 exit(2);
             }
         }
@@ -396,6 +402,7 @@ int convertDataToGlobals(global_data_t *d) {
 
         species_index = i;
         species_data_t *sp = &spec_data[species_index];
+        data->_species = sp;
 
         if (sp->id != 0) {
             fprintf(stderr, "convert: data error: species id %d is not unique: %d\n", data->id, sp->id);
@@ -454,9 +461,9 @@ int convertDataToGlobals(global_data_t *d) {
             fprintf(stderr, "convert: data error: species id %d is missing home planet\n", sp->id);
             exit(2);
         }
-        sp->homeSystem = NULL; //data->colonies[0]->location.system;
-        sp->homePlanet = NULL; //sp->homeSystem->planets[data->colonies[0]->location.orbit - 1];
-        sp->homeColony = NULL;
+        //sp->home_system = data->colonies[0]->location.system->;
+        //sp->home_planet = data->planet;
+        //sp->home_nampla = data->colonies;
         sp->hp_original_base = data->hp_original_base;
         for (int sk = 0; sk < 6; sk++) {
             if (data->skills[sk]) {
@@ -524,9 +531,25 @@ int convertDataToGlobals(global_data_t *d) {
         nampla_base = ncalloc(__FUNCTION__, __LINE__, sp->num_namplas, sizeof(nampla_data_t));
         namp_data[species_index] = nampla_base;
         for (int j = 0; data->colonies[j]; j++) {
-            global_colony_t *p = data->colonies[j];
+            global_colony_t *colony = data->colonies[j];
             nampla = nampla_base + j;
-            nampla->id = p->id;
+            colony->_nampla = nampla;
+            nampla->id = colony->id;
+            nampla->pn = colony->location.orbit;
+            for (int k = 0; k < num_stars; k++) {
+                if (colony->location.systemId == star_base[k].id) {
+                    nampla->star = star_base + k;
+                    nampla->planet = nampla->star->planets[nampla->pn - 1];
+                    break;
+                }
+            }
+        }
+        if (sp->num_namplas > 0) {
+            sp->home.nampla = namp_data[species_index];
+            if (sp->home.nampla != NULL) {
+                sp->home.planet = sp->home.nampla->planet;
+                sp->home.star = sp->home.nampla->star;
+            }
         }
 
         ship_base = ncalloc(__FUNCTION__, __LINE__, sp->num_ships, sizeof(ship_data_t));
@@ -534,6 +557,7 @@ int convertDataToGlobals(global_data_t *d) {
         for (int j = 0; data->ships[j]; j++) {
             global_ship_t *p = data->ships[j];
             ship = ship_base + j;
+            p->_ship = ship;
             ship->id = p->id;
         }
 
@@ -543,28 +567,32 @@ int convertDataToGlobals(global_data_t *d) {
         data_modified[species_index] = TRUE;
     }
     // quick sanity checks on the species
+    int foundErrors = FALSE;
     for (int i = 0; i < galaxy.num_species; i++) {
         species_index = i;
         species_data_t *sp = &spec_data[species_index];
         if (sp->id != species_index + 1) {
             fprintf(stderr, "convert: data error: species id %d: invalid index %d\n", sp->id, species_index + 1);
-            exit(2);
+            foundErrors = TRUE;
         } else if (data_in_memory[species_index] != TRUE) {
             fprintf(stderr, "convert: data error: species id %d: not in memory\n", sp->id);
-            exit(2);
+            foundErrors = TRUE;
         } else if (data_modified[species_index] != TRUE) {
             fprintf(stderr, "convert: data error: species id %d: not modified\n", sp->id);
-            exit(2);
-        } else if (sp->homeSystem == NULL) {
-            fprintf(stderr, "convert: data error: species id %d: missing home system\n", sp->id);
-            exit(2);
-        } else if (sp->homePlanet == NULL) {
-            fprintf(stderr, "convert: data error: species id %d: missing home planet\n", sp->id);
-            exit(2);
-        } else if (sp->homeColony == NULL) {
-            fprintf(stderr, "convert: data error: species id %d: missing home colony\n", sp->id);
-            exit(2);
+            foundErrors = TRUE;
+        } else if (sp->home.star == NULL) {
+            fprintf(stderr, "convert: data error: species id %d: missing home star\n", sp->id);
+            foundErrors = TRUE;
+        } else if (sp->home.planet == NULL) {
+            fprintf(stderr, "convert: data error: species id %d '%s': missing home planet\n", sp->id, sp->name);
+            foundErrors = TRUE;
+        } else if (sp->home.nampla == NULL) {
+            fprintf(stderr, "convert: data error: species id %d: missing home nampla\n", sp->id);
+            foundErrors = TRUE;
         }
+    }
+    if (foundErrors) {
+        exit(2);
     }
 
     return 0;
@@ -703,8 +731,8 @@ global_data_t *convertGlobalsToData(void) {
             p->special = nampla->special;
             p->use_on_ambush = nampla->use_on_ambush;
             for (global_system_t **system = g->cluster->systems; *system; system++) {
-                if (nampla->system->x == (*system)->coords.x && nampla->system->y == (*system)->coords.y
-                    && nampla->system->z == (*system)->coords.z) {
+                if (nampla->planet->star->x == (*system)->coords.x && nampla->planet->star->y == (*system)->coords.y
+                    && nampla->planet->star->z == (*system)->coords.z) {
                     p->location.system = *system;
                     for (global_planet_t **planet = (*system)->planets; *planet; planet++) {
                         if (nampla->planet->orbit == (*planet)->orbit) {

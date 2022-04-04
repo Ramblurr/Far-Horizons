@@ -99,7 +99,7 @@ void get_planet_data(void) {
         star_data_t *star = star_base + sn;
         for (int pn = 0; pn < star->num_planets; pn++) {
             struct planet_data *p = &planet_base[star->planet_index + pn];
-            p->system = star;
+            p->star = star;
             p->orbit = pn + 1;
         }
     }
