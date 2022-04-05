@@ -680,8 +680,14 @@ global_ship_t *unmarshalShip(json_value_t *j) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "string");
                     exit(2);
+                } else if (strlen(ship->name) > 4) {
+                    fprintf(stderr, "%s: ship.%s is too short\n", __FUNCTION__, t->key);
+                    exit(2);
+                } else if (strlen(ship->name) > 63) {
+                    fprintf(stderr, "%s: ship.%s is too long\n", __FUNCTION__, t->key);
+                    exit(2);
                 }
-                strncpy(ship->name, t->value->u.s, 32);
+                strncpy(ship->name, t->value->u.s, 64);
             } else if (strcmp(t->key, "remaining_cost") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
