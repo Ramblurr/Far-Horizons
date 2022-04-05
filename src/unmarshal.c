@@ -168,12 +168,12 @@ global_colony_t **unmarshalColonies(json_value_t *j) {
             // the first (and only the first) colony in the list must be a homeworld
             if (index == 0) {
                 if (colonies[index]->homeworld == FALSE) {
-                    fprintf(stderr, "%s: colonies.homeworld must be true for colony '%s'\n", __FUNCTION__, "colony",
+                    fprintf(stderr, "%s: colonies.homeworld must be true for colony '%s'\n", __FUNCTION__,
                             colonies[index]->name);
                     exit(2);
                 }
             } else if (colonies[index]->homeworld != FALSE) {
-                fprintf(stderr, "%s: colonies.homeworld must not be set for colony '%s'\n", __FUNCTION__, "colony",
+                fprintf(stderr, "%s: colonies.homeworld must not be set for colony '%s'\n", __FUNCTION__,
                         colonies[index]->name);
                 exit(2);
             }
