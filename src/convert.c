@@ -615,29 +615,141 @@ int convertDataToGlobals(global_data_t *d) {
             ship->id = p->id;
             ship->age = p->age;
             ship->arrived_via_wormhole = p->arrived_via_wormhole ? TRUE : FALSE;
+            ship->class = -1;
+            switch (p->name[0]) {
+                case 'B':
+                    switch (p->name[1]) {
+                        case 'A':
+                            ship->class = (p->name[2] == 'S') ? BA : ship->class;
+                            ship->type = SUB_LIGHT;
+                            ship->tonnage = p->tonnage;
+                            break;
+                        case 'C':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? BC : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'M':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? BM : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'R':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? BR : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'S':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? BS : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'W':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? BW : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'C':
+                    switch (p->name[1]) {
+                        case 'A':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CA : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'C':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CC : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'L':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CL : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'T':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CT : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'D':
+                    switch (p->name[1]) {
+                        case 'D':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? DD : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                        case 'N':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? DN : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'E':
+                    switch (p->name[1]) {
+                        case 'S':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? ES : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'F':
+                    switch (p->name[1]) {
+                        case 'F':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? FF : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'P':
+                    switch (p->name[1]) {
+                        case 'B':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? PB : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'S':
+                    switch (p->name[1]) {
+                        case 'D':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? SD : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
+                    }
+                    break;
+                case 'T':
+                    switch (p->name[1]) {
+                        case 'R':
+                            ship->class = TR;
+                            ship->type = SUB_LIGHT; // assume for the moment, we'll verify in the loop below
+                            for (char *s = p->name + 2; *s && *s != ' '; s++) {
+                                if ('0' <= *s && *s <= '9') {
+                                    if (ship->tonnage * 10 + (*s - '0') < 1) {
+                                        fprintf(stderr,
+                                                "convert: data error: species id %d: transport '%s' has invalid tonnage\n",
+                                                sp->id, p->name);
+                                        exit(2);
+                                    }
+                                    ship->tonnage = ship->tonnage * 10 + (*s - '0');
+                                    if (*(s + 1) == ' ') {
+                                        ship->type = FTL;
+                                        break;
+                                    }
+                                } else if (*s == 'S' && (*(s + 1) == ' ')) {
+                                    ship->type = SUB_LIGHT;
+                                    break;
+                                } else {
+                                    fprintf(stderr,
+                                            "convert: data error: species id %d: transport '%s' has invalid tonnage\n",
+                                            sp->id, p->name);
+                                    exit(2);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+            }
+            if (ship->class < 0) {
+                fprintf(stderr, "convert: data error: species id %d: ship '%s' has invalid class\n", sp->id, p->name);
+                exit(2);
+            }
+
             ship->dest_x = p->destination.x;
             ship->dest_y = p->destination.y;
             ship->dest_z = p->destination.z;
-            ship->just_jumped = p->just_jumped ? TRUE : FALSE;
-            char *space = p->name;
-            for (space = p->name; *space && *space != ' '; space++) {
-                //
-            }
-            if (*space == 0) {
-                fprintf(stderr, "convert: data error: species id %d: ship name '%s' has no spaces\n",
-                        sp->id, p->name);
-                exit(2);
-            }
-            char *shipName = space + 1;
-            if (strlen(shipName) > 31) {
-                fprintf(stderr, "convert: data error: species id %d: ship name '%s' is too long\n",
-                        sp->id, p->name);
-                exit(2);
-            }
-            strncpy(sp->name, shipName, 32);
-            ship->remaining_cost = p->remaining_cost;
-            ship->special = p->special;
-
             if (p->inventory != NULL) {
                 for (int jj = 0; p->inventory[jj] != NULL; jj++) {
                     for (int it = 0; it < MAX_ITEMS; it++) {
@@ -648,6 +760,29 @@ int convertDataToGlobals(global_data_t *d) {
                     }
                 }
             }
+            ship->just_jumped = p->just_jumped ? TRUE : FALSE;
+            for (char *s = p->name; *s; s++) {
+                if (*s == ' ') {
+                    for (; *s == ' '; s++) {
+                        // skip spaces
+                    }
+                    if (strlen(s) < 1) {
+                        fprintf(stderr, "convert: data error: species id %d: ship name '%s' is too short\n",
+                                sp->id, p->name);
+                        exit(2);
+                    } else if (strlen(s) > 31) {
+                        fprintf(stderr, "convert: data error: species id %d: ship name '%s' is too long\n",
+                                sp->id, p->name);
+                        exit(2);
+                    }
+                    strncpy(ship->name, s, 32);
+                    break;
+                }
+            }
+            ship->remaining_cost = p->remaining_cost;
+            ship->special = p->special;
+            ship->status = p->status;
+            //printf("%-60s %-32s %3d %3d %6d\n", p->name, ship->name, ship->class, ship->type, ship->tonnage);
         }
 
         num_new_namplas[species_index] = 0;
