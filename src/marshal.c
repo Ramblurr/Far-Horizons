@@ -250,7 +250,7 @@ json_value_t *marshalShip(global_ship_t *s) {
         json_add(j, "inventory", marshalInventory(s->inventory));
     }
     json_add(j, "location", marshalLocation(s->location));
-    if (s->destination.x != 0) {
+    if (s->destination.x != 0 && s->destination.y != 0 && s->destination.z != 0) {
         json_add(j, "destination", marshalLocation(s->destination));
     }
     if (s->status == JUMPED_IN_COMBAT) {
