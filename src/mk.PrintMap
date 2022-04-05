@@ -1,0 +1,2 @@
+#!/bin/bash
+cc -no-pie -o ../bin/PrintMap PrintMap.c -lm
