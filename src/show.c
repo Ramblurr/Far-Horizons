@@ -18,6 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "galaxyio.h"
@@ -25,6 +26,14 @@
 #include "show.h"
 #include "stario.h"
 #include "enginevars.h"
+
+
+
+static int showGalaxyAsciiMap(void);
+static int showGalaxyMap(void);
+
+
+static int star_here[MAX_DIAMETER][MAX_DIAMETER];
 
 
 int showCommand(int argc, char *argv[]) {
@@ -61,8 +70,6 @@ int showCommand(int argc, char *argv[]) {
 
 
 int showGalaxyCommand(int argc, char *argv[]) {
-    static int star_here[MAX_DIAMETER][MAX_DIAMETER];
-
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
         char *val = NULL;
@@ -77,22 +84,27 @@ int showGalaxyCommand(int argc, char *argv[]) {
             val = NULL;
         }
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
-            fprintf(stderr, "usage: show galaxy [-v]\n");
-            fprintf(stderr, "       display a crude ASCII map of the galaxy  with the relative positions\n");
+            fprintf(stderr, "usage: show galaxy [--ascii]\n");
+            fprintf(stderr, "ascii: display a crude ASCII map of the galaxy  with the relative positions\n");
             fprintf(stderr, "       of home planets, ideal colonies, and other star systems. the GM may\n");
             fprintf(stderr, "       run this program after creating a new galaxy to visually confirm the\n");
             fprintf(stderr, "       distribution is not too lopsided.\n");
             fprintf(stderr, "       in the map, 'H' indicates ideal home planet, 'C' ideal colony, and '*'\n");
             fprintf(stderr, "       is used for all other stars.\n");
             return 2;
-        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
-            verbose_mode = TRUE;
+        } else if (strcmp(opt, "--ascii") == 0 && val == NULL) {
+            return showGalaxyAsciiMap();
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", opt);
             return 2;
         }
     }
 
+    return showGalaxyMap();
+}
+
+
+int showGalaxyAsciiMap(void) {
     /* Get all the raw data. */
     get_galaxy_data();
     get_star_data();
@@ -176,6 +188,162 @@ int showGalaxyCommand(int argc, char *argv[]) {
     printf("    C - ideal colony\n");
     printf("    . - all other star systems\n");
 
+    return 0;
+}
+
+
+int showGalaxyMap(void) {
+    /* Get all the raw data. */
+    get_galaxy_data();
+    get_star_data();
+
+    int galactic_diameter = 2 * galaxy.radius;
+
+    /* Determine number of pages that will be needed to contain the complete map. */
+    int n_columns = 132;
+
+    int x_increment = (n_columns - 4) / 6;    /* 4 columns for left margin plus 6 per star. */
+    int page_count = (2 * galaxy.radius + x_increment - 1) / x_increment;
+
+    printf("\nI will generate %d page(s).\n\n", page_count);
+
+    // initialize array to hold -1, which means "no system here"
+    for (int x = 0; x < MAX_DIAMETER; x++) {
+        for (int y = 0; y < MAX_DIAMETER; y++) {
+            star_here[x][y] = -1;
+        }
+    }
+
+    /* For each star, set corresponding element of star_here[] to index into star array. */
+    struct star_data *star = star_base;
+    for (int star_index = 0; star_index < num_stars; star_index++) {
+        star_here[star->x][star->y] = star_index;
+        star++;
+    }
+
+    /* Create output file. */
+    FILE *outfile = fopen("galaxy.map", "w");
+    if (outfile == NULL) {
+        perror("showGalaxyMap:");
+        fprintf(stderr, "\n\tCannot create file galaxy.map!\n");
+        exit(2);
+    }
+
+    /* Outermost loop will count pages. */
+    int left_x = 0;
+    for (int page = 1; page <= page_count; page++) {
+        /* Next-to-outermost loop will control y-coordinates. */
+        for (int y = 2 * galaxy.radius - 1; y >= 0; y--) {
+            /* Next-to-innermost loop will count the 4 lines that make up each star box.
+             * Fifth and sixth lines are generated only at the very bottom of the page. */
+            for (int line = 1; line <= 6; line++) {
+                int x = left_x;
+
+                /* Do left margin of first page. */
+                if (x == 0 && page == 1) {
+                    switch (line) {
+                        case 1:
+                            fprintf(outfile, "   -");
+                            break;
+                        case 2:
+                            fprintf(outfile, "   |");
+                            break;
+                        case 3:
+                            fprintf(outfile, "%2d |", y);
+                            break;
+                        case 4:
+                            if (n_columns < 100) {
+                                fprintf(outfile, "   |");
+                            }
+                            break;
+                        case 5:
+                            if (y == 0) {
+                                fprintf(outfile, " Y -");
+                            }
+                            break;
+                        case 6:
+                            if (y == 0) {
+                                fprintf(outfile, "  X ");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                /* Innermost loop will control x-coordinate. */
+                for (int x_count = 1; x_count <= x_increment; x_count++) {
+                    if (x == galactic_diameter) {
+                        break;
+                    }
+                    int star_index = star_here[x][y];
+                    star = (struct star_data *) star_base;
+                    if (star_index > 0) {
+                        star += star_index;
+                    }
+
+                    switch (line) {
+                        case 1:
+                            fprintf(outfile, "------");
+                            break;
+                        case 2:
+                            if (star_index >= 0) {
+                                int z = star->z;
+                                if (z < 10) {
+                                    fprintf(outfile, "%3d  |", z);
+                                } else {
+                                    fprintf(outfile, "%4d |", z);
+                                }
+                            } else {
+                                fprintf(outfile, "     |");
+                            }
+                            break;
+                        case 3:
+                            if (star_index >= 0) {
+                                fprintf(outfile, " %c%c%c |", type_char[star->type], color_char[star->color],
+                                        size_char[star->size]);
+                            } else {
+                                fprintf(outfile, "     |");
+                            }
+                            break;
+                        case 4:
+                            if (n_columns < 100) {
+                                fprintf(outfile, "     |");
+                            }
+                            break;
+                        case 5:
+                            if (y == 0) {
+                                fprintf(outfile, "------");
+                            }
+                            break;
+                        case 6:
+                            if (y == 0) {
+                                fprintf(outfile, "  %2d  ", x);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    x++;
+                }
+
+                if ((line < 4) || (line == 4 && n_columns < 100)) {
+                    /* End of line. */
+                    fprintf(outfile, "\n");
+                }
+
+                if (y == 0 && line == 5) {
+                    fprintf(outfile, "\n");
+                }
+            }
+        }
+
+        fprintf(outfile, "\n\f");    /* Formfeed character. */
+        left_x += x_increment;
+    }
+
+    /* Clean up and exit. */
+    fclose(outfile);
     return 0;
 }
 
