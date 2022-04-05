@@ -203,8 +203,8 @@ int convertCommand(int argc, char *argv[]) {
     save_star_data();
     printf("convert: saving       planet  data...\n");
     save_planet_data();
-    //printf("convert: saving       species data...\n");
-    //save_species_data();
+    printf("convert: saving       species data...\n");
+    save_species_data();
 
     return rs;
 }
@@ -535,13 +535,67 @@ int convertDataToGlobals(global_data_t *d) {
             nampla = nampla_base + j;
             colony->_nampla = nampla;
             nampla->id = colony->id;
+            nampla->hidden = colony->hidden ? TRUE : FALSE;
+            nampla->hiding = colony->hiding ? TRUE : FALSE;
+            nampla->ma_base = colony->ma_base;
+            nampla->message = colony->message;
+            nampla->mi_base = colony->mi_base;
+            if (strlen(colony->name) > 31) {
+                fprintf(stderr, "convert: data error: species id %d: colony name '%s' is too long\n",
+                        sp->id, colony->name);
+                exit(2);
+            }
+            strncpy(nampla->name, colony->name, 32);
             nampla->pn = colony->location.orbit;
+            nampla->pop_units = colony->pop_units;
+            nampla->shipyards = colony->shipyards;
+            nampla->siege_eff = colony->siege_eff;
+            nampla->special = colony->special;
+            nampla->use_on_ambush = colony->use_on_ambush;
+
+            for (int dd = 0; colony->develop[dd]; dd++) {
+                if (strcmp(colony->develop[dd]->code, "AU") == 0) {
+                    nampla->AUs_needed = colony->develop[dd]->units_needed;
+                    nampla->AUs_to_install = colony->develop[dd]->units_to_install;
+                    nampla->auto_AUs = colony->develop[dd]->auto_install;
+                } else if (strcmp(colony->develop[dd]->code, "AU") == 0) {
+                    nampla->IUs_needed = colony->develop[dd]->units_needed;
+                    nampla->IUs_to_install = colony->develop[dd]->units_to_install;
+                    nampla->auto_IUs = colony->develop[dd]->auto_install;
+                }
+            }
+
+            if (colony->inventory != NULL) {
+                for (int jj = 0; colony->inventory[jj] != NULL; jj++) {
+                    for (int it = 0; it < MAX_ITEMS; it++) {
+                        if (strcmp(colony->inventory[jj]->code, item_abbr[it]) == 0) {
+                            nampla->item_quantity[it] = colony->inventory[jj]->quantity;
+                            break;
+                        }
+                    }
+                }
+            }
+
             for (int k = 0; k < num_stars; k++) {
                 if (colony->location.systemId == star_base[k].id) {
                     nampla->star = star_base + k;
+                    nampla->x = nampla->star->x;
+                    nampla->y = nampla->star->y;
+                    nampla->z = nampla->star->z;
                     nampla->planet = nampla->star->planets[nampla->pn - 1];
+                    nampla->planet_index = nampla->planet->index;
                     break;
                 }
+            }
+
+            if (nampla->star == NULL) {
+                fprintf(stderr, "convert: data error: species id %d: nampla star (%d) is null\n", sp->id,
+                        colony->location.systemId);
+                exit(2);
+            } else if (nampla->planet == NULL) {
+                fprintf(stderr, "convert: data error: species id %d: nampla star (%d) planet (%d) is null\n", sp->id,
+                        colony->location.systemId, colony->location.orbit);
+                exit(2);
             }
         }
         if (sp->num_namplas > 0) {
@@ -559,6 +613,41 @@ int convertDataToGlobals(global_data_t *d) {
             ship = ship_base + j;
             p->_ship = ship;
             ship->id = p->id;
+            ship->age = p->age;
+            ship->arrived_via_wormhole = p->arrived_via_wormhole ? TRUE : FALSE;
+            ship->dest_x = p->destination.x;
+            ship->dest_y = p->destination.y;
+            ship->dest_z = p->destination.z;
+            ship->just_jumped = p->just_jumped ? TRUE : FALSE;
+            char *space = p->name;
+            for (space = p->name; *space && *space != ' '; space++) {
+                //
+            }
+            if (*space == 0) {
+                fprintf(stderr, "convert: data error: species id %d: ship name '%s' has no spaces\n",
+                        sp->id, p->name);
+                exit(2);
+            }
+            char *shipName = space + 1;
+            if (strlen(shipName) > 31) {
+                fprintf(stderr, "convert: data error: species id %d: ship name '%s' is too long\n",
+                        sp->id, p->name);
+                exit(2);
+            }
+            strncpy(sp->name, shipName, 32);
+            ship->remaining_cost = p->remaining_cost;
+            ship->special = p->special;
+
+            if (p->inventory != NULL) {
+                for (int jj = 0; p->inventory[jj] != NULL; jj++) {
+                    for (int it = 0; it < MAX_ITEMS; it++) {
+                        if (strcmp(p->inventory[jj]->code, item_abbr[it]) == 0) {
+                            ship->item_quantity[it] = p->inventory[jj]->quantity;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         num_new_namplas[species_index] = 0;
