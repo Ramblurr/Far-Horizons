@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.9.3\n");
+            printf("7.9.4\n");
             return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
@@ -97,16 +97,16 @@ int main(int argc, char *argv[]) {
             return 0;
         } else if (strcmp(argv[i], "jump") == 0) {
             return jumpCommand(argc - i, argv + i);
-        } else if (strcmp(argv[i], "locations") == 0) {
-            return locationCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "list") == 0) {
             return listCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "locations") == 0) {
+            return locationCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "logrnd") == 0) {
             return logRandomCommand(argc - i, argv + i);
-        } else if (strcmp(argv[i], "pre-departure") == 0) {
-            return preDepartureCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "post-arrival") == 0) {
             return postArrivalCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "pre-departure") == 0) {
+            return preDepartureCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "production") == 0) {
             return productionCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "report") == 0) {
