@@ -73,6 +73,7 @@ add_executable(fh
         src/planetvars.c src/planetvars.h
         src/postarrival.c src/postarrival.c
         src/predeparture.c src/predeparture.h
+        src/prng.c src/prng.h
         src/production.c src/production.h
         src/productionvars.c src/productionvars.h
         src/report.c src/report.h

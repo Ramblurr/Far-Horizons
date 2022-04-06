@@ -27,8 +27,6 @@ const unsigned long defaultHistoricalSeedValue = 1924085713L;
 
 int first_pass = FALSE;
 
-unsigned long last_random; // allow callers to set the seed. ugh.
-
 int post_arrival_phase = FALSE;
 
 int prompt_gm;

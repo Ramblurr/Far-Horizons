@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
             printf("inspect: sizeof(ship_data_t)           == %5d\n", (int) sizeof(ship_data_t));
             printf("inspect: sizeof(uint16_t)              == %5d\n", (int) sizeof(uint16_t));
             printf("inspect: sizeof(uint32_t)              == %5d\n", (int) sizeof(uint32_t));
+            printf("inspect: sizeof(uint64_t)              == %5d\n", (int) sizeof(uint64_t));
             printf("inspect: sizeof(binary_galaxy_data_t)  == %5d\n", (int) sizeof(binary_galaxy_data_t));
             printf("inspect: sizeof(binary_star_data_t)    == %5d\n", (int) sizeof(binary_star_data_t));
             printf("inspect: sizeof(binary_planet_data_t)  == %5d\n", (int) sizeof(binary_planet_data_t));

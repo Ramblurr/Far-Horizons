@@ -17,18 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef FAR_HORIZONS_ENGINEVARS_H
-#define FAR_HORIZONS_ENGINEVARS_H
+#ifndef FAR_HORIZONS_PRNG_H
+#define FAR_HORIZONS_PRNG_H
 
-// globals. ugh.
+// prng returns a random int between 1 and max, inclusive.
+// It uses the so-called "Algorithm M" method, which is a combination of the congruential and shift-register methods.
+int prng(unsigned int max);
 
-extern int correct_spelling_required;
-extern const unsigned long defaultHistoricalSeedValue;
-extern int first_pass;
-extern int post_arrival_phase;
-extern int prompt_gm;
-extern int test_mode;
-extern char upper_name[32];
-extern int verbose_mode;
+uint64_t prngGetSeed(void);
 
-#endif //FAR_HORIZONS_ENGINEVARS_H
+int prngSetSeed(uint64_t seed);
+
+#endif //FAR_HORIZONS_PRNG_H

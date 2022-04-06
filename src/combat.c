@@ -23,11 +23,13 @@
 #include <string.h>
 #include <ctype.h>
 #include "engine.h"
+#include "combat.h"
 #include "enginevars.h"
-#include "galaxy.h"
 #include "galaxyio.h"
-#include "planet.h"
+#include "log.h"
+#include "logvars.h"
 #include "planetio.h"
+#include "prng.h"
 #include "species.h"
 #include "speciesio.h"
 #include "speciesvars.h"
@@ -42,9 +44,6 @@
 #include "commandvars.h"
 #include "transaction.h"
 #include "transactionio.h"
-#include "log.h"
-#include "logvars.h"
-#include "combat.h"
 
 int ambush_took_place;
 char append_log[MAX_SPECIES];
@@ -1154,7 +1153,7 @@ int combatCommand(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
-            printf(" info: combat: last_random is %12lu\n", last_random);
+            printf(" info: combat: last_random is %12lu\n", prngGetSeed());
         } else if (strcmp(argv[i], "--combat") == 0) {
             strike_phase = FALSE;
         } else if (strcmp(argv[i], "--strike") == 0) {

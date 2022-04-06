@@ -21,9 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 #include "engine.h"
 #include "enginevars.h"
+#include "prng.h"
 
 
 /* The following routine will return a score indicating how closely two strings match.
@@ -127,12 +127,8 @@ void gamemaster_abort_option(void) {
 
 // logRandomCommand generates random numbers using the historical default seed value.
 int logRandomCommand(int argc, char *argv[]) {
-    const char *cmdName = argv[0];
-
-    // delete any seed from the environment so that we're sure our value is used
-    putenv("FH_SEED");
     // use the historical default seed value
-    last_random = defaultHistoricalSeedValue;
+    prngSetSeed(defaultHistoricalSeedValue);
     // then print out a nice set of random values
     for (int i = 0; i < 1000000; i++) {
         int r = rnd(1024 * 1024);
@@ -187,56 +183,7 @@ char *readln(char *dst, int len, FILE *fp) {
 
 
 // rnd returns a random int between 1 and max, inclusive.
-// It uses the so-called "Algorithm M" method, which is a combination
-// of the congruential and shift-register methods.
+// It uses the so-called "Algorithm M" method, which is a combination of the congruential and shift-register methods.
 int rnd(unsigned int max) {
-    static unsigned long _lastRandom; // random seed
-    // seedState 0 == uninitialized
-    // seedState 1 == initializing
-    // seedState 2 == initialized
-    static int seedState = 0;
-    unsigned long a;
-    unsigned long b;
-    unsigned long c;
-    unsigned long cong_result;
-    unsigned long shift_result;
-
-    if (seedState == 0) {
-        char *envSeed = getenv("FH_SEED");
-        seedState = 1;
-        if (envSeed != NULL) {
-            for (; *envSeed != 0; envSeed++) {
-                if (isdigit(*envSeed)) {
-                    _lastRandom = _lastRandom * 10 + *envSeed - '0';
-                }
-            }
-            if (_lastRandom == 0) {
-                _lastRandom = 1924085713L;
-            }
-            seedState = 2;
-        }
-    }
-    if (seedState == 2) {
-        last_random = _lastRandom;
-    }
-    assert(last_random != 0);
-
-    /* For congruential method, multiply previous value by the prime number 16417. */
-    a = last_random;
-    b = last_random << 5;
-    c = last_random << 14;
-    cong_result = a + b + c;    /* Effectively multiply by 16417. */
-
-    /* For shift-register method, use shift-right 15 and shift-left 17 with no-carry addition (i.e., exclusive-or). */
-    a = last_random >> 15;
-    shift_result = a ^ last_random;
-    a = shift_result << 17;
-    shift_result ^= a;
-
-    last_random = cong_result ^ shift_result;
-    _lastRandom = last_random;
-
-    a = last_random & 0x0000FFFF;
-
-    return (int) ((a * (long) max) >> 16) + 1L;
+    return prng(max);
 }
