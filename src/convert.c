@@ -45,13 +45,9 @@ static global_data_t *convertGlobalsToData(void);
 
 
 int convertCommand(int argc, char *argv[]) {
-    char *exportFile = NULL;
-    char *exportName = NULL;
-    char *exportPath = NULL;
+    char *binaryPath = ".";
     char *from = NULL;
-    char *importFile = NULL;
-    char *importName = NULL;
-    char *importPath = NULL;
+    char *jsonFile = "game.json";
     struct stat sb;
 
     for (int i = 1; i < argc; i++) {
@@ -75,20 +71,33 @@ int convertCommand(int argc, char *argv[]) {
             fprintf(stderr, " note: the path to the binary data files defaults to the current directory.\n");
             fprintf(stderr, " note: the name of the json data files defaults to 'game.json`.\n");
             return 2;
-        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+        } else if ((strcmp(opt, "-t") == 0 || strcmp(opt, "--test") == 0) && val == NULL) {
             test_mode = TRUE;
-        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+        } else if ((strcmp(opt, "-v") == 0 || strcmp(opt, "--verbose") == 0) && val == NULL) {
             verbose_mode = TRUE;
-        } else if (strcmp(opt, "--test") == 0 && val == NULL) {
-            test_mode = TRUE;
-        } else if (strcmp(opt, "--export") == 0 && val && *val) {
-            exportName = val;
+        } else if (strcmp(opt, "--binary") == 0 && val && strcmp(val, ".") == 0) {
+            binaryPath = val;
+            if (stat(binaryPath, &sb) != 0) {
+                perror("error: the path to the binary data files does not exist");
+                exit(2);
+            } else if (S_ISDIR(sb.st_mode) == 0) {
+                // import binary data files from this path
+                if (strcmp(from, "binary") == 0) {
+                    fprintf(stderr, "fh: convert: import: the binary data must be a valid path name\n");
+                    exit(2);
+                }
+            }
         } else if (strcmp(opt, "--from") == 0 && val && strcmp(val, "binary") == 0) {
             from = val;
         } else if (strcmp(opt, "--from") == 0 && val && strcmp(val, "json") == 0) {
             from = val;
-        } else if (strcmp(opt, "--import") == 0 && val && *val) {
-            importName = val;
+        } else if (strcmp(opt, "--json") == 0 && val && *val) {
+            jsonFile = val;
+            char *dot = strrchr(jsonFile, '.');
+            if (dot == NULL || dot == jsonFile || strcmp(dot, ".json") != 0) {
+                fprintf(stderr, "error: the json file name must have '.json' extension\n");
+                exit(2);
+            }
         } else {
             fprintf(stderr, "fh: convert: unknown option '%s%s%s'\n", opt, val ? "=" : "", val);
             return 2;
@@ -99,104 +108,17 @@ int convertCommand(int argc, char *argv[]) {
         fprintf(stderr, "fh: convert: you must specify the type importing from (either binary or json).\n");
         return 2;
     }
-    if (importName == NULL || *importName == 0) {
-        if (strcmp(from, "binary") == 0) {
-            importName = ".";
-        } else {
-            importName = "game.json";
-        }
-    }
-    if (exportName == NULL || *exportName == 0) {
-        if (strcmp(from, "binary") == 0) {
-            exportName = ".";
-        } else {
-            exportName = "game.json";
-        }
-    }
 
     printf(" info: converting from %s to %s\n", from, strcmp(from, "json") == 0 ? "binary" : "json");
-    printf("       importing from '%s'\n", importName);
-    printf("       exporting to   '%s'\n", exportName);
-
-    if (stat(importName, &sb) != 0) {
-        // missing the import path or file is bad
-        perror("convert: import: missing import path and/or file");
-        exit(2);
-    } else if (S_ISDIR(sb.st_mode) != 0) {
-        // import from this path
-        if (strcmp(from, "json") == 0) {
-            fprintf(stderr, "fh: convert: import: the json data must be a file, not a path name\n");
-            exit(2);
-        }
-        importPath = importName;
-    } else if (S_ISREG(sb.st_mode) != 0) {
-        // import from this file
-        if (strcmp(from, "binary") == 0) {
-            fprintf(stderr, "fh: convert: import: the binary data must be a path name, not a file name\n");
-            exit(2);
-        }
-        char *dot = strrchr(importName, '.');
-        if (dot == NULL || dot == importName && strcmp(dot, ".json") != 0) {
-            fprintf(stderr, "fh: convert: import: the json file name must have '.json' extension\n");
-            exit(2);
-        }
-        importFile = importName;
-    }
-    //fprintf(stderr, "import %s: isdir %s isreg %s\n", importName, S_ISDIR(sb.st_mode) ? "true" : "false",
-    //        S_ISREG(sb.st_mode) ? "true" : "false");
-
-    if (stat(exportName, &sb) != 0) {
-        // missing is okay only if we're exporting to json
-        if (strcmp(from, "binary") == 0) {
-            perror("convert: export: export path not found");
-            exit(2);
-        }
-    } else if (S_ISDIR(sb.st_mode) != 0) {
-        // export to this path
-        if (strcmp(from, "json") == 0) {
-            fprintf(stderr, "fh: convert: export: the json data must be a file, not a path name\n");
-            exit(2);
-        }
-        exportPath = exportName;
-    } else if (S_ISREG(sb.st_mode) != 0) {
-        // export to this file
-        if (strcmp(from, "json") == 0) {
-            fprintf(stderr, "fh: convert: export: the binary data must be a path name, not a file name\n");
-            exit(2);
-        }
-        char *dot = strrchr(exportName, '.');
-        if (dot == NULL || dot == exportName || strcmp(dot, ".json") != 0) {
-            fprintf(stderr, "fh: convert: export: the json file name must have '.json' extension\n");
-            exit(2);
-        }
-        exportFile = exportName;
-    }
-    //fprintf(stderr, "export %s: isdir %s isreg %s\n", exportName, S_ISDIR(sb.st_mode) ? "true" : "false",
-    //        S_ISREG(sb.st_mode) ? "true" : "false");
-
-
-    if (exportPath == NULL && exportFile == NULL) {
-        fprintf(stderr,
-                "convert: export argument must be either a path to the binary data files or a filename with '.json' extension\n");
-        return 2;
-    } else if (importPath == NULL && importFile == NULL) {
-        fprintf(stderr,
-                "convert: import argument must be either a path to the binary data files or a filename with '.json' extension\n");
-        return 2;
-    } else if (exportFile != NULL && importFile != NULL) {
-        fprintf(stderr, "convert: export and import can not both be JSON file names\n");
-        return 2;
-    } else if (exportPath != NULL && importPath != NULL) {
-        fprintf(stderr, "convert: export and import can not both be paths\n");
-        return 2;
+    if (strcmp(from, "binary") == 0) {
+        printf(" info: importing from '%s'\n", binaryPath);
+        printf(" info: exporting to   '%s'\n", jsonFile);
+    } else {
+        printf(" info: importing from '%s'\n", jsonFile);
+        printf(" info: exporting to   '%s'\n", binaryPath);
     }
 
-    if (verbose_mode) {
-        printf(" info: importing from '%s'\n", importName);
-        printf(" info: exporting to   '%s'\n", exportName);
-    }
-
-    if (importPath != NULL) {
+    if (strcmp(from, "binary") == 0) {
         printf("convert: importing  galaxy  data...\n");
         get_galaxy_data();
         printf("convert: importing  star    data...\n");
@@ -211,7 +133,7 @@ int convertCommand(int argc, char *argv[]) {
         printf("convert: marshaling JSON    data...\n");
         json_value_t *j = marshalGlobals(g);
         printf("convert: saving     JSON    data...\n");
-        FILE *fp = fopen(exportName, "wb");
+        FILE *fp = fopen(jsonFile, "wb");
         if (fp == NULL) {
             perror("convert: export:");
             return 2;
@@ -219,13 +141,13 @@ int convertCommand(int argc, char *argv[]) {
         int rs = json_marshal(j, 0, fp);
         fclose(fp);
         if (rs == 0) {
-            printf("convert: created export file '%s'\n", exportName);
+            printf("convert: created export file '%s'\n", jsonFile);
         }
         return rs;
     }
 
     printf("convert: importing    JSON    data...\n");
-    FILE *fp = fopen(importName, "rb");
+    FILE *fp = fopen(jsonFile, "rb");
     if (fp == NULL) {
         perror("convert: import:");
         return 2;
