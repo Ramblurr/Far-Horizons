@@ -93,6 +93,7 @@ add_executable(fh
         src/transactionio.c src/transactionio.h
         src/turn.c src/turn.h
         src/unmarshal.c src/unmarshal.h
-        src/update.c src/update.h)
+        src/update.c src/update.h
+        src/version.c src/version.h)
 
 target_link_libraries(fh ${USE_LIB_M})

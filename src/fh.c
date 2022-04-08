@@ -42,6 +42,7 @@
 #include "stats.h"
 #include "turn.h"
 #include "update.h"
+#include "version.h"
 
 
 int main(int argc, char *argv[]) {
@@ -61,9 +62,6 @@ int main(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
-        } else if (strcmp(argv[i], "--version") == 0) {
-            printf("7.9.4\n");
-            return 0;
         } else if (strcmp(argv[i], "combat") == 0) {
             return combatCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "convert") == 0) {
@@ -125,6 +123,8 @@ int main(int argc, char *argv[]) {
             return turnCommand(argc - i, argv + i);
         } else if (strcmp(argv[i], "update") == 0) {
             return updateCommand(argc - i, argv + i);
+        } else if (strcmp(argv[i], "version") == 0) {
+            return versionCommand(argc - 1, argv+1);
         } else {
             fprintf(stderr, "fh: unknown option '%s'\n", argv[i]);
             return 2;
