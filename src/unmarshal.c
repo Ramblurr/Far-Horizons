@@ -644,12 +644,20 @@ global_ship_t *unmarshalShip(json_value_t *j) {
                     exit(2);
                 }
                 ship->age = t->value->u.n;
+            } else if (strcmp(t->key, "forced_jump") == 0) {
+                ship->status = FORCED_JUMP;
+            } else if (strcmp(t->key, "in_deep_space") == 0) {
+                ship->status = IN_DEEP_SPACE;
+            } else if (strcmp(t->key, "in_orbit") == 0) {
+                ship->status = IN_ORBIT;
             } else if (strcmp(t->key, "inventory") == 0) {
                 if (!json_is_map(t->value)) {
                     fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "map");
                     exit(2);
                 }
                 ship->inventory = unmarshalInventory(t->value);
+            } else if (strcmp(t->key, "jumped_in_combat") == 0) {
+                ship->status = JUMPED_IN_COMBAT;
             } else if (strcmp(t->key, "loading_point") == 0) {
                 if (!json_is_string(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "string");
@@ -688,6 +696,8 @@ global_ship_t *unmarshalShip(json_value_t *j) {
                     exit(2);
                 }
                 strncpy(ship->name, t->value->u.s, 64);
+            } else if (strcmp(t->key, "on_surface") == 0) {
+                ship->status = ON_SURFACE;
             } else if (strcmp(t->key, "remaining_cost") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
@@ -715,6 +725,8 @@ global_ship_t *unmarshalShip(json_value_t *j) {
                     exit(2);
                 }
                 strncpy(ship->unloading_point, t->value->u.s, 32);
+            } else if (strcmp(t->key, "under_construction") == 0) {
+                ship->status = UNDER_CONSTRUCTION;
             } else {
                 fprintf(stderr, "%s: unknown key 'ship.%s'\n", __FUNCTION__, t->key);
                 exit(2);
