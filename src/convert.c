@@ -629,6 +629,10 @@ int convertDataToGlobals(global_data_t *d) {
                             ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CL : ship->class;
                             ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
                             break;
+                        case 'S':
+                            ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CS : ship->class;
+                            ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
+                            break;
                         case 'T':
                             ship->class = (p->name[2] == ' ' || p->name[2] == 'S') ? CT : ship->class;
                             ship->type = p->name[2] == ' ' ? FTL : SUB_LIGHT;
