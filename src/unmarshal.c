@@ -130,8 +130,8 @@ global_colony_t *unmarshalColony(json_value_t *j) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: colony.%s must be %s\n", __FUNCTION__, t->key, "number");
                     exit(2);
-                } else if (t->value->u.n < -1) {
-                    fprintf(stderr, "%s: colony.%s must be number greater than or equal to -1\n", __FUNCTION__,
+                } else if (t->value->u.n < 0) {
+                    fprintf(stderr, "%s: colony.%s must be number greater than or equal to 0\n", __FUNCTION__,
                             t->key);
                     exit(2);
                 }
@@ -638,8 +638,8 @@ global_ship_t *unmarshalShip(json_value_t *j) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: ship.%s must be %s\n", __FUNCTION__, t->key, "number");
                     exit(2);
-                } else if (t->value->u.n < 0) {
-                    fprintf(stderr, "%s: ship.%s must be %s greater than or equal to zero\n", __FUNCTION__, t->key,
+                } else if (t->value->u.n < -1) {
+                    fprintf(stderr, "%s: ship.%s must be %s greater than or equal to -1\n", __FUNCTION__, t->key,
                             "number");
                     exit(2);
                 }
