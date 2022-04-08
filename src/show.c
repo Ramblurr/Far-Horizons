@@ -367,6 +367,7 @@ int showHelp(void) {
     printf("       report          create end of turn reports\n");
     printf("       stats           display statistics\n");
     printf("       create          create a new galaxy, home system templates\n");
+    printf("       convert         convert between binary and json formats\n");
     printf("       export          convert binary .dat to json or s-expression\n");
     //printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
     printf("       logrnd          display a list of random values for testing the PRNG\n");
