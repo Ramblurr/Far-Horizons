@@ -549,12 +549,18 @@ global_planet_t *unmarshalPlanet(json_value_t *j) {
                     exit(2);
                 }
                 planet->gravity = t->value->u.n;
-            } else if (strcmp(t->key, "ideal_home_planet") == 0) {
+            } else if (strcmp(t->key, "ideal_colony_planet") == 0) {
                 if (!json_is_bool(t->value)) {
                     fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "boolean");
                     exit(2);
                 }
                 planet->idealColonyPlanet = t->value->u.b;
+            } else if (strcmp(t->key, "ideal_home_planet") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                planet->idealHomePlanet = t->value->u.b;
             } else if (strcmp(t->key, "md_increase") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");
@@ -593,6 +599,12 @@ global_planet_t *unmarshalPlanet(json_value_t *j) {
                     exit(2);
                 }
                 planet->pressure_class = t->value->u.n;
+            } else if (strcmp(t->key, "radioactive_hell_hole") == 0) {
+                if (!json_is_bool(t->value)) {
+                    fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "boolean");
+                    exit(2);
+                }
+                planet->radioactiveHellHole = t->value->u.b;
             } else if (strcmp(t->key, "temperature_class") == 0) {
                 if (!json_is_number(t->value)) {
                     fprintf(stderr, "%s: planet.%s must be %s\n", __FUNCTION__, t->key, "number");

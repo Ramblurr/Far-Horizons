@@ -246,12 +246,14 @@ json_value_t *marshalShip(global_ship_t *s) {
     if (s->status == FORCED_JUMP) {
         json_add(j, "forced_jump", json_boolean(1));
     }
+    if (s->status == IN_DEEP_SPACE) {
+        json_add(j, "in_deep_space", json_boolean(1));
+    }
+    if (s->status == IN_ORBIT) {
+        json_add(j, "in_orbit", json_boolean(1));
+    }
     if (s->inventory[0] != NULL) {
         json_add(j, "inventory", marshalInventory(s->inventory));
-    }
-    json_add(j, "location", marshalLocation(s->location));
-    if (s->destination.x != 0 && s->destination.y != 0 && s->destination.z != 0) {
-        json_add(j, "destination", marshalLocation(s->destination));
     }
     if (s->status == JUMPED_IN_COMBAT) {
         json_add(j, "jumped_in_combat", json_boolean(1));
@@ -259,8 +261,15 @@ json_value_t *marshalShip(global_ship_t *s) {
     if (s->just_jumped) {
         json_add(j, "just_jumped", json_boolean(1));
     }
+    json_add(j, "location", marshalLocation(s->location));
+    if (s->destination.x != 0 && s->destination.y != 0 && s->destination.z != 0) {
+        json_add(j, "destination", marshalLocation(s->destination));
+    }
     if (s->loading_point[0]) {
         json_add(j, "loading_point", json_string(s->loading_point));
+    }
+    if (s->status == ON_SURFACE) {
+        json_add(j, "on_surface", json_boolean(1));
     }
     if (s->remaining_cost) {
         json_add(j, "remaining_cost", json_number(s->remaining_cost));
