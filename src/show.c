@@ -349,37 +349,34 @@ int showGalaxyMap(void) {
 
 
 int showHelp(void) {
-    printf("usage: fh [option...] command [argument...]\n");
-    printf("  opt: --help     show this helpful text and exit\n");
-    printf("  opt: --version  display version and exit\n");
-    printf("  opt: -t         enable test mode\n");
-    printf("  opt: -v         enable verbose mode\n");
-    printf("  cmd: turn       display the current turn number\n");
-    printf("  cmd: locations  create locations data file and update\n");
-    printf("                  economic efficiency in planets data file\n");
-    printf("  cmd: combat     run combat commands\n");
-    printf("            opt:  --combat   run combat    (default)\n");
-    printf("               :  --strike   run strikes\n");
-    printf("  cmd: pre-departure\n");
-    printf("                  run pre-departure commands\n");
-    printf("  cmd: jump       run jump commands\n");
-    printf("  cmd: production\n");
-    printf("                  run production commands\n");
-    printf("  cmd: post-arrival\n");
-    printf("                  run post-arrival commands\n");
-    printf("  cmd: finish     run end of turn logic\n");
-    printf("  cmd: report     create end of turn reports\n");
-    printf("  cmd: stats      display statistics\n");
-    printf("  cmd: create     create a new galaxy, home system templates\n");
-    printf("  cmd: export     convert binary .dat to json or s-expression\n");
-    printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
-    printf("  cmd: logrnd     display a list of random values for testing the PRNG\n");
-    printf("  cmd: scan       display a species-specific scan for a location\n");
-    printf("           args:  _spNo_ _x_ _y_ _z_\n");
-    printf("  cmd: scan-near  display ships and colonies near a location\n");
-    printf("           args:  _x_ _y_ _z_ _radiusInParsecs_\n");
-    printf("  cmd: set        update values for planet, species, or star\n");
-    printf("         args:    (planet | species | star ) values\n");
+    printf("usage: fh [options...] command [arguments...]\n");
+    printf("  opt: --help          show this helpful text and exit\n");
+    printf("       -t | --test     enable test mode\n");
+    printf("       -v | --verbose  enable verbose mode\n");
+    printf("  cmd: turn            display the current turn number\n");
+    printf("       locations       create locations data file and update\n");
+    printf("                       economic efficiency in planets data file\n");
+    printf("       combat          run combat commands\n");
+    //printf("            opt:  --combat   run combat    (default)\n");
+    //printf("               :  --strike   run strikes\n");
+    printf("       pre-departure   run pre-departure commands\n");
+    printf("       jump            run jump commands\n");
+    printf("       production      run production commands\n");
+    printf("       post-arrival    run post-arrival commands\n");
+    printf("       finish          run end of turn logic\n");
+    printf("       report          create end of turn reports\n");
+    printf("       stats           display statistics\n");
+    printf("       create          create a new galaxy, home system templates\n");
+    printf("       export          convert binary .dat to json or s-expression\n");
+    //printf("           args:  (json | sexpr) galaxy | stars | planets | species | locations | transactions\n");
+    printf("       logrnd          display a list of random values for testing the PRNG\n");
+    printf("       scan            display a species-specific scan for a location\n");
+    //printf("           args:  _spNo_ _x_ _y_ _z_\n");
+    printf("       scan-near       display all ships and colonies near a location\n");
+    //printf("           args:  _x_ _y_ _z_ _radiusInParsecs_\n");
+    printf("       set             update values for planet, species, or star\n");
+    //printf("         args:    (planet | species | star ) values\n");
+    printf("       version         display version of this program\n");
 
     return 0;
 }
