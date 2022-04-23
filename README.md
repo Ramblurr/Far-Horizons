@@ -1,6 +1,6 @@
 # FAR HORIZONS
 
-*This README.md file was last updated by Raven Zachary (raven@rinzai.com) on 1 May 2021.*
+> This README is available on GitHub at [Ramblurr/Far-Horizons](https://github.com/Ramblurr/Far-Horizons/blob/main/README.md).
 
 FAR HORIZONS is a strategic role-playing game of galactic exploration, trade, diplomacy, and conquest.
 The first and second editions were designed for play by postal mail.
@@ -20,9 +20,28 @@ The seventh edition rules and source code were released in 1999 by [Rick Morneau
     so in the foreseeable future.  However, if you would like to run your own
     game, a complete source code distribution (written in ANSI C and including
     the rules) is available here.
+The code for editions 1 - 6 are not available, and likely never existed on the
+WWW.
 
 This repository contains the original source code with various bug fixes and improvements.
 There have been *no changes to the game mechanics*, and there are no immediate plans to make any.
+CHANGES
+-------
+
+Updates to this codebase have been made sporadically over the years. The
+project was imported into git in 2009 by slawcok. slawcok was part of a polish
+contigent of FH players.
+
+Since then the following folks have contributed to the codebase:
+
+* slawcok
+* rozenfeld.piotr
+* Casey Link
+* mjoyner
+* Raven Zachary
+* Michael D Henderson
+
+If you're interested in what changes have been made, see the git history.
 
 If you find a change to the game mechanics, please file a bug report on the
 [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
@@ -31,14 +50,20 @@ If you find a change to the game mechanics, please file a bug report on the
 
 You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
 
-You can also build a PDF and HTML versions of these if you have [pandoc](https://pandoc.org/) installed.
 
-    cd doc/manual
-    make
-    
-A PDF version of the manual has also been included in the doc folder.    
+* Read the manual right in your browser: [Rules in HTML](http://ramblurr.github.io/Far-Horizons/)
+* Or in PDF format: [Rules in PDF](http://ramblurr.github.io/Far-Horizons/manual.pdf)
+* Or you can find the original 7th edition rules in all their fixed-width ASCII
+  glory here: [doc/rules](doc/rules).
 
 # Change Notes
+You can also build a PDF and HTML versions (if you have docker/podman
+installed):
+
+    $ make manual
+
+BUILDING
+--------
 
 Our changes are focused on
 
