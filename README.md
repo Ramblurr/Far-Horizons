@@ -1,5 +1,6 @@
 # FAR HORIZONS
 
+*This README.md file was last updated by Raven Zachary (raven@rinzai.com) on 1 May 2021.*
 FAR HORIZONS is a strategic role-playing game of galactic exploration, trade, diplomacy, and conquest. The first and
 second editions were designed for play by postal mail. Later editions were designed for play by electronic mail. The
 seventh edition rules and source code were released in 1999 by [Rick Morneau](http://rickmor.x10.mx).
@@ -32,6 +33,8 @@ You can also build a PDF and HTML versions of these if you have [pandoc](https:/
 
     cd doc/manual
     make
+    
+A PDF version of the manual has also been included in the doc folder.    
 
 # Change Notes
 

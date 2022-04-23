@@ -35,6 +35,11 @@ venv
 *.synctex.gz
 *.toc
 *.vrb
+/.cproject
+/.project
+/.settings/
+/.pydevproject
+/original
 
 # IDE files
 .cproject/
