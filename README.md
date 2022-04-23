@@ -1,9 +1,11 @@
 # FAR HORIZONS
 
 *This README.md file was last updated by Raven Zachary (raven@rinzai.com) on 1 May 2021.*
-FAR HORIZONS is a strategic role-playing game of galactic exploration, trade, diplomacy, and conquest. The first and
-second editions were designed for play by postal mail. Later editions were designed for play by electronic mail. The
-seventh edition rules and source code were released in 1999 by [Rick Morneau](http://rickmor.x10.mx).
+
+FAR HORIZONS is a strategic role-playing game of galactic exploration, trade, diplomacy, and conquest.
+The first and second editions were designed for play by postal mail.
+Later editions were designed for play by electronic mail.
+The seventh edition rules and source code were released in 1999 by [Rick Morneau](http://rickmor.x10.mx).
 
     Far Horizons is a play-by-email strategy game that I designed several
     years ago.  In this game, each player plays the role of an intelligent
@@ -19,8 +21,8 @@ seventh edition rules and source code were released in 1999 by [Rick Morneau](ht
     game, a complete source code distribution (written in ANSI C and including
     the rules) is available here.
 
-This repository contains the original source code with various bug fixes and improvements. There have been *no changes
-to the game mechanics*, and there are no immediate plans to make any.
+This repository contains the original source code with various bug fixes and improvements.
+There have been *no changes to the game mechanics*, and there are no immediate plans to make any.
 
 If you find a change to the game mechanics, please file a bug report on the
 [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
@@ -46,35 +48,40 @@ Our changes are focused on
 * making the data files portable between 32- and 64-bit x86 machines
 * creating a single executable to reduce the dependencies on Python and Perl to run game turns
 
-The shell scripts used to compile have been replaced with a single CMakefile. This should allow the engine to build on
-Linux, Windows and Mac. Please file a bug report on the
+The shell scripts used to compile have been replaced with a single CMakefile.
+This should allow the engine to build on Linux, Windows and Mac.
+Please file a bug report on the
 [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
 if you have problems with the build on any of these systems.
 
-We refactored the source and added a common entry point for all the commands. Those changes are covered in later
-sections of this document.
+We refactored the source and added a common entry point for all the commands.
+Those changes are covered in later sections of this document.
 
-The major change to the engine has been the data structures. The original code performed some minor miracles to support
-16- and 32-bit systems. We've changed to that support 32- and 64-bit systems.
+The major change to the engine has been the data structures.
+The original code performed some minor miracles to support 16- and 32-bit systems.
+We've changed to that support 32- and 64-bit systems.
 
 The internal structures have been cleaned up to remove unused fields.
 
-New structures were created for the external data formats (the binary and JSON data files). The `get` and `save`
-functions were updated to convert between the internal and external structures when fetching and saving data.
+New structures were created for the external data formats (the binary and JSON data files).
+The `get` and `save` functions were updated to convert between the internal and external structures when fetching and saving data.
 (A few of the internal structures had new fields added to help with the conversion.)
 
-We replaced the commands used to edit data (`AsciiToBinary`, `BinaryToAscii`, and `Edit`). Gamemasters must convert the
-binary data to JSON, edit the JSON data directly, and then convert back to binary. We apologize for the inconvenience of
-the extra steps, but it simplifies the code and testing.
+We replaced the commands used to edit data (`AsciiToBinary`, `BinaryToAscii`, and `Edit`).
+Gamemasters must convert the binary data to JSON, edit the JSON data directly, and then convert back to binary.
+We apologize for the inconvenience of the extra steps, but it simplifies the code and testing.
 
-Again, we have not intentionally changed any of the game mechanics. If you find a change it is very likely a bug. Please
-file a report on the [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
+Again, we have not intentionally changed any of the game mechanics.
+If you find a change, please report it as a bug on the
+[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
+page.
 
 # Building
 
 You can build with CMake or use one of the Makefile scripts.
 
-Building with CMake requires version 3.5 or newer. We highly recommend installing `ninja-build` along with CMake.
+Building with CMake requires version 3.5 or newer.
+We highly recommend installing `ninja-build` along with CMake.
 
 If you're on a Linux machine and have checked out the `main` branch, it should be something like:
 
@@ -115,11 +122,13 @@ If you're on a Linux machine and have checked out the `main` branch, it should b
 
 All the resulting binaries are in `build/`.
 
-Compiling is never easy. Please feel free to reach out to the GitHub site if you have any questions.
+Compiling is never easy.
+Please feel free to reach out to the GitHub site if you have any questions.
 
 # Game Mastering
 
-The game has scripts to help initialize and run a game. See [tools/README.md](tools/README.md).
+The game has scripts to help initialize and run a game.
+See [tools/README.md](tools/README.md).
 
 ## Running by Hand
 
@@ -174,15 +183,15 @@ The command accepts the following options:
 * --less-crowded, optional
 * --suggest-values, optional
 
-The number of species is used to determine the number of stars in the galaxy. The number of stars is used to determine
-the radius. As a game master, you can specify the values, or let the program determine them. You can also use
-the `--suggest-values` flag to display suggested values based on the number of species.
+The number of species is used to determine the number of stars in the galaxy.
+The number of stars is used to determine the radius.
+As a game master, you can specify the values, or let the program determine them.
+You can also use the `--suggest-values` flag to display suggested values based on the number of species.
 
 The `--less-crowded` flag increases the number of stars by about 50%.
 (It has no effect if you specify the number of stars yourself.)
 
-Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter
-each other.
+Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter each other.
 
 NB: `fh create-galaxy` replaces `NewGalaxy`.
 
@@ -196,10 +205,10 @@ NB: `fh show galaxy` replaces `ShowGalaxy`.
 
 ## Create Home System Templates
 
-The `fh create-home-systems` commands creates a set of templates for home systems. The templates are
-named `homesystemN.dat` where `N` is the number of planets in the template.
-(The number ranges from 3 to 9). The command ensures that one planet in the system template is "earth-like" and will be
-a good starting point for a species.
+The `fh create-home-systems` commands creates a set of templates for home systems.
+The templates are named `homesystemN.dat` where `N` is the number of planets in the template.
+(The number ranges from 3 to 9).
+The command ensures that one planet in the system template is "earth-like" and will be a good starting point for a species.
 
 When a species is added to the game, the template is used to updated their home system.
 
@@ -224,19 +233,24 @@ The command accepts the following options:
 * --system=integer,integer,integer, optional, use the system located at x,y,z
 * --force, optional, overrides the check for radius and existing home system
 
-If the `--radius` option is given, this command searches for find a system that has at least 3 planets, is not already a
-home system, and is at least the minimum distance from any other home system. If it cannot, it reports an error and
-terminates.
+If the `--radius` option is given,
+this command searches for find a system that has at least 3 planets,
+is not already a home system,
+and is at least the minimum distance from any other home system.
+If it cannot, it reports an error and terminates.
 
-If the `--system` option is given, this command verifies that the system has at least 3 planets and is not already a
-home system. If not, it reports an error and terminates.
+If the `--system` option is given,
+this command verifies that the system has at least 3 planets and is not already a home system.
+If not, it reports an error and terminates.
 
-If both `--radius` and `--system` are specified, the command will verify that the system has at least 3 planets, is not
-already a home system, and is at least the minimum distance from any other home system. If not, it reports an error and
-terminates.
+If both `--radius` and `--system` are specified,
+the command will verify that the system has at least 3 planets,
+is not already a home system,
+and is at least the minimum distance from any other home system.
+If not, it reports an error and terminates.
 
-The system is converted to one suitable for a home system by loading the appropriate template (based on the number of
-planets in the system). The values for the planets are adjusted by small random amounts to provide some variation.
+The system is converted to one suitable for a home system by loading the appropriate template (based on the number of planets in the system).
+The values for the planets are adjusted by small random amounts to provide some variation.
 
 If there are no problems, the `planets.dat` file is updated with the new data.
 
