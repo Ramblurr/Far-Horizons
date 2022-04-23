@@ -20,52 +20,23 @@ The seventh edition rules and source code were released in 1999 by [Rick Morneau
     so in the foreseeable future.  However, if you would like to run your own
     game, a complete source code distribution (written in ANSI C and including
     the rules) is available here.
-The code for editions 1 - 6 are not available, and likely never existed on the
-WWW.
 
-This repository contains the original source code with various bug fixes and improvements.
-There have been *no changes to the game mechanics*, and there are no immediate plans to make any.
-CHANGES
--------
-
-Updates to this codebase have been made sporadically over the years. The
-project was imported into git in 2009 by slawcok. slawcok was part of a polish
-contigent of FH players.
-
-Since then the following folks have contributed to the codebase:
-
-* slawcok
-* rozenfeld.piotr
-* Casey Link
-* mjoyner
-* Raven Zachary
-* Michael D Henderson
-
-If you're interested in what changes have been made, see the git history.
-
-If you find a change to the game mechanics, please file a bug report on the
-[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
+The code for editions 1 - 6 are not available, and likely never existed on the WWW.
 
 # Rules
 
 You can find the original 7th edition ASCII rules at [doc/rules](doc/rules).
 
-
 * Read the manual right in your browser: [Rules in HTML](http://ramblurr.github.io/Far-Horizons/)
 * Or in PDF format: [Rules in PDF](http://ramblurr.github.io/Far-Horizons/manual.pdf)
-* Or you can find the original 7th edition rules in all their fixed-width ASCII
-  glory here: [doc/rules](doc/rules).
+* Or you can find the original 7th edition rules in all their fixed-width ASCII glory here: [doc/rules](doc/rules).
 
 # Change Notes
-You can also build a PDF and HTML versions (if you have docker/podman
-installed):
 
-    $ make manual
+This repository contains the original source code with various bug fixes and improvements.
 
-BUILDING
---------
-
-Our changes are focused on
+There have been *no changes to the game mechanics*, and there are no immediate plans to make any.
+Our changes are focused on:
 
 * bug fixes
 * removing compiler warnings
@@ -73,8 +44,11 @@ Our changes are focused on
 * making the data files portable between 32- and 64-bit x86 machines
 * creating a single executable to reduce the dependencies on Python and Perl to run game turns
 
+If you find a change to the game mechanics, please file a bug report on the
+[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
+
 The shell scripts used to compile have been replaced with a single CMakefile.
-This should allow the engine to build on Linux, Windows and Mac.
+This should allow the engine to build on 32- and 64-bit Linux, Windows and Mac.
 Please file a bug report on the
 [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
 if you have problems with the build on any of these systems.
@@ -100,6 +74,23 @@ Again, we have not intentionally changed any of the game mechanics.
 If you find a change, please report it as a bug on the
 [FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
 page.
+
+## History
+
+Updates to this codebase have been made sporadically over the years.
+The project was imported into git in 2009 by `slawcok`.
+`slawcok` was part of a polish contigent of FH players.
+
+Since then the following folks have contributed to the codebase:
+
+* slawcok
+* rozenfeld.piotr
+* Casey Link
+* mjoyner
+* Raven Zachary
+* Michael D Henderson
+
+If you're interested in what changes have been made, see the [git history](https://github.com/Ramblurr/Far-Horizons/).
 
 # Building
 
@@ -149,6 +140,10 @@ All the resulting binaries are in `build/`.
 
 Compiling is never easy.
 Please feel free to reach out to the GitHub site if you have any questions.
+
+You can also build a PDF and HTML versions (if you have `docker` or `podman` installed):
+
+    $ make manual
 
 # Game Mastering
 

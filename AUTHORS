@@ -1,18 +1,21 @@
 Original Far Horizons source code (C):
-Richard A. Morneau (ram@eskimo.com)
-http://www.eskimo.com/~ram/
+
+    Richard A. Morneau (ram@eskimo.com)    http://www.eskimo.com/~ram/
 
 Bug fixes and perl utilities:
-slawcok@gmail.com
-rozenfeld.piotr@gmail.com
-via http://code.google.com/p/far-horizons/
 
-GitHub repo https://github.com/Ramblurr/Far-Horizons created.
+    slawcok@gmail.com
+    rozenfeld.piotr@gmail.com   via http://code.google.com/p/far-horizons/
+
+Bug fixes and python utilites and import into github repo (https://github.com/Ramblurr/Far-Horizons):
+
+    Casey Link <unnamedrambler@gmail.com>
+
+GitHub updates:
+
   * Casey Link          - https://github.com/Ramblurr
   * Adam Piggott        - https://github.com/ProactiveServices
   * Raven Zachary       - https://github.com/ravenzachary
   * Michael D Henderson - https://github.com/mdhender
-Bug fixes and python utilites and import into github
-Casey Link <unnamedrambler@gmail.com>
 
-See README.md for more information.
+Please see the README.md for more information.
