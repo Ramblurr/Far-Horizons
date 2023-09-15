@@ -1,6 +1,6 @@
 # FAR HORIZONS
 
-> This README is available on GitHub at [Ramblurr/Far-Horizons](https://github.com/Ramblurr/Far-Horizons/blob/main/README.md).
+> This README is available on GitHub at [playbymail/Far-Horizons](https://github.com/playbymail/Far-Horizons/blob/main/README.md).
 
 FAR HORIZONS is a strategic role-playing game of galactic exploration, trade, diplomacy, and conquest.
 The first and second editions were designed for play by postal mail.
@@ -21,7 +21,7 @@ The seventh edition rules and source code were released in 1999 by [Rick Morneau
     game, a complete source code distribution (written in ANSI C and including
     the rules) is available here.
 
-The code for editions 1 - 6 are not available, and likely never existed on the WWW.
+The code for editions 1 - 6 are not available, and likely never existed on the web.
 
 # Rules
 
@@ -45,12 +45,12 @@ Our changes are focused on:
 * creating a single executable to reduce the dependencies on Python and Perl to run game turns
 
 If you find a change to the game mechanics, please file a bug report on the
-[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues).
+[FAR HORIZONS Issue Tracker](https://github.com/playbymail/Far-Horizons/issues).
 
 The shell scripts used to compile have been replaced with a single CMakefile.
 This should allow the engine to build on 32- and 64-bit Linux, Windows and Mac.
 Please file a bug report on the
-[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
+[FAR HORIZONS Issue Tracker](https://github.com/playbymail/Far-Horizons/issues)
 if you have problems with the build on any of these systems.
 
 We refactored the source and added a common entry point for all the commands.
@@ -72,7 +72,7 @@ We apologize for the inconvenience of the extra steps, but it simplifies the cod
 
 Again, we have not intentionally changed any of the game mechanics.
 If you find a change, please report it as a bug on the
-[FAR HORIZONS Issue Tracker](https://github.com/Ramblurr/Far-Horizons/issues)
+[FAR HORIZONS Issue Tracker](https://github.com/playbymail/Far-Horizons/issues)
 page.
 
 ## History
@@ -90,11 +90,11 @@ Since then the following folks have contributed to the codebase:
 * Raven Zachary
 * Michael D Henderson
 
-If you're interested in what changes have been made, see the [git history](https://github.com/Ramblurr/Far-Horizons/).
+If you're interested in what changes have been made, see the [git history](https://github.com/playbymail/Far-Horizons/).
 
 # Building
 
-You can build with CMake or use one of the Makefile scripts.
+You can build with CMake.
 
 Building with CMake requires version 3.5 or newer.
 We highly recommend installing `ninja-build` along with CMake.
@@ -113,8 +113,8 @@ If you're on a Linux machine and have checked out the `main` branch, it should b
     ~/src$ cd Far-Horizons
 
     ~/src/Far-Horizons$ git remote -v
-      origin  git@github.com:Ramblurr/Far-Horizons.git (fetch)
-      origin  git@github.com:Ramblurr/Far-Horizons.git (push)
+      origin  git@github.com:playbymail/Far-Horizons.git (fetch)
+      origin  git@github.com:playbymail/Far-Horizons.git (push)
     
     ~/src/Far-Horizons$ cd build
     
@@ -141,10 +141,6 @@ All the resulting binaries are in `build/`.
 Compiling is never easy.
 Please feel free to reach out to the GitHub site if you have any questions.
 
-You can also build a PDF and HTML versions (if you have `docker` or `podman` installed):
-
-    $ make manual
-
 # Game Mastering
 
 The game has scripts to help initialize and run a game.
@@ -156,7 +152,6 @@ See [tools/README.md](tools/README.md).
 
 ```bash
 mkdir gamma
-cp examples/farhorizons.cfg gamma/
 cp examples/noorders.txt gamma/
 cp examples/species.cfg gamma/
 cd gamma
