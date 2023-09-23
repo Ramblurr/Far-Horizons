@@ -403,16 +403,20 @@ int createSpeciesCommand(int argc, char *argv[]) {
             star_data_t *star = star_base + s;
             for (int p = 0; p < star->num_planets; p++) {
                 planet_data_t *planet = planet_base + star->planet_index + p;
-                if (planet->special == HOME_PLANET) {
-                    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
-                        species_data_t *sp = &spec_data[spidx];
-                        if (sp->x == star->x && sp->y == star->y && sp->z == star->z) {
-                            // would be cruel to have two species share a system
-                            break;
-                        }
-                        candidateSystems[numCandidates++] = star;
+                if (planet->special != HOME_PLANET) {
+                    continue;
+                }
+                species_data_t *claimedBy = NULL;
+                for (int spidx = 0; spidx < galaxy.num_species && claimedBy == NULL; spidx++) {
+                    species_data_t *sp = &spec_data[spidx];
+                    if (sp->x == star->x && sp->y == star->y && sp->z == star->z) {
+                        // would be cruel to have two species share a system
+                        claimedBy = sp;
                     }
-                    break;
+                }
+                if (claimedBy == NULL) {
+                    // printf("%s:%d: unclaimed system: %d,%d,%d\n", __FUNCTION__, __LINE__, star->x, star->y, star->z);
+                    candidateSystems[numCandidates++] = star;
                 }
             }
         }
