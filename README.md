@@ -108,7 +108,7 @@ If you're on a Linux machine and have checked out the `main` branch, it should b
     ~/src$ cmake --version
       cmake version 3.5.1
     
-    ~/src$ git clone https://github.com/Ramblurr/Far-Horizons.git
+    ~/src$ git clone https://github.com/playbymail/Far-Horizons.git
 
     ~/src$ cd Far-Horizons
 
@@ -148,7 +148,23 @@ See [tools/README.md](tools/README.md).
 
 ## Running by Hand
 
-### Example: Creating a New Galaxy
+This application uses a built-in psuedo-random number generator (PRNG)
+that required you to set and export a random seed value.
+You do that by running something like:
+
+```bash
+export FH_SEED=$RANDOM
+```
+
+You must do this before every command.
+If you don't, each command will start with the same seed value.
+
+Why?
+Why would we do this?
+It's a hack that allows game-masters to re-run a turn and get identical results.
+There's an item on the "to do" list to make a random seed the default and still allow testers to specify their own seed.
+
+### Creating a New Galaxy
 
 ```bash
 mkdir gamma
@@ -164,19 +180,18 @@ FH_SEED=$RANDOM ../build/fh report
 FH_SEED=$RANDOM ../build/fh stats
 ```
 
-### Example: Running a Turn
+### Running a Turn
 
 ```bash
 FH_SEED=$RANDOM ../build/fh turn
-FH_SEED=$RANDOM ../build/fhorders
 FH_SEED=$RANDOM ../build/fh locations
-FH_SEED=$RANDOM ../build/fhcombat
+FH_SEED=$RANDOM ../build/fh combat
 FH_SEED=$RANDOM ../build/fh pre-departure
 FH_SEED=$RANDOM ../build/fh jump
 FH_SEED=$RANDOM ../build/fh production
 FH_SEED=$RANDOM ../build/fh post-arrival
 FH_SEED=$RANDOM ../build/fh locations
-FH_SEED=$RANDOM ../build/fhcombat --strike
+FH_SEED=$RANDOM ../build/fh combat --strike
 FH_SEED=$RANDOM ../build/fh finish
 FH_SEED=$RANDOM ../build/fh report
 FH_SEED=$RANDOM ../build/fh stats
@@ -208,7 +223,7 @@ The `--less-crowded` flag increases the number of stars by about 50%.
 
 Increasing the number of stars tends to slow the pace of the game since it will take longer for species to encounter each other.
 
-NB: `fh create-galaxy` replaces `NewGalaxy`.
+NB: `fh create galaxy` replaces `NewGalaxy`.
 
 ## Show Galaxy
 
@@ -220,14 +235,17 @@ NB: `fh show galaxy` replaces `ShowGalaxy`.
 
 ## Create Home System Templates
 
-The `fh create-home-systems` commands creates a set of templates for home systems.
+The `fh create home-systems` command creates a set of templates for home systems.
 The templates are named `homesystemN.dat` where `N` is the number of planets in the template.
 (The number ranges from 3 to 9).
 The command ensures that one planet in the system template is "earth-like" and will be a good starting point for a species.
 
-When a species is added to the game, the template is used to updated their home system.
+When a species is added to the game,
+they are assigned an unclaimed home system.
+The template that matches the number of planets in the system is used to update resources in the system.
+The actual values are randomly tweaked to prevent all the systems from looking the same.
 
-NB: `fh create-home-systems` replaces `MakeHomes`.
+NB: `fh create home-systems` replaces `MakeHomes`.
 
 # List Galaxy
 
@@ -241,6 +259,9 @@ The command accepts the following options:
 NB: `fh list galaxy` replaces `ListGalaxy`.
 
 ## Make Home System
+
+The `fh update home-system` sets the "home system" flag on a system.
+That flag is used when adding new species to a galaxy.
 
 The command accepts the following options:
 
@@ -271,41 +292,90 @@ If there are no problems, the `planets.dat` file is updated with the new data.
 
 NB: `fh update home-system` replaces `MakeHomeSystem` and `MakeHomeSystemAuto`.
 
+NB: The `fh create species` command automatically creates new home systems as needed,
+so this command is useful only if you wish to specify the location of home systems.
+(For example, if you're adding a new player in an existing game.)
+
 ## Add Species
 
-NB: `?` replaces `AddSpeciesAuto`.
+The `fh create species` adds new players to a galaxy.
+
+The command accepts the following options:
+
+* --config=text, required, name of config file to process
+
+It searches the galaxy for unclaimed home systems and assigns one randomly to the new player.
+(If there are no unclaimed home systems, it will attempt to generate a new one and use it.)
+
+The `--config` option is required.
+It is the name of the configuration file containing the new species data.
+
+The command will fail if a species already exists.
+
+NB: `fh create species` replaces `AddSpeciesAuto`.
+
+## Update Turn
+
+The `fh turn` command updates the current turn number.
+
+## Update Location
+
+The `fh location` command updates the location of all ships in the galaxy.
 
 ## Process Combat Commands
+
+The `fh combat` command runs orders from the COMBAT section.
 
 NB: `fh combat` replaces `Combat`.
 
 ## Process Pre-Departure Commands
 
+The `fh pre-departure` command runs orders from the PRE-DEPARTURE section. 
+
 NB: `fh pre-departure` replaces `PreDep`.
 
 ## Process Jump Commands
+
+The `fh jump` command runs orders from the JUMP section.
 
 NB: `fh jump` replaces `Jump`.
 
 ## Process Production Commands
 
+The `fh production` command runs orders from the PRODUCTION section.
+
 NB: `fh production` replaces `Production`.
 
 ## Process Post-Arrival Commands
+
+The `fh post-arrival` command runs orders from the POST-ARRIVAL section.
 
 NB: `fh post-arrival` replaces `PostArrival`.
 
 ## Process Strike Commands
 
+The `fh combat --strike` command runs orders from the STRIKE section.
+
 NB: `fh combat --strike` replaces `Strike`.
 
 ## Finish Turn
+
+The `fh finish` command completes turn processing.
+It updates statistics, materials, damage, and locations for all planets and ships.
 
 NB: `fh finish` replaces `Finish`.
 
 ## Generate Turn Reports
 
+The `fh report` command creates a report from the current data.
+
+If you run it before running `fh finish`, you may see inconsistent values.
+
 NB: `fh report` replaces `Report`.
+
+## Stats
+
+The `fh stats` command displays current statistics.
 
 # License
 
