@@ -418,6 +418,43 @@ int reportCommand(int argc, char *argv[]) {
     struct ship_data *ship, *ship2, *alien_ship;
     struct sp_loc_data *locations_base, *my_loc, *its_loc;
 
+    // consolidate logic for reporting and logging flags
+    // by default, log and report on all species
+    int logSpecies = 1;
+    int reportSpecies[MAX_SPECIES+1];
+    for (j = 0; j <= MAX_SPECIES; j++) {
+        reportSpecies[j] = 1;
+    }
+
+    // process the arguments and reset flags as needed
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-?") == 0) {
+            fprintf(stderr, "usage: report [--skip-log] [list-of-species]\n");
+            fprintf(stderr, "\t--skip-log       do not include prior turn results in report\n");
+            fprintf(stderr, "\tlist-of-species  you may specify individual species numbers to report on\n");
+            return 2;
+        } else if (strcmp(argv[i], "--skip-log") == 0) {
+            // turn off logging for all species
+            logSpecies = 0;
+        } else { // should be the species to report
+            int speciesNo = atoi(argv[i]);
+            if (speciesNo < 1 || speciesNo > MAX_SPECIES) {
+                fprintf(stderr, "error: unknown species '%s'\n", argv[i]);
+                return 2;
+            } else {
+                // ugly hack to reset the flags.
+                if (reportSpecies[0] == 1) {
+                    // reset the flags because we're not reporting on all
+                    for (j = 0; j <= MAX_SPECIES; j++) {
+                        reportSpecies[j] = 0;
+                    }
+                }
+                // set the flag for this species
+                reportSpecies[speciesNo] = 1;
+            }
+        }
+    }
+
     /* Get all necessary data. */
     printf("fh: %s: loading   galaxy   file...\n", cmdName);
     get_galaxy_data();
@@ -436,18 +473,8 @@ int reportCommand(int argc, char *argv[]) {
     int alien_number = 0;    /* Pointers to alien data not yet assigned. */
     for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
         /* Check if we are doing all species, or just one or more specified ones. */
-        if (argc > 1) {
-            int do_this_species = FALSE;
-            for (i = 1; i < argc; i++) {
-                j = atoi(argv[i]);
-                if (species_number == j) {
-                    do_this_species = TRUE;
-                    break;
-                }
-            }
-            if (!do_this_species) {
-                continue;
-            }
+        if (reportSpecies[species_number] != 1) {
+            continue;
         }
 
         /* Check if this species is still in the game. */
@@ -483,20 +510,22 @@ int reportCommand(int argc, char *argv[]) {
         }
 
         /* Copy log file, if any, to output file. */
-        sprintf(filename, "sp%02d.log", species_number);
-        log_file = fopen(filename, "r");
-        if (log_file != NULL) {
-            if (turn_number > 1) {
-                fprintf(report_file, "\n\n\t\t\tEVENT LOG FOR TURN %d\n", turn_number - 1);
+        if (logSpecies == 1) {
+            sprintf(filename, "sp%02d.log", species_number);
+            log_file = fopen(filename, "r");
+            if (log_file != NULL) {
+                if (turn_number > 1) {
+                    fprintf(report_file, "\n\n\t\t\tEVENT LOG FOR TURN %d\n", turn_number - 1);
+                }
+
+                while (readln(log_line, 256, log_file) != NULL) {
+                    fputs(log_line, report_file);
+                }
+
+                fprintf(report_file, "\n\n");
+
+                fclose(log_file);
             }
-
-            while (readln(log_line, 256, log_file) != NULL) {
-                fputs(log_line, report_file);
-            }
-
-            fprintf(report_file, "\n\n");
-
-            fclose(log_file);
         }
 
         /* Print header for status report. */
