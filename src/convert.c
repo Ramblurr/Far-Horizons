@@ -167,7 +167,7 @@ int convertCommand(int argc, char *argv[]) {
     int rs = convertDataToGlobals(d);
 
     printf("convert: saving       galaxy  data...\n");
-    save_galaxy_data();
+    save_galaxy_data(&galaxy);
     printf("convert: saving       star    data...\n");
     save_star_data();
     printf("convert: saving       planet  data...\n");

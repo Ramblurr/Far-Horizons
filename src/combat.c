@@ -1153,6 +1153,7 @@ int combatCommand(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
+            // todo: warning: format specifies type 'unsigned long' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
             printf(" info: combat: last_random is %12lu\n", prngGetSeed());
         } else if (strcmp(argv[i], "--combat") == 0) {
             strike_phase = FALSE;

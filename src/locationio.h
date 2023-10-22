@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include "location.h"
+#include "cJSON.h"
 
 void get_location_data(void);
 
@@ -30,6 +31,10 @@ void locationDataAsJson(FILE *fp);
 void locationDataAsSExpr(FILE *fp);
 
 void save_location_data(void);
+
+cJSON *locationsDataToJson(sp_loc_data_t *locData, int numLocations);
+
+cJSON *locationToJson(sp_loc_data_t *loc);
 
 // globals. ugh.
 

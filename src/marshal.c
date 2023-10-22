@@ -406,7 +406,7 @@ json_value_t *marshalSpecies(global_species_t **s) {
 json_value_t *marshalSystem(global_system_t *s) {
     json_value_t *j = json_map();
     json_add(j, "id", json_number(s->id));
-    global_location_t l = {.x =  s->coords.x, y: s->coords.y, z: s->coords.z};
+    global_location_t l = {.x =  s->coords.x, .y= s->coords.y, .z= s->coords.z};
     json_add(j, "coords", marshalLocation(l));
     switch (s->type) {
         case DEGENERATE:

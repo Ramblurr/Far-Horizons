@@ -32,6 +32,9 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp);
 
 void starDataAsSExpr(star_data_t *starBase, int numStars, FILE *fp);
 
+cJSON *starsDataToJson(star_data_t *starBase, int numStars);
+
+cJSON *starToJson(star_data_t *sd, int id);
 
 // globals. ugh.
 

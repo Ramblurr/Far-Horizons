@@ -799,6 +799,7 @@ void gc_mark(sexpr_atom_t root) {
     if (a->mark) {
         return;
     }
+    // warning: implicit truncation from 'int' to a one-bit wide bit-field changes value from 1 to -1 [-Wsingle-bit-bitfield-constant-conversion]
     a->mark = 1;
     gc_mark(car(root));
     gc_mark(cdr(root));

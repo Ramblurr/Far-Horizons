@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include "ship.h"
+#include "cJSON.h"
 
 struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp);
 
@@ -30,5 +31,9 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp);
 void shipDataAsJson(int spNo, struct ship_data *shipData, int num_ships, FILE *fp);
 
 void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *fp);
+
+cJSON *shipsDataToJson(ship_data_t *shipData, int numShips);
+
+cJSON *shipToJson(ship_data_t *sd, int id);
 
 #endif //FAR_HORIZONS_SHIPIO_H

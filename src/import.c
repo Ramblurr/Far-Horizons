@@ -28,10 +28,15 @@
 #include "import.h"
 #include "json.h"
 #include "unmarshal.h"
+#include "cjson/cJSON.h"
+#include "planetio.h"
+#include "speciesio.h"
+#include "stario.h"
 
 
 static int importData(FILE *fp);
 
+static int importFromJson(int argc, char *argv[]);
 
 int importCommand(int argc, char *argv[]) {
     char *importFileName = NULL;
@@ -52,37 +57,21 @@ int importCommand(int argc, char *argv[]) {
 
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
             fprintf(stderr, "usage: import options...\n");
-            fprintf(stderr, "  opt: --file=string   name of file to import\n");
+            fprintf(stderr, "  opt: --galaxy=string   name of galaxy JSON file to import\n");
             return 2;
         } else if (strcmp(opt, "-v") == 0 && val == NULL) {
             verbose_mode = TRUE;
         } else if (strcmp(opt, "--test") == 0 && val == NULL) {
             test_mode = TRUE;
-        } else if (strcmp(opt, "--file") == 0 && val && *val) {
-            importFileName = val;
+        } else if (strcmp(opt, "json") == 0 && val == NULL) {
+            return importFromJson(argc - i, argv + i);
         } else {
             fprintf(stderr, "import: unknown option '%s%s%s'\n", opt, val ? "=" : "", val);
             return 2;
         }
     }
 
-    if (importFileName == NULL || *importFileName == 0) {
-        fprintf(stderr, "error: you must supply the file name to import from\n");
-        return 2;
-    }
-    if (verbose_mode) {
-        printf(" info: importing '%s'\n", importFileName);
-    }
-
-    FILE *fp = fopen(importFileName, "rb");
-    if (fp == NULL) {
-        perror("importCommand: ");
-        exit(2);
-    }
-
-    int rs = importData(fp);
-    fclose(fp);
-    return rs;
+    return 0;
 }
 
 
@@ -103,4 +92,104 @@ int importData(FILE *fp) {
     return 0;
 }
 
+int importFromJson(int argc, char *argv[]) {
+    int loadAnything = 0;
+    int loadGalaxy = 0;
+    int loadLocations = 0;
+    int loadPlanets = 0;
+    int loadSpecies = 0;
+    int loadStars = 0;
+    int loadTransactions = 0;
 
+    for (int i = 1; i < argc; i++) {
+        char *opt = argv[i];
+        char *val = NULL;
+        for (val = opt; *val != 0; val++) {
+            if (*val == '=') {
+                *val = 0;
+                val++;
+                break;
+            }
+        }
+        if (*val == 0) {
+            val = NULL;
+        }
+
+        if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
+            fprintf(stderr, "usage: import json globals\n");
+            return 2;
+        } else if (strcmp(opt, "-t") == 0 && val == NULL) {
+            test_mode = TRUE;
+        } else if (strcmp(opt, "-v") == 0 && val == NULL) {
+            verbose_mode = TRUE;
+        } else if (strcmp(opt, "galaxy") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadGalaxy = 1;
+        } else if (strcmp(opt, "locations") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadLocations = 1;
+        } else if (strcmp(opt, "planets") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadPlanets = 1;
+        } else if (strcmp(opt, "species") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadSpecies = 1;
+        } else if (strcmp(opt, "stars") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadStars = 1;
+        } else if (strcmp(opt, "transactions") == 0 && val == NULL) {
+            loadAnything = 1;
+            loadTransactions = 1;
+        } else {
+            fprintf(stderr, "fh: import: json: unknown option '%s'\n", argv[i]);
+            return 2;
+        }
+    }
+
+    if (!loadAnything) {
+        printf(" info: nothing to import\n");
+        return 0;
+    }
+
+    printf("fh: import: json: loading   galaxy  data...\n");
+    get_galaxy_data();
+    printf("fh: import: json: loading   star    data...\n");
+    get_star_data();
+    printf("fh: import: json: loading   planet  data...\n");
+    get_planet_data();
+    printf("fh: import: json: loading   species data...\n");
+    get_species_data();
+
+    galaxy_data_t *gd = 0;
+    if (loadGalaxy) {
+        printf("fh: import: json: importing galaxy data...\n");
+        cJSON *js = jsonParseFile("galaxy.json");
+        if (js == 0) {
+            fprintf(stderr, "fh: import: json: galaxy: error\n");
+            return 2;
+        }
+        gd = galaxyDataFromJson(js);
+        if (gd == 0) {
+            fprintf(stderr, "fh: import: json: galaxy: error\n");
+            return 2;
+        }
+    }
+
+    if (verbose_mode) {
+        printf(" info: done importing\n");
+    }
+    if (test_mode) {
+        printf(" info: test mode, not saving changes\n");
+        return 0;
+    }
+
+    if (verbose_mode) {
+        printf(" info: saving changes...\n");
+    }
+    if (gd != 0) {
+        save_galaxy_data(gd);
+        printf(" info: saved galaxy changes...\n");
+    }
+
+    return 2;
+}

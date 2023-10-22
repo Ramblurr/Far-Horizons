@@ -25,6 +25,7 @@
 #include "planet.h"
 #include "planetio.h"
 #include "stario.h"
+#include "json.h"
 
 int num_planets;
 
@@ -50,7 +51,8 @@ void get_planet_data(void) {
         exit(-1);
     }
     /* Allocate enough memory for all planets. */
-    planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets + NUM_EXTRA_PLANETS, sizeof(binary_planet_data_t));
+    planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets + NUM_EXTRA_PLANETS,
+                                                  sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d + %d planet entries\n\n", numPlanets, NUM_EXTRA_PLANETS);
@@ -65,7 +67,8 @@ void get_planet_data(void) {
 
     num_planets = numPlanets;
     /* Allocate enough memory for all planets. */
-    planet_base = (struct planet_data *) ncalloc(__FUNCTION__, __LINE__, num_planets + NUM_EXTRA_PLANETS, sizeof(struct planet_data));
+    planet_base = (struct planet_data *) ncalloc(__FUNCTION__, __LINE__, num_planets + NUM_EXTRA_PLANETS,
+                                                 sizeof(struct planet_data));
     if (planet_base == NULL) {
         perror("get_planet_data");
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n\n");
@@ -128,7 +131,8 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     }
 
     // allocate enough memory for all records
-    binary_planet_data_t *rawRecords = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_planet_data_t));
+    binary_planet_data_t *rawRecords = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords,
+                                                                        sizeof(binary_planet_data_t));
     if (rawRecords == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n", filename);
         exit(-1);
@@ -145,7 +149,8 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     if (extraRecords < 0) {
         extraRecords = 0;
     }
-    planet_data_t *planetBase = (planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords + extraRecords + 1, sizeof(planet_data_t));
+    planet_data_t *planetBase = (planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords + extraRecords + 1,
+                                                          sizeof(planet_data_t));
     if (planet_base == NULL) {
         perror("get_planet_data");
         fprintf(stderr, "\nCannot allocate enough memory for planet file '%s'!\n\n", filename);
@@ -230,11 +235,72 @@ void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
     fprintf(fp, ")\n");
 }
 
+// planetsDataToJson translates the current planet_base array to JSON.
+cJSON *planetsDataToJson(planet_data_t *planetBase, int numPlanets) {
+    cJSON *root = cJSON_CreateArray();
+    if (root == 0) {
+        perror("planetDataToJson: unable to allocate root");
+        exit(2);
+    }
+    for (int i = 0; i < numPlanets; i++) {
+        int id = i + 1;
+        if (!cJSON_AddItemToArray(root, planetToJson(&planetBase[i], id))) {
+            perror("planetDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return root;
+
+}
+
+cJSON *planetToJson(planet_data_t *planet, int id) {
+    char *objName = "planetToJson";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "id", id);
+    jsonAddIntToObj(obj, objName, "diameter", planet->diameter);
+    jsonAddIntToObj(obj, objName, "gravity", planet->gravity);
+    jsonAddIntToObj(obj, objName, "temperature_class", planet->temperature_class);
+    jsonAddIntToObj(obj, objName, "pressure_class", planet->pressure_class);
+    jsonAddIntToObj(obj, objName, "special", planet->special);
+    cJSON *gases = cJSON_AddArrayToObject(obj, "gases");
+    if (gases == 0) {
+        fprintf(stderr, "%s: unable to allocate gases property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int j = 0; j < 4; j++) {
+        cJSON *gas = cJSON_AddObjectToObject(gases, "gases");
+        if (gas == NULL) {
+            fprintf(stderr, "%s: unable to allocate gas property\n", objName);
+            perror("cJSON_AddObjectToObject");
+            exit(2);
+        }
+        jsonAddIntToObj(gas, "gases", "code", planet->gas[j]);
+        jsonAddIntToObj(gas, "gases", "percent", planet->gas_percent[j]);
+    }
+    cJSON *miningDifficulty = cJSON_AddObjectToObject(obj, "mining_difficulty");
+    if (miningDifficulty == 0) {
+        fprintf(stderr, "%s: unable to allocate mining_difficulty property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "base", planet->mining_difficulty);
+    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "increase", planet->md_increase);
+    jsonAddIntToObj(obj, objName, "econ_efficiency", planet->econ_efficiency);
+    jsonAddIntToObj(obj, objName, "message", planet->message);
+    return obj;
+}
 
 void save_planet_data(void) {
     FILE *fp;
     int32_t numPlanets = num_planets;
-    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets, sizeof(binary_planet_data_t));
+    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets,
+                                                                        sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "\nCannot allocate enough memory for planet file!\n");
         fprintf(stderr, "\n\tattempted to allocate %d planet entries\n\n", numPlanets);
@@ -287,7 +353,8 @@ void save_planet_data(void) {
 
 void savePlanetData(planet_data_t *planetBase, int numPlanets, const char *filename) {
     int32_t numRecords = numPlanets;
-    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords, sizeof(binary_planet_data_t));
+    binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numRecords,
+                                                                        sizeof(binary_planet_data_t));
     if (planetData == NULL) {
         fprintf(stderr, "error: cannot allocate enough memory for planet file '%s'!\n", filename);
         fprintf(stderr, "       attempted to allocate %d planet records\n", numRecords);

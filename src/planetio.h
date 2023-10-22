@@ -21,6 +21,7 @@
 #define FAR_HORIZONS_PLANETIO_H
 
 #include "planet.h"
+#include "cJSON.h"
 
 void get_planet_data(void);
 
@@ -29,6 +30,10 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename);
 void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp);
 
 void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp);
+
+cJSON *planetsDataToJson(planet_data_t *planetBase, int numPlanets);
+
+cJSON *planetToJson(planet_data_t *planet, int id);
 
 void save_planet_data(void);
 

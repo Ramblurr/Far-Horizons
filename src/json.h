@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "cJSON.h"
 
 
 typedef struct json_value {
@@ -96,5 +97,17 @@ int json_is_string(json_value_t *j);
 
 int json_is_undefined(json_value_t *j);
 
+
+cJSON *jsonParseFile(char *name);
+
+void jsonWriteFile(cJSON *root, char *kind, char *name);
+
+void jsonAddIntToArray(cJSON *array, char *arrayName, int value);
+
+void jsonAddBoolToObj(cJSON *obj, char *objName, char *propName, int value);
+
+void jsonAddIntToObj(cJSON *obj, char *objName, char *propName, int value);
+
+void jsonAddStringToObj(cJSON *obj, char *objName, char *propName, char *value);
 
 #endif //FAR_HORIZONS_JSON_H

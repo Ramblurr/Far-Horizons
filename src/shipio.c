@@ -25,6 +25,7 @@
 #include "ship.h"
 #include "shipio.h"
 #include "item.h"
+#include "json.h"
 
 
 /* load ship data from file and create empty slots for future use */
@@ -206,4 +207,80 @@ void shipDataAsSExpr(int spNo, struct ship_data *shipData, int num_ships, FILE *
         fprintf(fp, "))");
     }
     fprintf(fp, ")\n");
+}
+
+cJSON *shipsDataToJson(ship_data_t *shipData, int numShips) {
+    char *arrayName = "ships";
+    cJSON *array = cJSON_CreateArray();
+    if (array == 0) {
+        fprintf(stderr, "%s: unable to allocate array\n", arrayName);
+        perror("cJSON_CreateArray");
+        exit(2);
+    }
+    for (int i = 0; i < numShips; i++) {
+        int id = i + 1;
+        if (!cJSON_AddItemToArray(array, shipToJson(&shipData[i], id))) {
+            perror("namedPlanetsDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return array;
+}
+
+cJSON *shipToJson(ship_data_t *sd, int id) {
+    char *objName = "ship";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+
+    jsonAddIntToObj(obj, objName, "id", id);
+    jsonAddStringToObj(obj, objName, "name", sd->name);
+    cJSON *location = cJSON_AddObjectToObject(obj, "location");
+    if (location == 0) {
+        fprintf(stderr, "%s: unable to allocate location property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(location, "location.x", "x", sd->x);
+    jsonAddIntToObj(location, "location.y", "y", sd->y);
+    jsonAddIntToObj(location, "location.z", "z", sd->z);
+    jsonAddIntToObj(location, "location.orbit", "orbit", sd->pn);
+    jsonAddIntToObj(location, "location.status", "status", sd->status);
+    cJSON *destination = cJSON_AddObjectToObject(obj, "destination");
+    if (destination == 0) {
+        fprintf(stderr, "%s: unable to allocate destination property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(destination, "destination.x", "x", sd->dest_x);
+    jsonAddIntToObj(destination, "destination.y", "y", sd->dest_y);
+    jsonAddIntToObj(destination, "destination.z", "z", sd->dest_z);
+    jsonAddIntToObj(obj, objName, "age", sd->age);
+    jsonAddBoolToObj(obj, objName, "arrived_via_wormhole", sd->arrived_via_wormhole);
+    jsonAddIntToObj(obj, objName, "class", sd->class);
+    jsonAddBoolToObj(obj, objName, "just_jumped", sd->just_jumped);
+    jsonAddIntToObj(obj, objName, "just_jumped_val", sd->just_jumped);
+    jsonAddIntToObj(obj, objName, "loading_point", sd->loading_point);
+    jsonAddIntToObj(obj, objName, "remaining_cost", sd->remaining_cost);
+    jsonAddIntToObj(obj, objName, "tonnage", sd->tonnage);
+    jsonAddIntToObj(obj, objName, "type", sd->type);
+    jsonAddIntToObj(obj, objName, "unloading_point", sd->unloading_point);
+    cJSON *cargo = cJSON_AddArrayToObject(obj, "cargo");
+    if (cargo == 0) {
+        fprintf(stderr, "%s: unable to allocate cargo property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int j = 0; j < MAX_ITEMS; j++) {
+        if (sd->item_quantity[j] > 0) {
+            cJSON *item = cJSON_CreateObject();
+            jsonAddIntToObj(item, "cargo.code", "code", j);
+            jsonAddIntToObj(item, "cargo.qty", "qty", sd->item_quantity[j]);
+            cJSON_AddItemToArray(cargo, item);
+        }
+    }
+    return obj;
 }

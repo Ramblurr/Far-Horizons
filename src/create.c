@@ -621,7 +621,7 @@ int createSpeciesCommand(int argc, char *argv[]) {
     }
 
     // save the updated data
-    save_galaxy_data();
+    save_galaxy_data(&galaxy);
     FILE *fp = fopen("galaxy.hs.txt", "wb");
     if (fp == NULL) {
         perror("changeSystemToHomeSystem:");

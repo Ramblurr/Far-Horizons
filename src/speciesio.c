@@ -32,6 +32,7 @@
 #include "namplavars.h"
 #include "shipio.h"
 #include "shipvars.h"
+#include "json.h"
 
 
 int data_in_memory[MAX_SPECIES];
@@ -362,3 +363,131 @@ void speciesDataAsSExpr(species_data_t *sp, FILE *fp) {
     fprintf(fp, ")\n");
 }
 
+cJSON *speciesToJson(species_data_t *sp) {
+    char *objName = "speciesToJson";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "id", sp->id);
+    jsonAddIntToObj(obj, objName, "sp_no", sp->id);
+    jsonAddStringToObj(obj, objName, "name", sp->name);
+    jsonAddIntToObj(obj, objName, "auto", sp->auto_orders);
+    cJSON *government = cJSON_AddObjectToObject(obj, "government");
+    if (government == 0) {
+        fprintf(stderr, "%s: unable to allocate government property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddStringToObj(government, "government", "name", sp->govt_name);
+    jsonAddStringToObj(government, "government", "type", sp->govt_type);
+    cJSON *home_world = cJSON_AddObjectToObject(obj, "home_world");
+    if (home_world == 0) {
+        fprintf(stderr, "%s: unable to allocate home_world property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(home_world, "home_world", "x", sp->x);
+    jsonAddIntToObj(home_world, "home_world", "y", sp->y);
+    jsonAddIntToObj(home_world, "home_world", "z", sp->z);
+    jsonAddIntToObj(home_world, "home_world", "orbit", sp->pn);
+    jsonAddIntToObj(home_world, "home_world", "hp_base", sp->hp_original_base);
+    cJSON *atmosphere = cJSON_AddObjectToObject(obj, "atmosphere");
+    if (atmosphere == 0) {
+        fprintf(stderr, "%s: unable to allocate atmosphere property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    cJSON *required = cJSON_AddObjectToObject(atmosphere, "required");
+    if (required == 0) {
+        fprintf(stderr, "%s: unable to allocate atmosphere.required property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(required, "atmosphere.required", "gas", sp->required_gas);
+    jsonAddIntToObj(required, "atmosphere.required", "min", sp->required_gas_min);
+    jsonAddIntToObj(required, "atmosphere.required", "max", sp->required_gas_max);
+    cJSON *neutral = cJSON_AddArrayToObject(atmosphere, "neutral");
+    if (neutral == 0) {
+        fprintf(stderr, "%s: unable to allocate atmosphere.neutral property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int j = 0; j < 6; j++) {
+        jsonAddIntToArray(neutral, "atmosphere.neutral", sp->neutral_gas[j]);
+    }
+    cJSON *poison = cJSON_AddArrayToObject(atmosphere, "poison");
+    if (poison == 0) {
+        fprintf(stderr, "%s: unable to allocate atmosphere.poison property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int j = 0; j < 6; j++) {
+        jsonAddIntToArray(poison, "atmosphere.poison", sp->poison_gas[j]);
+    }
+    cJSON *technology = cJSON_AddObjectToObject(obj, "technology");
+    if (technology == 0) {
+        fprintf(stderr, "%s: unable to allocate technology property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    for (int j = 0; j < 6; j++) {
+        cJSON *named = cJSON_AddObjectToObject(technology, tech_level_names[j]);
+        if (named == 0) {
+            fprintf(stderr, "%s: unable to allocate technology.%s property\n", objName, tech_level_names[j]);
+            perror("cJSON_AddObjectToObject");
+            exit(2);
+        }
+        jsonAddIntToObj(named, "technology", "level", sp->tech_level[j]);
+        jsonAddIntToObj(named, "technology", "knowledge", sp->tech_knowledge[j]);
+        jsonAddIntToObj(named, "technology", "init", sp->init_tech_level[j]);
+        jsonAddIntToObj(named, "technology", "xp", sp->tech_eps[j]);
+    }
+    jsonAddIntToObj(obj, objName, "num_namplas", sp->num_namplas);
+    jsonAddIntToObj(obj, objName, "num_ships", sp->num_ships);
+    cJSON *fleet_maintenance = cJSON_AddObjectToObject(obj, "fleet_maintenance");
+    if (fleet_maintenance == 0) {
+        fprintf(stderr, "%s: unable to allocate fleet_maintenance property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(fleet_maintenance, "fleet_maintenance", "cost", sp->fleet_cost);
+    jsonAddIntToObj(fleet_maintenance, "fleet_maintenance", "percent", sp->fleet_percent_cost);
+    jsonAddIntToObj(obj, objName, "banked_eu", sp->econ_units);
+    cJSON *contacts = cJSON_AddArrayToObject(obj, "contacts");
+    if (contacts == 0) {
+        fprintf(stderr, "%s: unable to allocate contacts property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+         if ((sp->contact[spidx / 32] & (1 << (spidx % 32))) != 0) {
+             jsonAddIntToArray(contacts, "contacts", spidx + 1);
+         }
+    }
+    cJSON *allies = cJSON_AddArrayToObject(obj, "allies");
+    if (allies == 0) {
+        fprintf(stderr, "%s: unable to allocate allies property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->ally[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(allies, "allies", spidx + 1);
+        }
+    }
+    cJSON *enemies = cJSON_AddArrayToObject(obj, "enemies");
+    if (enemies == 0) {
+        fprintf(stderr, "%s: unable to allocate allies property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->enemy[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(enemies, "enemies", spidx + 1);
+        }
+    }
+    return obj;
+}

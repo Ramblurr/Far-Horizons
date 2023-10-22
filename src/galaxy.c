@@ -259,7 +259,7 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
     printf("       the galaxy contains %d natural wormholes.\n", num_wormholes);
 
     // save data
-    save_galaxy_data();
+    save_galaxy_data(&galaxy);
     FILE *fp = fopen("galaxy.txt", "wb");
     if (fp == NULL) {
         perror("fh: export: sexpr:");

@@ -26,6 +26,6 @@ int prng(unsigned int max);
 
 uint64_t prngGetSeed(void);
 
-int prngSetSeed(uint64_t seed);
+uint64_t prngSetSeed(uint64_t seed);
 
 #endif //FAR_HORIZONS_PRNG_H

@@ -20,7 +20,7 @@
 #cmake_minimum_required(VERSION 3.21)
 cmake_minimum_required(VERSION 3.5)
 project(far_horizons C)
-include_directories(src)
+include_directories(src src/cjson)
 
 set(CMAKE_C_STANDARD 99)
 
@@ -94,6 +94,7 @@ add_executable(fh
         src/turn.c src/turn.h
         src/unmarshal.c src/unmarshal.h
         src/update.c src/update.h
-        src/version.c src/version.h)
+        src/version.c src/version.h
+        src/cjson/cJSON.c src/cjson/cJSON.h)
 
 target_link_libraries(fh ${USE_LIB_M})

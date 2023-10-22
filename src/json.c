@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include "engine.h"
 #include "json.h"
+#include "cjson/cJSON.h"
 
 
 #define JSON_TYPE_UNDEFINED  0
@@ -618,4 +619,107 @@ char *jp__stringer(json_symbol_t s) {
         default:
             return "*unknown*";
     }
+}
+
+void jsonAddIntToArray(cJSON *array, char *arrayName, int value) {
+    cJSON *item = cJSON_CreateNumber((double)value);
+    if (item == 0) {
+        fprintf(stderr, "%s: unable to integer for array\n", arrayName);
+        perror("cJSON_CreateNumber");
+        exit(2);
+    } else if (cJSON_AddItemToArray(array, item) == 0) {
+        fprintf(stderr, "%s: unable to add integer to array\n", arrayName);
+        perror("cJSON_AddItemToArray");
+        exit(2);
+    }
+}
+
+void jsonAddBoolToObj(cJSON *obj, char *objName, char *propName, int value) {
+    if (cJSON_AddBoolToObject(obj, propName, value) == 0) {
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        perror("cJSON_AddBoolToObject");
+        exit(2);
+    }
+}
+
+void jsonAddIntToObj(cJSON *obj, char *objName, char *propName, int value) {
+    if (cJSON_AddNumberToObject(obj, propName, (double) (value)) == 0) {
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        perror("cJSON_AddNumberToObject");
+        exit(2);
+    }
+}
+
+void jsonAddStringToObj(cJSON *obj, char *objName, char *propName, char *value) {
+    if (cJSON_AddStringToObject(obj, propName, value) == 0) {
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        perror("cJSON_AddStringToObject");
+        exit(2);
+    }
+}
+
+
+cJSON *jsonParseFile(char *name) {
+    FILE *fp = fopen(name, "rb");
+    if (fp == 0) {
+        return 0;
+    }
+
+    // determine the length of the file
+    if (fseek(fp, 0, SEEK_END) != 0) {
+        perror("json: parseFile: seeking to end of input");
+        exit(2);
+    }
+    long length = ftell(fp);
+    char *buffer = malloc(length + 1);
+    if (buffer == 0) {
+        perror("json: parseFile: allocating buffer");
+        exit(2);
+    }
+    // return to the beginning and read the entire file
+    if (fseek(fp, 0, SEEK_SET) != 0) {
+        perror("json: parseFile: seeking to start of input");
+        exit(2);
+    } else if (fread(buffer, 1, length, fp) != length) {
+        perror("json: parseFile: reading entire input");
+        exit(2);
+    }
+    // and close the file to avoid leaking a handle
+    fclose(fp);
+
+    // terminate the buffer with a nul byte
+    buffer[length] = 0;
+
+    // try to parse the JSON
+    cJSON *root = cJSON_Parse(buffer);
+    if (root == 0) {
+        fprintf(stderr, "json: there was an error parsing %s\n", name);
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "json: error before: %s\n", error_ptr);
+        }
+        exit(2);
+    }
+
+    return root;
+}
+
+void jsonWriteFile(cJSON *root, char *kind, char *name) {
+    // convert json to text
+    char *string = cJSON_Print(root);
+    if (string == 0) {
+        fprintf(stderr, "json: there was an error converting %s json to text\n", kind);
+        exit(2);
+    }
+    // save it to the file and close it
+    FILE *fp = fopen(name, "wb");
+    if (fp == NULL) {
+        perror("fh: export: json:");
+        fprintf(stderr, "\n\tCannot create new version of file '%s'!\n", name);
+        exit(2);
+    }
+    fprintf(fp, "%s\n", string);
+    fclose(fp);
+    // release the memory
+    free(string);
 }

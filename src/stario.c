@@ -25,15 +25,15 @@
 #include "galaxyio.h"
 #include "star.h"
 #include "stario.h"
+#include "json.h"
 
+cJSON *starToJson(star_data_t *sd, int id);
 
 int num_stars;
 
 struct star_data *star_base;
 
 int star_data_modified;
-
-
 
 
 void get_star_data(void) {
@@ -61,7 +61,8 @@ void get_star_data(void) {
         exit(-1);
     }
     num_stars = numStars;
-    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars + NUM_EXTRA_STARS, sizeof(struct star_data));
+    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars + NUM_EXTRA_STARS,
+                                             sizeof(struct star_data));
     if (star_base == NULL) {
         perror("get_star_data");
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
@@ -146,7 +147,8 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
         fprintf(stderr, "error: saveStarData: internal error: passed null file pointer\n");
         exit(2);
     }
-    binary_star_data_t *starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_star_data_t));
+    binary_star_data_t *starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars,
+                                                                  sizeof(binary_star_data_t));
     if (starData == NULL) {
         perror("saveStarData:");
         fprintf(stderr, "error: cannot allocate enough memory to convert stars data\n");
@@ -225,3 +227,84 @@ void starDataAsSExpr(star_data_t *starBase, int numStars, FILE *fp) {
     fprintf(fp, ")\n");
 }
 
+// starsDataToJson translates the current star_base array to JSON
+cJSON *starsDataToJson(star_data_t *starBase, int numStars) {
+    cJSON *root = cJSON_CreateArray();
+    if (root == 0) {
+        perror("starDataToJson: unable to allocate root");
+        exit(2);
+    }
+    for (int i = 0; i < numStars; i++) {
+        int id = i + 1;
+        if (!cJSON_AddItemToArray(root, starToJson(&starBase[i], id))) {
+            perror("starDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return root;
+}
+
+cJSON *starToJson(star_data_t *sd, int id) {
+    char *objName = "star";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "id", id);
+    jsonAddIntToObj(obj, objName, "x", sd->x);
+    jsonAddIntToObj(obj, objName, "y", sd->y);
+    jsonAddIntToObj(obj, objName, "z", sd->z);
+    char code[2];
+    code[1] = 0;
+    code[0] = star_type(sd->type);
+    if (code[0] == ' ') {
+        code[0] = 0;
+    }
+    jsonAddStringToObj(obj, objName, "type", code);
+    code[0] = star_color(sd->color);
+    if (code[0] == ' ') {
+        code[0] = 0;
+    }
+    jsonAddStringToObj(obj, objName, "color", code);
+    code[0] = star_size(sd->size);
+    if (code[0] == ' ') {
+        code[0] = 0;
+    }
+    jsonAddStringToObj(obj, objName, "size", code);
+    cJSON *planets = cJSON_AddArrayToObject(obj, "planets");
+    if (planets == 0) {
+        fprintf(stderr, "%s: unable to allocate planets property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int p = 0; p < sd->num_planets; p++) {
+        cJSON_AddItemToArray(planets, cJSON_CreateNumber((double)(sd->planet_index + p + 1)));
+    }
+    jsonAddBoolToObj(obj, objName, "home_system", sd->home_system);
+    cJSON *worm_hole = cJSON_AddObjectToObject(obj, "worm_hole");
+    if (worm_hole == NULL){
+        fprintf(stderr, "%s: unable to allocate worm_hole property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddBoolToObj(worm_hole, "worm_hole", "here", sd->worm_here);
+    jsonAddIntToObj(worm_hole, "worm_hole", "x", sd->worm_x);
+    jsonAddIntToObj(worm_hole, "worm_hole", "y", sd->worm_x);
+    jsonAddIntToObj(worm_hole, "worm_hole", "z", sd->worm_z);
+    cJSON *visited_by = cJSON_AddArrayToObject(obj, "visited_by");
+    if (visited_by == 0) {
+        fprintf(stderr, "%s: unable to allocate visited_by property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        // write the species only if it has visited this system
+        if ((sd->visited_by[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            cJSON_AddItemToArray(visited_by, cJSON_CreateNumber((double)(spidx + 1)));
+        }
+    }
+    jsonAddIntToObj(obj, objName, "message", sd->message);
+    return obj;
+}

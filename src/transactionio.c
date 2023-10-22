@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include "engine.h"
 #include "transactionio.h"
+#include "cJSON.h"
+#include "json.h"
 
 
 int num_transactions;
@@ -60,6 +62,7 @@ void get_transaction_data(void) {
     // get number of records in the file
     num_transactions = sb.st_size / sizeof(binary_ship_data_t);
     if (sb.st_size != num_transactions * sizeof(binary_ship_data_t)) {
+        // todo: warning: format specifies type 'long' but the argument has type 'off_t' (aka 'long long') [-Wformat]
         fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %ld)!\n\n",
                 sb.st_size, num_transactions * sizeof(binary_ship_data_t));
         exit(-1);
@@ -204,4 +207,51 @@ void transactionDataAsSExpr(FILE *fp) {
         fprintf(fp, "\n                           (arg (number %9d) (name \"%s\"))))", t->number3, t->name3);
     }
     fprintf(fp, ")\n");
+}
+
+cJSON *transactionsDataToJson(trans_data_t *transData, int numTransactions) {
+    cJSON *array = cJSON_CreateArray();
+    if (array == 0) {
+        perror("transactionsDataToJson: unable to allocate array");
+        exit(2);
+    }
+    for (int i = 0; i < numTransactions; i++) {
+        if (!cJSON_AddItemToArray(array, transactionToJson(&transData[i]))) {
+            perror("transactionsDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return array;
+}
+
+cJSON *transactionToJson(trans_data_t *td) {
+    char *objName = "transaction";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "type", td->type);
+    jsonAddIntToObj(obj, objName, "donor", td->donor);
+    jsonAddIntToObj(obj, objName, "recipient", td->recipient);
+    jsonAddIntToObj(obj, objName, "value", td->value);
+    jsonAddIntToObj(obj, objName, "x", td->x);
+    jsonAddIntToObj(obj, objName, "y", td->y);
+    jsonAddIntToObj(obj, objName, "z", td->z);
+    jsonAddIntToObj(obj, objName, "orbit", td->pn);
+    cJSON *args = cJSON_AddArrayToObject(obj, "args");
+    cJSON *item = cJSON_CreateObject();
+    jsonAddIntToObj(item, "args", "number", td->number1);
+    jsonAddStringToObj(item, "args", "name", td->name1);
+    cJSON_AddItemToArray(args, item);
+    item = cJSON_CreateObject();
+    jsonAddIntToObj(item, "args", "number", td->number2);
+    jsonAddStringToObj(item, "args", "name", td->name2);
+    cJSON_AddItemToArray(args, item);
+    item = cJSON_CreateObject();
+    jsonAddIntToObj(item, "args", "number", td->number3);
+    jsonAddStringToObj(item, "args", "name", td->name3);
+    cJSON_AddItemToArray(args, item);
+    return obj;
 }

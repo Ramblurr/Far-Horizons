@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include "transaction.h"
+#include "cJSON.h"
 
 void get_transaction_data(void);
 
@@ -31,6 +32,9 @@ void transactionDataAsJson(FILE *fp);
 
 void transactionDataAsSExpr(FILE *fp);
 
+cJSON *transactionsDataToJson(trans_data_t *transData, int numTransactions);
+
+cJSON *transactionToJson(trans_data_t *td);
 
 // globals. ugh.
 

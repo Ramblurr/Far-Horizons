@@ -34,6 +34,8 @@ void speciesDataAsJson(species_data_t *sp, FILE *fp);
 
 void speciesDataAsSExpr(species_data_t *sp, FILE *fp);
 
+cJSON *speciesToJson(species_data_t *sp);
+
 
 // globals. ugh.
 

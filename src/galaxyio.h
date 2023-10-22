@@ -21,16 +21,17 @@
 #define FAR_HORIZONS_GALAXYIO_H
 
 #include <stdio.h>
-
-
-void galaxyDataAsJson(FILE *fp);
+#include "cJSON.h"
 
 void galaxyDataAsSexpr(FILE *fp);
 
+struct galaxy_data *galaxyDataFromJson(cJSON *json);
+
 void get_galaxy_data(void);
 
-void save_galaxy_data(void);
+void save_galaxy_data(struct galaxy_data *gd);
 
+cJSON *galaxyDataToJson(struct galaxy_data *gd);
 
 // globals. ugh.
 

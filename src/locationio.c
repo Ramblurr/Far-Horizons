@@ -24,6 +24,7 @@
 #include "engine.h"
 #include "locationio.h"
 #include "location.h"
+#include "json.h"
 
 
 struct sp_loc_data loc[MAX_LOCATIONS];
@@ -161,3 +162,32 @@ void save_location_data(void) {
 
 
 
+cJSON *locationsDataToJson(sp_loc_data_t *locData, int numLocations) {
+    cJSON *array = cJSON_CreateArray();
+    if (array == 0) {
+        perror("locationsDataToJson: unable to allocate array");
+        exit(2);
+    }
+    for (int i = 0; i < numLocations; i++) {
+        if (!cJSON_AddItemToArray(array, locationToJson(&locData[i]))) {
+            perror("locationsDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return array;
+}
+
+cJSON *locationToJson(sp_loc_data_t *loc) {
+    char *objName = "location";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "x", loc->x);
+    jsonAddIntToObj(obj, objName, "y", loc->y);
+    jsonAddIntToObj(obj, objName, "z", loc->z);
+    jsonAddIntToObj(obj, objName, "species", loc->s);
+    return obj;
+}

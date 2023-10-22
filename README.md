@@ -377,6 +377,36 @@ NB: `fh report` replaces `Report`.
 
 The `fh stats` command displays current statistics.
 
+## Exporting data to JSON
+
+The `fh export json` command exports game data as JSON formatted data
+and saves the result to text files (instead of the normal binary data files).
+
+You may specify `galaxy`, `stars`, `planets`, `species`, `locations`, and/or `transactions` to this command.
+
+The output file names are hard-coded:
+
+    galaxy.json
+    stars.json
+    planets.json
+    species.spNN.json
+    species.spNN.planets.json
+    species.spNN.ships.json
+    locations.json
+    transactions.json
+
+When you export species data, all species are output.
+Each species creates a set of three files, one for the species data,
+one for the planets the species has named,
+and one for all the ships the species controls.
+
+You may specify more than one option.
+For example, the following command will export all the game data:
+
+```bash
+fh export json galaxy stars planets species locations transactions
+```
+
 # License
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)

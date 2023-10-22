@@ -379,7 +379,7 @@ global_gas_t *unmarshalGas(json_value_t *j) {
                 }
                 gas->required = t->value->u.b;
             } else {
-                fprintf(stderr, "%s: unknown key 'data.%s'\n", __FUNCTION__, t->key);
+                fprintf(stderr, "%s: unknown key 'gas.%s'\n", __FUNCTION__, t->key);
                 exit(2);
             }
         }

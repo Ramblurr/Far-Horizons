@@ -25,6 +25,7 @@
 #include <assert.h>
 #include "data.h"
 #include "item.h"
+#include "json.h"
 #include "nampla.h"
 #include "namplaio.h"
 #include "planetio.h"
@@ -232,4 +233,88 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
     free(binData);
 }
 
+cJSON *namedPlanetsDataToJson(struct nampla_data *namplaData, int numNamplas) {
+    char *arrayName = "namedPlanets";
+    cJSON *array = cJSON_CreateArray();
+    if (array == 0) {
+        fprintf(stderr, "%s: unable to allocate array\n", arrayName);
+        perror("cJSON_CreateArray");
+        exit(2);
+    }
+    for (int i = 0; i < numNamplas; i++) {
+        int id = i + 1;
+        if (!cJSON_AddItemToArray(array, namedPlanetToJson(&namplaData[i], id))) {
+            perror("namedPlanetsDataToJson: unable to extend array");
+            exit(2);
+        }
+    }
+    return array;
+}
 
+cJSON *namedPlanetToJson(struct nampla_data *np, int id) {
+    char *objName = "namedPlanet";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "%s: unable to allocate object\n", objName);
+        perror("cJSON_CreateObject");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, objName, "id", id);
+    jsonAddStringToObj(obj, objName, "name", np->name);
+    cJSON *planet = cJSON_AddObjectToObject(obj, "planet");
+    if (planet == 0) {
+        fprintf(stderr, "%s: unable to allocate planet property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(planet, "planet.id", "id", np->planet_index);
+    jsonAddIntToObj(planet, "planet.x", "x", np->x);
+    jsonAddIntToObj(planet, "planet.y", "y", np->y);
+    jsonAddIntToObj(planet, "planet.z", "z", np->z);
+    jsonAddIntToObj(planet, "planet.orbit", "orbit", np->pn);
+    jsonAddIntToObj(obj, objName, "status", np->status);
+    jsonAddBoolToObj(obj, objName, "hiding", np->hiding);
+    jsonAddIntToObj(obj, objName, "hiding_val", np->hiding);
+    jsonAddBoolToObj(obj, objName, "hidden", np->hidden);
+    jsonAddIntToObj(obj, objName, "hidden_val", np->hidden);
+    jsonAddIntToObj(obj, objName, "ma_base", np->ma_base);
+    jsonAddIntToObj(obj, objName, "mi_base", np->mi_base);
+    jsonAddIntToObj(obj, objName, "pop_units", np->pop_units);
+    jsonAddIntToObj(obj, objName, "shipyards", np->shipyards);
+    jsonAddIntToObj(obj, objName, "siege_eff", np->siege_eff);
+    jsonAddIntToObj(obj, objName, "special", np->special);
+    jsonAddIntToObj(obj, objName, "use_on_ambush", np->use_on_ambush);
+    cJSON *au = cJSON_AddObjectToObject(obj, "au");
+    if (au == 0) {
+        fprintf(stderr, "%s: unable to allocate au property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(au, "au.auto", "auto", np->auto_AUs);
+    jsonAddIntToObj(au, "au.needed", "needed", np->AUs_needed);
+    jsonAddIntToObj(au, "au.to_install", "to_install", np->AUs_to_install);
+    cJSON *iu = cJSON_AddObjectToObject(obj, "iu");
+    if (iu == 0) {
+        fprintf(stderr, "%s: unable to allocate iu property\n", objName);
+        perror("cJSON_AddObjectToObject");
+        exit(2);
+    }
+    jsonAddIntToObj(iu, "iu.auto", "auto", np->auto_IUs);
+    jsonAddIntToObj(iu, "iu.needed", "needed", np->IUs_needed);
+    jsonAddIntToObj(iu, "iu.to_install", "to_install", np->IUs_to_install);
+    cJSON *items = cJSON_AddArrayToObject(obj, "items");
+    if (items == 0) {
+        fprintf(stderr, "%s: unable to allocate items property\n", objName);
+        perror("cJSON_AddArrayToObject");
+        exit(2);
+    }
+    for (int j = 0; j < MAX_ITEMS; j++) {
+        if (np->item_quantity[j] > 0) {
+            cJSON *item = cJSON_CreateObject();
+            jsonAddIntToObj(item, "item.code", "code", j);
+            jsonAddIntToObj(item, "item.qty", "qty", np->item_quantity[j]);
+            cJSON_AddItemToArray(items, item);
+        }
+    }
+    return obj;
+}
