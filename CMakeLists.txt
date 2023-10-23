@@ -95,6 +95,7 @@ add_executable(fh
         src/unmarshal.c src/unmarshal.h
         src/update.c src/update.h
         src/version.c src/version.h
-        src/cjson/cJSON.c src/cjson/cJSON.h)
+        src/cjson/cJSON.c src/cjson/cJSON.h
+)
 
 target_link_libraries(fh ${USE_LIB_M})

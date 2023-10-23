@@ -1097,8 +1097,8 @@ int finishCommand(int argc, char *argv[]) {
     clean_up:
 
     /* Clean up and exit. */
-    save_planet_data();
-    save_location_data();
+    save_planet_data(planet_base, num_planets);
+    save_location_data(loc, num_locs);
     save_species_data();
     free_species_data();
     free(planet_base);

@@ -28,13 +28,7 @@ void get_transaction_data(void);
 
 void save_transaction_data(void);
 
-void transactionDataAsJson(FILE *fp);
-
 void transactionDataAsSExpr(FILE *fp);
-
-cJSON *transactionsDataToJson(trans_data_t *transData, int numTransactions);
-
-cJSON *transactionToJson(trans_data_t *td);
 
 // globals. ugh.
 

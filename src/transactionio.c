@@ -64,7 +64,7 @@ void get_transaction_data(void) {
     if (sb.st_size != num_transactions * sizeof(binary_ship_data_t)) {
         // todo: warning: format specifies type 'long' but the argument has type 'off_t' (aka 'long long') [-Wformat]
         fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %ld)!\n\n",
-                sb.st_size, num_transactions * sizeof(binary_ship_data_t));
+                (long)(sb.st_size), num_transactions * sizeof(binary_ship_data_t));
         exit(-1);
     } else if (num_transactions == 0) {
         // nothing to do
@@ -174,25 +174,6 @@ void save_transaction_data(void) {
     fclose(fp);
 }
 
-
-void transactionDataAsJson(FILE *fp) {
-    fprintf(fp, "[\n");
-    for (int i = 0; i < num_transactions; i++) {
-        trans_data_t *t = &transaction[i];
-        fprintf(fp,
-                "  {\"type\": %2d, \"donor\": %3d, \"recipient\": %3d, \"value\": %9d, \"x\": %3d, \"y\": %3d, \"z\": %3d, \"orbit\": %d, \"args\": [{\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}]}",
-                t->type, t->donor, t->recipient, t->value, t->x, t->y, t->z, t->pn, t->number1, t->name1, t->number2,
-                t->name2, t->number3, t->name3);
-        if (i + 1 < num_transactions) {
-            fprintf(fp, ",");
-        }
-        fprintf(fp, "\n");
-
-    }
-    fprintf(fp, "]\n");
-}
-
-
 void transactionDataAsSExpr(FILE *fp) {
     fprintf(fp, "(transactions");
     for (int i = 0; i < num_transactions; i++) {
@@ -209,49 +190,3 @@ void transactionDataAsSExpr(FILE *fp) {
     fprintf(fp, ")\n");
 }
 
-cJSON *transactionsDataToJson(trans_data_t *transData, int numTransactions) {
-    cJSON *array = cJSON_CreateArray();
-    if (array == 0) {
-        perror("transactionsDataToJson: unable to allocate array");
-        exit(2);
-    }
-    for (int i = 0; i < numTransactions; i++) {
-        if (!cJSON_AddItemToArray(array, transactionToJson(&transData[i]))) {
-            perror("transactionsDataToJson: unable to extend array");
-            exit(2);
-        }
-    }
-    return array;
-}
-
-cJSON *transactionToJson(trans_data_t *td) {
-    char *objName = "transaction";
-    cJSON *obj = cJSON_CreateObject();
-    if (obj == 0) {
-        fprintf(stderr, "%s: unable to allocate object\n", objName);
-        perror("cJSON_CreateObject");
-        exit(2);
-    }
-    jsonAddIntToObj(obj, objName, "type", td->type);
-    jsonAddIntToObj(obj, objName, "donor", td->donor);
-    jsonAddIntToObj(obj, objName, "recipient", td->recipient);
-    jsonAddIntToObj(obj, objName, "value", td->value);
-    jsonAddIntToObj(obj, objName, "x", td->x);
-    jsonAddIntToObj(obj, objName, "y", td->y);
-    jsonAddIntToObj(obj, objName, "z", td->z);
-    jsonAddIntToObj(obj, objName, "orbit", td->pn);
-    cJSON *args = cJSON_AddArrayToObject(obj, "args");
-    cJSON *item = cJSON_CreateObject();
-    jsonAddIntToObj(item, "args", "number", td->number1);
-    jsonAddStringToObj(item, "args", "name", td->name1);
-    cJSON_AddItemToArray(args, item);
-    item = cJSON_CreateObject();
-    jsonAddIntToObj(item, "args", "number", td->number2);
-    jsonAddStringToObj(item, "args", "name", td->name2);
-    cJSON_AddItemToArray(args, item);
-    item = cJSON_CreateObject();
-    jsonAddIntToObj(item, "args", "number", td->number3);
-    jsonAddStringToObj(item, "args", "name", td->name3);
-    cJSON_AddItemToArray(args, item);
-    return obj;
-}

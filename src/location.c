@@ -58,7 +58,7 @@ void add_location(int x, int y, int z) {
 /* This routine will create the "loc" array based on current species' data. */
 void do_locations(void) {
     num_locs = 0;
-    for (species_number = 1; species_number <= galaxy.num_species; species_number++) {
+    for (species_number = 1; species_number <= MAX_SPECIES; species_number++) {
         int spidx = species_number - 1;
         if (data_in_memory[spidx] == FALSE) {
             continue;
@@ -159,9 +159,9 @@ int locationCommand(int argc, char *argv[]) {
 
     // save the results
     printf("fh: %s: saving    planet   data...\n", cmdName);
-    save_planet_data();
+    save_planet_data(planet_base, num_planets);
     printf("fh: %s: saving    location data...\n", cmdName);
-    save_location_data();
+    save_location_data(loc, num_locs);
 
     // clean up
     free_species_data();

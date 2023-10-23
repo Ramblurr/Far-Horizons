@@ -51,7 +51,7 @@ int createHomeSystemTemplates() {
             generate_planets(planet_base, num_planets, earth_like, makeMiningEasier);
         }
         savePlanetData(planet_base, num_planets, filename);
-        sprintf(filename, "homesystem%d.txt", num_planets);
+        sprintf(filename, "homesystem%d.sexpr", num_planets);
         FILE *fp = fopen(filename, "wb");
         if (fp == NULL) {
             perror("createHomeSystemTemplates");

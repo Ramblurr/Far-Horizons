@@ -1173,14 +1173,14 @@ int sexprCommand(int argc, char **argv) {
 
     load_file(env, "library.lisp");
 
-    load_expr(env, "galaxy.txt");
-    //load_expr(env, "stars.txt");
-    //load_expr(env, "planets.txt");
-    load_expr(env, "species001.txt");
-    load_expr(env, "species002.txt");
-    load_expr(env, "species003.txt");
-    load_expr(env, "species004.txt");
-    //load_expr(env, "locations.txt");
+    load_expr(env, "galaxy.sexpr");
+    //load_expr(env, "stars.sexpr");
+    //load_expr(env, "planets.sexpr");
+    load_expr(env, "species001.sexpr");
+    load_expr(env, "species002.sexpr");
+    load_expr(env, "species003.sexpr");
+    load_expr(env, "species004.sexpr");
+    //load_expr(env, "locations.sexpr");
 
 
 //    /* Main loop */

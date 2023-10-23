@@ -18,13 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include "engine.h"
 #include "locationio.h"
 #include "location.h"
-#include "json.h"
+#include "speciesio.h"
+#include "shipvars.h"
 
 
 struct sp_loc_data loc[MAX_LOCATIONS];
@@ -38,7 +38,6 @@ typedef struct {
     uint8_t z;
 } binary_ship_data_t;
 
-
 void get_location_data(void) {
     /* Get size of file. */
     struct stat sb;
@@ -51,7 +50,7 @@ void get_location_data(void) {
     num_locs = sb.st_size / sizeof(binary_ship_data_t);
     if (sb.st_size != num_locs * sizeof(binary_ship_data_t)) {
         fprintf(stderr, "\nFile locations.dat contains extra bytes (%ld > %ld)!\n\n",
-                sb.st_size, num_locs * sizeof(binary_ship_data_t));
+                (long)sb.st_size, num_locs * sizeof(binary_ship_data_t));
         exit(-1);
     } else if (num_locs == 0) {
         // nothing to do
@@ -97,20 +96,6 @@ void get_location_data(void) {
     free(binData);
 }
 
-
-// locationDataAsJson writes the current location data to a text file as JSON.
-void locationDataAsJson(FILE *fp) {
-    const char *sep = "";
-    fprintf(fp, "[");
-    for (int i = 0; i < num_locs; i++) {
-        sp_loc_data_t *p = &loc[i];
-        fprintf(fp, "%s\n  {\"x\": %3d, \"y\": %3d, \"z\": %3d, \"species\": %3d}", sep, p->x, p->y, p->z, p->s);
-        sep = ",";
-    }
-    fprintf(fp, "\n]\n");
-}
-
-
 // locationDataAsSExpr writes the current location data to a text file as an s-expression.
 void locationDataAsSExpr(FILE *fp) {
     fprintf(fp, "(locations");
@@ -122,18 +107,18 @@ void locationDataAsSExpr(FILE *fp) {
 }
 
 
-void save_location_data(void) {
-    /* Open file 'locations.dat' for writing. */
-    FILE *fp = fopen("locations.dat", "wb");
+void save_location_data(sp_loc_data_t *allLocations, int numLocations) {
+    // open file 'allLocations.dat' for writing.
+    FILE *fp = fopen("allLocations.dat", "wb");
     if (fp == NULL) {
         perror("save_location_data");
-        fprintf(stderr, "\n\tCannot create file 'locations.dat'!\n\n");
+        fprintf(stderr, "\n\tCannot create file 'allLocations.dat'!\n\n");
         exit(-1);
     }
 
-    if (num_locs > 0) {
-        /* Allocate enough memory for all records. */
-        binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, num_locs, sizeof(binary_ship_data_t));
+    if (numLocations > 0) {
+        // allocate enough memory for all records
+        binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, numLocations, sizeof(binary_ship_data_t));
         if (binData == NULL) {
             perror("save_location_data");
             fprintf(stderr, "\nCannot allocate enough memory for location data!\n");
@@ -141,53 +126,21 @@ void save_location_data(void) {
             exit(-1);
         }
 
-        /* translate data */
-        for (int i = 0; i < num_locs; i++) {
-            binData[i].x = loc[i].x;
-            binData[i].y = loc[i].y;
-            binData[i].z = loc[i].z;
-            binData[i].s = loc[i].s;
+        // translate data
+        for (int i = 0; i < numLocations; i++) {
+            binData[i].x = allLocations[i].x;
+            binData[i].y = allLocations[i].y;
+            binData[i].z = allLocations[i].z;
+            binData[i].s = allLocations[i].s;
         }
 
-        /* Write array to disk. */
+        // write array to disk
         if (fwrite(binData, sizeof(binary_ship_data_t), num_locs, fp) != num_locs) {
             perror("save_location_data");
-            fprintf(stderr, "\n\n\tCannot write to 'locations.dat'!\n\n");
+            fprintf(stderr, "\n\n\tCannot write to 'allLocations.dat'!\n\n");
             exit(-1);
         }
         free(binData);
     }
     fclose(fp);
-}
-
-
-
-cJSON *locationsDataToJson(sp_loc_data_t *locData, int numLocations) {
-    cJSON *array = cJSON_CreateArray();
-    if (array == 0) {
-        perror("locationsDataToJson: unable to allocate array");
-        exit(2);
-    }
-    for (int i = 0; i < numLocations; i++) {
-        if (!cJSON_AddItemToArray(array, locationToJson(&locData[i]))) {
-            perror("locationsDataToJson: unable to extend array");
-            exit(2);
-        }
-    }
-    return array;
-}
-
-cJSON *locationToJson(sp_loc_data_t *loc) {
-    char *objName = "location";
-    cJSON *obj = cJSON_CreateObject();
-    if (obj == 0) {
-        fprintf(stderr, "%s: unable to allocate object\n", objName);
-        perror("cJSON_CreateObject");
-        exit(2);
-    }
-    jsonAddIntToObj(obj, objName, "x", loc->x);
-    jsonAddIntToObj(obj, objName, "y", loc->y);
-    jsonAddIntToObj(obj, objName, "z", loc->z);
-    jsonAddIntToObj(obj, objName, "species", loc->s);
-    return obj;
 }

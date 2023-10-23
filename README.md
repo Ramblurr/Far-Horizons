@@ -382,30 +382,32 @@ The `fh stats` command displays current statistics.
 The `fh export json` command exports game data as JSON formatted data
 and saves the result to text files (instead of the normal binary data files).
 
-You may specify `galaxy`, `stars`, `planets`, `species`, `locations`, and/or `transactions` to this command.
-
 The output file names are hard-coded:
 
     galaxy.json
     stars.json
     planets.json
-    species.spNN.json
-    species.spNN.planets.json
-    species.spNN.ships.json
+    species.NNN.json
+    species.NNN.planets.json
+    species.NNN.ships.json
     locations.json
     transactions.json
 
-When you export species data, all species are output.
 Each species creates a set of three files, one for the species data,
 one for the planets the species has named,
 and one for all the ships the species controls.
 
-You may specify more than one option.
-For example, the following command will export all the game data:
+## Importing data from JSON
 
-```bash
-fh export json galaxy stars planets species locations transactions
-```
+The `fh import json` command imports game data from JSON formatted data and saves the result to the binary data files.
+
+It expects the same file names that the `fh export json` creates.
+
+There are some data quality checks on the import,
+but they need much more work.
+
+Note that if the import does detect issues with the input,
+it will abend instead of overwriting the binary data files.
 
 # License
 

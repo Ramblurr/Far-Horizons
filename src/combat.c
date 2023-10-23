@@ -1219,7 +1219,7 @@ int combatCommand(int argc, char *argv[]) {
 
     int save = combat(default_summary, do_all_species, num_species, sp_num, sp_name, &loc[0]);
     if (save) {
-        save_planet_data();
+        save_planet_data(planet_base, num_planets);
         save_species_data();
         save_transaction_data();
     }

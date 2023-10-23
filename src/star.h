@@ -66,6 +66,9 @@ char star_type(int c);
 
 int star_visited(int x, int y, int z);
 
+// for json conversions
+int chToStarColor(char ch);
+int chToStarType(char ch);
 
 // globals. ugh.
 

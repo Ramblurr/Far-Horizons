@@ -260,30 +260,30 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
 
     // save data
     save_galaxy_data(&galaxy);
-    FILE *fp = fopen("galaxy.txt", "wb");
+    FILE *fp = fopen("galaxy.sexpr", "wb");
     if (fp == NULL) {
         perror("fh: export: sexpr:");
-        fprintf(stderr, "\n\tCannot create new version of file 'galaxy.txt'!\n");
+        fprintf(stderr, "\n\tCannot create new version of file 'galaxy.sexpr'!\n");
         return 2;
     }
     galaxyDataAsSexpr(fp);
     fclose(fp);
 
-    save_star_data();
-    fp = fopen("stars.txt", "wb");
+    save_star_data(star_base, num_stars);
+    fp = fopen("stars.sexpr", "wb");
     if (fp == NULL) {
         perror("fh: export: sexpr:");
-        fprintf(stderr, "\n\tCannot create new version of file 'stars.txt'!\n");
+        fprintf(stderr, "\n\tCannot create new version of file 'stars.sexpr'!\n");
         return 2;
     }
     starDataAsSExpr(star_base, num_stars, fp);
     fclose(fp);
 
-    save_planet_data();
-    fp = fopen("planets.txt", "wb");
+    save_planet_data(planet_base, num_planets);
+    fp = fopen("planets.sexpr", "wb");
     if (fp == NULL) {
         perror("fh: export: sexpr:");
-        fprintf(stderr, "\n\tCannot create new version of file 'planets.txt'!\n");
+        fprintf(stderr, "\n\tCannot create new version of file 'planets.sexpr'!\n");
         return 2;
     }
     planetDataAsSExpr(planet_base, num_planets, fp);

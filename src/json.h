@@ -23,6 +23,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "cJSON.h"
+#include "engine.h"
+#include "location.h"
+#include "transaction.h"
 
 
 typedef struct json_value {
@@ -109,5 +112,65 @@ void jsonAddBoolToObj(cJSON *obj, char *objName, char *propName, int value);
 void jsonAddIntToObj(cJSON *obj, char *objName, char *propName, int value);
 
 void jsonAddStringToObj(cJSON *obj, char *objName, char *propName, char *value);
+
+int jsonGetBool(cJSON *obj, char *property);
+
+int jsonGetInt(cJSON *obj, char *property);
+
+const char *jsonGetString(cJSON *obj, char *property, int maxLength);
+
+
+galaxy_data_t *galaxyDataFromJson(cJSON *root);
+
+cJSON *galaxyDataToJson(galaxy_data_t *gd);
+
+sp_loc_data_t *locationFromJson(cJSON *item);
+
+cJSON *locationToJson(sp_loc_data_t *loc);
+
+sp_loc_data_t **locationsFromJson(cJSON *root);
+
+cJSON *locationsToJson(sp_loc_data_t *loc, int numLocations);
+
+nampla_data_t *namedPlanetFromJson(cJSON *item);
+
+cJSON *namedPlanetToJson(nampla_data_t *namedPlanet);
+
+nampla_data_t **namedPlanetsFromJson(cJSON *root);
+
+cJSON *namedPlanetsToJson(nampla_data_t *namedPlanets, int numPlanets);
+
+planet_data_t *planetFromJson(cJSON *item);
+
+cJSON *planetToJson(planet_data_t *planet, int id);
+
+planet_data_t **planetsDataFromJson(cJSON *root);
+
+cJSON *planetsDataToJson(planet_data_t *planetBase, int numPlanets);
+
+ship_data_t *shipFromJson(cJSON *item);
+
+cJSON *shipToJson(ship_data_t *ship);
+
+cJSON *shipsToJson(ship_data_t *ships, int numShips);
+
+ship_data_t **shipsFromJson(cJSON *root);
+
+species_data_t *speciesFromJson(cJSON *root);
+
+cJSON *speciesToJson(species_data_t *sp);
+
+star_data_t **starsDataFromJson(cJSON *root);
+
+cJSON *starsDataToJson(star_data_t *starBase, int numStars);
+
+star_data_t *starFromJson(cJSON *item);
+
+cJSON *starToJson(star_data_t *sd, int id);
+
+cJSON *transactionsToJson(trans_data_t *transData, int numTransactions);
+
+cJSON *transactionToJson(trans_data_t *td);
+
 
 #endif //FAR_HORIZONS_JSON_H

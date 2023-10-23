@@ -293,6 +293,14 @@ CJSON_PUBLIC(char*) cJSON_SetValuestring(cJSON *object, const char *valuestring)
 CJSON_PUBLIC(void *) cJSON_malloc(size_t size);
 CJSON_PUBLIC(void) cJSON_free(void *object);
 
+typedef struct {
+    int line;
+    int col;
+    unsigned char text[256];
+} cJSON_Error_t;
+
+CJSON_PUBLIC(cJSON_Error_t) cJSON_GetError(void);
+
 #ifdef __cplusplus
 }
 #endif

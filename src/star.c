@@ -438,6 +438,26 @@ char star_type(int c) {
     return '?';
 }
 
+int chToStarColor(char ch) {
+    // space is supposed to be invalid, so work around
+    for (int i = 1; i < sizeof(color_char); i++) {
+        if (color_char[i] == ch) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+int chToStarType(char ch) {
+    // space is valid for two types of star, so work around
+    for (int i = 1; i < sizeof(type_char); i++) {
+        if (type_char[i] == ch) {
+            return i;
+        }
+    }
+    return 0;
+}
+
 
 /* The following routine will check if coordinates x-y-z contain a star and,
  * if so, will set the appropriate bit in the "visited_by" variable for the star.

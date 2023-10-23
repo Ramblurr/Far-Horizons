@@ -363,10 +363,10 @@ int postArrivalCommand(int argc, char *argv[]) {
     save_species_data();
     save_transaction_data();
     if (star_data_modified) {
-        save_star_data();
+        save_star_data(star_base, num_stars);
     }
     if (planet_data_modified) {
-        save_planet_data();
+        save_planet_data(planet_base, num_planets);
     }
     free_species_data();
     free(planet_base);

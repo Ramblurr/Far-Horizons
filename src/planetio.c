@@ -18,14 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdio.h>
 #include "data.h"
 #include "engine.h"
 #include "planet.h"
 #include "planetio.h"
 #include "stario.h"
-#include "json.h"
 
 int num_planets;
 
@@ -183,37 +181,6 @@ planet_data_t *getPlanetData(int extraRecords, const char *filename) {
     return planetBase;
 }
 
-
-// planetDataAsJson writes the current planet_base array to a text file as JSON.
-void planetDataAsJson(int numPlanets, planet_data_t *planetBase, FILE *fp) {
-    const char *sep = "";
-    fprintf(fp, "[");
-    for (int i = 0; i < numPlanets; i++) {
-        planet_data_t *p = &planetBase[i];
-        fprintf(fp, "%s\n  {\"id\": %d,", sep, i + 1);
-        fprintf(fp, "\n   \"diameter\": %d,", p->diameter);
-        fprintf(fp, "\n   \"gravity\": %d,", p->gravity);
-        fprintf(fp, "\n   \"temperature_class\": %d,", p->temperature_class);
-        fprintf(fp, "\n   \"pressure_class\": %d,", p->pressure_class);
-        fprintf(fp, "\n   \"special\": %d,", p->special);
-        fprintf(fp, "\n   \"gases\": [");
-        for (int j = 0; j < 4; j++) {
-            if (j != 0) {
-                fprintf(fp, ", ");
-            }
-            fprintf(fp, "{\":code\": %d, \":percent\": %d}", p->gas[j], p->gas_percent[j]);
-        }
-        fprintf(fp, "],");
-        fprintf(fp, "\n   \"mining_difficulty\": {\"base\": %d, \"increase\": %d},",
-                p->mining_difficulty, p->md_increase);
-        fprintf(fp, "\n   \"econ_efficiency\": %d,", p->econ_efficiency);
-        fprintf(fp, "\n   \"message\": %d}", p->message);
-        sep = ",";
-    }
-    fprintf(fp, "\n]\n");
-}
-
-
 // planetDataAsSExpr writes the current planet_base array to a text file as an s-expression.
 void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
     fprintf(fp, "(planets");
@@ -235,70 +202,7 @@ void planetDataAsSExpr(planet_data_t *planetBase, int numPlanets, FILE *fp) {
     fprintf(fp, ")\n");
 }
 
-// planetsDataToJson translates the current planet_base array to JSON.
-cJSON *planetsDataToJson(planet_data_t *planetBase, int numPlanets) {
-    cJSON *root = cJSON_CreateArray();
-    if (root == 0) {
-        perror("planetDataToJson: unable to allocate root");
-        exit(2);
-    }
-    for (int i = 0; i < numPlanets; i++) {
-        int id = i + 1;
-        if (!cJSON_AddItemToArray(root, planetToJson(&planetBase[i], id))) {
-            perror("planetDataToJson: unable to extend array");
-            exit(2);
-        }
-    }
-    return root;
-
-}
-
-cJSON *planetToJson(planet_data_t *planet, int id) {
-    char *objName = "planetToJson";
-    cJSON *obj = cJSON_CreateObject();
-    if (obj == 0) {
-        fprintf(stderr, "%s: unable to allocate object\n", objName);
-        perror("cJSON_CreateObject");
-        exit(2);
-    }
-    jsonAddIntToObj(obj, objName, "id", id);
-    jsonAddIntToObj(obj, objName, "diameter", planet->diameter);
-    jsonAddIntToObj(obj, objName, "gravity", planet->gravity);
-    jsonAddIntToObj(obj, objName, "temperature_class", planet->temperature_class);
-    jsonAddIntToObj(obj, objName, "pressure_class", planet->pressure_class);
-    jsonAddIntToObj(obj, objName, "special", planet->special);
-    cJSON *gases = cJSON_AddArrayToObject(obj, "gases");
-    if (gases == 0) {
-        fprintf(stderr, "%s: unable to allocate gases property\n", objName);
-        perror("cJSON_AddArrayToObject");
-        exit(2);
-    }
-    for (int j = 0; j < 4; j++) {
-        cJSON *gas = cJSON_AddObjectToObject(gases, "gases");
-        if (gas == NULL) {
-            fprintf(stderr, "%s: unable to allocate gas property\n", objName);
-            perror("cJSON_AddObjectToObject");
-            exit(2);
-        }
-        jsonAddIntToObj(gas, "gases", "code", planet->gas[j]);
-        jsonAddIntToObj(gas, "gases", "percent", planet->gas_percent[j]);
-    }
-    cJSON *miningDifficulty = cJSON_AddObjectToObject(obj, "mining_difficulty");
-    if (miningDifficulty == 0) {
-        fprintf(stderr, "%s: unable to allocate mining_difficulty property\n", objName);
-        perror("cJSON_AddObjectToObject");
-        exit(2);
-    }
-    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "base", planet->mining_difficulty);
-    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "increase", planet->md_increase);
-    jsonAddIntToObj(obj, objName, "econ_efficiency", planet->econ_efficiency);
-    jsonAddIntToObj(obj, objName, "message", planet->message);
-    return obj;
-}
-
-void save_planet_data(void) {
-    FILE *fp;
-    int32_t numPlanets = num_planets;
+void save_planet_data(planet_data_t *planets, int numPlanets) {
     binary_planet_data_t *planetData = (binary_planet_data_t *) ncalloc(__FUNCTION__, __LINE__, numPlanets,
                                                                         sizeof(binary_planet_data_t));
     if (planetData == NULL) {
@@ -306,8 +210,8 @@ void save_planet_data(void) {
         fprintf(stderr, "\n\tattempted to allocate %d planet entries\n\n", numPlanets);
         exit(-1);
     }
-    for (int i = 0; i < num_planets; i++) {
-        struct planet_data *p = &planet_base[i];
+    for (int i = 0; i < numPlanets; i++) {
+        planet_data_t *p = &planets[i];
         binary_planet_data_t *pd = &planetData[i];
         pd->temperature_class = p->temperature_class;
         pd->pressure_class = p->pressure_class;
@@ -325,14 +229,15 @@ void save_planet_data(void) {
     }
 
     /* Open planet file for writing. */
-    fp = fopen("planets.dat", "wb");
+    FILE *fp = fopen("planets.dat", "wb");
     if (fp == NULL) {
         perror("save_planet_data");
         fprintf(stderr, "\n\tCannot create file 'planets.dat'!\n");
         exit(-1);
     }
     /* Write header data. */
-    if (fwrite(&numPlanets, sizeof(numPlanets), 1, fp) != 1) {
+    int32_t numPlanetsHeader = (int32_t)numPlanets;
+    if (fwrite(&numPlanetsHeader, sizeof(numPlanetsHeader), 1, fp) != 1) {
         perror("save_planet_data");
         fprintf(stderr, "\n\tCannot write num_planets to file 'planets.dat'!\n\n");
         exit(-1);

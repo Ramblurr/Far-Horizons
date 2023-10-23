@@ -24,17 +24,13 @@
 #include "location.h"
 #include "cJSON.h"
 
-void get_location_data(void);
+void gen_location_data(void);
 
-void locationDataAsJson(FILE *fp);
+void get_location_data(void);
 
 void locationDataAsSExpr(FILE *fp);
 
-void save_location_data(void);
-
-cJSON *locationsDataToJson(sp_loc_data_t *locData, int numLocations);
-
-cJSON *locationToJson(sp_loc_data_t *loc);
+void save_location_data(sp_loc_data_t *allLocations, int numLocations);
 
 // globals. ugh.
 
