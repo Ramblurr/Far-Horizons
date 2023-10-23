@@ -25,6 +25,8 @@
 #include "planetio.h"
 #include "stario.h"
 
+// number of natural wormholes
+int num_wormholes = 0;
 
 int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies) {
     if (galacticRadius < MIN_RADIUS || galacticRadius > MAX_RADIUS) {
@@ -211,7 +213,7 @@ int createGalaxy(int galacticRadius, int desiredNumStars, int desiredNumSpecies)
     fflush(stdout);
 
     /* Allocate natural wormholes. */
-    int num_wormholes = 0;
+    num_wormholes = 0;
     for (int i = 0; i < desiredNumStars; i++) {
         struct star_data *star = star_base + i;
         if (rnd(100) >= 92 && star->home_system == FALSE && star->worm_here == FALSE) {

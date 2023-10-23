@@ -1,2 +1,4 @@
 *
 !.gitignore
+!inp001/
+!rebuild.sh

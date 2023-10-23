@@ -105,18 +105,39 @@ int listCommand(int argc, char *argv[]) {
                 fprintf(stderr, "error: species %d is not loaded\n", spno);
                 return 2;
             }
+        } else if (strcmp(opt, "d_num_species") == 0 && val == NULL) {
+            printf("%d\n", galaxy.d_num_species);
+            exit(0);
         } else if (strcmp(opt, "galaxy") == 0 && val == NULL) {
             if (listScanned != FALSE) {
                 fprintf(stderr, "error: you must not specify both galaxy and scanned\n");
                 return 2;
             }
             listGalaxy = TRUE;
+        } else if (strcmp(opt, "num_planets") == 0 && val == NULL) {
+            printf("%d\n", num_planets);
+            exit(0);
+        } else if (strcmp(opt, "num_species") == 0 && val == NULL) {
+            printf("%d\n", galaxy.num_species);
+            exit(0);
+        } else if (strcmp(opt, "num_stars") == 0 && val == NULL) {
+            printf("%d\n", num_stars);
+            exit(0);
+        } else if (strcmp(opt, "num_wormholes") == 0 && val == NULL) {
+            printf("%d\n", num_wormholes);
+            exit(0);
+        } else if (strcmp(opt, "radius") == 0 && val == NULL) {
+            printf("%d\n", galaxy.radius);
+            exit(0);
         } else if (strcmp(opt, "scanned") == 0 && val == NULL) {
             if (listGalaxy != FALSE) {
                 fprintf(stderr, "error: you must not specify both galaxy and scanned\n");
                 return 2;
             }
             listScanned = TRUE;
+        } else if (strcmp(opt, "turn_number") == 0 && val == NULL) {
+            printf("%d\n", galaxy.turn_number);
+            exit(0);
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", opt);
             return 2;
