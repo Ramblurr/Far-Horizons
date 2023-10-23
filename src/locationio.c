@@ -108,11 +108,11 @@ void locationDataAsSExpr(FILE *fp) {
 
 
 void save_location_data(sp_loc_data_t *allLocations, int numLocations) {
-    // open file 'allLocations.dat' for writing.
-    FILE *fp = fopen("allLocations.dat", "wb");
+    // open file 'locations.dat' for writing.
+    FILE *fp = fopen("locations.dat", "wb");
     if (fp == NULL) {
         perror("save_location_data");
-        fprintf(stderr, "\n\tCannot create file 'allLocations.dat'!\n\n");
+        fprintf(stderr, "\n\tCannot create file 'locations.dat'!\n\n");
         exit(-1);
     }
 
