@@ -379,10 +379,10 @@ The `fh stats` command displays current statistics.
 
 ## Show Engine Version
 
-The `fh show version` command displays the version of the game engin.
+The `fh version` command displays the version of the game engin.
 
 ```bash
-fh show version
+fh version
 7.5.2
 ```
 
