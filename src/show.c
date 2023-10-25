@@ -104,9 +104,6 @@ int showCommand(int argc, char *argv[]) {
             get_galaxy_data();
             printf("%s%d", sep, galaxy.turn_number);
             sep = " ";
-        } else if (strcmp(opt, "version") == 0 && val == NULL) {
-            printf("%s7.5.2", sep);
-            sep = " ";
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", opt);
             return 2;
