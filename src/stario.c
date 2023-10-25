@@ -33,8 +33,8 @@ struct star_data *star_base;
 
 int star_data_modified;
 
-
-
+// number of natural wormholes
+int num_natural_wormholes = 0;
 
 void get_star_data(void) {
     int32_t numStars;
@@ -100,12 +100,15 @@ void get_star_data(void) {
         s->id = i + 1;
         s->index = i;
         s->wormholeExit = NULL;
+
     }
 
     // link wormholes
+    num_natural_wormholes = 0;
     for (int i = 0; i < num_stars; i++) {
         struct star_data *s = &star_base[i];
         if (s->worm_here && s->wormholeExit == NULL) {
+            num_natural_wormholes++;
             for (int w = 0; w < num_stars; w++) {
                 struct star_data *p = &star_base[w];
                 if (p->x == s->worm_x && p->y == s->worm_y && p->z == s->worm_z) {

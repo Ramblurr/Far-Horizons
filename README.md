@@ -377,6 +377,35 @@ NB: `fh report` replaces `Report`.
 
 The `fh stats` command displays current statistics.
 
+## Show Engine Version
+
+The `fh show version` command displays the version of the game engin.
+
+```bash
+fh show version
+7.5.2
+```
+
+## Show Game Settings
+
+The `fh show` command can list the game version and several settings.
+
+    d_num_species          maximum number of species\n");
+    num_planets            number of planets in cluster\n");
+    num_species            number of planets in cluster\n");
+    num_stars              number of stars in cluster\n");
+    num_natural_wormholes  number of natural wormholes in cluster\n");
+    radius                 radius of cluster\n");
+    turn_number            current turn number\n");
+
+You may place several values on the command line.
+For example,
+
+```bash
+fh show num_stars num_planets
+162 606
+```
+
 # License
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
