@@ -1,0 +1,76 @@
+#!/bin/bash
+###########################################################################
+# initialize and verify the environment
+source .env || exit 2
+if [ -z "${FH_EXE}" ]; then
+  echo "error: FH_EXE is not set and exported"
+  echo "       please update the .env file in your test folder and retry"
+  exit 2
+elif [ -z "${FH_SEED}" ]; then
+  echo "error: FH_SEED is not set and exported"
+  echo "       please update the .env file in your test folder and retry"
+  exit 2
+elif [ ! -x "${FH_EXE}" ]; then
+  echo "error: can't find '${FH_EXE}'"
+  echo "       please update the .env file in your test folder and retry"
+  exit 2
+fi
+if [ -d "swamp" ]; then
+  echo " info: clearing swamp from prior runs"
+  rm -rf swamp
+fi
+###########################################################################
+# create a list all test scripts to execute in the order given.
+scripts=
+scripts="${scripts} test0001"
+scripts="${scripts} test0002"
+scripts="${scripts} test0003"
+scripts="${scripts} test0004"
+scripts="${scripts} test0005"
+###########################################################################
+# verify that the test scripts are present and executable
+for script in ${scripts}; do
+  if [ ! -f "bin/${script}" ]; then
+    echo "error: missing bin/${script}"
+    exit 2
+  elif [ ! -x "bin/${script}" ]; then
+    echo "error: bin/${script} is not executable"
+    exit 2
+  fi
+done
+###########################################################################
+# run each script, stopping at the first failure
+for script in ${scripts}; do
+  mkdir swamp || {
+    echo "error: ${script} failed to create swamp"
+    exit 2
+  }
+  cd swamp || {
+    echo "error: ${script} failed to enter to swamp"
+    exit 2
+  }
+  [ -f ../inputs/${script}.tgz ] && {
+    tar zxf ../inputs/${script}.tgz || {
+      echo "error: ${script} input extract failed"
+      echo "       output left in swamp folder"
+      exit 2
+    }
+  }
+  ../bin/${script} > ../logs/${script}.log 2>&1 || {
+    echo "error: ${script} failed"
+    echo "       output left in swamp folder"
+    exit 2
+  }
+  echo " info: ${script} passed"
+  cd .. || {
+    echo "error: ${script} failed to return from swamp"
+    exit 2
+  }
+  rm -r swamp || {
+    echo "error: ${script} failed to clean swamp"
+    exit 2
+  }
+done
+###########################################################################
+echo " info: all tests passed"
+exit 0

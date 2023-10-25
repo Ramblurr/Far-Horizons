@@ -1,0 +1,62 @@
+#!/bin/bash
+###########################################################################
+# test creation of plain galaxy
+${FH_EXE} create galaxy --less-crowded --species=18 || exit 2
+
+###########################################################################
+# check settings against expected values
+${FH_EXE} show turn_number d_num_species radius num_stars num_natural_wormholes num_planets num_species |
+  while   read turn_number d_num_species radius num_stars num_natural_wormholes num_planets num_species; do
+    foundErrors=NO
+    [ "${turn_number}" == 0 ] || {
+      echo "error: show turn_number: want 0, got '${turn_number}'"
+      foundErrors=YES
+    }
+    [ "${d_num_species}" == 18 ] || {
+      echo "error: show d_num_species: want 18, got '${d_num_species}'"
+      foundErrors=YES
+    }
+    [ "${radius}" == 25 ] || {
+      echo "error: show radius: want 25, got '${radius}'"
+      foundErrors=YES
+    }
+    [ "${num_stars}" == 162 ] || {
+      echo "error: show num_stars: want 162, got '${num_stars}'"
+      foundErrors=YES
+    }
+    [ "${num_natural_wormholes}" == 7 ] || {
+      echo "error: show num_natural_wormholes: want 7, got '${num_natural_wormholes}'"
+      foundErrors=YES
+    }
+    [ "${num_planets}" == 606 ] || {
+      echo "error: show num_planets: want 606, got '${num_planets}'"
+      foundErrors=YES
+    }
+    [ "${num_species}" == 0 ] || {
+      echo "error: show num_species: want 0, got '${num_species}'"
+      foundErrors=YES
+    }
+    if [ "${foundErrors}" != NO ]; then
+      echo "error: found errors with the 'show' command"
+      exit 2
+    fi
+  done
+
+###########################################################################
+# check files against expected contents
+deltaFiles=
+for file in galaxy.dat planets.dat stars.dat; do
+  cknew=$(cksum ${file})
+  cktst=$(cd comps && cksum ${file})
+  if [ "${cknew}" != "${cktst}" ]; then
+    deltaFiles="${deltaFiles} ${file}"
+  fi
+done
+if [ ! -z "${deltaFiles}" ]; then
+  for delta in ${deltaFiles}; do
+    echo "error: ${delta} does not match expected comp"
+  done
+  exit 2
+fi
+
+exit 0

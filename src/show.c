@@ -27,9 +27,12 @@
 #include "stario.h"
 #include "enginevars.h"
 
+// ugh globals
+extern int num_natural_wormholes;
 
 
 static int showGalaxyAsciiMap(void);
+
 static int showGalaxyMap(void);
 
 
@@ -37,6 +40,8 @@ static int star_here[MAX_DIAMETER][MAX_DIAMETER];
 
 
 int showCommand(int argc, char *argv[]) {
+    const char *sep = "";
+
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
         char *val = NULL;
@@ -51,18 +56,65 @@ int showCommand(int argc, char *argv[]) {
             val = NULL;
         }
         if (strcmp(opt, "--help") == 0 || strcmp(opt, "-h") == 0 || strcmp(opt, "-?") == 0) {
-            fprintf(stderr, "usage: show (galaxy | help)\n");
+            fprintf(stderr, "usage: show (galaxy | help | version | _game_value_)\n");
+            fprintf(stderr, "  opt: _game_value_    shows the current value of a game setting\n");
+            fprintf(stderr, "         d_num_species          maximum number of species\n");
+            fprintf(stderr, "         num_planets            number of planets in cluster\n");
+            fprintf(stderr, "         num_species            number of planets in cluster\n");
+            fprintf(stderr, "         num_stars              number of stars in cluster\n");
+            fprintf(stderr, "         num_natural_wormholes  number of natural wormholes in cluster\n");
+            fprintf(stderr, "         radius                 radius of cluster\n");
+            fprintf(stderr, "         turn_number            current turn number\n");
             return 2;
         } else if (strcmp(opt, "-v") == 0 && val == NULL) {
             verbose_mode = TRUE;
+        } else if (strcmp(opt, "d_num_species") == 0 && val == NULL) {
+            get_galaxy_data();
+            printf("%s%d", sep, galaxy.d_num_species);
+            sep = " ";
         } else if (strcmp(opt, "galaxy") == 0 && val == NULL) {
             return showGalaxyCommand(argc - 1, argv + 1);
         } else if (strcmp(opt, "help") == 0 && val == NULL) {
             return showHelp();
+        } else if (strcmp(opt, "num_planets") == 0 && val == NULL) {
+            get_galaxy_data();
+            get_star_data();
+            get_planet_data();
+            printf("%s%d", sep, num_planets);
+            sep = " ";
+        } else if (strcmp(opt, "num_species") == 0 && val == NULL) {
+            get_galaxy_data();
+            printf("%s%d", sep, galaxy.num_species);
+            sep = " ";
+        } else if (strcmp(opt, "num_stars") == 0 && val == NULL) {
+            get_galaxy_data();
+            get_star_data();
+            printf("%s%d", sep, num_stars);
+            sep = " ";
+        } else if (strcmp(opt, "num_natural_wormholes") == 0 && val == NULL) {
+            get_galaxy_data();
+            get_star_data();
+            printf("%s%d", sep, num_natural_wormholes);
+            sep = " ";
+        } else if (strcmp(opt, "radius") == 0 && val == NULL) {
+            get_galaxy_data();
+            printf("%s%d", sep, galaxy.radius);
+            sep = " ";
+        } else if (strcmp(opt, "turn_number") == 0 && val == NULL) {
+            get_galaxy_data();
+            printf("%s%d", sep, galaxy.turn_number);
+            sep = " ";
+        } else if (strcmp(opt, "version") == 0 && val == NULL) {
+            printf("%s7.5.2", sep);
+            sep = " ";
         } else {
             fprintf(stderr, "error: unknown option '%s'\n", opt);
             return 2;
         }
+    }
+
+    if (strlen(sep) > 0) {
+        printf("\n");
     }
 
     return 0;

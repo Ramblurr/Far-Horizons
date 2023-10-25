@@ -1,0 +1,24 @@
+#!/bin/bash
+###########################################################################
+# test creation of home systems from templates
+${FH_EXE} create galaxy --less-crowded --species=18 || exit 2
+${FH_EXE} create home-system-templates || exit 2
+
+###########################################################################
+# check files against expected contents
+deltaFiles=
+for file in homesystem?.dat; do
+  cknew=$(cksum ${file})
+  cktst=$(cd comps && cksum ${file})
+  if [ "${cknew}" != "${cktst}" ]; then
+    deltaFiles="${deltaFiles} ${file}"
+  fi
+done
+if [ ! -z "${deltaFiles}" ]; then
+  for delta in ${deltaFiles}; do
+    echo "error: ${delta} does not match expected comp"
+  done
+  exit 2
+fi
+
+exit 0
