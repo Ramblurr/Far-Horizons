@@ -26,11 +26,12 @@
 
 void get_star_data(void);
 
-void save_star_data(star_data_t *stars, int numStars);
+void save_star_data(void);
 
 void saveStarData(star_data_t *starBase, int numStars, FILE *fp);
 
 void starDataAsSExpr(star_data_t *starBase, int numStars, FILE *fp);
+
 
 // globals. ugh.
 

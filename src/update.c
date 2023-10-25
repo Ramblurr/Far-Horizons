@@ -212,8 +212,8 @@ int updateHomeSystem(int argc, char *argv[]) {
     }
 
     // save the updated data
-    save_star_data(star_base, num_stars);
-    FILE *fp = fopen("stars.hs.sexpr", "wb");
+    save_star_data();
+    FILE *fp = fopen("stars.hs.txt", "wb");
     if (fp == NULL) {
         perror("changeSystemToHomeSystem:");
         exit(2);
@@ -221,8 +221,8 @@ int updateHomeSystem(int argc, char *argv[]) {
     starDataAsSExpr(star_base, num_stars, fp);
     fclose(fp);
 
-    save_planet_data(planet_base, num_planets);
-    fp = fopen("planets.hs.sexpr", "wb");
+    save_planet_data();
+    fp = fopen("planets.hs.txt", "wb");
     if (fp == NULL) {
         perror("changeSystemToHomeSystem:");
         exit(2);

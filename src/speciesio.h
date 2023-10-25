@@ -30,7 +30,10 @@ void save_species_data(void);
 
 void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *ships, FILE *fp);
 
+void speciesDataAsJson(species_data_t *sp, FILE *fp);
+
 void speciesDataAsSExpr(species_data_t *sp, FILE *fp);
+
 
 // globals. ugh.
 
@@ -39,7 +42,5 @@ extern int data_in_memory[MAX_SPECIES];
 extern int data_modified[MAX_SPECIES];
 
 extern struct species_data spec_data[MAX_SPECIES];
-
-extern const char *tech_level_names[6];
 
 #endif //FAR_HORIZONS_SPECIESIO_H

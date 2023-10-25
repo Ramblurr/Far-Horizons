@@ -26,12 +26,15 @@
 #include "star.h"
 #include "stario.h"
 
+
 int num_stars;
 
 struct star_data *star_base;
 
 int star_data_modified;
 
+// number of natural wormholes
+int num_natural_wormholes = 0;
 
 void get_star_data(void) {
     int32_t numStars;
@@ -58,8 +61,7 @@ void get_star_data(void) {
         exit(-1);
     }
     num_stars = numStars;
-    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars + NUM_EXTRA_STARS,
-                                             sizeof(struct star_data));
+    star_base = (struct star_data *) ncalloc(__FUNCTION__, __LINE__, num_stars + NUM_EXTRA_STARS, sizeof(struct star_data));
     if (star_base == NULL) {
         perror("get_star_data");
         fprintf(stderr, "\nCannot allocate enough memory for star file!\n\n");
@@ -98,12 +100,15 @@ void get_star_data(void) {
         s->id = i + 1;
         s->index = i;
         s->wormholeExit = NULL;
+
     }
 
     // link wormholes
+    num_natural_wormholes = 0;
     for (int i = 0; i < num_stars; i++) {
         struct star_data *s = &star_base[i];
         if (s->worm_here && s->wormholeExit == NULL) {
+            num_natural_wormholes++;
             for (int w = 0; w < num_stars; w++) {
                 struct star_data *p = &star_base[w];
                 if (p->x == s->worm_x && p->y == s->worm_y && p->z == s->worm_z) {
@@ -121,7 +126,7 @@ void get_star_data(void) {
 }
 
 
-void save_star_data(star_data_t *stars, int numStars) {
+void save_star_data(void) {
     // open star file for writing
     FILE *fp = fopen("stars.dat", "wb");
     if (fp == NULL) {
@@ -129,7 +134,7 @@ void save_star_data(star_data_t *stars, int numStars) {
         fprintf(stderr, "\n\tCannot create file 'stars.dat'!\n");
         exit(-1);
     }
-    saveStarData(stars, numStars, fp);
+    saveStarData(star_base, num_stars, fp);
     fclose(fp);
 
     star_data_modified = FALSE;
@@ -144,8 +149,7 @@ void saveStarData(star_data_t *starBase, int numStars, FILE *fp) {
         fprintf(stderr, "error: saveStarData: internal error: passed null file pointer\n");
         exit(2);
     }
-    binary_star_data_t *starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars,
-                                                                  sizeof(binary_star_data_t));
+    binary_star_data_t *starData = (binary_star_data_t *) ncalloc(__FUNCTION__, __LINE__, numStars, sizeof(binary_star_data_t));
     if (starData == NULL) {
         perror("saveStarData:");
         fprintf(stderr, "error: cannot allocate enough memory to convert stars data\n");

@@ -22,13 +22,15 @@
 
 #include <stdio.h>
 #include "transaction.h"
-#include "cJSON.h"
 
 void get_transaction_data(void);
 
 void save_transaction_data(void);
 
+void transactionDataAsJson(FILE *fp);
+
 void transactionDataAsSExpr(FILE *fp);
+
 
 // globals. ugh.
 

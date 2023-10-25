@@ -25,7 +25,4 @@
 
 int createGalaxy(int radius, int desiredNumStars, int desiredNumSpecies);
 
-// ugh globals
-extern int num_wormholes;
-
 #endif //FAR_HORIZONS_GALAXY_H

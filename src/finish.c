@@ -115,7 +115,7 @@ int finishCommand(int argc, char *argv[]) {
     /* Handle turn number. */
     galaxy.turn_number++;
     turn_number = galaxy.turn_number;
-    save_galaxy_data(&galaxy);
+    save_galaxy_data();
 
     /* Do mining difficulty increases and initialize total economic base for each planet. */
     planet = planet_base;
@@ -1097,8 +1097,8 @@ int finishCommand(int argc, char *argv[]) {
     clean_up:
 
     /* Clean up and exit. */
-    save_planet_data(planet_base, num_planets);
-    save_location_data(loc, num_locs);
+    save_planet_data();
+    save_location_data();
     save_species_data();
     free_species_data();
     free(planet_base);

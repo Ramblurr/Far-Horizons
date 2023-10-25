@@ -21,9 +21,10 @@
 #define FAR_HORIZONS_NAMPLAIO_H
 
 #include <stdio.h>
-#include "cJSON.h"
 
 struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp);
+
+void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp);
 
 void namplaDataAsSExpr(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp);
 

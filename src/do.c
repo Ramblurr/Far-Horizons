@@ -396,9 +396,6 @@ void do_BUILD_command(int continuing_construction, int interspecies_construction
             pop_check_needed, contact_word_number, contact_bit_number,
             already_notified[MAX_SPECIES];
 
-    // todo:
-    //  warning: a function declaration without a prototype is deprecated in all versions of C and is treated as a zero-parameter prototype in C2x, conflicting with a previous declaration [-Wdeprecated-non-prototype]
-    //  note: conflicting prototype is in engine.h: char *commas(long value);
     char upper_ship_name[32], *commas(), *src, *dest,
             *original_line_pointer;
 
@@ -1454,7 +1451,7 @@ void do_DEVELOP_command(void) {
     /* See if there are any more arguments. */
     tp = input_line_pointer;
     more_args = FALSE;
-    while ((c = *tp++)) {
+    while (c = *tp++) {
         if (c == ';' || c == '\n') { break; }
         if (c == ' ' || c == '\t') { continue; }
         more_args = TRUE;
@@ -1604,7 +1601,7 @@ void do_DEVELOP_command(void) {
     /* See if there are more arguments. */
     tp = input_line_pointer;
     more_args = FALSE;
-    while ((c = *tp++)) {
+    while (c = *tp++) {
         if (c == ';' || c == '\n') { break; }
         if (c == ' ' || c == '\t') { continue; }
         more_args = TRUE;
@@ -5939,7 +5936,7 @@ void do_UPGRADE_command(void) {
     }
 
     /* Get amount to be spent. */
-    if ((value_specified = get_value())) {
+    if (value_specified = get_value()) {
         if (value == 0) {
             amount_to_spend = balance;
         } else {

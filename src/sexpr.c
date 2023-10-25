@@ -799,7 +799,6 @@ void gc_mark(sexpr_atom_t root) {
     if (a->mark) {
         return;
     }
-    // warning: implicit truncation from 'int' to a one-bit wide bit-field changes value from 1 to -1 [-Wsingle-bit-bitfield-constant-conversion]
     a->mark = 1;
     gc_mark(car(root));
     gc_mark(cdr(root));
@@ -1173,14 +1172,14 @@ int sexprCommand(int argc, char **argv) {
 
     load_file(env, "library.lisp");
 
-    load_expr(env, "galaxy.sexpr");
-    //load_expr(env, "stars.sexpr");
-    //load_expr(env, "planets.sexpr");
-    load_expr(env, "species001.sexpr");
-    load_expr(env, "species002.sexpr");
-    load_expr(env, "species003.sexpr");
-    load_expr(env, "species004.sexpr");
-    //load_expr(env, "locations.sexpr");
+    load_expr(env, "galaxy.txt");
+    //load_expr(env, "stars.txt");
+    //load_expr(env, "planets.txt");
+    load_expr(env, "species001.txt");
+    load_expr(env, "species002.txt");
+    load_expr(env, "species003.txt");
+    load_expr(env, "species004.txt");
+    //load_expr(env, "locations.txt");
 
 
 //    /* Main loop */

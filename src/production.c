@@ -266,7 +266,7 @@ int productionCommand(int argc, char *argv[]) {
     save_species_data();
 
     if (planet_data_modified) {
-        save_planet_data(planet_base, num_planets);
+        save_planet_data();
     }
 
     save_transaction_data();

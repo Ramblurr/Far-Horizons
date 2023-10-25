@@ -19,6 +19,7 @@
 
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -91,6 +92,56 @@ struct nampla_data *get_nampla_data(int numNamplas, int extraNamplas, FILE *fp) 
     free(binData);
 
     return namplaData;
+}
+
+
+void namplaDataAsJson(int spNo, struct nampla_data *namplaData, int num_namplas, FILE *fp) {
+    fprintf(fp, "{\n");
+    fprintf(fp, "  \"species_no\": %d,\n", spNo);
+    fprintf(fp, "  \"namplas\": [");
+    for (int i = 0; i < num_namplas; i++) {
+        struct nampla_data *np = &namplaData[i];
+        fprintf(fp, "{\n");
+        fprintf(fp, "      \"id\": %d,\n", i + 1);
+        fprintf(fp, "      \"name\": \"%s\",\n", np->name);
+        fprintf(fp, "      \"planet\": {\"id\": %5d, \"x\": %3d, \"y\": %3d, \"z\": %3d, \"orbit\": %d},\n",
+                np->planet_index, np->x, np->y, np->z, np->pn);
+        fprintf(fp, "      \"status\":        %9d,\n", np->status);
+        fprintf(fp, "      \"hiding\":        %9s,\n", np->hiding ? "true" : "false");
+        fprintf(fp, "      \"hiding_val\":    %9d,\n", np->hiding);
+        fprintf(fp, "      \"hidden\":        %9s,\n", np->hidden ? "true" : "false");
+        fprintf(fp, "      \"hidden_val\":    %9d,\n", np->hidden);
+        fprintf(fp, "      \"ma_base\":       %9d,\n", np->ma_base);
+        fprintf(fp, "      \"mi_base\":       %9d,\n", np->mi_base);
+        fprintf(fp, "      \"pop_units\":     %9d,\n", np->pop_units);
+        fprintf(fp, "      \"shipyards\":     %9d,\n", np->shipyards);
+        fprintf(fp, "      \"siege_eff\":     %9d,\n", np->siege_eff);
+        fprintf(fp, "      \"special\":       %9d,\n", np->special);
+        fprintf(fp, "      \"use_on_ambush\": %9d,\n", np->use_on_ambush);
+        fprintf(fp, "      \"au\": {\"auto\": %6d, \"needed\": %6d, \"to_install\": %6d},\n",
+                np->auto_AUs, np->AUs_needed, np->AUs_to_install);
+        fprintf(fp, "      \"iu\": {\"auto\": %6d, \"needed\": %6d, \"to_install\": %6d},\n",
+                np->auto_IUs, np->IUs_needed, np->IUs_to_install);
+        const char *sep = "\n";
+        fprintf(fp, "      \"items\": [");
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (np->item_quantity[j] > 0) {
+                fprintf(fp, "%s        {\"code\": %2d, \"qty\": %6d}", sep, j, np->item_quantity[j]);
+                sep = ",\n";
+            }
+        }
+        if (*sep == ',') {
+            // not an empty list so put closing bracket on new line
+            fprintf(fp, "\n      ");
+        }
+        fprintf(fp, "]\n");
+        fprintf(fp, "    }");
+        if (i + 1 < num_namplas) {
+            fprintf(fp, ",");
+        }
+    }
+    fprintf(fp, "]\n");
+    fprintf(fp, "}\n");
 }
 
 
@@ -180,4 +231,5 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
     /* release the binary data memory we allocated */
     free(binData);
 }
+
 

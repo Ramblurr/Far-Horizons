@@ -62,9 +62,8 @@ uint64_t prngGetSeed(void) {
 }
 
 
-uint64_t prngSetSeed(uint64_t seed) {
+int prngSetSeed(uint64_t seed) {
     prngSeed = seed;
-    return seed;
 }
 
 

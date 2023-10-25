@@ -377,37 +377,34 @@ NB: `fh report` replaces `Report`.
 
 The `fh stats` command displays current statistics.
 
-## Exporting data to JSON
+## Show Engine Version
 
-The `fh export json` command exports game data as JSON formatted data
-and saves the result to text files (instead of the normal binary data files).
+The `fh show version` command displays the version of the game engin.
 
-The output file names are hard-coded:
+```bash
+fh show version
+7.5.2
+```
 
-    galaxy.json
-    stars.json
-    planets.json
-    species.NNN.json
-    species.NNN.planets.json
-    species.NNN.ships.json
-    locations.json
-    transactions.json
+## Show Game Settings
 
-Each species creates a set of three files, one for the species data,
-one for the planets the species has named,
-and one for all the ships the species controls.
+The `fh show` command can list the game version and several settings.
 
-## Importing data from JSON
+    d_num_species          maximum number of species\n");
+    num_planets            number of planets in cluster\n");
+    num_species            number of planets in cluster\n");
+    num_stars              number of stars in cluster\n");
+    num_natural_wormholes  number of natural wormholes in cluster\n");
+    radius                 radius of cluster\n");
+    turn_number            current turn number\n");
 
-The `fh import json` command imports game data from JSON formatted data and saves the result to the binary data files.
+You may place several values on the command line.
+For example,
 
-It expects the same file names that the `fh export json` creates.
-
-There are some data quality checks on the import,
-but they need much more work.
-
-Note that if the import does detect issues with the input,
-it will abend instead of overwriting the binary data files.
+```bash
+fh show num_stars num_planets
+162 606
+```
 
 # License
 

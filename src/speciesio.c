@@ -18,12 +18,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include "data.h"
 #include "engine.h"
+#include "galaxy.h"
 #include "galaxyio.h"
+#include "species.h"
 #include "speciesio.h"
 #include "namplaio.h"
 #include "namplavars.h"
@@ -159,7 +162,7 @@ void get_species_data(void) {
 
 // save_species_data will write all data that has been modified
 void save_species_data(void) {
-    for (int species_index = 0; species_index < MAX_SPECIES; species_index++) {
+    for (int species_index = 0; species_index < galaxy.num_species; species_index++) {
         if (data_in_memory[species_index] != FALSE && data_modified[species_index] != FALSE) {
             // get the filename for the species
             char filename[128];
@@ -234,7 +237,7 @@ void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *s
     save_ship_data(ships, sp->num_ships, fp);
 
     char filename[128];
-    sprintf(filename, "species.%03d.sexpr", sp->id);
+    sprintf(filename, "species%03d.txt", sp->id);
     fp = fopen(filename, "wb");
     if (fp != NULL) {
         speciesDataAsSExpr(sp, fp);
@@ -243,7 +246,71 @@ void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *s
 }
 
 
-const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};
+static const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};
+
+
+// speciesDataAsJson writes the current species data to a text file as JSON.
+void speciesDataAsJson(species_data_t *sp, FILE *fp) {
+    fprintf(fp, "{\n");
+    fprintf(fp, "  \"id\": %d,\n", sp->id);
+    fprintf(fp, "  \"sp_no\": %d,\n", sp->id);
+    fprintf(fp, "  \"name\": \"%s\",\n", sp->name);
+    fprintf(fp, "  \"auto\": %s,\n", sp->auto_orders ? "true" : "false");
+    fprintf(fp, "  \"government\": {\"name\": \"%s\", \"type\": \"%s\"},\n",
+            sp->govt_name, sp->govt_type);
+    fprintf(fp, "  \"homeworld\": {\"x\": %d, \"y\": %d, \"z\": %d, \"orbit\": %d, \"hp_base\": %d},\n",
+            sp->x, sp->y, sp->z, sp->pn, sp->hp_original_base);
+    fprintf(fp, "  \"atmosphere\": {\n");
+    fprintf(fp, "      \"required\": {\"gas\": %d, \"min\": %d, \"max\": %d},\n",
+            sp->required_gas, sp->required_gas_min, sp->required_gas_max);
+    fprintf(fp, "      \"neutral\": [%d, %d, %d, %d, %d, %d],\n",
+            sp->neutral_gas[0], sp->neutral_gas[1], sp->neutral_gas[2], sp->neutral_gas[3],
+            sp->neutral_gas[4], sp->neutral_gas[5]);
+    fprintf(fp, "      \"poison\": [%d, %d, %d, %d, %d, %d]\n  },\n",
+            sp->poison_gas[0], sp->poison_gas[1], sp->poison_gas[2], sp->poison_gas[3],
+            sp->poison_gas[4], sp->poison_gas[5]);
+    fprintf(fp, "  \"technology\": {\n");
+    for (int i = 0; i < 6; i++) {
+        fprintf(fp, "    \"%s\": {\"level\": %d, \"knowledge\": %d, \"init\": %d, \"xp\": %d}",
+                tech_level_names[i], sp->tech_level[i], sp->tech_knowledge[i], sp->init_tech_level[i], sp->tech_eps[i]);
+        if (i != 5) {
+            fprintf(fp, ",\n");
+        }
+    }
+    fprintf(fp, "\n  },\n");
+    fprintf(fp, "  \"num_namplas\": %d,\n", sp->num_namplas);
+    fprintf(fp, "  \"num_ships\": %d,\n", sp->num_ships);
+    fprintf(fp, "  \"fleet_maintenance\": {\"cost\": %d, \"percent\": %d},\n", sp->fleet_cost, sp->fleet_percent_cost);
+    fprintf(fp, "  \"banked_eu\": %d,\n", sp->econ_units);
+    fprintf(fp, "  \"contacts\": [");
+    const char *sep = "";
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->contact[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            fprintf(fp, "%s%d", sep, spidx + 1);
+            sep = ", ";
+        }
+    }
+    fprintf(fp, "],\n");
+    fprintf(fp, "  \"allies\": [");
+    sep = "";
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->ally[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            fprintf(fp, "%s%d", sep, spidx + 1);
+            sep = ", ";
+        }
+    }
+    fprintf(fp, "],\n");
+    fprintf(fp, "  \"enemies\": [");
+    sep = "";
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->enemy[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            fprintf(fp, "%s%d", sep, spidx + 1);
+            sep = ", ";
+        }
+    }
+    fprintf(fp, "]\n}\n");
+}
+
 
 // speciesDataAsSExpr writes the current species data to a text file as an s-expression.
 void speciesDataAsSExpr(species_data_t *sp, FILE *fp) {
@@ -294,3 +361,4 @@ void speciesDataAsSExpr(species_data_t *sp, FILE *fp) {
     fprintf(fp, ")");
     fprintf(fp, ")\n");
 }
+

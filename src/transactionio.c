@@ -24,8 +24,6 @@
 #include <sys/stat.h>
 #include "engine.h"
 #include "transactionio.h"
-#include "cJSON.h"
-#include "json.h"
 
 
 int num_transactions;
@@ -62,9 +60,8 @@ void get_transaction_data(void) {
     // get number of records in the file
     num_transactions = sb.st_size / sizeof(binary_ship_data_t);
     if (sb.st_size != num_transactions * sizeof(binary_ship_data_t)) {
-        // todo: warning: format specifies type 'long' but the argument has type 'off_t' (aka 'long long') [-Wformat]
         fprintf(stderr, "\nFile interspecies.dat contains extra bytes (%ld > %ld)!\n\n",
-                (long)(sb.st_size), num_transactions * sizeof(binary_ship_data_t));
+                sb.st_size, num_transactions * sizeof(binary_ship_data_t));
         exit(-1);
     } else if (num_transactions == 0) {
         // nothing to do
@@ -174,6 +171,25 @@ void save_transaction_data(void) {
     fclose(fp);
 }
 
+
+void transactionDataAsJson(FILE *fp) {
+    fprintf(fp, "[\n");
+    for (int i = 0; i < num_transactions; i++) {
+        trans_data_t *t = &transaction[i];
+        fprintf(fp,
+                "  {\"type\": %2d, \"donor\": %3d, \"recipient\": %3d, \"value\": %9d, \"x\": %3d, \"y\": %3d, \"z\": %3d, \"orbit\": %d, \"args\": [{\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}, {\"number\": %9d, \"name\": \"%s\"}]}",
+                t->type, t->donor, t->recipient, t->value, t->x, t->y, t->z, t->pn, t->number1, t->name1, t->number2,
+                t->name2, t->number3, t->name3);
+        if (i + 1 < num_transactions) {
+            fprintf(fp, ",");
+        }
+        fprintf(fp, "\n");
+
+    }
+    fprintf(fp, "]\n");
+}
+
+
 void transactionDataAsSExpr(FILE *fp) {
     fprintf(fp, "(transactions");
     for (int i = 0; i < num_transactions; i++) {
@@ -189,4 +205,3 @@ void transactionDataAsSExpr(FILE *fp) {
     }
     fprintf(fp, ")\n");
 }
-

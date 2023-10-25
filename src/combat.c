@@ -1153,7 +1153,6 @@ int combatCommand(int argc, char *argv[]) {
             test_mode = TRUE;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose_mode = TRUE;
-            // todo: warning: format specifies type 'unsigned long' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
             printf(" info: combat: last_random is %12lu\n", prngGetSeed());
         } else if (strcmp(argv[i], "--combat") == 0) {
             strike_phase = FALSE;
@@ -1219,7 +1218,7 @@ int combatCommand(int argc, char *argv[]) {
 
     int save = combat(default_summary, do_all_species, num_species, sp_num, sp_name, &loc[0]);
     if (save) {
-        save_planet_data(planet_base, num_planets);
+        save_planet_data();
         save_species_data();
         save_transaction_data();
     }
