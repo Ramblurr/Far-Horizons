@@ -32,6 +32,7 @@
 #include "namplavars.h"
 #include "shipio.h"
 #include "shipvars.h"
+#include "speciesvars.h"
 
 
 int data_in_memory[MAX_SPECIES];
@@ -244,9 +245,6 @@ void saveSpeciesData(species_data_t *sp, nampla_data_t *colonies, ship_data_t *s
         fclose(fp);
     }
 }
-
-
-static const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};
 
 
 // speciesDataAsJson writes the current species data to a text file as JSON.
