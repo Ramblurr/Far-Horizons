@@ -20,51 +20,5 @@
 #ifndef FAR_HORIZONS_UNMARSHAL_H
 #define FAR_HORIZONS_UNMARSHAL_H
 
-#include "data.h"
-#include "json.h"
-
-
-global_cluster_t *unmarshalCluster(json_value_t *j);
-
-global_colony_t *unmarshalColony(json_value_t *j);
-
-global_colony_t **unmarshalColonies(json_value_t *j);
-
-global_coords_t *unmarshalCoords(json_value_t *j);
-
-global_data_t *unmarshalData(json_value_t *j);
-
-global_develop_t *unmarshalDevelop(json_value_t *j);
-
-global_develop_t **unmarshalDevelopList(json_value_t *j);
-
-global_gas_t *unmarshalGas(json_value_t *j);
-
-global_gas_t **unmarshalGases(json_value_t *j);
-
-global_item_t **unmarshalInventory(json_value_t *j);
-
-global_location_t *unmarshalLocation(json_value_t *j);
-
-global_planet_t *unmarshalPlanet(json_value_t *j);
-
-global_planet_t **unmarshalPlanets(json_value_t *j);
-
-global_ship_t *unmarshalShip(json_value_t *j);
-
-global_ship_t **unmarshalShips(json_value_t *j);
-
-global_skill_t *unmarshalSkill(json_value_t *j);
-
-global_species_t *unmarshalSpecie(json_value_t *j);
-
-global_species_t **unmarshalSpecies(json_value_t *j);
-
-global_system_t *unmarshalSystem(json_value_t *j);
-
-global_system_t **unmarshalSystems(json_value_t *j);
-
-
-
 
 #endif //FAR_HORIZONS_UNMARSHAL_H

@@ -29,4 +29,6 @@ extern struct species_data *species;
 extern int species_index;
 extern int species_number;
 
+extern const char *tech_level_names[6];
+
 #endif //FAR_HORIZONS_SPECIESVARS_H

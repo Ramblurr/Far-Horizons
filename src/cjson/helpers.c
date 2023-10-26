@@ -4,7 +4,114 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "helpers.h"
+
+
+void jsonAddIntToArray(cJSON *array, const char *arrayName, int value) {
+    cJSON *item = cJSON_CreateNumber((double) value);
+    if (item == 0) {
+        perror("cJSON_CreateNumber:");
+        fprintf(stderr, "%s: unable to integer for array\n", arrayName);
+        exit(2);
+    } else if (cJSON_AddItemToArray(array, item) == 0) {
+        perror("cJSON_AddItemToArray:");
+        fprintf(stderr, "%s: unable to add integer to array\n", arrayName);
+        exit(2);
+    }
+}
+
+void jsonAddBoolToObj(cJSON *obj, const char *objName, const char *propName, int value) {
+    if (cJSON_AddBoolToObject(obj, propName, value) == 0) {
+        perror("cJSON_AddBoolToObject:");
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        exit(2);
+    }
+}
+
+void jsonAddIntToObj(cJSON *obj, const char *objName, const char *propName, int value) {
+    if (cJSON_AddNumberToObject(obj, propName, (double) (value)) == 0) {
+        perror("cJSON_AddNumberToObject:");
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        exit(2);
+    }
+}
+
+void jsonAddItemToArray(cJSON *array, const char *objName, cJSON *value) {
+    if (cJSON_AddItemToArray(array, value) == 0) {
+        perror("cJSON_AddItemToArray:");
+        fprintf(stderr, "%s: unable to extend array\n", objName);
+        exit(2);
+    }
+}
+
+void jsonAddItemToObj(cJSON *obj, const char *objName, const char *propName, cJSON *value) {
+    if (cJSON_AddItemToObject(obj, propName, value) == 0) {
+        perror("cJSON_AddItemToObject:");
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        exit(2);
+    }
+}
+
+void jsonAddStringToObj(cJSON *obj, const char *objName, const char *propName, const char *value) {
+    if (cJSON_AddStringToObject(obj, propName, value) == 0) {
+        perror("cJSON_AddStringToObject:");
+        fprintf(stderr, "%s: unable to add property '%s'\n", objName, propName);
+        exit(2);
+    }
+}
+
+int jsonGetBool(cJSON *obj, const char *property) {
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(obj, property);
+    if (item == 0) {
+        fprintf(stderr, "property: %s: missing\n", property);
+        exit(2);
+    } else if (!cJSON_IsBool(item)) {
+        fprintf(stderr, "property: %s: not a boolean\n", property);
+        exit(2);
+    }
+    if (item->valueint == 0) {
+        return 0;
+    }
+    return 1;
+}
+
+int jsonGetInt(cJSON *obj, const char *property) {
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(obj, property);
+    if (item == 0) {
+        fprintf(stderr, "property: %s: missing\n", property);
+        exit(2);
+    } else if (!cJSON_IsNumber(item)) {
+        fprintf(stderr, "property: %s: not an integer\n", property);
+        exit(2);
+    }
+    return item->valueint;
+}
+
+// jsonGetString should copy up to maxLength - 1 bytes.
+const char *jsonGetString(cJSON *obj, const char *property, int maxLength) {
+    static char buffer[1024];
+    if (maxLength > 1023) {
+        fprintf(stderr, "jsonGetString: maxLength %d exceeds limit\n", maxLength);
+        exit(2);
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(obj, property);
+    if (item == 0) {
+        fprintf(stderr, "property: %s: missing\n", property);
+        exit(2);
+    } else if (!cJSON_IsString(item)) {
+        fprintf(stderr, "property: %s: not a string\n", property);
+        exit(2);
+    }
+    if (strlen(item->valuestring) > maxLength) {
+        fprintf(stderr, "jsonGetString: strlen %d exceeds limit %d\n", (int) strlen(item->valuestring) + 1, maxLength);
+        exit(2);
+    }
+    strcpy(buffer, item->valuestring);
+    buffer[maxLength - 1] = 0;
+    return buffer;
+}
+
 
 cJSON *jsonParseFile(const char *name) {
     FILE *fp = fopen(name, "rb");
@@ -48,3 +155,25 @@ cJSON *jsonParseFile(const char *name) {
 
     return root;
 }
+
+
+void jsonWriteFile(cJSON *root, const char *kind, const char *name) {
+    // convert json to text
+    char *string = cJSON_Print(root);
+    if (string == 0) {
+        fprintf(stderr, "error: %s: json print failed\n", kind);
+        exit(2);
+    }
+    // save it to the file and close it
+    FILE *fp = fopen(name, "wb");
+    if (fp == NULL) {
+        perror("fh: export: json:");
+        fprintf(stderr, "error: %s: can not create file!\n", name);
+        exit(2);
+    }
+    fprintf(fp, "%s\n", string);
+    fclose(fp);
+    // release the memory
+    free(string);
+}
+

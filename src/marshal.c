@@ -18,468 +18,415 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "marshal.h"
-#include "shipvars.h"
-#include "star.h"
+#include "engine.h"
+#include "galaxyio.h"
+#include "planetio.h"
+#include "speciesvars.h"
+#include "stario.h"
 
+static cJSON *marshalNamedPlanet(nampla_data_t *npd);
 
-json_value_t *marshalCluster(global_cluster_t *c) {
-    json_value_t *j = json_map();
-    json_add(j, "radius", json_number(c->radius));
-    json_add(j, "d_num_species", json_number(c->d_num_species));
-    json_add(j, "systems", marshalSystems(c->systems));
-    return j;
+static cJSON *marshalPlanet(planet_data_t *pd);
+
+static cJSON *marshalPlanets(planet_data_t *planets, int num);
+
+static cJSON *marshalShip(ship_data_t *sd);
+
+static cJSON *marshalStar(star_data_t *sd);
+
+cJSON *marshalGalaxy(void) {
+    cJSON *root = cJSON_CreateObject();
+    if (root == 0) {
+        fprintf(stderr, "galaxy: unable to allocate root\n");
+        exit(2);
+    }
+    jsonAddIntToObj(root, "root", "version", 1);
+    cJSON *obj = cJSON_AddObjectToObject(root, "galaxy");
+    if (obj == 0) {
+        fprintf(stderr, "galaxy: unable to allocate property 'galaxy'\n");
+        perror("cJSON_AddObjectToObject:");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, "galaxy", "turn_number", galaxy.turn_number);
+    jsonAddIntToObj(obj, "galaxy", "num_species", galaxy.num_species);
+    jsonAddIntToObj(obj, "galaxy", "d_num_species", galaxy.d_num_species);
+    jsonAddIntToObj(obj, "galaxy", "radius", galaxy.radius);
+    return root;
 }
 
-
-json_value_t *marshalColony(global_colony_t *c) {
-    json_value_t *j = json_map();
-    // json_add(j, "cid", json_number(c->id));
-    json_add(j, "name", json_string(c->name));
-    if (c->location.system) {
-        json_add(j, "system", json_number(c->location.system->id));
-        if (c->location.planet) {
-            json_add(j, "orbit", json_number(c->location.planet->orbit));
-        }
+cJSON *marshalNamedPlanet(nampla_data_t *npd) {
+    char *objName = "named_planet";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        perror("cJSON_CreateObject:");
+        fprintf(stderr, "error: named_planet: unable to allocate object\n");
+        exit(2);
     }
-    if (c->homeworld != FALSE) {
-        json_add(j, "homeworld", json_boolean(1));
-    }
-    if (c->hidden != FALSE) {
-        json_add(j, "hidden", json_boolean(1));
-    }
-    if (c->hiding != FALSE) {
-        json_add(j, "hiding", json_boolean(1));
-    }
-    if (c->inventory[0] != NULL) {
-        json_add(j, "inventory", marshalInventory(c->inventory));
-    }
-    json_value_t *develop = NULL;
-    for (global_develop_t **d = c->develop; *d != NULL; d++) {
-        if (develop == NULL) {
-            develop = json_list();
-        }
-        json_append(develop, marshalDevelop(*d));
-    }
-    if (develop != NULL) {
-        json_add(j, "develop", develop);
-    }
-    if (c->ma_base) {
-        json_add(j, "ma_base", json_number(c->ma_base));
-    }
-    if (c->message) {
-        json_add(j, "message", json_number(c->message));
-    }
-    if (c->mi_base) {
-        json_add(j, "mi_base", json_number(c->mi_base));
-    }
-    if (c->pop_units) {
-        json_add(j, "pop_units", json_number(c->pop_units));
-    }
-    if (c->siege_eff != 0) {
-        json_add(j, "siege_eff", json_number(c->siege_eff));
-    }
-    if (c->special != 0) {
-        json_add(j, "special", json_number(c->special));
-    }
-    if (c->use_on_ambush != 0) {
-        json_add(j, "use_on_ambush", json_boolean(1));
-    }
-    return j;
-}
-
-
-json_value_t *marshalColonies(global_colony_t **c) {
-    json_value_t *j = json_list();
-    if (c != NULL) {
-        for (; *c; c++) {
-            json_append(j, marshalColony(*c));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalDevelop(global_develop_t *d) {
-    json_value_t *j = json_map();
-    json_add(j, "code", json_string(d->code));
-    if (d->auto_install) {
-        json_add(j, "auto_install", json_number(d->auto_install));
-    }
-    if (d->units_needed) {
-        json_add(j, "units_needed", json_number(d->units_needed));
-    }
-    if (d->units_to_install) {
-        json_add(j, "units_to_install", json_number(d->units_to_install));
-    }
-    return j;
-}
-
-
-json_value_t *marshalGas(global_gas_t *g) {
-    json_value_t *j = json_map();
-    json_add(j, "code", json_string(g->code));
-    if (g->atmos_pct) {
-        json_add(j, "atmos_pct", json_number(g->atmos_pct));
-    }
-    if (g->min_pct || g->max_pct) {
-        json_add(j, "min_pct", json_number(g->min_pct));
-        json_add(j, "max_pct", json_number(g->max_pct));
-    }
-    if (g->required) {
-        json_add(j, "required", json_boolean(1));
-    }
-    return j;
-}
-
-
-json_value_t *marshalGases(global_gas_t **g) {
-    json_value_t *j = json_list();
-    if (g != NULL) {
-        for (; *g; g++) {
-            json_append(j, marshalGas(*g));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalGlobals(global_data_t *g) {
-    json_value_t *j = json_map();
-    json_add(j, "turn", json_number(g->turn));
-    json_add(j, "cluster", marshalCluster(g->cluster));
-    json_add(j, "species", marshalSpecies(g->species));
-    return j;
-}
-
-
-json_value_t *marshalInventory(global_item_t **i) {
-    json_value_t *j = json_map();
-    if (i != NULL) {
-        for (; *i; i++) {
-            json_add(j, (*i)->code, json_number((*i)->quantity));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalLocation(global_location_t l) {
-    json_value_t *j = json_map();
-    if (l.colony[0] != 0) {
-        json_add(j, "colony", json_string(l.colony));
+    jsonAddStringToObj(obj, objName, "name", npd->name);
+    jsonAddIntToObj(obj, objName, "star_x", npd->x);
+    jsonAddIntToObj(obj, objName, "star_y", npd->y);
+    jsonAddIntToObj(obj, objName, "star_z", npd->z);
+    jsonAddIntToObj(obj, objName, "planet_orbit", npd->pn);
+    jsonAddIntToObj(obj, objName, "status", npd->status);
+    jsonAddIntToObj(obj, objName, "hiding", npd->hiding);
+    jsonAddIntToObj(obj, objName, "hidden", npd->hidden);
+    jsonAddIntToObj(obj, objName, "ma_base", npd->ma_base);
+    jsonAddIntToObj(obj, objName, "mi_base", npd->mi_base);
+    jsonAddIntToObj(obj, objName, "pop_units", npd->pop_units);
+    jsonAddIntToObj(obj, objName, "shipyards", npd->shipyards);
+    jsonAddIntToObj(obj, objName, "siege_eff", npd->siege_eff);
+    jsonAddIntToObj(obj, objName, "special", npd->special);
+    jsonAddIntToObj(obj, objName, "use_on_ambush", npd->use_on_ambush);
+    jsonAddIntToObj(obj, objName, "au_auto", npd->auto_AUs);
+    jsonAddIntToObj(obj, objName, "au_needed", npd->AUs_needed);
+    jsonAddIntToObj(obj, objName, "au_to_install", npd->AUs_to_install);
+    jsonAddIntToObj(obj, objName, "iu_auto", npd->auto_IUs);
+    jsonAddIntToObj(obj, objName, "iu_needed", npd->IUs_needed);
+    jsonAddIntToObj(obj, objName, "iu_to_install", npd->IUs_to_install);
+    cJSON *items = cJSON_AddArrayToObject(obj, "items");
+    if (items == 0) {
+        perror("cJSON_AddArrayToObject:");
+        fprintf(stderr, "error: named_planet: unable to allocate property 'items'\n");
+        exit(2);
     } else {
-        json_add(j, "x", json_number(l.x));
-        json_add(j, "y", json_number(l.y));
-        json_add(j, "z", json_number(l.z));
-        if (l.orbit) {
-            json_add(j, "z", json_number(l.orbit));
-        }
-    }
-    if (l.deep_space) {
-        json_add(j, "deep_space", json_boolean(1));
-    }
-    if (l.in_orbit) {
-        json_add(j, "in_orbit", json_boolean(1));
-    }
-    if (l.on_surface) {
-        json_add(j, "on_surface", json_boolean(1));
-    }
-    return j;
-}
-
-
-json_value_t *marshalPlanet(global_planet_t *p) {
-    json_value_t *j = json_map();
-    //json_add(j, "id", json_number(p->id));
-    json_add(j, "orbit", json_number(p->orbit));
-    json_add(j, "diameter", json_number(p->diameter));
-    json_add(j, "econ_efficiency", json_number(p->econ_efficiency));
-    if (p->gases[0] != NULL) {
-        json_add(j, "gases", marshalGases(p->gases));
-    }
-    json_add(j, "gravity", json_number(p->gravity));
-    if (p->idealHomePlanet) {
-        json_add(j, "ideal_home_planet", json_boolean(1));
-    }
-    if (p->idealColonyPlanet) {
-        json_add(j, "ideal_colony_planet", json_boolean(1));
-    }
-    if (p->md_increase != 0) {
-        json_add(j, "md_increase", json_number(p->md_increase));
-    }
-    if (p->message != 0) {
-        json_add(j, "message", json_number(p->message));
-    }
-    if (p->mining_difficulty != 0) {
-        json_add(j, "mining_difficulty", json_number(p->mining_difficulty));
-    }
-    json_add(j, "pressure_class", json_number(p->pressure_class));
-    if (p->radioactiveHellHole) {
-        json_add(j, "radioactive_hell_hole", json_boolean(1));
-    }
-    json_add(j, "temperature_class", json_number(p->temperature_class));
-    return j;
-}
-
-
-json_value_t *marshalPlanets(global_planet_t **p) {
-    json_value_t *j = json_list();
-    if (p != NULL) {
-        for (; *p; p++) {
-            json_append(j, marshalPlanet(*p));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalShip(global_ship_t *s) {
-    json_value_t *j = json_map();
-    json_add(j, "name", json_string(s->name));
-    if (s->age) {
-        json_add(j, "age", json_number(s->age));
-    }
-    if (s->arrived_via_wormhole) {
-        json_add(j, "arrived_via_wormhole", json_boolean(1));
-    }
-    if (s->status == FORCED_JUMP) {
-        json_add(j, "forced_jump", json_boolean(1));
-    }
-    if (s->status == IN_DEEP_SPACE) {
-        json_add(j, "in_deep_space", json_boolean(1));
-    }
-    if (s->status == IN_ORBIT) {
-        json_add(j, "in_orbit", json_boolean(1));
-    }
-    if (s->inventory[0] != NULL) {
-        json_add(j, "inventory", marshalInventory(s->inventory));
-    }
-    if (s->status == JUMPED_IN_COMBAT) {
-        json_add(j, "jumped_in_combat", json_boolean(1));
-    }
-    if (s->just_jumped) {
-        json_add(j, "just_jumped", json_boolean(1));
-    }
-    json_add(j, "location", marshalLocation(s->location));
-    if (s->destination.x != 0 && s->destination.y != 0 && s->destination.z != 0) {
-        json_add(j, "destination", marshalLocation(s->destination));
-    }
-    if (s->loading_point[0]) {
-        json_add(j, "loading_point", json_string(s->loading_point));
-    }
-    if (s->status == ON_SURFACE) {
-        json_add(j, "on_surface", json_boolean(1));
-    }
-    if (s->remaining_cost) {
-        json_add(j, "remaining_cost", json_number(s->remaining_cost));
-    }
-    if (s->tonnage != 0) {
-        json_add(j, "tonnage", json_number(s->tonnage));
-    }
-    if (s->status == UNDER_CONSTRUCTION) {
-        json_add(j, "under_construction", json_boolean(1));
-    }
-    if (s->special != 0) {
-        json_add(j, "special", json_number(s->special));
-    }
-    if (s->unloading_point[0]) {
-        json_add(j, "unloading_point", json_string(s->unloading_point));
-    }
-    return j;
-}
-
-
-json_value_t *marshalShips(global_ship_t **s) {
-    json_value_t *j = json_list();
-    if (s != NULL) {
-        for (; *s; s++) {
-            json_append(j, marshalShip(*s));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalSkill(global_skill_t *s) {
-    json_value_t *j = json_map();
-    json_add(j, "code", json_string(s->code));
-    if (s->init_level != 0) {
-        json_add(j, "init_level", json_number(s->init_level));
-    }
-    json_add(j, "current_level", json_number(s->current_level));
-    if (s->knowledge_level != 0) {
-        json_add(j, "knowledge_level", json_number(s->knowledge_level));
-    }
-    json_add(j, "xps", json_number(s->xps));
-
-    return j;
-}
-
-
-json_value_t *marshalSkills(global_skill_t **s) {
-    json_value_t *j = json_list();
-    if (s != NULL) {
-        for (; *s; s++) {
-            json_append(j, marshalSkill(*s));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalSpecie(global_species_t *s) {
-    json_value_t *j = json_map();
-    json_add(j, "sp_no", json_number(s->id));
-    json_add(j, "name", json_string(s->name));
-    json_add(j, "govt_name", json_string(s->govt_name));
-    json_add(j, "govt_type", json_string(s->govt_type));
-
-    if (s->auto_orders) {
-        json_add(j, "auto_orders", json_boolean(1));
-    }
-    json_add(j, "econ_units", json_number(s->econ_units));
-    if (s->hp_original_base) {
-        json_add(j, "hp_original_base", json_number(s->hp_original_base));
-    }
-
-    json_add(j, "skills", marshalSkills(s->skills));
-
-    json_add(j, "required_gases", marshalGases(s->required_gases));
-    json_add(j, "neutral_gases", marshalGases(s->neutral_gases));
-    json_add(j, "poison_gases", marshalGases(s->poison_gases));
-
-    json_value_t *v = NULL;
-    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
-        if (s->contacts[sp]) {
-            if (v == NULL) {
-                v = json_list();
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (npd->item_quantity[j] > 0) {
+                cJSON *item = cJSON_CreateObject();
+                jsonAddIntToObj(item, "item.code", "code", j);
+                jsonAddIntToObj(item, "item.qty", "qty", npd->item_quantity[j]);
+                cJSON_AddItemToArray(items, item);
             }
-            json_append(v, json_number(sp));
         }
     }
-    if (v != NULL) {
-        json_add(j, "contacts", v);
+    return obj;
+}
+
+cJSON *marshalPlanet(planet_data_t *pd) {
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        perror("cJSON_CreateObject:");
+        fprintf(stderr, "error: planet: unable to allocate object\n");
+        exit(2);
     }
-    v = NULL;
-    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
-        if (s->allies[sp]) {
-            if (v == NULL) {
-                v = json_list();
+    jsonAddIntToObj(obj, "planet", "diameter", pd->diameter);
+    jsonAddIntToObj(obj, "planet", "gravity", pd->gravity);
+    jsonAddIntToObj(obj, "planet", "temperature_class", pd->temperature_class);
+    jsonAddIntToObj(obj, "planet", "pressure_class", pd->pressure_class);
+    jsonAddIntToObj(obj, "planet", "special", pd->special);
+    cJSON *gases = cJSON_AddArrayToObject(obj, "gases");
+    if (gases == 0) {
+        perror("cJSON_AddArrayToObject:");
+        fprintf(stderr, "error: planet: unable to allocate property 'gases'\n");
+        exit(2);
+    }
+    for (int j = 0; j < 4; j++) {
+        cJSON *gas = cJSON_AddObjectToObject(gases, "gases");
+        if (gas == NULL) {
+            perror("cJSON_AddObjectToObject:");
+            fprintf(stderr, "error: planet: unable to allocate property 'gas'\n");
+            exit(2);
+        }
+        jsonAddIntToObj(gas, "gases", "code", pd->gas[j]);
+        jsonAddIntToObj(gas, "gases", "percent", pd->gas_percent[j]);
+    }
+    cJSON *miningDifficulty = cJSON_AddObjectToObject(obj, "mining_difficulty");
+    if (miningDifficulty == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: planet: unable to allocate property 'mining_difficulty'\n");
+        exit(2);
+    }
+    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "base", pd->mining_difficulty);
+    jsonAddIntToObj(miningDifficulty, "mining_difficulty", "increase", pd->md_increase);
+    jsonAddIntToObj(obj, "planet", "econ_efficiency", pd->econ_efficiency);
+    jsonAddIntToObj(obj, "planet", "message", pd->message);
+    return obj;
+}
+
+cJSON *marshalPlanets(planet_data_t *planets, int num) {
+    cJSON *array = cJSON_CreateArray();
+    if (array == 0) {
+        fprintf(stderr, "error: planets: unable to allocate array\n");
+        perror("cJSON_CreateArray");
+        exit(2);
+    }
+    for (int p = 0; p < num; p++) {
+        planet_data_t *pd = &planets[p];
+        jsonAddItemToArray(array, "planets", marshalPlanet(pd));
+    }
+    return array;
+}
+
+cJSON *marshalShip(ship_data_t *sd) {
+    char *objName = "ship";
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        fprintf(stderr, "error: ship: unable to allocate object\n");
+        exit(2);
+    }
+    jsonAddStringToObj(obj, objName, "name", sd->name);
+    jsonAddIntToObj(obj, objName, "type", sd->type);
+    jsonAddIntToObj(obj, objName, "tonnage", sd->tonnage);
+    jsonAddIntToObj(obj, objName, "age", sd->age);
+    jsonAddIntToObj(obj, objName, "loc_x", sd->x);
+    jsonAddIntToObj(obj, objName, "loc_y", sd->y);
+    jsonAddIntToObj(obj, objName, "loc_z", sd->z);
+    jsonAddIntToObj(obj, objName, "loc_orbit", sd->pn);
+    jsonAddIntToObj(obj, objName, "loc_status", sd->status);
+    jsonAddIntToObj(obj, objName, "dest_x", sd->dest_x);
+    jsonAddIntToObj(obj, objName, "dest_y", sd->dest_y);
+    jsonAddIntToObj(obj, objName, "dest_z", sd->dest_z);
+    jsonAddBoolToObj(obj, objName, "arrived_via_wormhole", sd->arrived_via_wormhole);
+    jsonAddIntToObj(obj, objName, "class", sd->class);
+    jsonAddIntToObj(obj, objName, "just_jumped", sd->just_jumped);
+    jsonAddIntToObj(obj, objName, "loading_point", sd->loading_point);
+    jsonAddIntToObj(obj, objName, "remaining_cost", sd->remaining_cost);
+    jsonAddIntToObj(obj, objName, "unloading_point", sd->unloading_point);
+    cJSON *cargo = cJSON_AddArrayToObject(obj, "cargo");
+    if (cargo == 0) {
+        fprintf(stderr, "error: ship: unable to allocate property 'cargo'\n");
+        exit(2);
+    } else {
+        for (int j = 0; j < MAX_ITEMS; j++) {
+            if (sd->item_quantity[j] > 0) {
+                cJSON *item = cJSON_CreateObject();
+                jsonAddIntToObj(item, "cargo.code", "code", j);
+                jsonAddIntToObj(item, "cargo.qty", "qty", sd->item_quantity[j]);
+                cJSON_AddItemToArray(cargo, item);
             }
-            json_append(v, json_number(sp));
         }
     }
-    if (v != NULL) {
-        json_add(j, "allies", v);
+    return obj;
+}
+
+cJSON *marshalSpecies(species_data_t *sp, nampla_data_t *npa, ship_data_t *sa) {
+    cJSON *root = cJSON_CreateObject();
+    if (root == 0) {
+        perror("cJSON_CreateObject:");
+        fprintf(stderr, "error: species: unable to allocate root\n");
+        exit(2);
     }
-    v = NULL;
-    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
-        if (s->enemies[sp]) {
-            if (v == NULL) {
-                v = json_list();
+    jsonAddIntToObj(root, "root", "version", 1);
+    cJSON *obj = cJSON_AddObjectToObject(root, "species");
+    if (obj == 0) {
+        fprintf(stderr, "error: species: unable to allocate property 'species'\n");
+        exit(2);
+    }
+    const char *objName = "species";
+    jsonAddIntToObj(obj, objName, "id", sp->id);
+    jsonAddStringToObj(obj, objName, "name", sp->name);
+    jsonAddIntToObj(obj, objName, "auto", sp->auto_orders);
+    cJSON *government = cJSON_AddObjectToObject(obj, "government");
+    if (government == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'government'\n");
+        exit(2);
+    } else {
+        jsonAddStringToObj(government, "government", "name", sp->govt_name);
+        jsonAddStringToObj(government, "government", "type", sp->govt_type);
+    }
+    cJSON *home_world = cJSON_AddObjectToObject(obj, "home_world");
+    if (home_world == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'home_world'\n");
+        exit(2);
+    } else {
+        jsonAddIntToObj(home_world, "home_world", "x", sp->x);
+        jsonAddIntToObj(home_world, "home_world", "y", sp->y);
+        jsonAddIntToObj(home_world, "home_world", "z", sp->z);
+        jsonAddIntToObj(home_world, "home_world", "orbit", sp->pn);
+        jsonAddIntToObj(home_world, "home_world", "hp_base", sp->hp_original_base);
+    }
+    cJSON *atmosphere = cJSON_AddObjectToObject(obj, "atmosphere");
+    if (atmosphere == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'atmosphere'\n");
+        exit(2);
+    } else {
+        cJSON *required = cJSON_AddObjectToObject(atmosphere, "required");
+        if (required == 0) {
+            perror("cJSON_AddObjectToObject:");
+            fprintf(stderr, "error: species: unable to allocate property 'atmosphere.required'\n");
+            exit(2);
+        } else {
+            jsonAddIntToObj(required, "atmosphere.required", "gas", sp->required_gas);
+            jsonAddIntToObj(required, "atmosphere.required", "min", sp->required_gas_min);
+            jsonAddIntToObj(required, "atmosphere.required", "max", sp->required_gas_max);
+        }
+        cJSON *neutral = cJSON_AddArrayToObject(atmosphere, "neutral");
+        if (neutral == 0) {
+            perror("cJSON_AddArrayToObject:");
+            fprintf(stderr, "error: species: unable to allocate property 'atmosphere.neutral'\n");
+            exit(2);
+        } else {
+            for (int j = 0; j < 6; j++) {
+                jsonAddIntToArray(neutral, "atmosphere.neutral", sp->neutral_gas[j]);
             }
-            json_append(v, json_number(sp));
         }
-    }
-    if (v != NULL) {
-        json_add(j, "enemies", v);
-    }
-
-    json_add(j, "colonies", marshalColonies(s->colonies));
-    json_add(j, "ships", marshalShips(s->ships));
-    return j;
-}
-
-
-json_value_t *marshalSpecies(global_species_t **s) {
-    json_value_t *j = json_list();
-    if (s != NULL) {
-        for (; *s; s++) {
-            json_append(j, marshalSpecie(*s));
-        }
-    }
-    return j;
-}
-
-
-json_value_t *marshalSystem(global_system_t *s) {
-    json_value_t *j = json_map();
-    json_add(j, "id", json_number(s->id));
-    global_location_t l = {.x =  s->coords.x, y: s->coords.y, z: s->coords.z};
-    json_add(j, "coords", marshalLocation(l));
-    switch (s->type) {
-        case DEGENERATE:
-            json_add(j, "type", json_string("degenerate"));
-            break;
-        case DWARF:
-            json_add(j, "type", json_string("dwarf"));
-            break;
-        case GIANT:
-            json_add(j, "type", json_string("giant"));
-            break;
-        case MAIN_SEQUENCE:
-            json_add(j, "type", json_string("main_sequence"));
-            break;
-    }
-    switch (s->color) {
-        case BLUE:
-            json_add(j, "color", json_string("blue"));
-            break;
-        case BLUE_WHITE:
-            json_add(j, "color", json_string("blue_white"));
-            break;
-        case WHITE:
-            json_add(j, "color", json_string("white"));
-            break;
-        case YELLOW_WHITE:
-            json_add(j, "color", json_string("yellow_white"));
-            break;
-        case YELLOW:
-            json_add(j, "color", json_string("yellow"));
-            break;
-        case ORANGE:
-            json_add(j, "color", json_string("orange"));
-            break;
-        case RED:
-            json_add(j, "color", json_string("red"));
-            break;
-    }
-    json_add(j, "size", json_number(s->size));
-    if (s->home_system) {
-        json_add(j, "home_system", json_boolean(1));
-    }
-    if (s->message != 0) {
-        json_add(j, "message", json_number(s->message));
-    }
-    if (s->wormholeExit != 0) {
-        json_add(j, "wormhole_exit", json_number(s->wormholeExit));
-    }
-    json_value_t *v = NULL;
-    for (int sp = 0; sp < MAX_SPECIES + 1; sp++) {
-        if (s->visited_by[sp]) {
-            if (v == NULL) {
-                v = json_list();
+        cJSON *poison = cJSON_AddArrayToObject(atmosphere, "poison");
+        if (poison == 0) {
+            perror("cJSON_AddArrayToObject:");
+            fprintf(stderr, "error: species: unable to allocate property 'atmosphere.poison'\n");
+            exit(2);
+        } else {
+            for (int j = 0; j < 6; j++) {
+                jsonAddIntToArray(poison, "atmosphere.poison", sp->poison_gas[j]);
             }
-            json_append(v, json_number(sp));
         }
     }
-    if (v != NULL) {
-        json_add(j, "visited_by", v);
+    cJSON *technology = cJSON_AddObjectToObject(obj, "technology");
+    if (technology == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'technology'\n");
+        exit(2);
     }
-    json_add(j, "planets", marshalPlanets(s->planets));
-    return j;
-}
-
-
-json_value_t *marshalSystems(global_system_t **s) {
-    json_value_t *j = json_list();
-    if (s != NULL) {
-        for (; *s; s++) {
-            json_append(j, marshalSystem(*s));
+    for (int j = 0; j < 6; j++) {
+        cJSON *named = cJSON_AddObjectToObject(technology, tech_level_names[j]);
+        if (named == 0) {
+            perror("cJSON_AddObjectToObject:");
+            fprintf(stderr, "error: species: unable to allocate property 'technology.%s'\n", tech_level_names[j]);
+            exit(2);
+        }
+        jsonAddIntToObj(named, "technology", "level", sp->tech_level[j]);
+        jsonAddIntToObj(named, "technology", "knowledge", sp->tech_knowledge[j]);
+        jsonAddIntToObj(named, "technology", "init", sp->init_tech_level[j]);
+        jsonAddIntToObj(named, "technology", "xp", sp->tech_eps[j]);
+    }
+    cJSON *fleet_maintenance = cJSON_AddObjectToObject(obj, "fleet_maintenance");
+    if (fleet_maintenance == 0) {
+        perror("cJSON_AddObjectToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'fleet_maintenance'\n");
+        exit(2);
+    }
+    jsonAddIntToObj(fleet_maintenance, "fleet_maintenance", "cost", sp->fleet_cost);
+    jsonAddIntToObj(fleet_maintenance, "fleet_maintenance", "percent", sp->fleet_percent_cost);
+    jsonAddIntToObj(obj, objName, "banked_eu", sp->econ_units);
+    cJSON *contacts = cJSON_AddArrayToObject(obj, "contacts");
+    if (contacts == 0) {
+        perror("cJSON_AddArrayToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'contacts'\n");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < MAX_SPECIES; spidx++) {
+        if ((sp->contact[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(contacts, "contacts", spidx + 1);
         }
     }
-    return j;
+    cJSON *allies = cJSON_AddArrayToObject(obj, "allies");
+    if (allies == 0) {
+        perror("cJSON_AddArrayToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'allies'\n");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        if ((sp->ally[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(allies, "allies", spidx + 1);
+        }
+    }
+    cJSON *enemies = cJSON_AddArrayToObject(obj, "enemies");
+    if (enemies == 0) {
+        perror("cJSON_AddArrayToObject:");
+        fprintf(stderr, "error: species: unable to allocate property 'enemies'\n");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < MAX_SPECIES; spidx++) {
+        if ((sp->enemy[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(enemies, "enemies", spidx + 1);
+        }
+    }
+    cJSON *namedPlanets = cJSON_AddArrayToObject(root, "named_planets");
+    if (namedPlanets == 0) {
+        fprintf(stderr, "species: unable to allocate property 'named_planets'\n");
+        exit(2);
+    }
+    for (int i = 0; i < sp->num_namplas; i++) {
+        if (!cJSON_AddItemToArray(namedPlanets, marshalNamedPlanet(npa + i))) {
+            perror("cJSON_AddItemToArray:");
+            fprintf(stderr, "error: species: unable to extend array 'named_planets'");
+            exit(2);
+        }
+    }
+    cJSON *ships = cJSON_AddArrayToObject(root, "ships");
+    if (ships == 0) {
+        fprintf(stderr, "species: unable to allocate property 'ships'\n");
+        exit(2);
+    }
+    for (int i = 0; i < sp->num_ships; i++) {
+        if (!cJSON_AddItemToArray(ships, marshalShip(sa + i))) {
+            perror("cJSON_AddItemToArray:");
+            fprintf(stderr, "error: species: unable to extend array 'ships'");
+            exit(2);
+        }
+    }
+    return root;
 }
 
+cJSON *marshalStar(star_data_t *sd) {
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == 0) {
+        perror("cJSON_CreateObject:");
+        fprintf(stderr, "error: star: unable to allocate object\n");
+        exit(2);
+    }
+    jsonAddIntToObj(obj, "star", "x", sd->x);
+    jsonAddIntToObj(obj, "star", "y", sd->y);
+    jsonAddIntToObj(obj, "star", "z", sd->z);
+    char code[2];
+    code[1] = 0;
+    code[0] = star_type(sd->type);
+    jsonAddStringToObj(obj, "star", "type", code);
+    code[0] = star_color(sd->color);
+    jsonAddStringToObj(obj, "star", "color", code);
+    jsonAddIntToObj(obj, "star", "size", sd->size);
+    jsonAddBoolToObj(obj, "star", "home_system", sd->home_system);
+    cJSON *worm_hole = cJSON_AddObjectToObject(obj, "worm_hole");
+    if (worm_hole == NULL) {
+        fprintf(stderr, "error: star: unable to allocate property 'worm_hole'\n");
+        perror("cJSON_AddObjectToObject:");
+        exit(2);
+    }
+    jsonAddBoolToObj(worm_hole, "worm_hole", "here", sd->worm_here);
+    jsonAddIntToObj(worm_hole, "worm_hole", "x", sd->worm_x);
+    jsonAddIntToObj(worm_hole, "worm_hole", "y", sd->worm_y);
+    jsonAddIntToObj(worm_hole, "worm_hole", "z", sd->worm_z);
+    cJSON *visited_by = cJSON_AddArrayToObject(obj, "visited_by");
+    if (visited_by == 0) {
+        fprintf(stderr, "error: star: unable to allocate property 'visited_by'\n");
+        perror("cJSON_AddArrayToObject:");
+        exit(2);
+    }
+    for (int spidx = 0; spidx < galaxy.num_species; spidx++) {
+        // write the species only if it has visited this system
+        if ((sd->visited_by[spidx / 32] & (1 << (spidx % 32))) != 0) {
+            jsonAddIntToArray(visited_by, "visited_by", spidx + 1);
+        }
+    }
+    jsonAddIntToObj(obj, "star", "message", sd->message);
+    jsonAddItemToObj(obj, "star", "planets", marshalPlanets(planet_base + sd->planet_index, sd->num_planets));
+    return obj;
+}
+
+cJSON *marshalSystems(void) {
+    cJSON *root = cJSON_CreateObject();
+    if (root == 0) {
+        fprintf(stderr, "error: systems: unable to allocate root\n");
+        exit(2);
+    }
+    jsonAddIntToObj(root, "root", "version", 1);
+    cJSON *systems = cJSON_AddArrayToObject(root, "systems");
+    if (systems == 0) {
+        fprintf(stderr, "systems: unable to allocate property 'systems'\n");
+        exit(2);
+    }
+    for (int i = 0; i < num_stars; i++) {
+        if (!cJSON_AddItemToArray(systems, marshalStar(&star_base[i]))) {
+            perror("cJSON_AddItemToArray:");
+            fprintf(stderr, "error: stars: unable to extend array 'systems'");
+            exit(2);
+        }
+    }
+    return root;
+}
 

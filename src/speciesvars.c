@@ -28,3 +28,4 @@ int species_index; // zero-based index, mostly for accessing arrays
 
 int species_number; // one-based index, for reports and file names
 
+const char *tech_level_names[6] = {"MI", "MA", "ML", "GV", "LS", "BI"};

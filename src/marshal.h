@@ -20,48 +20,14 @@
 #ifndef FAR_HORIZONS_MARSHAL_H
 #define FAR_HORIZONS_MARSHAL_H
 
-
+#include "cjson/cJSON.h"
+#include "cjson/helpers.h"
 #include "engine.h"
-#include "json.h"
 
+cJSON *marshalGalaxy();
 
-json_value_t *marshalCluster(global_cluster_t *c);
+cJSON *marshalSpecies(species_data_t *sp, nampla_data_t *npa, ship_data_t *sa);
 
-json_value_t *marshalColony(global_colony_t *c);
-
-json_value_t *marshalColonies(global_colony_t **c);
-
-json_value_t *marshalDevelop(global_develop_t *d);
-
-json_value_t *marshalGas(global_gas_t *g);
-
-json_value_t *marshalGases(global_gas_t **g);
-
-json_value_t *marshalGlobals(global_data_t *g);
-
-json_value_t *marshalInventory(global_item_t **i);
-
-json_value_t *marshalLocation(global_location_t l);
-
-json_value_t *marshalPlanet(global_planet_t *p);
-
-json_value_t *marshalPlanets(global_planet_t **p);
-
-json_value_t *marshalShip(global_ship_t *s);
-
-json_value_t *marshalShips(global_ship_t **s);
-
-json_value_t *marshalSkill(global_skill_t *s);
-
-json_value_t *marshalSkills(global_skill_t **s);
-
-json_value_t *marshalSpecie(global_species_t *s);
-
-json_value_t *marshalSpecies(global_species_t **s);
-
-json_value_t *marshalSystem(global_system_t *s);
-
-json_value_t *marshalSystems(global_system_t **s);
-
+cJSON *marshalSystems();
 
 #endif //FAR_HORIZONS_MARSHAL_H

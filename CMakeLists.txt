@@ -38,7 +38,6 @@ add_executable(fh
         src/combat.c src/combat.h
         src/command.c src/command.h
         src/commandvars.c src/commandvars.h
-        src/convert.c src/convert.h
         src/create.c src/create.h
         src/data.c src/data.h
         src/dev_log.c src/dev_log.h
@@ -52,7 +51,6 @@ add_executable(fh
         src/import.c src/import.h
         src/intercept.c src/intercept.h
         src/item.c src/item.h
-        src/json.c src/json.h
         src/jump.c src/jump.h
         src/jumpvars.c src/jumpvars.h
         src/list.c src/list.h
