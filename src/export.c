@@ -33,7 +33,6 @@
 #include "speciesio.h"
 #include "stario.h"
 #include "transactionio.h"
-#include "json.h"
 #include "data.h"
 
 
@@ -44,16 +43,6 @@ int exportToJson(int argc, char *argv[]);
 
 int exportCommand(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy  data...\n", cmdName);
-    get_galaxy_data();
-    printf("fh: export: %s: loading   star    data...\n", cmdName);
-    get_star_data();
-    printf("fh: export: %s: loading   planet  data...\n", cmdName);
-    get_planet_data();
-    printf("fh: export: %s: loading   species data...\n", cmdName);
-    get_species_data();
-
-    char *exportFileName = NULL;
 
     for (int i = 1; i < argc; i++) {
         // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
@@ -80,28 +69,29 @@ int exportCommand(int argc, char *argv[]) {
         } else if (strcmp(opt, "--test") == 0 && val == NULL) {
             test_mode = TRUE;
         } else if (strcmp(opt, "json") == 0 && val == NULL) {
-            return exportToJson(argc - i, argv + i);
+            if (exportToJson(argc - i, argv + i) != 0) {
+                return 2;
+            }
         } else if (strcmp(opt, "sexpr") == 0 && val == NULL) {
-            return exportToSExpr(argc - i, argv + i);
+            if (exportToSExpr(argc - i, argv + i) != 0) {
+                return 2;
+            }
         } else {
             fprintf(stderr, "fh: export: unknown option '%s'\n", opt);
             return 2;
         }
     }
 
-    return 2;
+    return 0;
 }
 
 
 int exportToJson(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy  data...\n", cmdName);
+
     get_galaxy_data();
-    printf("fh: export: %s: loading   star    data...\n", cmdName);
     get_star_data();
-    printf("fh: export: %s: loading   planet  data...\n", cmdName);
     get_planet_data();
-    printf("fh: export: %s: loading   species data...\n", cmdName);
     get_species_data();
 
     for (int i = 1; i < argc; i++) {
@@ -261,12 +251,11 @@ int exportToJson(int argc, char *argv[]) {
 
 int exportToSExpr(int argc, char *argv[]) {
     const char *cmdName = argv[0];
-    printf("fh: export: %s: loading   galaxy data...\n", cmdName);
+
     get_galaxy_data();
-    printf("fh: export: %s: loading   star   data...\n", cmdName);
     get_star_data();
-    printf("fh: export: %s: loading   planet data...\n", cmdName);
     get_planet_data();
+    get_species_data();
 
     for (int i = 1; i < argc; i++) {
         char *opt = argv[i];
