@@ -1,0 +1,97 @@
+#!/bin/bash
+###########################################################################
+# test several turns
+
+###########################################################################
+# create the cluster
+${FH_EXE} create galaxy --less-crowded --species=18 || exit 2
+${FH_EXE} create home-system-templates || exit 2
+${FH_EXE} create species --config=species.cfg.json || exit 2
+
+###########################################################################
+# run turn
+for sp in 01 02 03 04 05; do
+  cp inputs/sp${sp}.ord.t1 sp${sp}.ord || exit 2
+done
+${FH_EXE} turn || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat || exit 2
+${FH_EXE} pre-departure || exit 2
+${FH_EXE} jump || exit 2
+${FH_EXE} production || exit 2
+${FH_EXE} post-arrival || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat --strike || exit 2
+${FH_EXE} finish || exit 2
+${FH_EXE} report || exit 2
+${FH_EXE} stats || exit 2
+
+###########################################################################
+# check settings against expected values
+${FH_EXE} show turn_number |
+  while   read turn_number ; do
+    foundErrors=NO
+    [ "${turn_number}" == 1 ] || {
+      echo "error: show turn_number: want 1, got '${turn_number}'"
+      foundErrors=YES
+    }
+    if [ "${foundErrors}" != NO ]; then
+      echo "error: found errors with the 'show' command"
+      exit 2
+    fi
+  done
+
+###########################################################################
+# run turn
+for sp in 01 02 03 04 05; do
+  cp inputs/sp${sp}.ord.t2 sp${sp}.ord || exit 2
+done
+${FH_EXE} turn || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat || exit 2
+${FH_EXE} pre-departure || exit 2
+${FH_EXE} jump || exit 2
+${FH_EXE} production || exit 2
+${FH_EXE} post-arrival || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat --strike || exit 2
+${FH_EXE} finish || exit 2
+${FH_EXE} report || exit 2
+${FH_EXE} stats || exit 2
+
+###########################################################################
+# run turn
+for sp in 01 02 03 04 05; do
+  cp inputs/sp${sp}.ord.t3 sp${sp}.ord || exit 2
+done
+${FH_EXE} turn || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat || exit 2
+${FH_EXE} pre-departure || exit 2
+${FH_EXE} jump || exit 2
+${FH_EXE} production || exit 2
+${FH_EXE} post-arrival || exit 2
+${FH_EXE} locations || exit 2
+${FH_EXE} combat --strike || exit 2
+${FH_EXE} finish || exit 2
+${FH_EXE} report || exit 2
+${FH_EXE} stats || exit 2
+
+###########################################################################
+# check files against expected contents
+deltaFiles=
+for file in sp??.dat; do
+  cknew=$(cksum ${file})
+  cktst=$(cd comps && cksum ${file})
+  if [ "${cknew}" != "${cktst}" ]; then
+    deltaFiles="${deltaFiles} ${file}"
+  fi
+done
+if [ ! -z "${deltaFiles}" ]; then
+  for delta in ${deltaFiles}; do
+    echo "error: ${delta} does not match expected comp"
+  done
+  exit 2
+fi
+
+exit 0

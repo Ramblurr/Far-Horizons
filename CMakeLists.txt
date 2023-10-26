@@ -94,6 +94,8 @@ add_executable(fh
         src/turn.c src/turn.h
         src/unmarshal.c src/unmarshal.h
         src/update.c src/update.h
-        src/version.c src/version.h)
+        src/version.c src/version.h
+        src/cjson/cJSON.c src/cjson/cJSON.h
+        src/cjson/helpers.c src/cjson/helpers.h)
 
 target_link_libraries(fh ${USE_LIB_M})
