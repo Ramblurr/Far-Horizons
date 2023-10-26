@@ -27,6 +27,7 @@ scripts="${scripts} test0002"
 scripts="${scripts} test0003"
 scripts="${scripts} test0004"
 scripts="${scripts} test0005"
+scripts="${scripts} test0006"
 ###########################################################################
 # verify that the test scripts are present and executable
 for script in ${scripts}; do

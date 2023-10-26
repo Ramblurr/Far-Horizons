@@ -245,6 +245,7 @@ int createOrdersCommand(int argc, char *argv[]) {
 
 
 int createSpeciesCommand(int argc, char *argv[]) {
+    fprintf(stderr, "%s:%s:%d\n", __FILE_NAME__, __FUNCTION__, __LINE__);
     const char *configFile = NULL;
     int radius = 10; // default minimum distance between home systems
 
@@ -282,9 +283,9 @@ int createSpeciesCommand(int argc, char *argv[]) {
         fprintf(stderr, "error: you must supply a configuration file name\n");
         return 2;
     }
-    species_cfg_t *cfg = CfgSpeciesFromFile(configFile);
-    if (cfg == NULL) {
-        fprintf(stderr, "error: found no sections in config file '%s'.\n", configFile);
+    species_cfg_t **cfg = cfgSpeciesFromFile(configFile);
+    if (cfg == NULL || cfg[0] == 0) {
+        fprintf(stderr, "error: %s: no species in config file\n", configFile);
         return 2;
     }
 
@@ -305,7 +306,8 @@ int createSpeciesCommand(int argc, char *argv[]) {
         return 2;
     }
 
-    for (species_cfg_t *c = cfg; c != NULL; c = c->next) {
+    for (int n = 0; cfg[n] != 0; n++) {
+        species_cfg_t *c = cfg[n];
         species_index = galaxy.num_species;
         species_number = species_index + 1;
 
@@ -382,16 +384,26 @@ int createSpeciesCommand(int argc, char *argv[]) {
         strcpy(sp->govt_name, c->govtname);
         strcpy(sp->govt_type, c->govttype);
         sp->tech_level[MA] = 10;
+        if (c->experimental.tech_ma > sp->tech_level[MA]) { sp->tech_level[MA] = c->experimental.tech_ma; }
         sp->tech_level[MI] = 10;
+        if (c->experimental.tech_mi > sp->tech_level[MI]) { sp->tech_level[MI] = c->experimental.tech_mi; }
         sp->tech_level[ML] = c->ml;
+        if (c->experimental.tech_ml > sp->tech_level[ML]) { sp->tech_level[ML] = c->experimental.tech_ml; }
         sp->tech_level[GV] = c->gv;
+        if (c->experimental.tech_gv > sp->tech_level[GV]) { sp->tech_level[GV] = c->experimental.tech_gv; }
         sp->tech_level[LS] = c->ls;
+        if (c->experimental.tech_ls > sp->tech_level[LS]) { sp->tech_level[LS] = c->experimental.tech_ls; }
         sp->tech_level[BI] = c->bi;
+        if (c->experimental.tech_bi > sp->tech_level[BI]) { sp->tech_level[BI] = c->experimental.tech_bi; }
         // initialize other tech stuff
         for (int t = MI; t <= BI; t++) {
             sp->tech_knowledge[t] = sp->tech_level[t];
             sp->init_tech_level[t] = sp->tech_level[t];
             sp->tech_eps[t] = 0;
+        }
+        sp->econ_units = 0;
+        if (c->experimental.econ_units > sp->econ_units) {
+            sp->econ_units = c->experimental.econ_units;
         }
         // make O2 a required gas for the species
         sp->required_gas = O2;
@@ -449,6 +461,40 @@ int createSpeciesCommand(int argc, char *argv[]) {
         sp->y = homeSystem->y;
         sp->z = homeSystem->z;
         sp->pn = home_planet->orbit;
+
+        if (c->experimental.make_bridges) {
+            printf(" warn: engaging experimental hook 'make-bridges'\n");
+            printf(" hook: values before running hook\n");
+            printf("       system %d: worm_here %s\n", homeSystem->id, homeSystem->worm_here ? "true" : "false");
+            // set all other species wormholes to exit in this system
+            star_data_t *alienHomeSystem = 0;
+            for (int alienIndex = 0; alienIndex < MAX_SPECIES; alienIndex++) {
+                if (!data_in_memory[alienIndex]) {
+                    continue;
+                }
+                species_data_t *alien = &spec_data[alienIndex];
+                nampla_data_t *alienNamedPlanets = namp_data[alienIndex];
+                alienHomeSystem = alienNamedPlanets[0].star;
+                printf("       hsp %3d: creating wormhole from %d,%d,%d\n", alien->id, alienHomeSystem->x,
+                       alienHomeSystem->y, alienHomeSystem->z);
+                alienHomeSystem->worm_here = TRUE;
+                alienHomeSystem->worm_x = homeSystem->x;
+                alienHomeSystem->worm_y = homeSystem->y;
+                alienHomeSystem->worm_z = homeSystem->z;
+            }
+            if (alienHomeSystem == 0) {
+                printf("       no alien species found, not creating wormhole\n");
+            } else {
+                printf("       creating wormhole to %d,%d,%d\n", alienHomeSystem->x, alienHomeSystem->y,
+                       alienHomeSystem->z);
+                homeSystem->worm_here = TRUE;
+                homeSystem->worm_x = alienHomeSystem->x;
+                homeSystem->worm_y = alienHomeSystem->y;
+                homeSystem->worm_z = alienHomeSystem->z;
+            }
+            printf(" hook: values after running hook\n");
+            printf("       system %d: worm_here %s\n", homeSystem->id, homeSystem->worm_here ? "true" : "false");
+        }
 
         nampla_data_t *home_nampla = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(nampla_data_t));
         if (home_nampla == NULL) {
@@ -541,13 +587,22 @@ int createSpeciesCommand(int argc, char *argv[]) {
         int base = sp->tech_level[MI] + sp->tech_level[MA];
         base = (25 * base) + rnd(base) + rnd(base) + rnd(base);
         home_nampla->mi_base = home_planet->mining_difficulty * base / (10 * sp->tech_level[MI]);
+        if (c->experimental.mi_base > home_nampla->mi_base) {
+            home_nampla->mi_base = c->experimental.mi_base;
+        }
         home_nampla->ma_base = 10 * base / sp->tech_level[MA];
+        if (c->experimental.ma_base > home_nampla->ma_base) {
+            home_nampla->ma_base = c->experimental.ma_base;
+        }
 
         // fill out the rest
         sp->num_namplas = 1;    // just the home planet for now ("nampla" means "named planet")
         home_nampla->status = HOME_PLANET | POPULATED;
         home_nampla->pop_units = HP_AVAILABLE_POP;
         home_nampla->shipyards = 1;
+        if (c->experimental.ship_yards > home_nampla->shipyards) {
+            home_nampla->shipyards = c->experimental.ship_yards;
+        }
         // everything else was initialized to zero in the earlier call to 'delete_nampla'
 
         /* Print summary. */

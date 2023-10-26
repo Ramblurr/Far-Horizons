@@ -20,8 +20,7 @@
 #ifndef FAR_HORIZONS_CFGFILE_H
 #define FAR_HORIZONS_CFGFILE_H
 
-typedef struct species_cfg {
-    struct species_cfg *next;
+struct species_cfg {
     char *email;
     char *govtname;
     char *govttype;
@@ -31,11 +30,25 @@ typedef struct species_cfg {
     int gv;
     int ls;
     int bi;
-} species_cfg_t;
+    struct {
+        int econ_units;
+        int make_bridges;
+        int ma_base;
+        int mi_base;
+        int ship_yards;
+        int tech_bi;
+        int tech_gv;
+        int tech_ls;
+        int tech_ma;
+        int tech_mi;
+        int tech_ml;
+    } experimental;
+}
+typedef species_cfg_t;
 
 
-species_cfg_t *CfgSpeciesFree(species_cfg_t *c);
+species_cfg_t *cfgSpeciesFree(species_cfg_t *c);
 
-species_cfg_t *CfgSpeciesFromFile(const char *name);
+species_cfg_t **cfgSpeciesFromFile(const char *name);
 
 #endif //FAR_HORIZONS_CFGFILE_H

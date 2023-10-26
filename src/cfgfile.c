@@ -23,12 +23,16 @@
 #include <ctype.h>
 #include "engine.h"
 #include "cfgfile.h"
+#include "cjson/cJSON.h"
+#include "cjson/helpers.h"
+
 
 typedef struct {
     char *key;
     char *value;
 } key_value_t;
 
+static species_cfg_t **cfgSpeciesFromJSON(const char *name);
 
 // cfgReadLine reads one line from the input file and returns
 // the key/value pair on the line.
@@ -95,39 +99,49 @@ key_value_t cfgReadLine(FILE *fp) {
 }
 
 
-species_cfg_t *CfgSpeciesFree(species_cfg_t *c) {
-    for (; c != NULL;) {
-        species_cfg_t *tmp = c;
-        c = c->next;
-        if (tmp->email != NULL) {
-            free(tmp->email);
-        }
-        if (tmp->govtname != NULL) {
-            free(tmp->govtname);
-        }
-        if (tmp->govttype != NULL) {
-            free(tmp->govttype);
-        }
-        if (tmp->homeworld != NULL) {
-            free(tmp->homeworld);
-        }
-        if (tmp->name != NULL) {
-            free(tmp->name);
-        }
-        free(tmp);
+species_cfg_t *cfgSpeciesFree(species_cfg_t *c) {
+    if (c->email != NULL) {
+        free(c->email);
     }
-    return c;
+    if (c->govtname != NULL) {
+        free(c->govtname);
+    }
+    if (c->govttype != NULL) {
+        free(c->govttype);
+    }
+    if (c->homeworld != NULL) {
+        free(c->homeworld);
+    }
+    if (c->name != NULL) {
+        free(c->name);
+    }
+    free(c);
+    return 0;
 }
 
 
-species_cfg_t *CfgSpeciesFromFile(const char *name) {
+species_cfg_t **cfgSpeciesFromFile(const char *name) {
+    // reroute if the file name ends in ".json"
+    int isJSON = FALSE;
+    for (int i = 0; i < strlen(name); i++) {
+        if (strcmp(name + i, ".json") == 0) {
+            isJSON = TRUE;
+            break;
+        }
+    }
+    if (isJSON) {
+        return cfgSpeciesFromJSON(name);
+    }
+
+    species_cfg_t **slots = ncalloc(__FUNCTION__, __LINE__, MAX_SPECIES+1, sizeof(species_cfg_t*));
+    int next = 0;
+
     FILE *fp = fopen(name, "rb");
     if (fp == NULL) {
-        perror("CfgSpeciesFromFile:");
+        perror("cfgSpeciesFromFile:");
         exit(2);
     }
     int line = 0;
-    species_cfg_t *root = NULL;
     species_cfg_t *curr = NULL;
     for (;;) {
         key_value_t kv = cfgReadLine(fp);
@@ -139,19 +153,10 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             continue;
         } else if (strcmp(kv.key, "species") == 0) {
             // append a new section to the list
-            if (root == NULL) {
-                curr = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
-                root = curr;
-            } else {
-                curr->next = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
-                curr = curr->next;
-            }
-            if (curr == NULL) {
-                perror("CfgSpeciesFromFile:");
-                exit(2);
-            }
-            curr->next = NULL;
-            // fprintf(stderr, "CfgSpeciesFromFile: key '%s' val '%s'\n", kv.key, kv.value ? kv.value : "null");
+            curr = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
+            slots[next] = curr;
+            next++;
+            // fprintf(stderr, "cfgSpeciesFromFile: key '%s' val '%s'\n", kv.key, kv.value ? kv.value : "null");
         } else if (curr == NULL) {
             fprintf(stderr, "error: %d: key %s: found key outside of section\n", line, kv.key);
             exit(2);
@@ -173,7 +178,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 curr->email = strdup(kv.value);
                 if (curr->email == NULL) {
-                    perror("CfgSpeciesFromFile:");
+                    perror("cfgSpeciesFromFile:");
                     exit(2);
                 }
             }
@@ -185,7 +190,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 curr->govtname = strdup(kv.value);
                 if (curr->govtname == NULL) {
-                    perror("CfgSpeciesFromFile:");
+                    perror("cfgSpeciesFromFile:");
                     exit(2);
                 }
             }
@@ -197,7 +202,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 curr->govttype = strdup(kv.value);
                 if (curr->govttype == NULL) {
-                    perror("CfgSpeciesFromFile:");
+                    perror("cfgSpeciesFromFile:");
                     exit(2);
                 }
             }
@@ -219,7 +224,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 curr->homeworld = strdup(kv.value);
                 if (curr->homeworld == NULL) {
-                    perror("CfgSpeciesFromFile:");
+                    perror("cfgSpeciesFromFile:");
                     exit(2);
                 }
             }
@@ -244,7 +249,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             }
             curr->ml = val;
         } else if (strcmp(kv.key, "name") == 0) {
-            // fprintf(stderr, "CfgSpeciesFromFile: key '%s' val '%s'\n", kv.key, kv.value ? kv.value : "null");
+            // fprintf(stderr, "cfgSpeciesFromFile: key '%s' val '%s'\n", kv.key, kv.value ? kv.value : "null");
             if (curr->name != NULL) {
                 free(curr->name);
                 curr->name = NULL;
@@ -252,7 +257,7 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             if (kv.value != NULL) {
                 curr->name = strdup(kv.value);
                 if (curr->name == NULL) {
-                    perror("CfgSpeciesFromFile:");
+                    perror("cfgSpeciesFromFile:");
                     exit(2);
                 }
             }
@@ -261,7 +266,133 @@ species_cfg_t *CfgSpeciesFromFile(const char *name) {
             exit(2);
         }
     }
-    printf(" info: read %d lines from '%s'\n", line, name);
+    // printf(" info: read %d lines from '%s'\n", line, name);
 
-    return root;
+    return slots;
+}
+
+species_cfg_t **cfgSpeciesFromJSON(const char *filename) {
+    cJSON *array = jsonParseFile(filename);
+    if (array == 0) {
+        fprintf(stderr, "error: %s: unable to read\n", filename);
+        exit(2);
+    } else if (!cJSON_IsArray(array)) {
+        fprintf(stderr, "error: %s: does not contain array\n", filename);
+        exit(2);
+    }
+    int length = cJSON_GetArraySize(array);
+    if (length == 0) {
+        fprintf(stderr, "error: %s: contains no data\n", filename);
+        exit(2);
+    } else if (length > MAX_SPECIES) {
+        fprintf(stderr, "error: %s: too many species\n", filename);
+        fprintf(stderr, "       expect 0..%d species, got %d\n", MAX_SPECIES, length);
+        exit(2);
+    }
+    species_cfg_t **slots = ncalloc(__FUNCTION__, __LINE__, length+1, sizeof(species_cfg_t*));
+
+    int idx = 0;
+    cJSON *elem = 0;
+    cJSON_ArrayForEach(elem, array) {
+        if (!cJSON_IsObject(elem)) {
+            fprintf(stderr, "error: %s: array must contain only objects\n", filename);
+            exit(2);
+        }
+        species_cfg_t *curr = ncalloc(__FUNCTION__, __LINE__, 1, sizeof(species_cfg_t));
+        slots[idx] = curr;
+        cJSON *item = cJSON_GetObjectItem(elem, "email");
+        if (item != 0 && cJSON_IsString(item)) {
+            curr->email = strdup(item->valuestring);
+        }
+        item = cJSON_GetObjectItem(elem, "name");
+        if (item != 0 && cJSON_IsString(item)) {
+            curr->name = strdup(item->valuestring);
+        }
+        item = cJSON_GetObjectItem(elem, "homeworld");
+        if (item != 0 && cJSON_IsString(item)) {
+            curr->homeworld = strdup(item->valuestring);
+        }
+        item = cJSON_GetObjectItem(elem, "govt-name");
+        if (item != 0 && cJSON_IsString(item)) {
+            curr->govtname = strdup(item->valuestring);
+        }
+        item = cJSON_GetObjectItem(elem, "govt-type");
+        if (item != 0 && cJSON_IsString(item)) {
+            curr->govttype = strdup(item->valuestring);
+        }
+        item = cJSON_GetObjectItem(elem, "tech-ml");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99)) {
+            curr->ml = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "tech-gv");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99)) {
+            curr->gv = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "tech-ls");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99)) {
+            curr->ml = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "tech-bi");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99)) {
+            curr->bi = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-bridges");
+        if (item != 0 && cJSON_IsBool(item)) {
+            curr->experimental.make_bridges = item->valueint ? TRUE : FALSE;
+        }
+        item = cJSON_GetObjectItem(elem, "x-bridges");
+        if (item != 0 && cJSON_IsBool(item)) {
+            curr->experimental.make_bridges = item->valueint ? TRUE : FALSE;
+        }
+        item = cJSON_GetObjectItem(elem, "x-econ-units");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99999999)) {
+            curr->experimental.econ_units = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-ma-base");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99999999)) {
+            curr->experimental.ma_base = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-mi-base");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99999999)) {
+            curr->experimental.mi_base = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-mi-base");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99999999)) {
+            curr->experimental.ma_base = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-ship-yards");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 99)) {
+            curr->experimental.ship_yards = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-bi");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_bi = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-gv");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_gv = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-ls");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_ls = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-ma");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_ma = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-mi");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_mi = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-ml");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_ml = item->valueint;
+        }
+        item = cJSON_GetObjectItem(elem, "x-tech-ls");
+        if (item != 0 && cJSON_IsNumber(item) && (0 <= item->valueint && item->valueint <= 999)) {
+            curr->experimental.tech_ls = item->valueint;
+        }
+        idx++;
+    }
+    return slots;
 }
