@@ -70,9 +70,9 @@ static cJSON *marshalSpeciesBitfield(uint32_t *bits);
 
 static cJSON *marshalSystem(star_data_t *sd);
 
-static cJSON *marshalTechnologies(const char **codes, int *levels, int *knowledge, int *xp);
+static cJSON *marshalTechnologies(const char **codes, int *levels, int *knowledge, int *xp, int *init_levels);
 
-static cJSON *marshalTechnology(int level, int knowledge, int xp);
+static cJSON *marshalTechnology(int level, int knowledge, int xp, int init_level);
 
 static cJSON *marshalVersion(int version);
 
@@ -411,9 +411,11 @@ cJSON *marshalSpecies(species_data_t *sp) {
             marshalGases(sp->poison_gas)));
     jsonAddBoolToObj(root, objName, "auto_orders", sp->auto_orders);
     cJSON_AddItemToObject(root, "tech",
-                          marshalTechnologies(tech_level_names, sp->tech_level, sp->tech_knowledge, sp->tech_eps));
+                          marshalTechnologies(tech_level_names, sp->tech_level, sp->tech_knowledge, sp->tech_eps, sp->init_tech_level));
     jsonAddIntToObj(root, objName, "hp_original_base", sp->hp_original_base);
     jsonAddIntToObj(root, objName, "econ_units", sp->econ_units);
+    jsonAddIntToObj(root, objName, "fleet_cost", sp->fleet_cost);
+    jsonAddIntToObj(root, objName, "fleet_percent_cost", sp->fleet_percent_cost);
     cJSON_AddItemToObject(root, "contacts", marshalSpeciesBitfield(sp->contact));
     cJSON_AddItemToObject(root, "allies", marshalSpeciesBitfield(sp->ally));
     cJSON_AddItemToObject(root, "enemies", marshalSpeciesBitfield(sp->enemy));
@@ -438,12 +440,17 @@ cJSON *marshalSpeciesBitfield(uint32_t *bits) {
         fprintf(stderr, "error: species_bits: unable to allocate memory\n");
         exit(2);
     }
-    for (int spidx = 0; spidx < MAX_SPECIES; spidx++) {
-        if ((bits[spidx / 32] & (1 << (spidx % 32))) != 0) {
-            if (cJSON_AddItemToArray(array, cJSON_CreateNumber((double)(spidx + 1))) == 0) {
-                fprintf(stderr, "error: species_bits: unable to extend array\n");
-                exit(2);
-            }
+    for (int alien = 1; alien <= MAX_SPECIES; alien++) { // alien is 1..MAX_SPECIES
+        int word = (alien - 1) / 32;
+        int bit = (alien - 1) % 32;
+        long mask = 1 << bit;
+        if ((bits[word] & mask) == 0) {
+            // not a hit for this alien
+            continue;
+        }
+        if (cJSON_AddItemToArray(array, cJSON_CreateNumber((double)(alien))) == 0) {
+            fprintf(stderr, "error: species_bits: unable to extend array\n");
+            exit(2);
         }
     }
     return array;
@@ -515,19 +522,19 @@ cJSON *marshalSystemsFile(void) {
     return root;
 }
 
-cJSON *marshalTechnologies(const char **codes, int *levels, int *knowledge, int *xp) {
+cJSON *marshalTechnologies(const char **codes, int *levels, int *knowledge, int *xp, int *init_levels) {
     cJSON *root = cJSON_CreateObject();
     if (root == 0) {
         fprintf(stderr, "error: technologies: unable to allocate memory\n");
         exit(2);
     }
     for (int i = 0; i < 6; i++) {
-        cJSON_AddItemToObject(root, codes[i], marshalTechnology(levels[i], knowledge[i], xp[i]));
+        cJSON_AddItemToObject(root, codes[i], marshalTechnology(levels[i], knowledge[i], xp[i], init_levels[i]));
     }
     return root;
 }
 
-cJSON *marshalTechnology(int level, int knowledge, int xp) {
+cJSON *marshalTechnology(int level, int knowledge, int xp, int init_level) {
     cJSON *root = cJSON_CreateObject();
     if (root == 0) {
         fprintf(stderr, "error: technology: unable to allocate memory\n");
@@ -536,6 +543,7 @@ cJSON *marshalTechnology(int level, int knowledge, int xp) {
     cJSON_AddNumberToObject(root, "level", (double) level);
     cJSON_AddNumberToObject(root, "knowledge", (double) knowledge);
     cJSON_AddNumberToObject(root, "xp", (double) xp);
+    cJSON_AddNumberToObject(root, "init_level", (double) init_level);
     return root;
 }
 

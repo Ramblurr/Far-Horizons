@@ -67,7 +67,7 @@ The `get` and `save` functions were updated to convert between the internal and 
 (A few of the internal structures had new fields added to help with the conversion.)
 
 We replaced the commands used to edit data (`AsciiToBinary`, `BinaryToAscii`, and `Edit`).
-Gamemasters must convert the binary data to JSON, edit the JSON data directly, and then convert back to binary.
+Gamemasters must export the binary data files to JSON, edit the JSON data, and then import the JSON back in.
 We apologize for the inconvenience of the extra steps, but it simplifies the code and testing.
 
 Again, we have not intentionally changed any of the game mechanics.
@@ -174,7 +174,7 @@ cd gamma
 FH_SEED=$RANDOM ../build/fh create galaxy --less-crowded --species=18
 FH_SEED=$RANDOM ../build/fh show galaxy
 FH_SEED=$RANDOM ../build/fh create home-system-templates
-FH_SEED=$RANDOM ../build/fh create species --config=species.cfg
+FH_SEED=$RANDOM ../build/fh create species --config=species.cfg.json
 FH_SEED=$RANDOM ../build/fh finish
 FH_SEED=$RANDOM ../build/fh report
 FH_SEED=$RANDOM ../build/fh stats
@@ -312,6 +312,33 @@ It is the name of the configuration file containing the new species data.
 
 The command will fail if a species already exists.
 
+The configuration file format changes from simple text to JSON with Release 7.5.5.
+
+```json
+[
+  {
+    "email": "alderaan@example.com",
+    "name": "Alderaan",
+    "homeworld": "Optimus",
+    "govt-name": "His Majesty",
+    "govt-type": "Degenerated Monarchy",
+    "tech-ml": 10,
+    "tech-gv": 1,
+    "tech-ls": 1,
+    "tech-bi": 3
+  }
+]
+```
+
+The file must contain an array of JSON objects with fields for
+
+1. email - the player's email address
+2. name - the name of the species
+3. homeworld - the name of the species' homeworld
+4. govt-name - the name of the species' government
+5. govt-type - the type of the species' government
+6. tech-XX - the values for the four base techologies, `ml`, `gv`, `ls`, and `bi`.
+
 NB: `fh create species` replaces `AddSpeciesAuto`.
 
 ## Update Turn
@@ -383,7 +410,7 @@ The `fh version` command displays the version of the game engin.
 
 ```bash
 fh version
-7.5.2
+7.5.6
 ```
 
 ## Show Game Settings
@@ -405,6 +432,70 @@ For example,
 fh show num_stars num_planets
 162 606
 ```
+
+## Editing Game Data
+
+You may run `fh export json` to export the game data into JSON files.
+
+You should see output like:
+
+    info: loading binary data...
+    info: exporting galaxy.json...
+    info: exporting systems.json...
+    info: exporting species.001.json...
+    info: exporting species.002.json...
+    info: exporting species.003.json...
+    info: exporting species.004.json...
+    info: exporting species.005.json...
+    info: export complete
+
+The files created are:
+
+* galaxy.json - the basic game settings
+* systems.json - data for all stars and planets
+* species.NNN.json - data for each species including ships and colonies
+
+NB: The species JSON file uses 3 digits for the species number!
+
+You can edit the JSON files using any text editor.
+Be careful with preserving types and maximum lengths for strings.
+
+NB: Please back up all of your game files before importing data!
+There is very little error checking on the data.
+You can easily corrupt your game files.
+
+After editing the files, run the `fh import json` 
+
+You should see output like:
+
+    info: loading binary data...
+    info: importing galaxy.json...
+    info: importing systems.json...
+    unmarshal: systems: found      162 stars
+    unmarshal: systems: found      606 planets
+    info: importing species.001.json...
+    info: species   1: name Alderaan planet Optimus
+    info: importing species.002.json...
+    info: species   2: name Bantustan planet The Nest
+    info: importing species.003.json...
+    info: species   3: name Charabon planet Nexus Eleven
+    info: importing species.004.json...
+    info: species   4: name Doop'ov-aci planet Baar'u'bomba
+    info: importing species.005.json...
+    info: species   5: name Ba' Doop planet Ba'da'boom
+    info: saving binary data...
+    info: import and save complete
+
+### JSON Notes
+
+You can add new ships and named planets, but please be careful.
+There's an internal buffer that allows 25 new items.
+Exceeding that can corrupt the data.
+If you need to add more items than that, you could try exporting,
+adding a few, importing, exporting again, etc.
+
+There's very little error checking during the import.
+It's easier to corrupt the data than it should be.
 
 # License
 

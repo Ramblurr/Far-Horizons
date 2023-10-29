@@ -83,8 +83,8 @@ struct ship_data *get_ship_data(int numShips, int extraShips, FILE *fp) {
 
 void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     /* Allocate enough memory for all ships. */
-    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__, numShips,
-                                                                 sizeof(binary_ship_data_t));
+    binary_ship_data_t *binData = (binary_ship_data_t *) ncalloc(__FUNCTION__, __LINE__,
+                                                                 numShips, sizeof(binary_ship_data_t));
     if (binData == NULL) {
         perror("save_ship_data");
         fprintf(stderr, "\nCannot allocate enough memory for ship data!\n");
@@ -95,7 +95,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
         binary_ship_data_t *sd = &binData[i];
-        memcpy(sd->name, s->name, 32);
+        strlcpy((char *) (sd->name), s->name, 32);
         sd->x = s->x;
         sd->y = s->y;
         sd->z = s->z;

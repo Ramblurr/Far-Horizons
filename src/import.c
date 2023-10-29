@@ -76,15 +76,18 @@ int importCommand(int argc, char *argv[]) {
 }
 
 int importFromJson(int doTest) {
+    printf(" info: loading binary data...\n");
     get_galaxy_data();
     get_star_data();
     get_planet_data();
     get_species_data();
 
+    printf(" info: importing galaxy.json...\n");
     cJSON *root = jsonParseFile("galaxy.json");
     unmarshalGalaxyFile(root, &galaxy);
     cJSON_Delete(root);
 
+    printf(" info: importing systems.json...\n");
     root = jsonParseFile("systems.json");
     unmarshalSystemsFile(root, star_base, planet_base);
     cJSON_Delete(root);
@@ -99,8 +102,10 @@ int importFromJson(int doTest) {
                 printf(" warn: missing species file '%s'\n", filename);
                 continue;
             }
+            printf(" info: importing %s...\n", filename);
             root = jsonParseFile(filename);
             unmarshalSpeciesFile(root, &spec_data[i], namp_data[i], ship_data[i]);
+            data_modified[i] = TRUE;
         }
     }
 
@@ -109,10 +114,12 @@ int importFromJson(int doTest) {
         return 0;
     }
 
+    printf(" info: saving binary data...\n");
     save_galaxy_data();
     save_star_data();
     save_planet_data();
     save_species_data();
+    printf(" info: import and save complete\n");
 
-    return 2;
+    return 0;
 }

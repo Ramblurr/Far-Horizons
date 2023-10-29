@@ -194,7 +194,7 @@ void save_nampla_data(struct nampla_data *namplaData, int numNamplas, FILE *fp) 
     for (int i = 0; i < numNamplas; i++) {
         struct nampla_data *nampla = &namplaData[i];
         binary_nampla_data_t *data = &binData[i];
-        memcpy(data->name, nampla->name, 32);
+        strlcpy((char *)(data->name), nampla->name, 32);
         data->x = nampla->x;
         data->y = nampla->y;
         data->z = nampla->z;

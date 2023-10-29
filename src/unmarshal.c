@@ -45,7 +45,7 @@ static void unmarshalItems(cJSON *array, int *items);
 
 static void unmarshalMiningDifficulty(cJSON *obj, int *base, int *increase);
 
-static void unmarshalNamedPlanets(cJSON *array, nampla_data_t *npa);
+static void unmarshalNamedPlanets(cJSON *array, species_data_t *sp, nampla_data_t *npa);
 
 static void unmarshalPlanet(cJSON *root, planet_data_t *pd);
 
@@ -55,7 +55,7 @@ static void unmarshalRequireAtmosphericGas(cJSON *root, int *code, int *min_pct,
 
 static void unmarshalShip(cJSON *root, ship_data_t *sd);
 
-static void unmarshalShips(cJSON *array, ship_data_t *sa);
+static void unmarshalShips(cJSON *array, species_data_t *sp, ship_data_t *sa);
 
 static void unmarshalSpecies(cJSON *root, species_data_t *sp);
 
@@ -69,7 +69,7 @@ static int unmarshalStarType(cJSON *obj);
 
 static void unmarshalSystem(cJSON *root, star_data_t *sd, planet_data_t *pa);
 
-static void unmarshalTechnologies(cJSON *root, species_data_t *sp, const char **codes);
+static void unmarshalTechnologies(cJSON *root, const char **codes, int *levels, int *knowledge, int *xp, int *init_levels);
 
 static int unmarshalVersion(cJSON *elem);
 
@@ -285,11 +285,12 @@ void unmarshalNamedPlanet(cJSON *root, nampla_data_t *npd) {
                 exit(2);
             }
             npd->planet = planet_base + sd->planet_index + npd->pn - 1;
+            npd->planet_index = npd->planet->index;
         }
     }
 }
 
-void unmarshalNamedPlanets(cJSON *array, nampla_data_t *npa) {
+void unmarshalNamedPlanets(cJSON *array, species_data_t *sp, nampla_data_t *npa) {
     if (array == 0) {
         fprintf(stderr, "error: named_planets: property must not be null\n");
         exit(2);
@@ -297,13 +298,14 @@ void unmarshalNamedPlanets(cJSON *array, nampla_data_t *npa) {
         fprintf(stderr, "error: named_planets: property must be an array\n");
         exit(2);
     }
-    int named_planet_index = 0;
+    sp->num_namplas = 0;
     cJSON *elem = 0;
     cJSON_ArrayForEach(elem, array) {
-        nampla_data_t *npd = npa + named_planet_index;
-        npd->id = named_planet_index + 1;
+        nampla_data_t *npd = npa + sp->num_namplas;
+        memset(npd, 0, sizeof(nampla_data_t));
+        npd->id = sp->num_namplas + 1;
         unmarshalNamedPlanet(elem, npd);
-        named_planet_index++;
+        sp->num_namplas++;
     }
 }
 
@@ -387,7 +389,7 @@ void unmarshalShip(cJSON *root, ship_data_t *sd) {
     sd->special = jsonGetInt(root, "special");
 }
 
-void unmarshalShips(cJSON *array, ship_data_t *sa) {
+void unmarshalShips(cJSON *array, species_data_t *sp, ship_data_t *sa) {
     if (array == 0) {
         fprintf(stderr, "error: ships: property must not be null\n");
         exit(2);
@@ -395,13 +397,14 @@ void unmarshalShips(cJSON *array, ship_data_t *sa) {
         fprintf(stderr, "error: ships: property must be an array\n");
         exit(2);
     }
-    int ship_index = 0;
+    sp->num_ships = 0;
     cJSON *elem = 0;
     cJSON_ArrayForEach(elem, array) {
-        ship_data_t *sd = sa + ship_index;
-        sd->id = ship_index + 1;
-        unmarshalShip(elem, sa + ship_index);
-        ship_index++;
+        ship_data_t *sd = sa + sp->num_ships;
+        memset(sd, 0, sizeof(ship_data_t));
+        sd->id = sp->num_ships + 1;
+        unmarshalShip(elem, sd);
+        sp->num_ships++;
     }
 }
 
@@ -413,15 +416,18 @@ void unmarshalSpecies(cJSON *root, species_data_t *sp) {
         fprintf(stderr, "species: property 'species' must be an object\n");
         exit(2);
     }
+    memset(sp, 0, sizeof(species_data_t));
     sp->id = jsonGetInt(root, "id");
     jsonGetString(root, "name", sp->name, sizeof(sp->name));
     unmarshalGovernment(cJSON_GetObjectItem(root, "government"), sp);
     unmarshalCoordsWithOrbit(cJSON_GetObjectItem(root, "home_world"), &sp->x, &sp->y, &sp->z, &sp->pn);
     unmarshalSpeciesAtmosphere(cJSON_GetObjectItem(root, "atmosphere"), sp);
     sp->auto_orders = jsonGetBool(root, "auto_orders");
-    unmarshalTechnologies(cJSON_GetObjectItem(root, "tech"), sp, tech_level_names);
+    unmarshalTechnologies(cJSON_GetObjectItem(root, "tech"), tech_level_names, sp->tech_level, sp->tech_knowledge, sp->tech_eps, sp->init_tech_level);
     sp->hp_original_base = jsonGetInt(root, "hp_original_base");
     sp->econ_units = jsonGetInt(root, "econ_units");
+    sp->fleet_cost = jsonGetInt(root, "fleet_cost");
+    sp->fleet_percent_cost = jsonGetInt(root, "fleet_percent_cost");
     unmarshalSpeciesBitfield(cJSON_GetObjectItem(root, "contacts"), sp->contact);
     unmarshalSpeciesBitfield(cJSON_GetObjectItem(root, "allies"), sp->ally);
     unmarshalSpeciesBitfield(cJSON_GetObjectItem(root, "enemies"), sp->enemy);
@@ -442,18 +448,30 @@ void unmarshalSpeciesAtmosphere(cJSON *root, species_data_t *sp) {
 
 void unmarshalSpeciesBitfield(cJSON *array, uint32_t *bits) {
     if (array == 0) {
-        fprintf(stderr, "error: species_bitfield: property must not be null\n");
+        fprintf(stderr, "error: species_bits: property must not be null\n");
         exit(2);
     } else if (!cJSON_IsArray(array)) {
-        fprintf(stderr, "species_bitfield: property must be an array\n");
+        fprintf(stderr, "error: species_bits: property must be an array\n");
         exit(2);
+    } else if (cJSON_GetArraySize(array) == 0) {
+        // nothing to do
+        return;
     }
     cJSON *elem = 0;
     cJSON_ArrayForEach(elem, array) {
-        if (cJSON_IsNumber(elem) && 0 < elem->valueint && elem->valueint <= MAX_SPECIES) {
-            int alien = elem->valueint - 1;
-            bits[alien / 32] ^= (1 << (alien % 32));
+        if (!cJSON_IsNumber(elem)) {
+            fprintf(stderr, "error: species_bits: elements must be numeric\n");
+            exit(2);
         }
+        int alien = elem->valueint;        // alien is 1..MAX_SPECIES
+        if (!(0 < alien && alien <= MAX_SPECIES)) {
+            fprintf(stderr, "error: species_bits: elements must be integers in range 1..%d\n", MAX_SPECIES);
+            exit(2);
+        }
+        int word = (alien - 1) / 32;
+        int bit = (alien - 1) % 32;
+        long mask = 1 << bit;
+        bits[word] |= mask;
     }
 }
 
@@ -464,8 +482,8 @@ void unmarshalSpeciesFile(cJSON *root, species_data_t *sp, nampla_data_t *npa, s
         exit(2);
     }
     unmarshalSpecies(cJSON_GetObjectItem(root, "species"), sp);
-    unmarshalNamedPlanets(cJSON_GetObjectItem(root, "named_planets"), npa);
-    unmarshalShips(cJSON_GetObjectItem(root, "ships"), sa);
+    unmarshalNamedPlanets(cJSON_GetObjectItem(root, "named_planets"), sp, npa);
+    unmarshalShips(cJSON_GetObjectItem(root, "ships"), sp, sa);
     sp->home.nampla = npa;
     sp->home.planet = sp->home.nampla->planet;
     sp->home.star = sp->home.nampla->star;
@@ -561,10 +579,10 @@ void unmarshalSystemsFile(cJSON *root, star_data_t *sa, planet_data_t *pa) {
         exit(2);
     }
     unmarshalSystems(cJSON_GetObjectItem(root, "systems"), sa, pa);
-    printf("%s: %s: add logic to find wormhole_exit\n", __FILE_NAME__, __FUNCTION__);
+    fflush(stdout);
 }
 
-void unmarshalTechnologies(cJSON *root, species_data_t *sp, const char **codes) {
+void unmarshalTechnologies(cJSON *root, const char **codes, int *levels, int *knowledge, int *xp, int *init_levels) {
     if (root == 0) {
         fprintf(stderr, "error: technologies: property must not be null\n");
         exit(2);
@@ -573,10 +591,12 @@ void unmarshalTechnologies(cJSON *root, species_data_t *sp, const char **codes) 
         exit(2);
     }
     for (int i = 0; i < 6; i++) {
-        sp->tech_level[i] = 0;
-        sp->init_tech_level[i] = 0;
-        sp->tech_knowledge[i] = 0;
-        sp->tech_eps [i] = 0;
+        levels[i] = 0;
+        knowledge[i] = 0;
+        xp[i] = 0;
+        init_levels[i] = 0;
+    }
+    for (int i = 0; i < 6; i++) {
         cJSON *elem = cJSON_GetObjectItem(root, codes[i]);
         if (elem == 0) {
             continue;
@@ -584,9 +604,11 @@ void unmarshalTechnologies(cJSON *root, species_data_t *sp, const char **codes) 
             fprintf(stderr, "error: technologies: '%s' must be an object\n", codes[i]);
             exit(2);
         }
-        sp->tech_level[i] = jsonGetInt(elem, "level");
-        sp->tech_knowledge[i] = jsonGetInt(elem, "knowledge");
-        sp->tech_eps[i] = jsonGetInt(elem, "xp");
+        levels[i] = jsonGetInt(elem, "level");
+        knowledge[i] = jsonGetInt(elem, "knowledge");
+        xp[i] = jsonGetInt(elem, "xp");
+        init_levels[i] = jsonGetInt(elem, "init_level");
+        // printf("unTech: code '%s' level %3d knowl %3d xp %3d init %3d\n", codes[i], levels[i], knowledge[i], xp[i], init_levels[i]);
     }
 }
 

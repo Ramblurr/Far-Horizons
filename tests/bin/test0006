@@ -60,10 +60,30 @@ ${FH_EXE} report || exit 2
 ${FH_EXE} stats || exit 2
 ${FH_EXE} export json || exit 2
 
+echo
+echo " info: pushing data to comps after export"
+cp -p galaxy.dat stars.dat planets.dat homesystem?.dat sp??.dat comps/ || exit 2
+cp -p *.json comps/ || exit 2
+echo
+echo
+echo " info: dumping species 05 data after export"
+${FH_EXE} export --species=05 > comps/species.005.txt || exit 2
+echo
+echo
+
 ###########################################################################
 # check files against expected contents
+echo
+echo " info: comparing comps after export but before import"
 deltaFiles=
 for file in galaxy.dat stars.dat planets.dat homesystem?.dat sp??.dat; do
+  cknew=$(cksum ${file})
+  cktst=$(cd comps && cksum ${file})
+  if [ "${cknew}" != "${cktst}" ]; then
+    deltaFiles="${deltaFiles} ${file}"
+  fi
+done
+for file in galaxy.json systems.json species.???.json; do
   cknew=$(cksum ${file})
   cktst=$(cd comps && cksum ${file})
   if [ "${cknew}" != "${cktst}" ]; then
@@ -79,10 +99,24 @@ fi
 
 ###########################################################################
 #
-${FH_EXE} import || exit 2
+echo
+echo
+echo " info: importing json files"
+${FH_EXE} import json || exit 2
+echo
+echo
+echo " info: dumping species 05 data after import"
+${FH_EXE} export --species=05 > species.005.txt || exit 2
+echo
+echo
+${FH_EXE} export json || exit 2
+echo
+echo
 
 ###########################################################################
 # check files against expected contents
+echo
+echo " info: comparing comps after import"
 deltaFiles=
 for file in galaxy.dat stars.dat planets.dat homesystem?.dat sp??.dat; do
   cknew=$(cksum ${file})
@@ -91,16 +125,6 @@ for file in galaxy.dat stars.dat planets.dat homesystem?.dat sp??.dat; do
     deltaFiles="${deltaFiles} ${file}"
   fi
 done
-if [ ! -z "${deltaFiles}" ]; then
-  for delta in ${deltaFiles}; do
-    echo "error: ${delta} does not match expected comp"
-  done
-  exit 2
-fi
-
-###########################################################################
-# check files against expected contents
-deltaFiles=
 for file in galaxy.json systems.json species.???.json; do
   cknew=$(cksum ${file})
   cktst=$(cd comps && cksum ${file})

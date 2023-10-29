@@ -118,7 +118,7 @@ cJSON *jsonParseFile(const char *name) {
         exit(2);
     }
     long length = ftell(fp);
-    char *buffer = malloc(length + 1);
+    char *buffer = calloc(1, length + 1);
     if (buffer == 0) {
         perror("json: parseFile: allocating buffer");
         exit(2);
