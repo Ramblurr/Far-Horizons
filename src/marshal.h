@@ -21,13 +21,12 @@
 #define FAR_HORIZONS_MARSHAL_H
 
 #include "cjson/cJSON.h"
-#include "cjson/helpers.h"
 #include "engine.h"
 
-cJSON *marshalGalaxy();
+cJSON *marshalGalaxyFile();
 
-cJSON *marshalSpecies(species_data_t *sp, nampla_data_t *npa, ship_data_t *sa);
+cJSON *marshalSpeciesFile(species_data_t *sp, nampla_data_t *npa, ship_data_t *sa);
 
-cJSON *marshalSystems();
+cJSON *marshalSystemsFile();
 
 #endif //FAR_HORIZONS_MARSHAL_H

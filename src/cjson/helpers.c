@@ -89,27 +89,20 @@ int jsonGetInt(cJSON *obj, const char *property) {
 }
 
 // jsonGetString should copy up to maxLength - 1 bytes.
-const char *jsonGetString(cJSON *obj, const char *property, int maxLength) {
-    static char buffer[1024];
-    if (maxLength > 1023) {
-        fprintf(stderr, "jsonGetString: maxLength %d exceeds limit\n", maxLength);
-        exit(2);
-    }
+void jsonGetString(cJSON *obj, const char *property, char *dst, int size) {
+    memset(dst, 0, size);
     cJSON *item = cJSON_GetObjectItemCaseSensitive(obj, property);
     if (item == 0) {
-        fprintf(stderr, "property: %s: missing\n", property);
+        fprintf(stderr, "property: %s: must not be null\n", property);
         exit(2);
     } else if (!cJSON_IsString(item)) {
         fprintf(stderr, "property: %s: not a string\n", property);
         exit(2);
-    }
-    if (strlen(item->valuestring) > maxLength) {
-        fprintf(stderr, "jsonGetString: strlen %d exceeds limit %d\n", (int) strlen(item->valuestring) + 1, maxLength);
+    } else if (strlen(item->valuestring)+1 > size) {
+        fprintf(stderr, "jsonGetString: strlen %d exceeds limit %d\n", (int) strlen(item->valuestring) + 1, size);
         exit(2);
     }
-    strcpy(buffer, item->valuestring);
-    buffer[maxLength - 1] = 0;
-    return buffer;
+    strlcpy(dst, item->valuestring, size);
 }
 
 

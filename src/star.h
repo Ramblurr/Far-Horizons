@@ -45,6 +45,10 @@
 
 int changeSystemToHomeSystem(star_data_t *star);
 
+int chToStarColor(char ch);
+
+int chToStarType(char ch);
+
 void closest_unvisited_star(struct ship_data *ship);
 
 void closest_unvisited_star_report(struct ship_data *ship, FILE *fp);

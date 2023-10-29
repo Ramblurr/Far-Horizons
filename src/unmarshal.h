@@ -20,5 +20,13 @@
 #ifndef FAR_HORIZONS_UNMARSHAL_H
 #define FAR_HORIZONS_UNMARSHAL_H
 
+#include "cjson/cJSON.h"
+#include "engine.h"
+
+void unmarshalGalaxyFile(cJSON *root, galaxy_data_t *g);
+
+void unmarshalSpeciesFile(cJSON *root, species_data_t *sp, nampla_data_t *npa, ship_data_t *sa);
+
+void unmarshalSystemsFile(cJSON *root, star_data_t *sa, planet_data_t *pa);
 
 #endif //FAR_HORIZONS_UNMARSHAL_H
