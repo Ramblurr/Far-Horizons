@@ -134,6 +134,25 @@ int changeSystemToHomeSystem(star_data_t *star) {
     return 0;
 }
 
+int chToStarColor(char ch) {
+    // space is supposed to be invalid, so work around
+    for (int i = 1; i < sizeof(color_char); i++) {
+        if (color_char[i] == ch) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+int chToStarType(char ch) {
+    // space is valid for two types of star, so work around
+    for (int i = 1; i < sizeof(type_char); i++) {
+        if (type_char[i] == ch) {
+            return i;
+        }
+    }
+    return 0;
+}
 
 void closest_unvisited_star(struct ship_data *ship) {
     int found = FALSE;

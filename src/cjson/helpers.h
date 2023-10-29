@@ -23,7 +23,9 @@ int jsonGetBool(cJSON *obj, const char *property);
 
 int jsonGetInt(cJSON *obj, const char *property);
 
-const char *jsonGetString(cJSON *obj, const char *property, int maxLength);
+// jsonGetString uses `strlcpy` to copy the string to the destination.
+// size is the size of the destination, including space for the nul byte.
+void jsonGetString(cJSON *obj, const char *property, char *dst, int size);
 
 cJSON *jsonParseFile(const char *name);
 

@@ -20,24 +20,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "export.h"
 #include "marshal.h"
 #include "galaxyio.h"
-#include "namplaio.h"
 #include "planetio.h"
 #include "shipio.h"
 #include "speciesio.h"
 #include "stario.h"
 #include "namplavars.h"
 #include "shipvars.h"
+#include "cjson/helpers.h"
 
-int exportToJson(int argc, char *argv[]);
+
+static int exportToJson();
 
 
 int exportCommand(int argc, char *argv[]) {
-    const char *cmdName = argv[0];
-
     for (int i = 1; i < argc; i++) {
-        // fprintf(stderr, "fh: %s: argc %2d argv '%s'\n", cmdName, i, argv[i]);
         char *opt = argv[i];
         char *val = NULL;
         for (val = opt; *val != 0; val++) {
@@ -55,7 +54,7 @@ int exportCommand(int argc, char *argv[]) {
             fprintf(stderr, "usage: export json\n");
             return 2;
         } else if (strcmp(opt, "json") == 0 && val == NULL) {
-            return exportToJson(argc - i, argv + i);
+            return exportToJson();
         } else {
             fprintf(stderr, "fh: export: unknown option '%s'\n", opt);
             return 2;
@@ -66,13 +65,13 @@ int exportCommand(int argc, char *argv[]) {
 }
 
 
-int exportToJson(int argc, char *argv[]) {
+int exportToJson(void) {
     get_galaxy_data();
     get_star_data();
     get_planet_data();
     get_species_data();
 
-    cJSON *root = marshalGalaxy();
+    cJSON *root = marshalGalaxyFile();
     if (root == 0) {
         fprintf(stderr, "error: there was an error converting galaxy data to json\n");
         exit(2);
@@ -80,7 +79,7 @@ int exportToJson(int argc, char *argv[]) {
     jsonWriteFile(root, "galaxy", "galaxy.json");
     cJSON_Delete(root);
 
-    root = marshalSystems();
+    root = marshalSystemsFile();
     if (root == 0) {
         fprintf(stderr, "error: there was an error converting systems data to json\n");
         exit(2);
@@ -90,7 +89,7 @@ int exportToJson(int argc, char *argv[]) {
 
     for (int i = 0; i < MAX_SPECIES; i++) {
         if (data_in_memory[i]) {
-            root = marshalSpecies(&spec_data[i], namp_data[i], ship_data[i]);
+            root = marshalSpeciesFile(&spec_data[i], namp_data[i], ship_data[i]);
             if (root == 0) {
                 fprintf(stderr, "error: there was an error converting species data to json\n");
                 exit(2);
