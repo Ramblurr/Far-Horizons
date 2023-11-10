@@ -48,7 +48,7 @@ int versionCommand(int argc, char *argv[]) {
         }
     }
 
-    printf("7.5.6\n");
+    printf("7.5.7\n");
 
     return 2;
 }
