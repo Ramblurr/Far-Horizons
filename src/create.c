@@ -245,7 +245,7 @@ int createOrdersCommand(int argc, char *argv[]) {
 
 
 int createSpeciesCommand(int argc, char *argv[]) {
-    fprintf(stderr, "%s:%s:%d\n", __FILE_NAME__, __FUNCTION__, __LINE__);
+    // fprintf(stderr, "%s:%s:%d\n", __FILE_NAME__, __FUNCTION__, __LINE__);
     const char *configFile = NULL;
     int radius = 10; // default minimum distance between home systems
 
