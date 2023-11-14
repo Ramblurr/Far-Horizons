@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "helpers.h"
+#include "../memsafe.h"
 
 
 void jsonAddIntToArray(cJSON *array, const char *arrayName, int value) {
@@ -102,7 +103,7 @@ void jsonGetString(cJSON *obj, const char *property, char *dst, int size) {
         fprintf(stderr, "jsonGetString: strlen %d exceeds limit %d\n", (int) strlen(item->valuestring) + 1, size);
         exit(2);
     }
-    strncpy(dst, item->valuestring, size);
+    zstrcpy(dst, item->valuestring, size);
 }
 
 

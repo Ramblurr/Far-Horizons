@@ -94,6 +94,7 @@ add_executable(fh
         src/update.c src/update.h
         src/version.c src/version.h
         src/cjson/cJSON.c src/cjson/cJSON.h
-        src/cjson/helpers.c src/cjson/helpers.h)
+        src/cjson/helpers.c src/cjson/helpers.h
+        src/memsafe.c src/memsafe.h)
 
 target_link_libraries(fh ${USE_LIB_M})

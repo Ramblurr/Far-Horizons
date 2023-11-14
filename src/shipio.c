@@ -25,6 +25,7 @@
 #include "ship.h"
 #include "shipio.h"
 #include "item.h"
+#include "memsafe.h"
 
 
 /* load ship data from file and create empty slots for future use */
@@ -95,7 +96,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
         binary_ship_data_t *sd = &binData[i];
-        strncpy((char *) (sd->name), s->name, 32);
+        zstrcpy((char *) (sd->name), s->name, 32);
         sd->x = s->x;
         sd->y = s->y;
         sd->z = s->z;
