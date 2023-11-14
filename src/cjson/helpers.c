@@ -102,7 +102,7 @@ void jsonGetString(cJSON *obj, const char *property, char *dst, int size) {
         fprintf(stderr, "jsonGetString: strlen %d exceeds limit %d\n", (int) strlen(item->valuestring) + 1, size);
         exit(2);
     }
-    strlcpy(dst, item->valuestring, size);
+    strncpy(dst, item->valuestring, size);
 }
 
 

@@ -95,7 +95,7 @@ void save_ship_data(struct ship_data *shipData, int numShips, FILE *fp) {
     for (int i = 0; i < numShips; i++) {
         struct ship_data *s = &shipData[i];
         binary_ship_data_t *sd = &binData[i];
-        strlcpy((char *) (sd->name), s->name, 32);
+        strncpy((char *) (sd->name), s->name, 32);
         sd->x = s->x;
         sd->y = s->y;
         sd->z = s->z;
